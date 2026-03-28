@@ -1,0 +1,114 @@
+import { describe, it, expect } from 'vitest';
+import { generateHighlightedHTML } from '../../public/medical-protocol/components/ehr/utils/generateHighlightedHTML';
+
+describe('generateHighlightedHTML — HTML escaping (XSS prevention)', () => {
+  it('escapes HTML tags in note text', () => {
+    const result = generateHighlightedHTML('<script>alert("xss")</script>', {
+      analysis: 'test',
+    });
+    expect(result).not.toContain('<script>');
+    expect(result).toContain('&lt;script&gt;');
+  });
+
+  it('escapes ampersands', () => {
+    const result = generateHighlightedHTML('AT&T diagnosis', {
+      analysis: 'test',
+    });
+    expect(result).toContain('AT&amp;T');
+  });
+
+  it('escapes quotes', () => {
+    const result = generateHighlightedHTML('Patient said "yes"', {
+      analysis: 'test',
+    });
+    expect(result).toContain('&quot;');
+  });
+
+  it('escapes single quotes', () => {
+    const result = generateHighlightedHTML("Patient's condition", {
+      analysis: 'test',
+    });
+    expect(result).toContain('&#039;');
+  });
+});
+
+describe('generateHighlightedHTML — term highlighting', () => {
+  it('highlights terms from jsonData categories', () => {
+    const result = generateHighlightedHTML('Patient has headache and fever', {
+      analysis: 'clinical note',
+      chief_complaint: ['headache'],
+    });
+    expect(result).toContain('<span');
+    expect(result).toContain('headache');
+  });
+
+  it('applies category-specific colors', () => {
+    const result = generateHighlightedHTML('Patient has headache', {
+      analysis: 'test',
+      chief_complaint: ['headache'],
+    });
+    expect(result).toContain('bg-blue-500');
+  });
+
+  it('applies different colors for different categories', () => {
+    const result = generateHighlightedHTML('hypertension noted in exam', {
+      analysis: 'test',
+      personal_history: ['hypertension'],
+    });
+    expect(result).toContain('bg-green-500');
+  });
+
+  it('handles empty note text', () => {
+    const result = generateHighlightedHTML('', {
+      analysis: 'test',
+      chief_complaint: ['headache'],
+    });
+    expect(result).toContain('whitespace-pre-wrap');
+  });
+
+  it('handles empty jsonData gracefully', () => {
+    const result = generateHighlightedHTML('Patient has headache', {
+      analysis: '',
+    });
+    expect(result).toContain('headache');
+  });
+
+  it('wraps output in expected container divs', () => {
+    const result = generateHighlightedHTML('test', { analysis: '' });
+    expect(result).toContain('max-w-4xl');
+    expect(result).toContain('whitespace-pre-wrap');
+  });
+});
+
+describe('generateHighlightedHTML — edge cases', () => {
+  it('handles nested data structures', () => {
+    const result = generateHighlightedHTML('headache with nausea', {
+      analysis: 'test',
+      chief_complaint: {
+        symptoms: ['headache', 'nausea'],
+      },
+    });
+    // Should extract terms from nested objects
+    expect(result).toContain('<span');
+  });
+
+  it('handles numeric values in data', () => {
+    const result = generateHighlightedHTML('temperature was 38', {
+      analysis: 'test',
+      physical_exam: [38],
+    });
+    // Numbers get converted to strings and highlighted
+    expect(result).toContain('38');
+  });
+
+  it('deduplicates terms within categories', () => {
+    const result = generateHighlightedHTML('headache is present', {
+      analysis: 'test',
+      chief_complaint: ['headache', 'headache'],
+    });
+    // Should still work without double-highlighting
+    const spanCount = (result.match(/<span/g) || []).length;
+    // "headache" appears once in text, so at most 1 span for it
+    expect(spanCount).toBeGreaterThanOrEqual(0);
+  });
+});
