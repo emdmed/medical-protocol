@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/install", "destination": "/install.sh" }
+    { "source": "/install", "destination": "/install.md" }
   ],
   "headers": [
     {
@@ -11,7 +11,7 @@
       ]
     },
     {
-      "source": "/install.sh",
+      "source": "/install.md",
       "headers": [
         { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
       ]
