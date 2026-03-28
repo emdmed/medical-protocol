@@ -1,4 +1,4 @@
-import { useRef, useEffect, RefObject } from "react";
+import { useRef, useEffect } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ const HeartRate = ({
   clickedComponent,
   editable,
 }: HeartRateProps) => {
-  const inputRef: RefObject<HTMLInputElement> = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (clickedComponent === "heartRate" && inputRef.current) {
@@ -59,7 +59,7 @@ const HeartRate = ({
     }
   };
 
-  const currentCategory = getHeartRateCategory(heartRateValue);
+  const currentCategory = getHeartRateCategory(heartRateValue ?? 0);
 
   return (
     <div

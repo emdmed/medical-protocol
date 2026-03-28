@@ -36,7 +36,7 @@ export const useVitalSigns = (
   );
 
   const parseNumericValue = useCallback(
-    (value: string | number): number | null => {
+    (value: string | number | null): number | null => {
       if (value === null || value === undefined || value === "") return null;
       const numValue = typeof value === "string" ? parseFloat(value) : value;
       return isNaN(numValue) ? null : numValue;
@@ -45,7 +45,7 @@ export const useVitalSigns = (
   );
 
   const createNumericHandler = useCallback(
-    (setter: (value: number | null) => void) => (value: string | number) => {
+    (setter: (value: number | null) => void) => (value: string | number | null) => {
       const parsedValue = parseNumericValue(value);
       setter(parsedValue);
       setTimestamp(new Date().toISOString());
@@ -58,7 +58,7 @@ export const useVitalSigns = (
   const handleTemperature = createNumericHandler(setTemperature);
 
   const handleBloodOxygen = useCallback(
-    (value: string | number) => {
+    (value: string | number | null) => {
       const parsedValue = parseNumericValue(value);
       setBloodOxygen((prev) => ({ ...prev, saturation: parsedValue }));
       setTimestamp(new Date().toISOString());
@@ -67,7 +67,7 @@ export const useVitalSigns = (
   );
 
   const handleFio2 = useCallback(
-    (value: string | number) => {
+    (value: string | number | null) => {
       const parsedValue = parseNumericValue(value);
       setBloodOxygen((prev) => ({ ...prev, fiO2: parsedValue }));
       setTimestamp(new Date().toISOString());

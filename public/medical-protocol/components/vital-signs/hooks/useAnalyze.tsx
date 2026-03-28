@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const useAnalyzeVitalSigns = ({ route, getCurrentVitalSignsData }) => {
+export const useAnalyzeVitalSigns = ({ route, getCurrentVitalSignsData }: { route: string; getCurrentVitalSignsData: () => Record<string, unknown> }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [analysis, setAnalysis] = useState("");

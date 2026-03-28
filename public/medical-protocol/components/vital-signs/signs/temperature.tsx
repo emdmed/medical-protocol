@@ -65,7 +65,7 @@ const Temperature: React.FC<TemperatureProps> = ({
     }
   };
 
-  const temperatureStatus = getTemperatureStatus(temperatureValue, useFahrenheit);
+  const temperatureStatus = getTemperatureStatus(temperatureValue ?? 0, useFahrenheit);
   const limits = getTemperatureLimits(useFahrenheit);
 
   return (

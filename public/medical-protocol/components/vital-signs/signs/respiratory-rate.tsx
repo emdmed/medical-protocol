@@ -78,7 +78,7 @@ const RespiratoryRate: React.FC<RespiratoryRateProps> = ({
     setClickedComponent("respiratoryRate");
   };
 
-  const currentCategory = getRespiratoryRateCategory(respiratoryRateValue);
+  const currentCategory = getRespiratoryRateCategory(respiratoryRateValue ?? 0);
 
   return (
     <div className="px-2 cursor-pointer relative">

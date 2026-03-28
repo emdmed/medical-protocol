@@ -34,7 +34,7 @@ const VitalSigns = ({
   border = true,
   assistantRoute = "",
 }: IVitalSignsProps) => {
-  const [clickedComponent, setClickedComponent] = useState(null);
+  const [clickedComponent, setClickedComponent] = useState<string | null>(null);
 
   const componentRef = useClickOutside(() => {
     setClickedComponent("");
