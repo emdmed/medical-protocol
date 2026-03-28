@@ -1,0 +1,13 @@
+{
+  "name": "medical-protocol",
+  "owner": {
+    "name": "emdmed"
+  },
+  "plugins": [
+    {
+      "name": "medical-protocol",
+      "source": "./plugin",
+      "description": "Clinical interface builder for healthcare professionals — vital signs, EHR, calculators, and more"
+    }
+  ]
+}
