@@ -28,21 +28,12 @@ Do NOT ask about:
 Silently determine which files need to change:
 
 1. **Read the existing project structure** — check what components are already installed
-2. **Map the doctor's request** to specific files:
-   - Vital sign changes → `components/vital-signs/signs/` and related validation files
-   - Patient info changes → `app/ehr/patient-details/`
-   - Clinical notes changes → `app/ehr/prev-evolutions/`
-   - Alert changes → `components/vital-signs/components/vital-signs-alert.tsx`
-   - Blood gas / acid-base changes → `components/acid-base/`
-   - BMI changes → `components/bmi/`
-   - Fluid balance changes → `components/water-balance/`
-   - Pulse oximetry changes → `components/telemonitoring/pulse-oximetry/`
-   - Timeline changes → `components/timeline/`
-   - Layout changes → the relevant page file
+2. **Fetch the manifest** (`{CDN_BASE}/components/manifest.json`) and use its `target` and `files` fields to locate the right files for the doctor's request. The manifest's `props` and `dataFlow` fields tell you how each component accepts data and reports changes — read these before modifying anything.
+3. **Read the JSDoc header** at the top of the main component file to understand its props, usage, and integration points before making changes.
 
-3. **If the doctor requests a component that isn't installed yet**, fetch it from the CDN following the component fetching process in the main protocol
+4. **If the doctor requests a component that isn't installed yet**, fetch it from the CDN following the component fetching process in the main protocol
 
-4. **If the doctor requests a feature that doesn't exist in the CDN** (e.g., a medication tracker, lab results viewer, scheduling system), build it from scratch:
+5. **If the doctor requests a feature that doesn't exist in the CDN** (e.g., a medication tracker, lab results viewer, scheduling system), build it from scratch:
    - Follow the patterns established in the existing project code (file structure, naming conventions, hook patterns, shadcn usage)
    - Use the same state management approach (localStorage for persistence if enabled, React state otherwise)
    - Place new components in the appropriate directory (`components/` for reusable widgets, `app/{feature}/` for pages)

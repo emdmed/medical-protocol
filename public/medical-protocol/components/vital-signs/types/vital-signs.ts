@@ -1,3 +1,17 @@
+/**
+ * Type definitions for the VitalSigns component system.
+ *
+ * Key types for consumers:
+ *   IVitalSignsProps  — Props for the main <VitalSigns> component
+ *   IVitalSignsData   — Shape of vital signs data (passed via `data` prop and returned in `onData`)
+ *   FhirBundle        — FHIR R4 Bundle returned alongside data in `onData` callback
+ *
+ * Internal types (used by sub-components):
+ *   BloodPressureProps, HeartRateProps, RespiratoryRateProps,
+ *   TemperatureProps, BloodOxygenProps — individual sign component props
+ *   EditSectionProps — reusable edit overlay component props
+ *   UseVitalSignsReturn — return type from useVitalSigns hook
+ */
 import { ReactNode } from "react";
 
 export interface VitalSignsFhirProps {

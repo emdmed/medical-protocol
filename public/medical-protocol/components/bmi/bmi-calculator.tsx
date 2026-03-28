@@ -1,3 +1,16 @@
+/**
+ * BMICalculator — Self-contained BMI calculator with metric/imperial toggle.
+ *
+ * @props  None — fully self-contained, no external data flow.
+ *
+ * @usage
+ *   <BMICalculator />
+ *
+ * @behavior
+ *   Click card to enter edit mode → input weight + height → save to see BMI.
+ *   Supports imperial (lbs, ft/in) and metric (kg, m) with live conversion.
+ *   Displays BMI category badge: Underweight | Normal | Overweight | Obese.
+ */
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -5,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, User, ToggleLeft, ToggleRight } from "lucide-react";
 
-const calculateBMI = (w: boolean, hFt, hIn, hM, metric) => {
+const calculateBMI = (w: string, hFt: string, hIn: string, hM: string, metric: boolean): string | null => {
   const weightNum = parseFloat(w);
 
   if (weightNum > 0) {
@@ -29,7 +42,7 @@ const calculateBMI = (w: boolean, hFt, hIn, hM, metric) => {
   return null;
 };
 
-const getBMICategory = (bmi) => {
+const getBMICategory = (bmi: string | null): string => {
   if (!bmi) return "Unknown";
   const bmiNum = parseFloat(bmi);
   if (bmiNum < 18.5) return "Underweight";
@@ -38,7 +51,7 @@ const getBMICategory = (bmi) => {
   return "Obese";
 };
 
-const getBMIColor = (bmi) => {
+const getBMIColor = (bmi: string | null): string => {
   if (!bmi) return "";
   const bmiNum = parseFloat(bmi);
   if (bmiNum < 18.5) return "";

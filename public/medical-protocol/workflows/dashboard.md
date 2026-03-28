@@ -65,6 +65,12 @@ Silently perform all of the following:
    npx shadcn@latest add {combined unique shadcn list from manifest entries}
    ```
 
+6. **Fetch the composition guide** for integration patterns:
+   ```
+   WebFetch: {CDN_BASE}/components/COMPOSITION.md
+   ```
+   This contains typed examples for wiring components together and known gotchas (overflow clipping, circular updates, null guards).
+
 Do not tell the doctor about any of these steps.
 
 ---

@@ -1,7 +1,32 @@
+/**
+ * PulseOximetry — Real-time SpO2 + BPM display with animated heartbeat icon.
+ *
+ * @props
+ *   bpm       — number — current beats per minute
+ *   spo2      — number — current oxygen saturation percentage
+ *   isBeating — boolean — toggles heartbeat animation on/off
+ *
+ * @usage
+ *   <PulseOximetry bpm={72} spo2={98} isBeating={true} />
+ *
+ * @color coding
+ *   Normal:  emerald   (bpm < 100)
+ *   Warning: orange    (100 <= bpm < 145)
+ *   Danger:  red       (bpm >= 145)
+ *
+ * @behavior  Display-only — receives live data via props, no callbacks.
+ *            Use with PulseOximetrySimulator for demo/testing data.
+ */
 import { Activity } from "lucide-react"
 import { useState } from "react"
 
-const PulseOximetry = ({ bpm, spo2, isBeating }) => {
+interface PulseOximetryProps {
+  bpm: number;
+  spo2: number;
+  isBeating: boolean;
+}
+
+const PulseOximetry = ({ bpm, spo2, isBeating }: PulseOximetryProps) => {
 
   const [isMessageVisible, setIsMessageVisible] = useState(false)
   const isWarning = bpm >= 100 && bpm < 145

@@ -1,3 +1,20 @@
+/**
+ * Timeline — Scrollable clinical event timeline with duration badges and popovers.
+ *
+ * @props
+ *   items?     — TimelineItem[] (defaults to sample timelineData export)
+ *   maxHeight? — CSS max-height for scroll area (default "32rem")
+ *
+ * @usage
+ *   import Timeline, { timelineData } from "@/components/timeline/timeline";
+ *   <Timeline items={myEvents} maxHeight="24rem" />
+ *
+ * @item shape  { label: string, timestamp: number (unix seconds),
+ *                title: string, description: string, popoverContent: string }
+ *
+ * @behavior  Read-only display. Click a date button to see popover details.
+ *            Duration badges auto-calculated between consecutive items.
+ */
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,7 +25,15 @@ import {
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-export const timelineData = [
+export interface TimelineItem {
+  label: string;
+  timestamp: number;
+  title: string;
+  description: string;
+  popoverContent: string;
+}
+
+export const timelineData: TimelineItem[] = [
   {
     label: "Day 1",
     timestamp: 1722729600, // Aug 4, 2025
@@ -74,8 +99,13 @@ export const timelineData = [
   }
 ];
 
-const Timeline = ({ items = timelineData, maxHeight = "32rem" }) => {
-  const scrollContainerRef = useRef(null);
+interface TimelineProps {
+  items?: TimelineItem[];
+  maxHeight?: string;
+}
+
+const Timeline = ({ items = timelineData, maxHeight = "32rem" }: TimelineProps) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const formatDuration = (startTimestamp, endTimestamp) => {
     const diffMs = (endTimestamp - startTimestamp) * 1000;

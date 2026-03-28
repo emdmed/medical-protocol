@@ -1,3 +1,23 @@
+/**
+ * WaterBalanceCalculator — Fluid intake/output tracker with net balance.
+ *
+ * @props
+ *   data? — { weight?: number, intakeOral?: number, intakeIv?: number,
+ *             diuresis?: number, defecations?: number }
+ *           Initial values to hydrate the calculator. All fields optional.
+ *
+ * @usage
+ *   <WaterBalanceCalculator data={{ weight: 70, intakeOral: 1500, intakeIv: 500, diuresis: 1200, defecations: 2 }} />
+ *   <WaterBalanceCalculator />  // starts empty, user fills in via edit mode
+ *
+ * @calculations
+ *   Insensible loss     = weight × 12 mL
+ *   Endogenous water    = weight × 4.5 mL
+ *   Defecation loss     = count × 120 mL
+ *   Net balance         = (oral + IV + endogenous) - (diuresis + defecation + insensible)
+ *
+ * @behavior  Click card to enter edit mode. No callbacks — display only.
+ */
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,7 +26,19 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
 import { Label } from "../ui/label";
 
-const WaterBalanceCalculator = ({ data }) => {
+interface WaterBalanceData {
+  weight?: number | string;
+  intakeOral?: number | string;
+  intakeIv?: number | string;
+  diuresis?: number | string;
+  defecations?: number | string;
+}
+
+interface WaterBalanceProps {
+  data?: WaterBalanceData;
+}
+
+const WaterBalanceCalculator = ({ data }: WaterBalanceProps) => {
   // Convert incoming data to strings, handling both numbers and strings
   const [weight, setWeight] = useState(data?.weight ? String(data.weight) : "");
   const [fluidIntakeOral, setFluidIntakeOral] = useState(

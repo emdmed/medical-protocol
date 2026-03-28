@@ -1,3 +1,22 @@
+/**
+ * AcidBase — Arterial blood gas analyzer with disorder detection & anion gap.
+ *
+ * @props
+ *   onData  — (result: Result) => void — called whenever analysis updates.
+ *             Result type from ./types/interfaces.ts contains:
+ *             { disorder, mixedDisorders, compensation, expectedValues,
+ *               anionGap, agStatus, allDisorders, compensatoryResponse }
+ *
+ * @usage
+ *   <AcidBase onData={(result) => console.log(result.disorder)} />
+ *
+ * @dataflow
+ *   User inputs pH, pCO2, HCO3, Na, Cl, Albumin →
+ *   analyze() runs on every change → results displayed as badges →
+ *   onData(result) reports to parent.
+ *
+ * @inputs  pH*, pCO2*, HCO3* (required for analysis), Na, Cl, Albumin (for anion gap)
+ */
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -36,7 +55,11 @@ const PLACEHOLDERS = {
   albumin: "4"
 }
 
-const AcidBase = ({ onData }) => {
+interface AcidBaseProps {
+  onData: (result: Result | null) => void;
+}
+
+const AcidBase = ({ onData }: AcidBaseProps) => {
   const [values, setValues] = useState<Values>({
     pH: "",
     pCO2: "",

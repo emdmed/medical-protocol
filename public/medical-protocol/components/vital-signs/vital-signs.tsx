@@ -1,3 +1,27 @@
+/**
+ * VitalSigns — Editable vital signs panel (BP, HR, RR, Temp, SpO2/FiO2).
+ *
+ * @props  See IVitalSignsProps in ./types/vital-signs.ts
+ *   data?            — IVitalSignsData to hydrate initial values
+ *   onData?          — (data: IVitalSignsData, fhir?: FhirBundle) => void — called on every change
+ *   editable?        — enable click-to-edit overlays (default true)
+ *   useFahrenheit?   — temperature unit (default true)
+ *   assistant?       — show AI analysis button (default true)
+ *   border?          — render card border (default true)
+ *   assistantRoute?  — API route for AI analysis
+ *
+ * @usage
+ *   <VitalSigns data={vitalData} onData={(d, fhir) => save(d)} editable />
+ *
+ * @dataflow
+ *   Parent passes `data` → useVitalSigns hook manages local state →
+ *   individual sign components render + accept edits →
+ *   VitalSignsFhir converts to FHIR bundle →
+ *   onData(data, fhir) reports changes back to parent.
+ *
+ * @note Add `overflow-visible` to any parent Card wrapping this component
+ *       so that edit popups (absolutely positioned) are not clipped.
+ */
 "use client";
 
 import { useState, useCallback, useEffect, memo } from "react";

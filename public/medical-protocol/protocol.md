@@ -135,15 +135,16 @@ The CDN components are **references and guidelines**, not copy-paste code. Use t
 When a workflow instructs you to install a component:
 
 1. **Fetch manifest**: `WebFetch` from `{CDN_BASE}/components/manifest.json`
-2. **Read the component entry** for the requested component name
+2. **Read the component entry** for the requested component name — the manifest includes `import` (import path), `types` (types path), `props` (prop summary), and `dataFlow` (how data moves in/out). Use these to understand the component before fetching files.
 3. **Check the manifest `version` field** to know which version of the components you are working with
 4. **Fetch and study each file** listed in `manifest[component].files`:
    - `WebFetch` the file from `{CDN_BASE}/components/{component-name}/{file-path}`
-   - Read and understand: component structure, prop interfaces, clinical validation logic, FHIR data handling, state management patterns, and UI behavior
+   - Each main component file has a **JSDoc header** documenting its props, usage examples, data flow, and behavior — read this first before studying the implementation
    - **If a `WebFetch` fails**, retry once. If it still fails, tell the doctor: "I'm having trouble fetching some resources. Please check your internet connection and try again." Do not attempt to build with partial components.
 5. **Check `externalComponents`** (if present in the manifest entry): these are imports the component expects from the doctor's project that are *not* on the CDN. You must either create them or remove/replace those imports when adapting the code.
 6. **Install shadcn dependencies**: Run `npx shadcn@latest add {manifest.shadcn components}` silently
-7. **Write components to the project** using the fetched code as a guide:
+7. **When composing multiple components**, fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns, typed examples, and known gotchas. This is only needed when wiring components together — skip for single-component workflows.
+8. **Write components to the project** using the fetched code as a guide:
    - Preserve the clinical logic, validations, data structures, and overall architecture
    - Adapt types, hooks, imports, and patterns to match the project's actual React/Next.js/shadcn/TypeScript versions
    - Follow the project's existing code style and conventions
@@ -151,7 +152,7 @@ When a workflow instructs you to install a component:
    - Make sure UI elements like popups and overlays work correctly within the layout (e.g., no overflow clipping, correct positioning)
    - **shadcn Card overflow-hidden**: When a Card contains absolutely-positioned popups or overlays, add `overflow-visible` to its className. The default Card clips content outside its bounds. This applies to the Card itself AND any parent Cards wrapping it.
    - **Avoid circular update loops**: When a child component receives data via props AND reports changes back via a callback, never put `onData(values)` in a `useEffect` that depends on `values` if the parent re-renders and passes those values back as props. Use `useRef` to track the previous serialized value and skip updates when nothing changed. Store callback props in a ref (`onDataRef.current = onData`) so they don't appear in dependency arrays.
-8. **Do not tell the doctor** about files being fetched or installed — just confirm the clinical capability is ready
+9. **Do not tell the doctor** about files being fetched or installed — just confirm the clinical capability is ready
 
 ---
 
