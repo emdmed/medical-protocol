@@ -61,7 +61,7 @@
     }
     .step-list li {
       counter-increment: steps;
-      margin-bottom: 0.8rem;
+      margin-bottom: 1rem;
       display: flex;
       align-items: baseline;
       gap: 0.6rem;
@@ -217,20 +217,31 @@
 
     <section>
       <h2>how to get started</h2>
-      <p>Open Claude Code and tell it:</p>
-      <div class="example-box" style="margin-top: 0.4rem;">
-        <p><code>"Fetch and follow https://medical-protocol-workflows.vercel.app/install"</code></p>
-      </div>
-      <p>Claude will check your computer, install anything that's missing, and set everything up for you. If it runs into a problem, it will explain what to do in plain language — no IT team required.</p>
-      <p>Once it's done, just describe what you need:</p>
-      <div class="example-box" style="margin-top: 0.4rem;">
-        <p><code>"I need a vital signs monitor for my clinic"</code></p>
-      </div>
+      <ol class="step-list">
+        <li>
+          <div>
+            Open Claude Code on your computer and tell it:
+            <div class="example-box" style="margin-top: 0.4rem;">
+              <p><code>Fetch and follow https://medical-protocol-workflows.vercel.app/install</code></p>
+            </div>
+            <p style="font-size: 0.72rem; color: #78909c; margin-bottom: 0;">Claude will install everything your computer needs and set up your project automatically. If anything is missing, it will handle it or walk you through it in plain language.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            Once setup is done, describe what you need:
+            <div class="example-box" style="margin-top: 0.4rem;">
+              <p><code>"I need a vital signs monitor for my clinic"</code></p>
+            </div>
+          </div>
+        </li>
+      </ol>
+      <p style="font-size: 0.72rem; color: #78909c;">That's it — two steps. No IT team, no technical knowledge required.</p>
     </section>
 
     <section>
       <h2>what you can say</h2>
-      <p>Just describe what you need as you would to a colleague. Here are some examples:</p>
+      <p>Just describe what you need as you would to a colleague:</p>
       <div class="example-box">
         <p class="example-label">vital signs</p>
         <p><code>"I need a vital signs monitor for my clinic"</code></p>
@@ -290,7 +301,7 @@
       <ul class="plain">
         <li>The system does not connect to any external database by default</li>
         <li>No data is uploaded to any cloud service or AI provider</li>
-        <li>If you want to connect to a real patient database, involve your IT and compliance teams first</li>
+        <li>If you want to connect to a real patient database, consult your compliance team first</li>
         <li>This tool builds a <strong>prototype</strong> — using it with real patients requires a security review by qualified professionals</li>
       </ul>
     </section>
@@ -308,7 +319,7 @@
     <section>
       <h2>need help?</h2>
       <p>If the system doesn't understand your request, try rephrasing it using clinical terms like "vital signs", "patient record", "clinical notes", or "dashboard".</p>
-      <p>If something goes wrong during setup, just tell Claude — it will figure out the problem and walk you through it.</p>
+      <p>If something goes wrong, just tell Claude what happened — it will figure out the problem and walk you through it.</p>
     </section>
 
     <div class="footer">
