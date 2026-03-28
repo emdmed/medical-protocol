@@ -1,5 +1,7 @@
 # Customize Workflow
 
+> `{CDN_BASE}` refers to `https://medical-protocol.vercel.app/medical-protocol` (defined in the main protocol).
+
 ## Phase 1: Clinical Requirements
 
 The doctor wants to modify an existing interface. Understand what they want to change:
@@ -11,6 +13,7 @@ The doctor wants to modify an existing interface. Understand what they want to c
   - Adding new sections or fields to the records
   - Changing how alerts or warnings appear
   - Adjusting the layout or arrangement of information
+  - Adding an entirely new clinical tool or feature
 
 Do NOT ask about:
 - CSS, styles, or design tokens
@@ -34,6 +37,12 @@ Silently determine which files need to change:
 
 3. **If the doctor requests a component that isn't installed yet**, fetch it from the CDN following the component fetching process in the main protocol
 
+4. **If the doctor requests a feature that doesn't exist in the CDN** (e.g., a medication tracker, lab results viewer, scheduling system), build it from scratch:
+   - Follow the patterns established in the existing project code (file structure, naming conventions, hook patterns, shadcn usage)
+   - Use the same state management approach (localStorage for persistence if enabled, React state otherwise)
+   - Place new components in the appropriate directory (`components/` for reusable widgets, `app/{feature}/` for pages)
+   - Include clinical validation where applicable
+
 ---
 
 ## Phase 3: Apply Changes
@@ -51,9 +60,10 @@ Common customization patterns:
 
 ---
 
-## Phase 4: Preview
+## Phase 4: Quality & Preview
 
-1. If `npm run dev` is already running, the changes will appear automatically. If not, start it.
-2. Tell the doctor:
+1. **Run the Quality Checklist** from the main protocol — silently review theming, responsiveness, and shadcn polish for any new or changed components. Fix any issues before proceeding.
+2. If `npm run dev` is already running, the changes will appear automatically. If not, start it.
+3. Tell the doctor:
    > "I've updated your interface. [Describe what changed in clinical terms]. You can see the changes at http://localhost:3000/[relevant-path]"
-3. Ask: "Does this look right? Would you like any other adjustments?"
+4. Ask: "Does this look right? Would you like any other adjustments?"

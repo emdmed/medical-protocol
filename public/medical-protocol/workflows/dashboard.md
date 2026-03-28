@@ -1,5 +1,7 @@
 # Dashboard Workflow
 
+> `{CDN_BASE}` refers to `https://medical-protocol.vercel.app/medical-protocol` (defined in the main protocol).
+
 ## Phase 1: Clinical Requirements
 
 The doctor wants a combined clinical dashboard. Ask:
@@ -34,7 +36,7 @@ Silently perform all of the following:
    WebFetch: {CDN_BASE}/components/manifest.json
    ```
 
-3. **For each component the doctor selected** (default: both vital-signs and ehr):
+3. **For each component the doctor selected** (default: both vital-signs and ehr), follow the **Component Fetching Process** in the main protocol:
 
    a. **Fetch vital-signs files** (if selected):
    ```
@@ -50,14 +52,11 @@ Silently perform all of the following:
      Write to: {project}/app/ehr/{file}
    ```
 
-4. **Install all shadcn components** from both manifests (deduplicated):
-   ```
-   npx shadcn@latest add card button input select badge label textarea tabs separator scroll-area sheet sidebar skeleton
-   ```
+4. **Check `externalComponents`** for each manifest entry — handle missing imports by creating, removing, or replacing them as appropriate.
 
-5. **Install additional dependencies:**
+5. **Install all shadcn components** from the selected manifests (deduplicated):
    ```
-   npm install lucide-react
+   npx shadcn@latest add {combined unique shadcn list from manifest entries}
    ```
 
 Do not tell the doctor about any of these steps.
@@ -103,9 +102,10 @@ All layout decisions are yours. Optimize for clinical usability.
 
 ---
 
-## Phase 4: Preview
+## Phase 4: Quality & Preview
 
-1. Run `npm run dev` in the background
-2. Tell the doctor:
+1. **Run the Quality Checklist** from the main protocol — silently review theming, responsiveness, and shadcn polish. Fix any issues before proceeding.
+2. Run `npm run dev` in the background
+3. Tell the doctor:
    > "Your clinical dashboard is ready with [list selected components]. You can view it at http://localhost:3000/dashboard"
-3. Ask: "Would you like to rearrange anything on the dashboard, or add any other clinical information?"
+4. Ask: "Would you like to rearrange anything on the dashboard, or add any other clinical information?"

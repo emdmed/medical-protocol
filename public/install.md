@@ -51,13 +51,13 @@ Run `claude --version` silently.
 
 ## Step 3 — Create project
 
-Check if the current directory already has a `.claude/protocol.md` file.
+Check if the current directory already has a `CLAUDE.md` file that references the medical protocol.
 
 - **If it exists**: tell the doctor "Everything is already set up. You can describe what you need — for example, 'I need a vital signs monitor for my clinic.'"
-- **If it doesn't exist**: create the directory and download the protocol:
+- **If it doesn't exist**: download the protocol and set it as the project instructions:
   ```
   mkdir -p .claude
-  curl -fsSL https://medical-protocol.vercel.app/medical-protocol/protocol.md -o .claude/protocol.md
+  curl -fsSL https://medical-protocol.vercel.app/medical-protocol/protocol.md -o .claude/CLAUDE.md
   ```
 
 ---

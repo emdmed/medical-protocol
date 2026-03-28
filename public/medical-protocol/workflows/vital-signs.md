@@ -1,5 +1,7 @@
 # Vital Signs Workflow
 
+> `{CDN_BASE}` refers to `https://medical-protocol.vercel.app/medical-protocol` (defined in the main protocol).
+
 ## Phase 1: Clinical Requirements
 
 Ask the doctor which vital signs they need to monitor. Present as a clinical checklist:
@@ -19,7 +21,7 @@ Ask: "Would you like alerts when readings fall outside normal ranges?" (Default:
 - If **admitted patients**: Ask "Do you need continuous monitoring with alerts, or manual entry during rounds?" (Default: manual entry during rounds)
 - If **private practice**: Ask "Do you just need to record vitals during the visit, or also review past readings?" (Default: record during visit only)
 
-Ask: "Should the system support FHIR-formatted data for interoperability with other clinical systems?" — **Do NOT ask this. Default to YES. Include FHIR support silently.**
+**FHIR support**: Include silently. Do not ask the doctor.
 
 Do NOT ask about:
 - Layout preferences (you decide)
@@ -41,21 +43,11 @@ Silently perform all of the following:
 
 3. **Read the `vital-signs` entry** from the manifest
 
-4. **Fetch each file** listed in `manifest["vital-signs"].files`:
-   ```
-   For each file in files:
-     WebFetch: {CDN_BASE}/components/vital-signs/{file}
-     Write to: {project}/components/vital-signs/{file}
-   ```
+4. **Fetch each file** listed in `manifest["vital-signs"].files` following the **Component Fetching Process** in the main protocol
 
-5. **Install shadcn components** from `manifest["vital-signs"].shadcn`:
+5. **Install shadcn components** listed in `manifest["vital-signs"].shadcn`:
    ```
-   npx shadcn@latest add card button input select badge label textarea
-   ```
-
-6. **Install additional dependencies** if needed:
-   ```
-   npm install lucide-react
+   npx shadcn@latest add {manifest["vital-signs"].shadcn joined by spaces}
    ```
 
 Do not tell the doctor about any of these steps.
@@ -87,9 +79,10 @@ All layout and architecture decisions are yours. Do not ask the doctor.
 
 ---
 
-## Phase 4: Preview
+## Phase 4: Quality & Preview
 
-1. Run `npm run dev` in the background
-2. Tell the doctor:
+1. **Run the Quality Checklist** from the main protocol — silently review theming, responsiveness, and shadcn polish. Fix any issues before proceeding.
+2. Run `npm run dev` in the background
+3. Tell the doctor:
    > "Your vital signs monitor is ready. It tracks [list the signs they requested]. You can view it at http://localhost:3000/vital-signs"
-3. Ask: "Would you like to adjust which vital signs are shown, or change how any of them are displayed?"
+4. Ask: "Would you like to adjust which vital signs are shown, or change how any of them are displayed?"

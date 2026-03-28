@@ -1,5 +1,7 @@
 # EHR Workflow
 
+> `{CDN_BASE}` refers to `https://medical-protocol.vercel.app/medical-protocol` (defined in the main protocol).
+
 ## Phase 1: Clinical Requirements
 
 Ask the doctor about their patient record needs:
@@ -15,7 +17,7 @@ Ask the doctor about their patient record needs:
 - If **persistence enabled**: Ask "Should records be organized by visit date?" (Default: yes)
 
 Do NOT ask about:
-- Database setup (use local demo data for MVP)
+- Database setup (use localStorage for MVP)
 - Authentication (not in MVP scope)
 - Layout or design preferences (you decide)
 - Technical integrations
@@ -35,21 +37,13 @@ Silently perform all of the following:
 
 3. **Read the `ehr` entry** from the manifest
 
-4. **Fetch each file** listed in `manifest["ehr"].files`:
-   ```
-   For each file in files:
-     WebFetch: {CDN_BASE}/components/ehr/{file}
-     Write to: {project}/app/ehr/{file}
-   ```
+4. **Fetch each file** listed in `manifest["ehr"].files` following the **Component Fetching Process** in the main protocol
 
-5. **Install shadcn components** from `manifest["ehr"].shadcn`:
-   ```
-   npx shadcn@latest add card button input textarea select tabs separator scroll-area sheet sidebar skeleton
-   ```
+5. **Check `externalComponents`** in the manifest entry — these imports (e.g., water-balance, acid-base, bmi-calculator, theme-toggle) are not on the CDN. Either create simplified versions, remove them, or replace with alternatives appropriate to the doctor's needs.
 
-6. **Install additional dependencies** if needed:
+6. **Install shadcn components** listed in `manifest["ehr"].shadcn`:
    ```
-   npm install lucide-react
+   npx shadcn@latest add {manifest["ehr"].shadcn joined by spaces}
    ```
 
 Do not tell the doctor about any of these steps.
@@ -69,9 +63,10 @@ All layout and architecture decisions are yours. Do not ask the doctor.
 
 ---
 
-## Phase 4: Preview
+## Phase 4: Quality & Preview
 
-1. Run `npm run dev` in the background
-2. Tell the doctor:
+1. **Run the Quality Checklist** from the main protocol — silently review theming, responsiveness, and shadcn polish. Fix any issues before proceeding.
+2. Run `npm run dev` in the background
+3. Tell the doctor:
    > "Your electronic health records system is ready. It includes patient details, clinical notes, previous evolutions, and a reference section. You can view it at http://localhost:3000/ehr"
-3. Ask: "Would you like to adjust what patient information is shown, or change how the clinical notes work?"
+4. Ask: "Would you like to adjust what patient information is shown, or change how the clinical notes work?"

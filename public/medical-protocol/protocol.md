@@ -40,6 +40,25 @@ https://medical-protocol.vercel.app/medical-protocol
 
 ---
 
+## Returning to an Existing Project
+
+When the doctor opens Claude Code in a project that already has components installed (e.g., they built a vital signs monitor last week and now want changes):
+
+1. **Check what's already built** — silently scan the project for existing components (`components/vital-signs/`, `app/ehr/`, etc.)
+2. **If the doctor asks for something that's already installed** (e.g., "add temperature alerts" and vital-signs already exists), route to the **customize** workflow — do not re-fetch or re-install components
+3. **If the doctor asks for something new** that doesn't exist yet (e.g., "now add patient records"), proceed with the appropriate workflow — it will fetch only the missing components
+4. **Never re-scaffold the project** if it already has a working Next.js setup
+
+---
+
+## Interface Language
+
+Use the same language the doctor uses in the conversation. If the doctor writes in Spanish, build the UI with Spanish labels. If they write in English, use English.
+
+If it's unclear (e.g., the doctor mixes languages), ask once: "Would you prefer the interface in Spanish or English?" Then apply consistently.
+
+---
+
 ## Initial Clarification
 
 When the doctor's request is vague or general (e.g., "I need something to track vitals" or "build me a patient system"), ask the following three questions **in a single conversational message** before proceeding to Classification. If the request already makes the answers clear (e.g., "I need a vital signs monitor for admitted patients with data saved"), skip this section entirely.
@@ -116,6 +135,7 @@ When a workflow instructs you to install a component:
 4. **Fetch and study each file** listed in `manifest[component].files`:
    - `WebFetch` the file from `{CDN_BASE}/components/{component-name}/{file-path}`
    - Read and understand: component structure, prop interfaces, clinical validation logic, FHIR data handling, state management patterns, and UI behavior
+   - **If a `WebFetch` fails**, retry once. If it still fails, tell the doctor: "I'm having trouble fetching some resources. Please check your internet connection and try again." Do not attempt to build with partial components.
 5. **Check `externalComponents`** (if present in the manifest entry): these are imports the component expects from the doctor's project that are *not* on the CDN. You must either create them or remove/replace those imports when adapting the code.
 6. **Install shadcn dependencies**: Run `npx shadcn@latest add {manifest.shadcn components}` silently
 7. **Write components to the project** using the fetched code as a guide:
@@ -186,7 +206,7 @@ Apply these additional checks based on what was built:
 
 The interfaces you build are ready to use with real clinical data. All data is stored locally in the doctor's browser. Do not describe them as "demos", "prototypes", or "sample projects" — they are working tools.
 
-Components should ship with empty forms ready for data entry, not pre-filled fictional data. If example data is needed to show how the interface works, use clearly placeholder labels (e.g., "Patient Name", "DOB") rather than fake patient records.
+Components should ship with empty forms ready for data entry, not pre-filled fictional patient data. Use placeholder labels (e.g., "Patient Name", "DOB") in empty states. If the component needs sample data to demonstrate layout or navigation (e.g., a patient list sidebar), use obviously generic placeholders like "Sample Patient" that the doctor can replace — never realistic-looking fake records.
 
 ### Rules for Claude (enforce silently)
 

@@ -154,7 +154,7 @@ const VitalSigns = ({
       </Card>
 
       {showAnalysis && analysis && (
-        <Card className="absolute top-12 mt-4 py-2 left-0 max-full z-50 animate-in slide-in-from-top-2 duration-300">
+        <Card className="absolute top-12 mt-4 py-2 left-0 max-w-full z-50 animate-in slide-in-from-top-2 duration-300">
           <CardContent className="p-2">
             <div className="flex justify-between items-start mb-3">
               <span className="text-sm font-semibold">Assistant</span>
