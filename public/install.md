@@ -4,6 +4,24 @@
 
 ---
 
+## Step 0 — Verify project folder
+
+Check if the current directory looks like an appropriate project folder (not the home directory, desktop, or system folder).
+
+- **If the doctor is in a reasonable project folder** (e.g., `~/my-clinic`, `~/projects/clinic-tools`, or any dedicated folder): move to step 1.
+- **If the doctor is in their home directory, desktop, or root**: tell them:
+  "Before we start, let's create a dedicated folder for your project. Could you:
+  1. Create a new folder on your computer — you can call it anything, like 'my-clinic'
+  2. Open your terminal inside that folder
+  3. Type **claude** to start me up again
+  4. Then paste the install command again
+
+  This keeps everything organized in one place."
+
+  Then stop — do not continue with the install until the doctor is in a proper project folder.
+
+---
+
 ## Step 1 — Check Node.js
 
 Run `node -v` silently.
