@@ -1,20 +1,17 @@
 import { useState } from "react";
 
-export const useAnalyzeVitalSigns = ({ route, getCurrentVitalSignsData }: { route: string; getCurrentVitalSignsData: () => Record<string, unknown> }) => {
+export const useAnalyzeVitalSigns = ({ route, getCurrentVitalSignsData }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [analysis, setAnalysis] = useState("");
   const [showAnalysis, setShowAnalysis] = useState(false);
 
   const analyzeVitalSigns = async () => {
-    if (!route) {
-      setError("No analysis route configured");
-      return;
-    }
     setIsLoading(true);
     setError("");
     setAnalysis("");
     const vitalSigns = getCurrentVitalSignsData();
+    if (!route) return;
     try {
       const response = await fetch(route, {
         method: "POST",

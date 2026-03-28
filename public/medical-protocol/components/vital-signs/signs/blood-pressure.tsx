@@ -143,7 +143,7 @@ const BloodPressure = ({
             onChange={onSystolicChange}
             onKeyDown={handleKeyDown}
             placeholder="120"
-            className="w-[50px] text-center"
+            className="w-[60px] text-center"
             maxLength={3}
           />
           <span className="text-muted-foreground">/</span>
@@ -153,13 +153,13 @@ const BloodPressure = ({
             onChange={onDiastolicChange}
             onKeyDown={handleKeyDown}
             placeholder="80"
-            className="w-[50px] text-center"
+            className="w-[60px] text-center"
             maxLength={3}
           />
         </EditSection>
-
         {bloodPressureValue?.systolic && bloodPressureValue?.diastolic ? (
-          <span className="flex items-baseline gap-2 hover:text-accent-foreground transition-all">
+          <span className={`flex items-baseline gap-2 hover:text-accent-foreground transition-all ${currentBPCategory ? "text-destructive" : ""}
+`}>
             {bloodPressureValue.systolic}/{bloodPressureValue.diastolic}{" "}
             <small className="opacity-50">mmHg</small>
           </span>

@@ -33,6 +33,11 @@ Silently determine which files need to change:
    - Patient info changes → `app/ehr/patient-details/`
    - Clinical notes changes → `app/ehr/prev-evolutions/`
    - Alert changes → `components/vital-signs/components/vital-signs-alert.tsx`
+   - Blood gas / acid-base changes → `components/acid-base/`
+   - BMI changes → `components/bmi/`
+   - Fluid balance changes → `components/water-balance/`
+   - Pulse oximetry changes → `components/telemonitoring/pulse-oximetry/`
+   - Timeline changes → `components/timeline/`
    - Layout changes → the relevant page file
 
 3. **If the doctor requests a component that isn't installed yet**, fetch it from the CDN following the component fetching process in the main protocol

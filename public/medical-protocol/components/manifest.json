@@ -1,10 +1,13 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "vital-signs": {
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Blood pressure, heart rate, SpO2, temperature, respiratory rate monitor",
     "target": "components/vital-signs",
     "shadcn": ["card", "button", "input", "select", "badge", "label", "textarea"],
+    "externalComponents": [
+      "@/hooks/use-mobile"
+    ],
     "files": [
       "vital-signs.tsx",
       "components/edit-section.tsx",
@@ -27,8 +30,58 @@
       "validations/temperature-validations.tsx"
     ]
   },
+  "acid-base": {
+    "version": "0.3.0",
+    "description": "Arterial blood gas analyzer with acid-base disorder detection, compensation assessment, and anion gap calculation",
+    "target": "components/acid-base",
+    "shadcn": ["card", "input", "label", "badge"],
+    "files": [
+      "acid-base.tsx",
+      "analyze.ts",
+      "components/popup.tsx",
+      "types/interfaces.ts",
+      "utils/safeFloat.ts"
+    ]
+  },
+  "bmi": {
+    "version": "0.3.0",
+    "description": "BMI calculator with imperial/metric toggle, category badges, and inline editing",
+    "target": "components/bmi",
+    "shadcn": ["card", "input", "button", "badge"],
+    "files": [
+      "bmi-calculator.tsx"
+    ]
+  },
+  "telemonitoring": {
+    "version": "0.3.0",
+    "description": "Real-time pulse oximetry display with animated heartbeat indicator and BPM/SpO2 monitoring",
+    "target": "components/telemonitoring",
+    "shadcn": [],
+    "files": [
+      "pulse-oximetry/pulse-oximetry.tsx",
+      "pulse-oximetry/pulse-oximetry-simulator.tsx"
+    ]
+  },
+  "water-balance": {
+    "version": "0.3.0",
+    "description": "Fluid intake/output tracker with insensible loss calculation, endogenous water generation, and net balance display",
+    "target": "components/water-balance",
+    "shadcn": ["card", "input", "button", "badge", "label"],
+    "files": [
+      "water-balance.tsx"
+    ]
+  },
+  "timeline": {
+    "version": "0.3.0",
+    "description": "Clinical timeline with scrollable event history, duration badges, and popover details",
+    "target": "components/timeline",
+    "shadcn": ["button", "popover", "badge"],
+    "files": [
+      "timeline.tsx"
+    ]
+  },
   "ehr": {
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Electronic Health Records with patient management, clinical notes, sidebar",
     "target": "app/ehr",
     "shadcn": ["card", "button", "input", "textarea", "select", "tabs", "separator", "scroll-area", "sheet", "sidebar", "skeleton", "alert-dialog", "badge"],

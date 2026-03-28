@@ -44,7 +44,7 @@ const Temperature: React.FC<TemperatureProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === "Enter" && validateTemperatureInput(e.currentTarget.value, useFahrenheit)) {
       handleCancel();
-          setClickedComponent("bloodOxygen");
+      setClickedComponent("bloodOxygen");
     } else if (e.key === "Escape") {
       handleCancel();
     }
@@ -52,7 +52,7 @@ const Temperature: React.FC<TemperatureProps> = ({
 
   const handleEditClick = (): void => {
     setClickedComponent("temperature");
-    
+
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
@@ -65,7 +65,7 @@ const Temperature: React.FC<TemperatureProps> = ({
     }
   };
 
-  const temperatureStatus = getTemperatureStatus(temperatureValue ?? 0, useFahrenheit);
+  const temperatureStatus = getTemperatureStatus(temperatureValue, useFahrenheit);
   const limits = getTemperatureLimits(useFahrenheit);
 
   return (
@@ -82,7 +82,7 @@ const Temperature: React.FC<TemperatureProps> = ({
           <div className="flex items-center gap-2">
             <Input
               ref={inputRef}
-              className="w-[70px] text-center"
+              className="w-[85px] text-center"
               defaultValue={temperatureValue?.toString() || ""}
               onChange={onChange}
               onKeyDown={handleKeyDown}
@@ -90,13 +90,14 @@ const Temperature: React.FC<TemperatureProps> = ({
               max={limits.INPUT_MAX.toString()}
               step="0.1"
               type="number"
+              placeholder={useFahrenheit ? "98.6" : "36"}
             />
           </div>
         </EditSection>
 
         <div>
           {temperatureValue ? (
-            <span className="flex items-baseline gap-2  hover:text-accent-foreground transition-all">
+            <span className={`flex items-baseline gap-2  hover:text-accent-foreground transition-all ${temperatureStatus ? "text-destructive" : ""}`}>
               {temperatureValue}{" "}
               <small className="opacity-50">
                 {useFahrenheit ? "°F" : "°C"}

@@ -78,7 +78,8 @@ const RespiratoryRate: React.FC<RespiratoryRateProps> = ({
     setClickedComponent("respiratoryRate");
   };
 
-  const currentCategory = getRespiratoryRateCategory(respiratoryRateValue ?? 0);
+  const currentCategory = getRespiratoryRateCategory(respiratoryRateValue);
+  console.log("current category", currentCategory)
 
   return (
     <div className="px-2 cursor-pointer relative">
@@ -97,6 +98,7 @@ const RespiratoryRate: React.FC<RespiratoryRateProps> = ({
             value={respiratoryRateValue?.toString() || ""}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
+            placeholder="14"
             maxLength={2}
             min={RESPIRATORY_RATE_LIMITS.MIN.toString()}
             max={RESPIRATORY_RATE_LIMITS.MAX.toString()}
@@ -104,7 +106,8 @@ const RespiratoryRate: React.FC<RespiratoryRateProps> = ({
         </EditSection>
         <div>
           {respiratoryRateValue ? (
-            <span className="flex items-baseline gap-2  hover:text-accent-foreground transition-all">
+            <span className={`flex items-baseline gap-2  hover:text-accent-foreground transition-all ${currentCategory?.category !== "Normal" ? "text-destructive" : ""}`}>
+
               {respiratoryRateValue}{" "}
               <small className="opacity-50">breaths/min</small>
             </span>

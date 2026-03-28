@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, RefObject } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ const HeartRate = ({
   clickedComponent,
   editable,
 }: HeartRateProps) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef: RefObject<HTMLInputElement> = useRef(null);
 
   useEffect(() => {
     if (clickedComponent === "heartRate" && inputRef.current) {
@@ -59,7 +59,7 @@ const HeartRate = ({
     }
   };
 
-  const currentCategory = getHeartRateCategory(heartRateValue ?? 0);
+  const currentCategory = getHeartRateCategory(heartRateValue);
 
   return (
     <div
@@ -79,6 +79,7 @@ const HeartRate = ({
           <div className="flex items-center gap-2">
             <Input
               ref={inputRef}
+              placeholder="70"
               className="w-[50px] text-center"
               defaultValue={heartRateValue || ""}
               onKeyDown={handleKeyDown}
@@ -90,7 +91,7 @@ const HeartRate = ({
         </EditSection>
         <div>
           {heartRateValue ? (
-            <span className="flex items-baseline gap-2  hover:text-accent-foreground transition-all">
+            <span className={`flex items-baseline gap-2  hover:text-accent-foreground transition-all ${currentCategory ? "text-destructive" : ""}`}>
               {heartRateValue} <small className="opacity-50">beats/min</small>
             </span>
           ) : (

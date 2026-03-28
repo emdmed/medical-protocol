@@ -18,20 +18,17 @@ export interface IBloodOxygen {
   fiO2: number | null;
 }
 
-export interface BloodPressureValue {
+export interface IBloodPressureValue {
   systolic: number | null;
   diastolic: number | null;
 }
-
-export type IBloodPressureValue = BloodPressureValue;
-
 export interface IVitalSignsData {
-  bloodPressure: BloodPressureValue;
+  bloodPressure: IBloodPressureValue;
   heartRate: number | null;
   respiratoryRate: number | null;
   temperature: number | null;
   bloodOxygen: IBloodOxygen;
-  fhirBundle?: FhirBundle;
+  fhirBundle?: unknown;
   timestamp?: string;
 }
 
@@ -44,6 +41,11 @@ export interface IVitalSignsProps {
   editable?: boolean;
   border?: boolean;
   assistantRoute?: string;
+}
+
+export interface BloodPressureValue {
+  systolic: number | null;
+  diastolic: number | null;
 }
 
 interface FhirCoding {
@@ -109,11 +111,11 @@ export interface FhirBundle {
 export interface UseVitalSignsReturn {
   values: IVitalSignsData;
   handlers: {
-    handleHeartRate: (value: string | number | null) => void;
-    handleRespiratoryRate: (value: string | number | null) => void;
-    handleTemperature: (value: string | number | null) => void;
-    handleBloodOxygen: (value: string | number | null) => void;
-    handleFio2: (value: string | number | null) => void;
+    handleHeartRate: (value: string | number) => void;
+    handleRespiratoryRate: (value: string | number) => void;
+    handleTemperature: (value: string | number) => void;
+    handleBloodOxygen: (value: string | number) => void;
+    handleFio2: (value: string | number) => void;
     handleBloodPressure: (value: BloodPressureValue) => void;
     handleFhirUpdate: (bundle: FhirBundle) => void;
     resetValues: () => void;
@@ -124,7 +126,7 @@ export interface UseVitalSignsReturn {
 
 export type BloodOxygenValue = number | null;
 export type Fio2Value = number | null;
-export type ClickedComponent = string | null;
+export type ClickedComponent = string | null | undefined;
 
 export interface Fio2Option {
   value: string;
@@ -133,9 +135,9 @@ export interface Fio2Option {
 
 export interface BloodOxygenProps {
   bloodOxygenValue: BloodOxygenValue;
-  setBloodOxygenValue: (value: string | number | null) => void;
+  setBloodOxygenValue: (value: BloodOxygenValue) => void;
   fio2Value: Fio2Value;
-  setFio2Value: (value: string | number | null) => void;
+  setFio2Value: (value: Fio2Value) => void;
   setClickedComponent: (component: ClickedComponent) => void;
   clickedComponent: ClickedComponent;
   editable: boolean;
@@ -143,14 +145,14 @@ export interface BloodOxygenProps {
 
 export type InputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => void;
 export type KeyDownHandler = (e: React.KeyboardEvent<HTMLInputElement>) => void;
-export type SelectChangeHandler = (value: string | null) => void;
+export type SelectChangeHandler = (value: string) => void;
 
 
 export interface BloodPressureProps {
   bloodPressureValue: BloodPressureValue;
   setBloodPressureValue: (value: BloodPressureValue) => void;
-  setClickedComponent: (component: ClickedComponent) => void;
-  clickedComponent: ClickedComponent;
+  setClickedComponent: (component: string) => void;
+  clickedComponent: string;
   editable: boolean;
 }
 
@@ -159,33 +161,33 @@ export interface BloodPressureCategory {
 }
 
 export interface TemperatureProps {
-  temperatureValue: string | number | null;
-  setTemperatureValue: (value: string | number | null) => void;
+  temperatureValue: string | number;
+  setTemperatureValue: (value: string | number) => void;
   useFahrenheit?: boolean;
-  setClickedComponent: (component: ClickedComponent) => void;
-  clickedComponent: ClickedComponent;
+  setClickedComponent: (component: string) => void;
+  clickedComponent: string;
   editable: boolean;
 }
 
 export interface RespiratoryRateProps {
-  respiratoryRateValue: number | null;
-  setRespiratoryRateValue: (value: string | number | null) => void;
-  setClickedComponent: (component: ClickedComponent) => void;
-  clickedComponent: ClickedComponent;
+  respiratoryRateValue: number;
+  setRespiratoryRateValue: (value: string | number) => void;
+  setClickedComponent: (component: string) => void;
+  clickedComponent: string;
   editable: boolean;
 }
 
 export interface HeartRateProps {
-  heartRateValue: number | null;
-  setHeartRateValue: (value: string | number | null) => void;
-  setClickedComponent: (component: ClickedComponent) => void;
-  clickedComponent: ClickedComponent;
+  heartRateValue: number;
+  setHeartRateValue: (value: number) => void;
+  setClickedComponent: (component: string) => void;
+  clickedComponent: string;
   editable: boolean;
 }
 
 export interface EditSectionProps {
   children: ReactNode;
-  clickedComponent: ClickedComponent;
+  clickedComponent: string | number | null;
   parentComponent: string | number;
   editable: boolean;
   handleCancel: () => void;

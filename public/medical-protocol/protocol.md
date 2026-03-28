@@ -102,6 +102,11 @@ When the doctor describes what they need, classify into one of these domains bas
 |---|---|---|
 | **vital-signs** | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate, vitals, monitor | `workflows/vital-signs.md` |
 | **ehr** | patient record, medical history, clinical notes, evolution, health record, EHR, EMR, patient file | `workflows/ehr.md` |
+| **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | `workflows/acid-base.md` |
+| **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | `workflows/bmi.md` |
+| **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | `workflows/water-balance.md` |
+| **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | `workflows/telemonitoring.md` |
+| **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | `workflows/timeline.md` |
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `workflows/dashboard.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize | `workflows/customize.md` |
 
@@ -144,6 +149,8 @@ When a workflow instructs you to install a component:
    - Follow the project's existing code style and conventions
    - Ensure all TypeScript compiles cleanly (`npx tsc --noEmit`) — don't introduce type errors
    - Make sure UI elements like popups and overlays work correctly within the layout (e.g., no overflow clipping, correct positioning)
+   - **shadcn Card overflow-hidden**: When a Card contains absolutely-positioned popups or overlays, add `overflow-visible` to its className. The default Card clips content outside its bounds. This applies to the Card itself AND any parent Cards wrapping it.
+   - **Avoid circular update loops**: When a child component receives data via props AND reports changes back via a callback, never put `onData(values)` in a `useEffect` that depends on `values` if the parent re-renders and passes those values back as props. Use `useRef` to track the previous serialized value and skip updates when nothing changed. Store callback props in a ref (`onDataRef.current = onData`) so they don't appear in dependency arrays.
 8. **Do not tell the doctor** about files being fetched or installed — just confirm the clinical capability is ready
 
 ---
@@ -174,7 +181,12 @@ When a workflow instructs you to install a component:
 - Sidebar/patient list: collapsible or hidden behind a toggle on smaller screens
 - Test by checking the built page renders without horizontal overflow
 
-### 3. shadcn Component Polish
+### 3. Error Boundary
+
+- Wrap the top-level page component in `ErrorBoundary` (from `components/vital-signs/components/error-boundary`) so the app shows a recovery UI instead of a white screen on crash
+- If the project doesn't have the error boundary file yet, create it following the pattern in the vital-signs CDN component
+
+### 4. shadcn Component Polish
 
 - Use proper shadcn components for all interactive elements (Button, Input, Select, Badge, etc.) — no raw HTML `<button>` or `<input>`
 - Consistent spacing: use Tailwind's spacing scale (`p-4`, `gap-4`, `space-y-4`), not arbitrary values

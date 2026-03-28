@@ -14,7 +14,7 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-export class VitalSignsErrorBoundary extends Component<
+export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
@@ -28,7 +28,7 @@ export class VitalSignsErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("VitalSigns error:", error, errorInfo);
+    console.error("Application error:", error, errorInfo);
   }
 
   render() {

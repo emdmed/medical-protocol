@@ -39,7 +39,7 @@ Silently perform all of the following:
 
 4. **Fetch each file** listed in `manifest["ehr"].files` following the **Component Fetching Process** in the main protocol
 
-5. **Check `externalComponents`** in the manifest entry — these imports (e.g., water-balance, acid-base, bmi-calculator, theme-toggle) are not on the CDN. Either create simplified versions, remove them, or replace with alternatives appropriate to the doctor's needs.
+5. **Check `externalComponents`** in the manifest entry — some of these are now available as their own manifest entries on the CDN (water-balance, acid-base, bmi). Fetch those using the Component Fetching Process. For any remaining external imports that are not on the CDN (e.g., theme-toggle, textarea-inv), create simplified versions, remove them, or replace with alternatives appropriate to the doctor's needs.
 
 6. **Install shadcn components** listed in `manifest["ehr"].shadcn`:
    ```

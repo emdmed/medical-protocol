@@ -28,7 +28,7 @@ export const useVitalSigns = (
   const [bloodPressure, setBloodPressure] = useState<IBloodPressureValue>(
     initialData?.bloodPressure ?? { systolic: null, diastolic: null },
   );
-  const [fhirBundle, setFhirBundle] = useState<FhirBundle | undefined>(
+  const [fhirBundle, setFhirBundle] = useState<unknown>(
     initialData?.fhirBundle,
   );
   const [timestamp, setTimestamp] = useState<string>(
@@ -36,7 +36,7 @@ export const useVitalSigns = (
   );
 
   const parseNumericValue = useCallback(
-    (value: string | number | null): number | null => {
+    (value: string | number): number | null => {
       if (value === null || value === undefined || value === "") return null;
       const numValue = typeof value === "string" ? parseFloat(value) : value;
       return isNaN(numValue) ? null : numValue;
@@ -45,7 +45,7 @@ export const useVitalSigns = (
   );
 
   const createNumericHandler = useCallback(
-    (setter: (value: number | null) => void) => (value: string | number | null) => {
+    (setter: (value: number | null) => void) => (value: string | number) => {
       const parsedValue = parseNumericValue(value);
       setter(parsedValue);
       setTimestamp(new Date().toISOString());
@@ -58,7 +58,7 @@ export const useVitalSigns = (
   const handleTemperature = createNumericHandler(setTemperature);
 
   const handleBloodOxygen = useCallback(
-    (value: string | number | null) => {
+    (value: string | number) => {
       const parsedValue = parseNumericValue(value);
       setBloodOxygen((prev) => ({ ...prev, saturation: parsedValue }));
       setTimestamp(new Date().toISOString());
@@ -67,7 +67,7 @@ export const useVitalSigns = (
   );
 
   const handleFio2 = useCallback(
-    (value: string | number | null) => {
+    (value: string | number) => {
       const parsedValue = parseNumericValue(value);
       setBloodOxygen((prev) => ({ ...prev, fiO2: parsedValue }));
       setTimestamp(new Date().toISOString());
