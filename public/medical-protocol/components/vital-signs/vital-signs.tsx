@@ -92,7 +92,7 @@ const VitalSigns = ({
       />
 
       <Card
-        className={`p-0 px-0 transition-all duration-200 flex w-fit ${border ? "" : "border-none shadow-none"}`}
+        className={`p-0 px-0 overflow-visible transition-all duration-200 flex w-fit ${border ? "" : "border-none shadow-none"}`}
       >
         <CardContent
           className={
