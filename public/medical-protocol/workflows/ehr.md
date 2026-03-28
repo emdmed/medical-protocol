@@ -9,6 +9,11 @@ Ask the doctor about their patient record needs:
 - "Do you need to search through previous clinical notes?" (Default: yes)
 - "Do you need a reference section for clinical guidelines or drug references?" (Default: yes)
 
+### Setting-Aware Questions (based on Initial Clarification)
+
+- If **multiple patients**: Ask "Do you need a patient list to switch between records, or will you search by name?" (Default: patient list)
+- If **persistence enabled**: Ask "Should records be organized by visit date?" (Default: yes)
+
 Do NOT ask about:
 - Database setup (use local demo data for MVP)
 - Authentication (not in MVP scope)

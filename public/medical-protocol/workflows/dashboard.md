@@ -11,6 +11,11 @@ The doctor wants a combined clinical dashboard. Ask:
 
 - "Is this for a single patient view or a clinic overview?" (Default: single patient)
 
+### Setting-Aware Questions (based on Initial Clarification)
+
+- If **admitted patients**: Ask "Do you want the dashboard to highlight patients with abnormal readings?" (Default: yes)
+- If **multiple patients**: Ask "Should the dashboard show all patients at once, or one patient with a list to navigate?" (Default: one patient with a list)
+
 Do NOT ask about:
 - Layout arrangement (you decide — typically vitals on one side, records on the other)
 - Navigation structure (you decide)

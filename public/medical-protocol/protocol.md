@@ -40,6 +40,41 @@ https://medical-protocol.vercel.app/medical-protocol
 
 ---
 
+## Initial Clarification
+
+When the doctor's request is vague or general (e.g., "I need something to track vitals" or "build me a patient system"), ask the following three questions **in a single conversational message** before proceeding to Classification. If the request already makes the answers clear (e.g., "I need a vital signs monitor for admitted patients with data saved"), skip this section entirely.
+
+**Ask all three together, conversationally — not as a numbered quiz. Provide defaults so the doctor can simply say "defaults are fine."**
+
+1. **Patient setting & priority**
+   - "What type of patients is this for?"
+     - **In/out patients in private practice** — shorter visits, quick data entry, lower-acuity workflows
+     - **Admitted patients (hospital/clinic)** — continuous monitoring, more detailed records, higher-acuity workflows
+     - **Both**
+   - Default: private practice (in/out patients)
+
+2. **Single patient vs patient management**
+   - "Will you work with one patient at a time, or do you need to manage a list of patients?"
+     - **One patient at a time** — focused view, no patient list needed
+     - **Multiple patients** — patient list or sidebar, ability to switch between patients
+   - Default: one patient at a time
+
+3. **Data persistence**
+   - "Should the system remember patient data between sessions, or start fresh each time?"
+     - **Remember data** — data is saved on your computer and available next time you open it
+     - **Start fresh** — data is only available during the current session
+   - Default: remember data (stored locally on the doctor's computer)
+
+**Rules:**
+- Never ask more than these three questions — keep it brief
+- The answers feed into Classification and influence how each workflow is executed
+- Silently adapt the architecture based on the answers:
+  - **Admitted patients + persistence** → local storage with patient identifiers, richer vital signs with alerts
+  - **Private practice + single patient + no persistence** → simple session-based state, minimal UI
+  - **Multiple patients** → patient list component, sidebar navigation
+
+---
+
 ## Classification
 
 When the doctor describes what they need, classify into one of these domains based on signal words:
@@ -54,6 +89,8 @@ When the doctor describes what they need, classify into one of these domains bas
 **If the request matches multiple domains**, prefer `dashboard` as it combines components.
 
 **If no domain matches**, ask: "Could you describe what clinical information you'd like to see or manage?"
+
+**Pass Initial Clarification answers downstream.** The answers from Initial Clarification (patient setting, single vs multiple patients, data persistence) are passed to the selected workflow as context. The workflow should silently adapt its behavior, questions, and architecture based on these answers.
 
 ---
 

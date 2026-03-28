@@ -14,6 +14,11 @@ Ask the doctor which vital signs they need to monitor. Present as a clinical che
 
 Ask: "Would you like alerts when readings fall outside normal ranges?" (Default: yes)
 
+### Setting-Aware Questions (based on Initial Clarification)
+
+- If **admitted patients**: Ask "Do you need continuous monitoring with alerts, or manual entry during rounds?" (Default: manual entry during rounds)
+- If **private practice**: Ask "Do you just need to record vitals during the visit, or also review past readings?" (Default: record during visit only)
+
 Ask: "Should the system support FHIR-formatted data for interoperability with other clinical systems?" — **Do NOT ask this. Default to YES. Include FHIR support silently.**
 
 Do NOT ask about:
