@@ -1,11 +1,14 @@
 {
+  "version": "0.2.0",
   "vital-signs": {
+    "version": "0.2.0",
     "description": "Blood pressure, heart rate, SpO2, temperature, respiratory rate monitor",
     "target": "components/vital-signs",
     "shadcn": ["card", "button", "input", "select", "badge", "label", "textarea"],
     "files": [
       "vital-signs.tsx",
       "components/edit-section.tsx",
+      "components/error-boundary.tsx",
       "components/vital-signs-alert.tsx",
       "components/vital-signs-fhir.tsx",
       "hooks/useAnalyze.tsx",
@@ -25,9 +28,17 @@
     ]
   },
   "ehr": {
+    "version": "0.2.0",
     "description": "Electronic Health Records with patient management, clinical notes, sidebar",
     "target": "app/ehr",
-    "shadcn": ["card", "button", "input", "textarea", "select", "tabs", "separator", "scroll-area", "sheet", "sidebar", "skeleton"],
+    "shadcn": ["card", "button", "input", "textarea", "select", "tabs", "separator", "scroll-area", "sheet", "sidebar", "skeleton", "alert-dialog", "badge"],
+    "externalComponents": [
+      "@/components/water-balance/water-balance",
+      "@/components/acid-base/acid-base",
+      "@/components/bmi/bmi-calculator",
+      "@/components/theme-toggle",
+      "@/components/ui/textarea-inv"
+    ],
     "files": [
       "ehr.tsx",
       "page.tsx",

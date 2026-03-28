@@ -1,6 +1,3 @@
-/* eslint-disable */
-// @ts-nocheck
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -27,7 +24,6 @@ import AcidBaseWidget from "@/components/acid-base/acid-base";
 import BMICalculator from "@/components/bmi/bmi-calculator";
 import { generateHighlightedHTML } from "./utils/generateHighlightedHTML";
 import References from "./references/references";
-import { create } from "node:domain";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   AlertDialog,
@@ -60,6 +56,13 @@ interface MedicalRecord {
   timestamp?: string;
 }
 
+interface EhrUser {
+  name?: string;
+  surname?: string;
+  specialty?: string;
+  idNumber?: string;
+}
+
 interface Tool {
   value: string;
   label: string;
@@ -83,16 +86,18 @@ export default function MedicalRecordsApp() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   
-  const [user, setUser] = useState("")
-  
+  const [user, setUser] = useState<EhrUser | null>(null)
+
   useEffect(() => {
     try{
       const storedString = localStorage.getItem("ehr-user")
-      setUser(JSON.parse(storedString))
+      if (storedString) {
+        setUser(JSON.parse(storedString) as EhrUser)
+      }
     } catch(err){
       console.error(err)
     }
-    
+
   }, [])
   
   
@@ -216,10 +221,10 @@ export default function MedicalRecordsApp() {
       const fullNote = noteHeader + noteContent;
       
       // Add doctor signature if available
-      if (user && user.name && user.surname) {
+      if (user?.name && user?.surname) {
         const signature = `\n\n---\nDr. ${user.surname} ${user.name}\n${user.specialty || ''}\nM.N. ${user.idNumber || ''}`;
         const completeNote = fullNote + signature;
-        
+
         await navigator.clipboard.writeText(completeNote);
       } else {
         await navigator.clipboard.writeText(fullNote);
@@ -236,7 +241,7 @@ export default function MedicalRecordsApp() {
         const noteContent = currentRecord.notes.trim();
         let fullNote = noteHeader + noteContent;
         
-        if (user && user.name && user.surname) {
+        if (user?.name && user?.surname) {
           const signature = `\n\n---\nDr. ${user.surname} ${user.name}\n${user.specialty || ''}\nM.N. ${user.idNumber || ''}`;
           fullNote += signature;
         }
@@ -550,7 +555,9 @@ export default function MedicalRecordsApp() {
                       dangerouslySetInnerHTML={{
                         __html: generateHighlightedHTML(
                           currentRecord.notes,
-                          JSON.parse(currentRecord?.analysis),
+                          typeof currentRecord.analysis === 'string'
+                            ? JSON.parse(currentRecord.analysis)
+                            : currentRecord.analysis,
                         ),
                       }}
                     />
@@ -579,9 +586,9 @@ export default function MedicalRecordsApp() {
                     
                   )}
                   <div className="flex flex-col absolute bottom-0 px-3 py-2 opacity-50">
-                    <span>{user.surname} {user.name}</span>
-                    <small>{user.specialty}</small>
-                    <small>M.N.{user.idNumber}</small>
+                    <span>{user?.surname} {user?.name}</span>
+                    <small>{user?.specialty}</small>
+                    <small>M.N.{user?.idNumber}</small>
                   </div>
                 </div>
 
@@ -697,7 +704,7 @@ export default function MedicalRecordsApp() {
             </div>
           </div>
         </div>
-        <div className="abdolute bottom p-2">
+        <div className="absolute bottom-0 p-2">
           {currentRecord.analysis && <References />}
         </div>
       </div>

@@ -104,23 +104,27 @@ Once classified, fetch and follow the workflow:
 
 ### Component Fetching Process
 
-The CDN components are **references and guidelines**, not copy-paste code. Use them as inspiration for the architecture, clinical logic, data flow, and UI patterns — then write components that fit the doctor's actual project setup (React version, shadcn version, TypeScript config, existing code style).
+The CDN components are **references and guidelines**, not copy-paste code. Use them to understand the architecture, clinical logic, data flow, and UI patterns — then write components that fit the doctor's actual project setup (React version, shadcn version, TypeScript config, existing code style).
+
+> **Important:** Workflow instructions like `Write to: {project}/components/...` indicate *where* the component should live in the project, not that the CDN file should be copied verbatim. Always adapt the code to the project context.
 
 When a workflow instructs you to install a component:
 
 1. **Fetch manifest**: `WebFetch` from `{CDN_BASE}/components/manifest.json`
 2. **Read the component entry** for the requested component name
-3. **Fetch and study each file** listed in `manifest[component].files`:
+3. **Check the manifest `version` field** to know which version of the components you are working with
+4. **Fetch and study each file** listed in `manifest[component].files`:
    - `WebFetch` the file from `{CDN_BASE}/components/{component-name}/{file-path}`
    - Read and understand: component structure, prop interfaces, clinical validation logic, FHIR data handling, state management patterns, and UI behavior
-4. **Install shadcn dependencies**: Run `npx shadcn@latest add {manifest.shadcn components}` silently
-5. **Write components to the project** using the fetched code as a guide:
+5. **Check `externalComponents`** (if present in the manifest entry): these are imports the component expects from the doctor's project that are *not* on the CDN. You must either create them or remove/replace those imports when adapting the code.
+6. **Install shadcn dependencies**: Run `npx shadcn@latest add {manifest.shadcn components}` silently
+7. **Write components to the project** using the fetched code as a guide:
    - Preserve the clinical logic, validations, data structures, and overall architecture
    - Adapt types, hooks, imports, and patterns to match the project's actual React/Next.js/shadcn/TypeScript versions
    - Follow the project's existing code style and conventions
    - Ensure all TypeScript compiles cleanly (`npx tsc --noEmit`) — don't introduce type errors
    - Make sure UI elements like popups and overlays work correctly within the layout (e.g., no overflow clipping, correct positioning)
-6. **Do not tell the doctor** about files being fetched or installed — just confirm the clinical capability is ready
+8. **Do not tell the doctor** about files being fetched or installed — just confirm the clinical capability is ready
 
 ---
 

@@ -7,11 +7,14 @@ export const useAnalyzeVitalSigns = ({ route, getCurrentVitalSignsData }: { rout
   const [showAnalysis, setShowAnalysis] = useState(false);
 
   const analyzeVitalSigns = async () => {
+    if (!route) {
+      setError("No analysis route configured");
+      return;
+    }
     setIsLoading(true);
     setError("");
     setAnalysis("");
     const vitalSigns = getCurrentVitalSignsData();
-    if (!route) return;
     try {
       const response = await fetch(route, {
         method: "POST",

@@ -28,7 +28,7 @@ export const useVitalSigns = (
   const [bloodPressure, setBloodPressure] = useState<IBloodPressureValue>(
     initialData?.bloodPressure ?? { systolic: null, diastolic: null },
   );
-  const [fhirBundle, setFhirBundle] = useState<unknown>(
+  const [fhirBundle, setFhirBundle] = useState<FhirBundle | undefined>(
     initialData?.fhirBundle,
   );
   const [timestamp, setTimestamp] = useState<string>(

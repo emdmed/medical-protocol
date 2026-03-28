@@ -18,17 +18,20 @@ export interface IBloodOxygen {
   fiO2: number | null;
 }
 
-export interface IBloodPressureValue {
+export interface BloodPressureValue {
   systolic: number | null;
   diastolic: number | null;
 }
+
+export type IBloodPressureValue = BloodPressureValue;
+
 export interface IVitalSignsData {
-  bloodPressure: IBloodPressureValue;
+  bloodPressure: BloodPressureValue;
   heartRate: number | null;
   respiratoryRate: number | null;
   temperature: number | null;
   bloodOxygen: IBloodOxygen;
-  fhirBundle?: unknown;
+  fhirBundle?: FhirBundle;
   timestamp?: string;
 }
 
@@ -41,11 +44,6 @@ export interface IVitalSignsProps {
   editable?: boolean;
   border?: boolean;
   assistantRoute?: string;
-}
-
-export interface BloodPressureValue {
-  systolic: number | null;
-  diastolic: number | null;
 }
 
 interface FhirCoding {

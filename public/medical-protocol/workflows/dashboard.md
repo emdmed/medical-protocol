@@ -75,7 +75,8 @@ Create a dashboard page that combines the selected components:
 
 2. **Example layout** (adapt as needed):
    ```tsx
-   import { VitalSigns } from "@/components/vital-signs/vital-signs"
+   import VitalSigns from "@/components/vital-signs/vital-signs"
+   import MedicalRecordsApp from "@/app/ehr/ehr"
 
    export default function DashboardPage() {
      return (
@@ -86,13 +87,15 @@ Create a dashboard page that combines the selected components:
              <VitalSigns />
            </section>
            <section>
-             {/* EHR summary or link to /ehr */}
+             <MedicalRecordsApp />
            </section>
          </div>
        </main>
      )
    }
    ```
+
+   > **Note:** The EHR component (`MedicalRecordsApp`) includes its own sidebar and layout. When embedding it in a dashboard, you may need to adapt its wrapper to fit within the grid — for example, removing `h-screen` from its root div and adjusting padding. Use the fetched source as a guide.
 
 3. **Update the home page** to redirect to `/dashboard`
 

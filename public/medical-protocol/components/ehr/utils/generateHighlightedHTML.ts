@@ -10,25 +10,24 @@ interface TermsByCategory {
   [category: string]: string[];
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export function generateHighlightedHTML(noteText: string, jsonData: AnalysisData): string {
-  // Parse the JSON analysis
-  // 
-  console.log("generateHighlightedHTML params", noteText, jsonData)
-  // let analysisData: any;
-  // try {
-  //   analysisData = typeof jsonData.analysis === 'string' 
-  //     ? JSON.parse(jsonData.analysis) 
-  //     : jsonData.analysis;
-  // } catch (e) {
-  //   console.warn('Could not parse analysis JSON:', e);
-  //   analysisData = {};
-  // }
+  // Sanitize the note text before any HTML insertion
+  const sanitizedText = escapeHtml(noteText);
 
   // Extract terms with their categories
   const termsByCategory = extractTermsByCategory(jsonData);
-  
-  // Highlight all terms in the text
-  const highlightedContent = highlightTerms(noteText, termsByCategory);
+
+  // Highlight all terms in the sanitized text
+  const highlightedContent = highlightTerms(sanitizedText, termsByCategory);
   
   return `
     <div class="max-w-4xl mx-auto p-4">

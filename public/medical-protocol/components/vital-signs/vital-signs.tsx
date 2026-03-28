@@ -13,6 +13,7 @@ import RespiratoryRate from "@/components/vital-signs/signs/respiratory-rate";
 import Temperature from "@/components/vital-signs/signs/temperature";
 import BloodOxygen from "@/components/vital-signs/signs/blood-oxygen";
 import VitalSignsFhir from "@/components/vital-signs/components/vital-signs-fhir";
+import { VitalSignsErrorBoundary } from "@/components/vital-signs/components/error-boundary";
 
 import { useAnalyzeVitalSigns } from "@/components/vital-signs/hooks/useAnalyze";
 import { useClickOutside } from "./hooks/useClickOutside";
@@ -64,10 +65,8 @@ const VitalSigns = ({
 
   useEffect(() => {
     if (onData && typeof onData === "function") {
-      //quick fix until next refactor
-      const fhirBundle = values.fhirBundle;
-      delete values.fhirBundle;
-      onData(values, fhirBundle as FhirBundle);
+      const { fhirBundle, ...vitalSignsData } = values;
+      onData(vitalSignsData as IVitalSignsData, fhirBundle as FhirBundle);
     }
   }, [values, onData]);
 
@@ -76,6 +75,7 @@ const VitalSigns = ({
   };
 
   return (
+    <VitalSignsErrorBoundary fallbackMessage="Unable to load vital signs monitor. Please try again.">
     <div
       ref={componentRef}
       className="relative animate-in fade-in-1 duration-200"
@@ -197,10 +197,8 @@ const VitalSigns = ({
         </div>
       )}
     </div>
+    </VitalSignsErrorBoundary>
   );
 };
 
-//TODO
-export default memo(VitalSigns, (prevProps, nextProps) => {
-  return JSON.stringify(prevProps.data) === JSON.stringify(nextProps.data);
-});
+export default memo(VitalSigns);
