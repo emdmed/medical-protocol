@@ -3,330 +3,442 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>medical protocol — for doctors</title>
-  <meta name="description" content="A plain-language guide for doctors using the medical protocol with Claude Code. No engineering knowledge required.">
+  <title>Medical Protocol — For Doctors</title>
+  <meta name="description" content="Build fully functional clinical interfaces just by describing what you need. No coding, no IT team required.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Fragment+Mono:wght@400&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
-      background: #f8fafb;
-      color: #37474f;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 2rem 1.5rem;
-      line-height: 1.6;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
+    :root {
+      --bg-dark: #0f1d2e;
+      --bg-darker: #091525;
+      --bg-light: #fff;
+      --bg-muted: #f0f4f8;
+      --text-primary: #1a2b3c;
+      --text-light: #fff;
+      --text-muted: #5a6e82;
+      --text-dimmed: rgba(255,255,255,0.65);
+      --accent-blue: #2b7fc3;
+      --accent-teal: #1a9e8f;
+      --accent-yellow: #e5a100;
+      --accent-lime: #6ee7b7;
+      --accent-red: #dc4a5a;
+      --border-light: #dce4ed;
+      --border-dark: rgba(255,255,255,0.12);
+      --card-dark: rgba(255,255,255,0.06);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 50px;
     }
-    main { max-width: 620px; width: 100%; }
+    body { font-family: 'Inter', sans-serif; color: var(--text-primary); background: var(--bg-light); line-height: 1.6; }
+    h1, h2, h3 { font-family: 'Funnel Display', sans-serif; line-height: 1.15; }
+    .mono { font-family: 'Fragment Mono', monospace; }
 
-    .header {
-      margin-bottom: 2.5rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid #cfd8dc;
-    }
-    h1 {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #1a2a33;
-      letter-spacing: 0.04em;
-    }
-    .subtitle {
-      font-size: 0.75rem;
-      color: #78909c;
-      margin-top: 0.3rem;
-    }
+    /* Layout */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .container--narrow { max-width: 720px; margin: 0 auto; padding: 0 24px; }
 
-    section { margin-bottom: 2.2rem; }
-    h2 {
-      font-size: 0.65rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #78909c;
-      margin-bottom: 0.6rem;
-      padding-bottom: 0.3rem;
-      border-bottom: 1px solid #cfd8dc;
-    }
+    /* Sections */
+    .section { padding: 100px 0; }
+    .section--dark { background: var(--bg-dark); color: var(--text-light); }
+    .section--darker { background: var(--bg-darker); color: var(--text-light); }
+    .section--muted { background: var(--bg-muted); }
 
-    p {
-      font-size: 0.8rem;
-      margin-bottom: 0.6rem;
-      color: #37474f;
-    }
+    /* Nav */
+    .nav { display: flex; justify-content: space-between; align-items: center; height: 50px; padding: 0 24px; max-width: 1100px; margin: 0 auto; border-bottom: 1px solid var(--border-dark); }
+    .nav__brand { font-family: 'Funnel Display', sans-serif; font-weight: 700; font-size: 18px; color: var(--text-light); text-decoration: none; }
+    .nav__links { display: flex; gap: 32px; align-items: center; }
+    .nav__link { color: var(--text-dimmed); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    .nav__link:hover { color: var(--text-light); }
+    .nav__cta { background: var(--text-light); color: var(--bg-dark); font-size: 14px; font-weight: 600; padding: 10px 24px; border-radius: var(--radius-lg); text-decoration: none; transition: opacity 0.2s; }
+    .nav__cta:hover { opacity: 0.85; }
+    /* Mobile hamburger */
+    .nav__toggle { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
+    .nav__toggle svg { display: block; }
+    .nav__mobile-menu { display: none; }
 
-    .step-list {
-      list-style: none;
-      counter-reset: steps;
-    }
-    .step-list li {
-      counter-increment: steps;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: baseline;
-      gap: 0.6rem;
-      font-size: 0.8rem;
-    }
-    .step-list li::before {
-      content: counter(steps);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      background: #cfd8dc;
-      color: #37474f;
-      border-radius: 50%;
-      font-size: 0.6rem;
-      font-weight: 600;
-      flex-shrink: 0;
-    }
+    /* Hero */
+    .hero { position: relative; overflow: hidden; }
+    .hero__bg { position: relative; width: 100%; }
+    .hero__bg img { width: calc(100% + 100px); max-width: none; display: block; object-fit: cover; margin-left: 100px; margin-top: -100px; }
+    .hero__bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, var(--bg-dark) 0%, var(--bg-dark) 15%, rgba(15,29,46,0.85) 30%, rgba(15,29,46,0.4) 55%, transparent 75%); }
+    .hero__content { position: absolute; top: 0; left: 0; z-index: 1; padding: 60px 24px 60px 48px; text-align: left; }
+    .hero__badge { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--accent-teal); background: rgba(26,158,143,0.15); border: 1px solid rgba(26,158,143,0.25); padding: 8px 18px; border-radius: var(--radius-lg); margin-bottom: 28px; }
+    .hero__badge svg { width: 14px; height: 14px; stroke: var(--accent-teal); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .hero h1 { font-size: clamp(36px, 5vw, 56px); font-weight: 700; color: var(--text-light); margin-bottom: 20px; letter-spacing: -0.025em; max-width: 560px; }
+    .hero h1 em { font-style: normal; color: var(--accent-teal); }
+    .hero__sub { font-size: 17px; color: rgba(255,255,255,0.7); margin-bottom: 36px; line-height: 1.75; max-width: 460px; }
+    .hero__cta-group { display: flex; flex-direction: column; gap: 16px; max-width: 520px; }
+    .hero__terminal { background: var(--bg-darker); border: 1px solid var(--border-dark); border-radius: var(--radius-md); padding: 20px 24px; width: 100%; text-align: left; position: relative; cursor: pointer; transition: border-color 0.2s; }
+    .hero__terminal:hover { border-color: rgba(255,255,255,0.25); }
+    .hero__terminal-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .hero__terminal-dots { display: flex; gap: 6px; }
+    .hero__terminal-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+    .hero__terminal-label { font-size: 11px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.06em; }
+    .hero__terminal-line { display: flex; align-items: baseline; gap: 10px; }
+    .hero__terminal-prompt { color: var(--accent-teal); font-size: 14px; flex-shrink: 0; user-select: none; }
+    .hero__terminal-cmd { font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.6; }
+    .copy-btn { position: absolute; bottom: 16px; right: 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 7px; cursor: pointer; transition: background 0.2s, border-color 0.2s; display: flex; align-items: center; justify-content: center; }
+    .copy-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); }
+    .copy-btn svg { width: 14px; height: 14px; stroke: rgba(255,255,255,0.4); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .copy-btn--copied svg { stroke: var(--accent-teal); }
+    .hero__hint { font-size: 13px; color: rgba(255,255,255,0.45); }
+    .hero__proof { display: flex; gap: 24px; margin-top: 32px; flex-wrap: wrap; }
+    .hero__proof-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.55); }
+    .hero__proof-item svg { width: 16px; height: 16px; stroke: var(--accent-teal); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
-    .example-box {
-      padding: 0.8rem 1rem;
-      background: #eceff1;
-      border: 1px solid #cfd8dc;
-      border-radius: 4px;
-      margin-bottom: 0.6rem;
-    }
-    .example-box p {
-      margin-bottom: 0.3rem;
-      font-size: 0.75rem;
-    }
-    .example-box p:last-child { margin-bottom: 0; }
-    .example-label {
-      font-size: 0.6rem;
-      color: #90a4ae;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.3rem;
-    }
+    /* Steps */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .step { text-align: center; }
+    .step__num { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--card-dark); border: 1px solid var(--border-dark); font-family: 'Fragment Mono', monospace; font-size: 14px; color: var(--accent-blue); margin-bottom: 20px; }
+    .step h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+    .step p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+    .section--dark .step p { color: var(--text-dimmed); }
 
-    .capability-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.6rem;
-      margin-bottom: 0.6rem;
-    }
-    .capability {
-      padding: 0.7rem 0.8rem;
-      background: #eceff1;
-      border: 1px solid #cfd8dc;
-      border-radius: 4px;
-    }
-    .capability-name {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #1a2a33;
-      margin-bottom: 0.2rem;
-    }
-    .capability-desc {
-      font-size: 0.7rem;
-      color: #78909c;
-    }
+    /* Example cards */
+    .examples-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .example-card { background: var(--bg-light); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 28px; transition: border-color 0.2s, transform 0.2s; }
+    .example-card:hover { border-color: #b8c4d1; transform: translateY(-2px); }
+    .example-card__label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-blue); margin-bottom: 12px; }
+    .example-card__text { font-size: 14px; color: var(--text-muted); font-style: italic; line-height: 1.7; }
 
-    .warning-box {
-      padding: 0.8rem 1rem;
-      background: #fff3e0;
-      border: 1px solid #ffe0b2;
-      border-radius: 4px;
-      margin-bottom: 0.6rem;
-    }
-    .warning-box p {
-      font-size: 0.75rem;
-      color: #e65100;
-      margin-bottom: 0.3rem;
-    }
-    .warning-box p:last-child { margin-bottom: 0; }
+    /* Feature cards */
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .feature-card { background: var(--card-dark); border: 1px solid var(--border-dark); border-radius: var(--radius-md); padding: 32px; transition: border-color 0.2s; }
+    .feature-card:hover { border-color: rgba(255,255,255,0.2); }
+    .feature-card__icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(43,127,195,0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+    .feature-card__icon svg { width: 20px; height: 20px; stroke: var(--accent-blue); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .feature-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--text-dimmed); line-height: 1.7; }
 
-    .safe-box {
-      padding: 0.8rem 1rem;
-      background: #e8f5e9;
-      border: 1px solid #c8e6c9;
-      border-radius: 4px;
-      margin-bottom: 0.6rem;
-    }
-    .safe-box p {
-      font-size: 0.75rem;
-      color: #2e7d32;
-      margin-bottom: 0.3rem;
-    }
-    .safe-box p:last-child { margin-bottom: 0; }
+    /* Privacy notices */
+    .notice { border-radius: var(--radius-md); padding: 24px 28px; margin-bottom: 16px; display: flex; gap: 16px; align-items: flex-start; }
+    .notice--green { background: rgba(26,158,143,0.1); border: 1px solid rgba(26,158,143,0.25); }
+    .notice--yellow { background: rgba(229,161,0,0.1); border: 1px solid rgba(229,161,0,0.25); }
+    .notice--blue { background: rgba(43,127,195,0.1); border: 1px solid rgba(43,127,195,0.25); }
+    .notice__icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .notice__title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+    .notice--green .notice__title { color: var(--accent-teal); }
+    .notice--yellow .notice__title { color: var(--accent-yellow); }
+    .notice--blue .notice__title { color: var(--accent-blue); }
+    .notice__text { font-size: 14px; color: var(--text-dimmed); line-height: 1.7; }
 
-    ul.plain {
-      list-style: none;
-      margin-bottom: 0.6rem;
-    }
-    ul.plain li {
-      margin-bottom: 0.2rem;
-      display: flex;
-      align-items: baseline;
-      gap: 0.5rem;
-      font-size: 0.75rem;
-    }
-    ul.plain li::before {
-      content: '';
-      display: inline-block;
-      width: 4px;
-      height: 4px;
-      background: #90a4ae;
-      border-radius: 1px;
-      flex-shrink: 0;
-      position: relative;
-      top: -1px;
-    }
+    /* Check list */
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .checklist li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .section--dark .checklist li { color: var(--text-dimmed); }
+    .checklist__check { color: var(--accent-lime); flex-shrink: 0; font-size: 16px; margin-top: 1px; }
 
-    a {
-      color: #546e7a;
-      text-decoration: none;
-      transition: color 0.12s ease;
-    }
-    a:hover { color: #0d7c66; }
+    /* Bullet list */
+    .bullet-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .bullet-list li { display: flex; gap: 10px; align-items: baseline; font-size: 14px; color: var(--text-dimmed); }
+    .bullet-list li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--text-dimmed); flex-shrink: 0; margin-top: 8px; }
 
-    .footer {
-      margin-top: 3rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid #cfd8dc;
-      font-size: 0.65rem;
-      color: #90a4ae;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .footer a { font-size: 0.65rem; color: #90a4ae; }
-    .footer a:hover { color: #0d7c66; }
+    /* Section headings */
+    .section-heading { text-align: center; margin-bottom: 56px; }
+    .section-heading h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
+    .section-heading p { font-size: 16px; color: var(--text-muted); max-width: 480px; margin: 0 auto; }
+    .section--dark .section-heading p, .section--darker .section-heading p { color: var(--text-dimmed); }
 
-    @media (max-width: 500px) {
-      body { padding: 1.5rem 1rem; }
-      .capability-grid { grid-template-columns: 1fr; }
+    /* CTA section */
+    .cta { text-align: center; }
+    .cta h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; margin-bottom: 16px; letter-spacing: -0.02em; }
+    .cta__sub { font-size: 16px; color: var(--text-dimmed); margin-bottom: 40px; }
+    .cta__terminal { background: rgba(255,255,255,0.06); border: 1px solid var(--border-dark); border-radius: var(--radius-md); padding: 24px 28px; max-width: 560px; margin: 0 auto; text-align: left; position: relative; cursor: pointer; transition: border-color 0.2s; }
+    .cta__terminal:hover { border-color: rgba(255,255,255,0.2); }
+    .cta__terminal .mono { padding-right: 40px; }
+    .cta__hint { font-size: 13px; color: var(--text-dimmed); margin-top: 20px; }
+    .cta__action { display: inline-block; margin-top: 32px; font-size: 13px; color: var(--accent-blue); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+    .cta__action:hover { border-color: var(--accent-blue); }
+
+    /* Footer */
+    .footer { display: flex; justify-content: space-between; align-items: center; padding: 40px 24px; max-width: 1100px; margin: 0 auto; font-size: 13px; color: var(--text-dimmed); border-top: 1px solid var(--border-dark); }
+    .footer a { color: var(--text-dimmed); text-decoration: none; transition: color 0.2s; }
+    .footer a:hover { color: var(--text-light); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .section { padding: 72px 0; }
+      .steps { grid-template-columns: 1fr; gap: 40px; }
+      .examples-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .nav__links { display: none; }
+      .nav__toggle { display: block; }
+      .nav__mobile-menu.is-open { display: flex; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-dark); border-top: 1px solid var(--border-dark); padding: 16px 24px 24px; gap: 16px; z-index: 50; }
+      .nav__mobile-menu .nav__link { font-size: 16px; }
+      .nav__mobile-menu .nav__cta { display: inline-block; text-align: center; margin-top: 8px; }
+      .nav { position: relative; }
+      .hero__content { padding: 0 20px 48px; }
+      .hero h1 { font-size: 30px; }
+      .hero__terminal-cmd { font-size: 11px; word-break: break-all; }
+      .hero__proof { gap: 16px; }
     }
   </style>
 </head>
 <body>
-  <main>
-    <div class="header">
-      <h1>medical protocol <span style="color: #90a4ae;">— for doctors</span></h1>
-      <p class="subtitle">describe what you need in your own words. the system builds it for you.</p>
+
+  <!-- Nav -->
+  <header class="section--dark" style="padding-bottom:0">
+    <nav class="nav">
+      <a href="/" class="nav__brand">Medical Protocol</a>
+      <div class="nav__links">
+        <a href="#how" class="nav__link">How it works</a>
+        <a href="#examples" class="nav__link">Examples</a>
+        <a href="#privacy" class="nav__link">Privacy</a>
+        <a href="#start" class="nav__cta">Get started</a>
+      </div>
+      <button class="nav__toggle" aria-label="Menu" onclick="document.querySelector('.nav__mobile-menu').classList.toggle('is-open')">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      </button>
+      <div class="nav__mobile-menu">
+        <a href="#how" class="nav__link" onclick="this.parentElement.classList.remove('is-open')">How it works</a>
+        <a href="#examples" class="nav__link" onclick="this.parentElement.classList.remove('is-open')">Examples</a>
+        <a href="#privacy" class="nav__link" onclick="this.parentElement.classList.remove('is-open')">Privacy</a>
+        <a href="#start" class="nav__cta" onclick="this.parentElement.classList.remove('is-open')">Get started</a>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero__bg">
+        <img src="/hero.jpg" alt="Doctor presenting clinical dashboard on laptop" loading="eager">
+      </div>
+      <div class="hero__content">
+        <span class="hero__badge">
+          <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          For Doctors
+        </span>
+        <h1>Build <em>clinical tools</em> by describing what you need</h1>
+        <p class="hero__sub">
+          Vital signs monitors, patient records, clinical dashboards &mdash; fully functional and ready for real data. No coding, no IT team.
+        </p>
+        <div class="hero__cta-group">
+          <div class="hero__terminal" onclick="copyCommand(this)">
+            <div class="hero__terminal-top">
+              <div class="hero__terminal-dots"><span class="hero__terminal-dot"></span><span class="hero__terminal-dot"></span><span class="hero__terminal-dot"></span></div>
+              <span class="hero__terminal-label mono">Claude Code</span>
+            </div>
+            <div class="hero__terminal-line">
+              <span class="hero__terminal-prompt mono">&gt;</span>
+              <p class="hero__terminal-cmd mono">Fetch and follow https://medical-protocol-workflows.vercel.app/install</p>
+            </div>
+            <button class="copy-btn" aria-label="Copy command">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+          </div>
+          <p class="hero__hint">Paste this into Claude Code. It handles the entire setup automatically.</p>
+        </div>
+        <div class="hero__proof">
+          <div class="hero__proof-item">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Runs locally
+          </div>
+          <div class="hero__proof-item">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            No coding needed
+          </div>
+          <div class="hero__proof-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Ready in minutes
+          </div>
+        </div>
+      </div>
     </div>
+  </header>
 
-    <section>
-      <h2>what is this?</h2>
-      <p>This is a tool that lets you create clinical interfaces — vital signs monitors, patient record systems, and dashboards — just by describing what you need in plain language.</p>
-      <p>You don't need to know anything about programming. You speak in clinical terms, and the system handles everything else.</p>
-    </section>
+  <!-- How it works -->
+  <section id="how" class="section section--darker">
+    <div class="container">
+      <div class="section-heading">
+        <h2>How it works</h2>
+        <p>Three steps, no technical knowledge needed.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step__num">01</div>
+          <h3>Open Claude Code</h3>
+          <p>Paste the install command. Claude sets up everything your computer needs automatically.</p>
+        </div>
+        <div class="step">
+          <div class="step__num">02</div>
+          <h3>Describe what you need</h3>
+          <p>Use your own words. &ldquo;I need a vital signs monitor&rdquo; or &ldquo;Build me a patient records system.&rdquo;</p>
+        </div>
+        <div class="step">
+          <div class="step__num">03</div>
+          <h3>Start using it</h3>
+          <p>Your interface is ready to use with real clinical data. Everything runs locally on your computer.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2>how to get started</h2>
-      <ol class="step-list">
-        <li>
-          <div>
-            Open Claude Code on your computer and tell it:
-            <div class="example-box" style="margin-top: 0.4rem;">
-              <p><code>Fetch and follow https://medical-protocol-workflows.vercel.app/install</code></p>
-            </div>
-            <p style="font-size: 0.72rem; color: #78909c; margin-bottom: 0;">Claude will install everything your computer needs and set up your project automatically. If anything is missing, it will handle it or walk you through it in plain language.</p>
+  <!-- Examples -->
+  <section id="examples" class="section section--muted">
+    <div class="container">
+      <div class="section-heading">
+        <h2>Just say what you need</h2>
+        <p>Talk to Claude like you'd talk to a colleague.</p>
+      </div>
+      <div class="examples-grid">
+        <div class="example-card">
+          <p class="example-card__label">Vital Signs</p>
+          <p class="example-card__text">&ldquo;I need a vital signs monitor for my clinic&rdquo;</p>
+          <p class="example-card__text" style="margin-top:6px">&ldquo;Set up blood pressure and heart rate tracking&rdquo;</p>
+        </div>
+        <div class="example-card">
+          <p class="example-card__label">Patient Records</p>
+          <p class="example-card__text">&ldquo;I need a system to manage patient records&rdquo;</p>
+          <p class="example-card__text" style="margin-top:6px">&ldquo;Build me a patient file with medical history&rdquo;</p>
+        </div>
+        <div class="example-card">
+          <p class="example-card__label">Dashboard</p>
+          <p class="example-card__text">&ldquo;Give me a clinical dashboard with vitals and patient info&rdquo;</p>
+          <p class="example-card__text" style="margin-top:6px">&ldquo;I want an overview of everything for one patient&rdquo;</p>
+        </div>
+        <div class="example-card">
+          <p class="example-card__label">Customize</p>
+          <p class="example-card__text">&ldquo;Remove respiratory rate from the monitor&rdquo;</p>
+          <p class="example-card__text" style="margin-top:6px">&ldquo;Add an allergy field to the patient details&rdquo;</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What gets built -->
+  <section class="section section--dark">
+    <div class="container">
+      <div class="section-heading">
+        <h2>What gets built</h2>
+        <p>Real clinical tools, ready for real data.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
-        </li>
-        <li>
-          <div>
-            Once setup is done, describe what you need:
-            <div class="example-box" style="margin-top: 0.4rem;">
-              <p><code>"I need a vital signs monitor for my clinic"</code></p>
-            </div>
+          <h3>Vital Signs Monitor</h3>
+          <p>Blood pressure, heart rate, SpO2, temperature, and respiratory rate with clinical alerts.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           </div>
-        </li>
-      </ol>
-      <p style="font-size: 0.72rem; color: #78909c;">That's it — two steps. No IT team, no technical knowledge required.</p>
-    </section>
-
-    <section>
-      <h2>what you can say</h2>
-      <p>Just describe what you need as you would to a colleague:</p>
-      <div class="example-box">
-        <p class="example-label">vital signs</p>
-        <p><code>"I need a vital signs monitor for my clinic"</code></p>
-        <p><code>"Set up blood pressure and heart rate tracking"</code></p>
-      </div>
-      <div class="example-box">
-        <p class="example-label">patient records</p>
-        <p><code>"I need a system to manage patient records and clinical notes"</code></p>
-        <p><code>"Build me a patient file with medical history and evolutions"</code></p>
-      </div>
-      <div class="example-box">
-        <p class="example-label">dashboard</p>
-        <p><code>"Give me a clinical dashboard with vitals and patient info"</code></p>
-        <p><code>"I want an overview of everything for one patient"</code></p>
-      </div>
-      <div class="example-box">
-        <p class="example-label">changes</p>
-        <p><code>"Remove respiratory rate from the monitor"</code></p>
-        <p><code>"Add an allergy field to the patient details"</code></p>
-      </div>
-    </section>
-
-    <section>
-      <h2>what gets built</h2>
-      <div class="capability-grid">
-        <div class="capability">
-          <p class="capability-name">vital signs monitor</p>
-          <p class="capability-desc">blood pressure, heart rate, SpO2, temperature, respiratory rate with clinical alerts</p>
+          <h3>Patient Records</h3>
+          <p>Demographics, conditions, allergies, clinical notes, and previous evolutions.</p>
         </div>
-        <div class="capability">
-          <p class="capability-name">patient records</p>
-          <p class="capability-desc">demographics, conditions, allergies, clinical notes, and previous evolutions</p>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>Clinical Dashboard</h3>
+          <p>Combined view with vitals and patient information side by side.</p>
         </div>
-        <div class="capability">
-          <p class="capability-name">clinical dashboard</p>
-          <p class="capability-desc">combined view with vitals and patient information side by side</p>
-        </div>
-        <div class="capability">
-          <p class="capability-name">customizable</p>
-          <p class="capability-desc">add, remove, or rearrange anything by describing what you want changed</p>
+        <div class="feature-card">
+          <div class="feature-card__icon">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <h3>Fully Customizable</h3>
+          <p>Add, remove, or rearrange anything by describing what you want changed.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section>
-      <h2>patient privacy</h2>
-      <div class="safe-box">
-        <p>Everything runs locally on your computer. Patient data stays on your machine — nothing is sent to external servers.</p>
+  <!-- Privacy + What you don't need to worry about (combined) -->
+  <section id="privacy" class="section section--darker">
+    <div class="container--narrow">
+      <div class="section-heading">
+        <h2>Patient privacy</h2>
       </div>
 
-      <p>The interfaces you build are <strong>fully functional</strong> — you can enter and manage real clinical data. All data is stored locally in your browser.</p>
-
-      <div class="warning-box">
-        <p><strong>Do not paste real patient data into the chat with Claude.</strong></p>
-        <p>The conversation is processed by AI servers. Use the interfaces Claude builds for you to enter patient data — not the chat itself. Claude will warn you if you're about to do something that could expose patient information.</p>
+      <div class="notice notice--green">
+        <div class="notice__icon">&#x2713;</div>
+        <div>
+          <p class="notice__title">Everything runs on your computer</p>
+          <p class="notice__text">Patient data stays on your machine. Nothing is sent to external servers. The interfaces are fully functional and ready for real clinical data.</p>
+        </div>
       </div>
 
-      <ul class="plain">
-        <li>Claude will alert you if any action could create a privacy risk</li>
-        <li>The system does not connect to any external database by default</li>
-        <li>No data is uploaded to any cloud service</li>
-        <li>If you want to connect to a real database or deploy to a network, consult your compliance team first</li>
+      <div class="notice notice--yellow">
+        <div class="notice__icon">&#x26A0;</div>
+        <div>
+          <p class="notice__title">Don't paste patient data into the chat</p>
+          <p class="notice__text">The conversation with Claude is processed by AI servers. Enter patient data directly into the interfaces Claude builds for you &mdash; that stays on your computer.</p>
+        </div>
+      </div>
+
+      <div class="notice notice--blue">
+        <div class="notice__icon">&#x1F6E1;</div>
+        <div>
+          <p class="notice__title">Claude watches out for you</p>
+          <p class="notice__text">If anything you ask could create a privacy risk &mdash; like connecting to an external service or exposing data &mdash; Claude will warn you before proceeding and explain the risk in plain language.</p>
+        </div>
+      </div>
+
+      <ul class="bullet-list" style="margin-top:32px">
+        <li>No external database connections by default</li>
+        <li>No data uploaded to any cloud service</li>
+        <li>To deploy on a network or connect to a database, consult your compliance team first</li>
       </ul>
-    </section>
 
-    <section>
-      <h2>what you don't need to worry about</h2>
-      <ul class="plain">
-        <li>You will never be asked about technical details — the system decides those for you</li>
-        <li>You won't see code, error messages, or terminal output unless you ask for it</li>
-        <li>If something isn't right, just describe what you'd like changed and it will be adjusted</li>
-        <li>The system uses established clinical standards (like FHIR) automatically</li>
-      </ul>
-    </section>
+      <!-- Merged: what you don't need to worry about -->
+      <div style="margin-top:72px">
+        <div class="section-heading">
+          <h2>What you don't need to worry about</h2>
+        </div>
+        <ul class="checklist" style="max-width:540px;margin:0 auto">
+          <li><span class="checklist__check" style="color:var(--accent-teal)">&#x2713;</span> You will never be asked about technical details &mdash; the system decides those for you</li>
+          <li><span class="checklist__check" style="color:var(--accent-teal)">&#x2713;</span> You won't see code, error messages, or terminal output unless you ask</li>
+          <li><span class="checklist__check" style="color:var(--accent-teal)">&#x2713;</span> If something isn't right, just describe what you'd like changed</li>
+          <li><span class="checklist__check" style="color:var(--accent-teal)">&#x2713;</span> The system uses established clinical standards automatically</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2>need help?</h2>
-      <p>If the system doesn't understand your request, try rephrasing it using clinical terms like "vital signs", "patient record", "clinical notes", or "dashboard".</p>
-      <p>If something goes wrong, just tell Claude what happened — it will figure out the problem and walk you through it.</p>
-    </section>
+  <!-- CTA -->
+  <section id="start" class="section section--dark">
+    <div class="container">
+      <div class="cta">
+        <h2>Start building in minutes</h2>
+        <p class="cta__sub">Open Claude Code and paste this command. That's all you need.</p>
+        <div class="cta__terminal" onclick="copyCommand(this)">
+          <p class="mono" style="font-size:14px;color:var(--accent-lime);padding-right:40px">Fetch and follow https://medical-protocol-workflows.vercel.app/install</p>
+          <button class="copy-btn" aria-label="Copy command">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+        </div>
+        <p class="cta__hint">If something goes wrong, just tell Claude &mdash; it will figure out the problem and walk you through it.</p>
+      </div>
+    </div>
+  </section>
 
+  <!-- Footer -->
+  <footer class="section--dark" style="padding-top:0">
     <div class="footer">
-      <a href="/">&larr; back to protocol</a>
-      <span>no engineering required</span>
+      <a href="/">&larr; Back to protocol</a>
+      <span>No engineering required</span>
     </div>
-  </main>
+  </footer>
+
+  <script>
+    function copyCommand(el) {
+      var cmd = 'Fetch and follow https://medical-protocol-workflows.vercel.app/install';
+      navigator.clipboard.writeText(cmd).then(function() {
+        var btn = el.querySelector('.copy-btn');
+        btn.classList.add('copy-btn--copied');
+        btn.querySelector('svg').innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+        setTimeout(function() {
+          btn.classList.remove('copy-btn--copied');
+          btn.querySelector('svg').innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>';
+        }, 2000);
+      });
+    }
+  </script>
+
 </body>
 </html>
