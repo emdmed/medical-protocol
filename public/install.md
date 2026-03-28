@@ -39,7 +39,7 @@ Check if the current directory already has a `.claude/protocol.md` file.
 - **If it doesn't exist**: create the directory and download the protocol:
   ```
   mkdir -p .claude
-  curl -fsSL https://medical-protocol-workflows.vercel.app/medical-protocol/protocol.md -o .claude/protocol.md
+  curl -fsSL https://medical-protocol.vercel.app/medical-protocol/protocol.md -o .claude/protocol.md
   ```
 
 ---

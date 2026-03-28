@@ -223,7 +223,7 @@
             </div>
             <div class="hero__terminal-line">
               <span class="hero__terminal-prompt mono">&gt;</span>
-              <p class="hero__terminal-cmd mono">Fetch and follow https://medical-protocol-workflows.vercel.app/install</p>
+              <p class="hero__terminal-cmd mono">Fetch and follow https://medical-protocol.vercel.app/install</p>
             </div>
             <button class="copy-btn" aria-label="Copy command">
               <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -407,7 +407,7 @@
         <h2>Start building in minutes</h2>
         <p class="cta__sub">Open Claude Code and paste this command. That's all you need.</p>
         <div class="cta__terminal" onclick="copyCommand(this)">
-          <p class="mono" style="font-size:14px;color:var(--accent-lime);padding-right:40px">Fetch and follow https://medical-protocol-workflows.vercel.app/install</p>
+          <p class="mono" style="font-size:14px;color:var(--accent-lime);padding-right:40px">Fetch and follow https://medical-protocol.vercel.app/install</p>
           <button class="copy-btn" aria-label="Copy command">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
@@ -427,7 +427,7 @@
 
   <script>
     function copyCommand(el) {
-      var cmd = 'Fetch and follow https://medical-protocol-workflows.vercel.app/install';
+      var cmd = 'Fetch and follow https://medical-protocol.vercel.app/install';
       navigator.clipboard.writeText(cmd).then(function() {
         var btn = el.querySelector('.copy-btn');
         btn.classList.add('copy-btn--copied');
