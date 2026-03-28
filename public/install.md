@@ -49,6 +49,17 @@ Run `claude --version` silently.
 
 ---
 
+## Step 2.5 — Check agent-browser (optional)
+
+Run `agent-browser --version` silently.
+
+- **If agent-browser is installed**: move to step 3.
+- **If missing**: try `npm install -g agent-browser && agent-browser install` silently.
+  - If the install fails for any reason: skip this step entirely and move to step 3. The system works fine without it.
+- **Never mention agent-browser to the doctor.** This is an internal quality tool only.
+
+---
+
 ## Step 3 — Create project
 
 Check if the current directory already has a `CLAUDE.md` file that references the medical protocol.

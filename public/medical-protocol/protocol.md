@@ -158,7 +158,7 @@ When a workflow instructs you to install a component:
 
 ## Quality Checklist
 
-> **This checklist is for Claude only.** Run it silently after every workflow build, before `npm run dev`. Never mention it to the doctor. Fix any issues you find without discussing the technical details.
+> **This checklist is for Claude only.** Run it silently after every workflow build. Items 1–4 run before `npm run dev`; item 5 (Browser QA) runs after the dev server is ready. Never mention it to the doctor. Fix any issues you find without discussing the technical details.
 
 ### 1. Theming & Branding (via tweakcn)
 
@@ -209,6 +209,25 @@ Apply these additional checks based on what was built:
 | Dashboard with multiple cards | Responsive grid (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`) |
 | Charts / graphs | Responsive container, readable on tablet |
 
+### 5. Browser QA (requires agent-browser)
+
+> **Skip this entire section** if `agent-browser --version` fails. The system works without it — this is an enhancement, not a requirement.
+
+Run the full browser QA workflow defined in `workflows/agent-qa.md`. It covers:
+
+- **Page load:** No console errors, accessibility tree populated
+- **Interactive elements:** Click-to-edit, form inputs, navigation all functional
+- **Responsive layout:** Correct rendering at 768px and 1280px viewports
+- **Clinical safety:** Dangerous values trigger alerts, validation rejects out-of-range input
+- **Empty states:** No blank screens, no "undefined" or "NaN" text visible
+- **Keyboard navigation:** Tab, Enter, and Escape work on interactive elements
+
+**Rules:**
+- Auto-fix any issues you find silently (e.g., add `overflow-visible`, fix responsive classes)
+- If an issue can't be auto-fixed, translate it to clinical language for the doctor (e.g., "The edit popup gets cut off" not "overflow-hidden clips the absolutely-positioned element")
+- After 2 failed fix attempts on the same issue, or 3 total browser crashes: skip browser QA and proceed
+- Never mention agent-browser, snapshots, accessibility trees, or any browser testing terminology to the doctor
+
 ---
 
 ## Patient Privacy & Data Protection
@@ -255,8 +274,11 @@ If the doctor asks about deploying to a network, connecting to a clinic database
 
 ## After Any Workflow Completes
 
-1. **Run the Quality Checklist** (see Quality Checklist section) — silently review and fix any issues
+1. **Run static quality checks** (Quality Checklist items 1–4) — silently review and fix any issues
 2. Run `npm run dev` in the background
-3. Tell the doctor: "Your [description] is ready. You can view it at http://localhost:3000"
-4. **On first workflow completion only**, mention: "All patient data you enter stays on your computer. I'll let you know if anything could affect privacy." Do not repeat this on subsequent workflows.
-5. Ask if they'd like to adjust anything — in clinical terms only
+3. **Wait for the dev server** to be ready: `npx wait-on http://localhost:3000 -t 30000`
+   - If `wait-on` times out: skip browser QA, proceed to step 5
+4. **Run Browser QA** (Quality Checklist item 5) — only if agent-browser is installed and the server is ready. Follow `workflows/agent-qa.md`. Fix issues silently.
+5. Tell the doctor: "Your [description] is ready. You can view it at http://localhost:3000"
+6. **On first workflow completion only**, mention: "All patient data you enter stays on your computer. I'll let you know if anything could affect privacy." Do not repeat this on subsequent workflows.
+7. Ask if they'd like to adjust anything — in clinical terms only
