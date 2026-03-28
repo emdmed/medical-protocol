@@ -217,26 +217,11 @@
 
     <section>
       <h2>how to get started</h2>
-      <ol class="step-list">
-        <li>Ask your IT team to install <a href="https://nodejs.org/">Node.js</a> (v18 or later) and <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a> on your computer</li>
-        <li>Open a terminal and create a folder for your clinic project:
-          <div class="example-box" style="margin-top: 0.4rem;">
-            <p><code>mkdir my-clinic && cd my-clinic</code></p>
-          </div>
-        </li>
-        <li>Download the protocol file (one-time setup):
-          <div class="example-box" style="margin-top: 0.4rem;">
-            <p><code>mkdir -p .claude && curl -fsSL https://medical-protocol-workflows.vercel.app/medical-protocol/protocol.md -o .claude/protocol.md</code></p>
-          </div>
-        </li>
-        <li>Launch Claude Code:
-          <div class="example-box" style="margin-top: 0.4rem;">
-            <p><code>claude</code></p>
-          </div>
-        </li>
-        <li>Tell Claude what you need, in your own words</li>
-      </ol>
-      <p style="font-size: 0.7rem; color: #90a4ae; margin-top: 0.4rem;">Your IT team can also follow the <a href="/install">install guide</a> to set this up for you.</p>
+      <p>Open a terminal on your computer and paste this single command. It installs everything you need automatically:</p>
+      <div class="example-box" style="margin-top: 0.4rem;">
+        <p><code>curl -fsSL https://medical-protocol-workflows.vercel.app/install | bash</code></p>
+      </div>
+      <p>Once it finishes, type <code>claude</code> and describe what you need. That's it — no IT team required.</p>
     </section>
 
     <section>
@@ -319,7 +304,7 @@
     <section>
       <h2>need help?</h2>
       <p>If the system doesn't understand your request, try rephrasing it using clinical terms like "vital signs", "patient record", "clinical notes", or "dashboard".</p>
-      <p>For technical setup, ask your institution's IT team to install Claude Code and configure the protocol file.</p>
+      <p>If you run into trouble during installation, run the <a href="/install">install command</a> again — it will pick up where it left off.</p>
     </section>
 
     <div class="footer">
