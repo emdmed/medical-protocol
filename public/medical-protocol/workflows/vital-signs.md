@@ -63,7 +63,7 @@ Create the page that displays the vital signs monitor:
 
 1. **Create `app/vital-signs/page.tsx`**:
    ```tsx
-   import { VitalSigns } from "@/components/vital-signs/vital-signs"
+   import VitalSigns from "@/components/vital-signs/vital-signs"
 
    export default function VitalSignsPage() {
      return (
