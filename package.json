@@ -1,11 +1,12 @@
 {
   "name": "medical-protocol-workflows",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "description": "CDN-hosted medical protocol workflows and components for Claude Code",
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "version:bump": "bash scripts/bump-version.sh"
   },
   "devDependencies": {
     "typescript": "^6.0.2",

@@ -17,8 +17,18 @@
       "assistantRoute": "string — API route for analysis"
     },
     "dataFlow": "bidirectional — receives data, reports changes via onData",
-    "shadcn": ["card", "button", "input", "select", "badge", "label", "textarea"],
-    "externalComponents": ["@/hooks/use-mobile"],
+    "shadcn": [
+      "card",
+      "button",
+      "input",
+      "select",
+      "badge",
+      "label",
+      "textarea"
+    ],
+    "externalComponents": [
+      "@/hooks/use-mobile"
+    ],
     "files": [
       "vital-signs.tsx",
       "components/edit-section.tsx",
@@ -51,7 +61,12 @@
       "onData": "(result: Result | null) => void — required, fires on every input change and on mount with null"
     },
     "dataFlow": "output only — reports Result via onData",
-    "shadcn": ["card", "input", "label", "badge"],
+    "shadcn": [
+      "card",
+      "input",
+      "label",
+      "badge"
+    ],
     "files": [
       "acid-base.tsx",
       "analyze.ts",
@@ -67,8 +82,15 @@
     "target": "components/bmi",
     "props": "none — self-contained",
     "dataFlow": "none — internal state only",
-    "shadcn": ["card", "input", "button", "badge"],
-    "files": ["bmi-calculator.tsx"]
+    "shadcn": [
+      "card",
+      "input",
+      "button",
+      "badge"
+    ],
+    "files": [
+      "bmi-calculator.tsx"
+    ]
   },
   "telemonitoring": {
     "version": "0.3.0",
@@ -96,8 +118,16 @@
       "data": "{ weight?, intakeOral?, intakeIv?, diuresis?, defecations? } — all number | string"
     },
     "dataFlow": "input only — no callbacks, display + edit",
-    "shadcn": ["card", "input", "button", "badge", "label"],
-    "files": ["water-balance.tsx"]
+    "shadcn": [
+      "card",
+      "input",
+      "button",
+      "badge",
+      "label"
+    ],
+    "files": [
+      "water-balance.tsx"
+    ]
   },
   "timeline": {
     "version": "0.3.0",
@@ -109,8 +139,14 @@
       "maxHeight": "string (default '32rem')"
     },
     "dataFlow": "input only — read-only display",
-    "shadcn": ["button", "popover", "badge"],
-    "files": ["timeline.tsx"]
+    "shadcn": [
+      "button",
+      "popover",
+      "badge"
+    ],
+    "files": [
+      "timeline.tsx"
+    ]
   },
   "ehr": {
     "version": "0.3.0",
@@ -119,7 +155,21 @@
     "target": "app/ehr",
     "props": "none — self-contained root app",
     "dataFlow": "none — orchestrates VitalSigns, WaterBalance, AcidBase, BMI internally",
-    "shadcn": ["card", "button", "input", "textarea", "select", "tabs", "separator", "scroll-area", "sheet", "sidebar", "skeleton", "alert-dialog", "badge"],
+    "shadcn": [
+      "card",
+      "button",
+      "input",
+      "textarea",
+      "select",
+      "tabs",
+      "separator",
+      "scroll-area",
+      "sheet",
+      "sidebar",
+      "skeleton",
+      "alert-dialog",
+      "badge"
+    ],
     "externalComponents": [
       "@/components/water-balance/water-balance",
       "@/components/acid-base/acid-base",
