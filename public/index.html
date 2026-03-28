@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>medical protocol</title>
+  <meta name="description" content="Medical workflows and components served as plain text for AI agents. Doctors describe what they need — Claude builds it.">
+  <meta property="og:title" content="medical protocol">
+  <meta property="og:description" content="Medical workflows and components served as plain text for AI agents. Doctors describe what they need — Claude builds it.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="medical protocol">
+  <meta name="twitter:description" content="Medical workflows and components for AI agents.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+      background: #f8fafb;
+      color: #37474f;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      line-height: 1.6;
+    }
+    main { max-width: 600px; width: 100%; }
+
+    .header {
+      margin-bottom: 3rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #cfd8dc;
+    }
+    h1 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1a2a33;
+      letter-spacing: 0.04em;
+    }
+    h1 span { color: #90a4ae; }
+    .subtitle {
+      font-size: 0.75rem;
+      color: #78909c;
+      margin-top: 0.3rem;
+    }
+
+    section { margin-bottom: 1.8rem; }
+    h2 {
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #78909c;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid #cfd8dc;
+    }
+    ul { list-style: none; }
+    li {
+      margin-bottom: 0.15rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    li::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      background: #90a4ae;
+      border-radius: 1px;
+      flex-shrink: 0;
+      position: relative;
+      top: -1px;
+    }
+    a {
+      color: #546e7a;
+      text-decoration: none;
+      font-size: 0.8rem;
+      transition: color 0.12s ease;
+    }
+    a:hover { color: #0d7c66; }
+    .desc {
+      color: #90a4ae;
+      font-size: 0.72rem;
+    }
+    .desc::before {
+      content: '—';
+      margin-right: 0.3rem;
+    }
+
+    .usage {
+      margin-top: 2.5rem;
+      padding: 1rem 1.2rem;
+      background: #eceff1;
+      border: 1px solid #cfd8dc;
+      border-radius: 4px;
+    }
+    .usage h2 {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0.5rem;
+    }
+    .usage .prompt {
+      font-size: 0.75rem;
+      color: #546e7a;
+      margin-bottom: 0.4rem;
+    }
+    .usage .prompt:last-child {
+      margin-bottom: 0;
+    }
+    .usage .prompt span {
+      color: #90a4ae;
+      user-select: none;
+    }
+    .usage code {
+      font-size: 0.75rem;
+      color: #1a2a33;
+    }
+    .usage .prompt-label {
+      font-size: 0.6rem;
+      color: #90a4ae;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.6rem;
+      margin-bottom: 0.2rem;
+    }
+    .usage .prompt-label:first-of-type {
+      margin-top: 0;
+    }
+
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #cfd8dc;
+      font-size: 0.65rem;
+      color: #90a4ae;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer a {
+      font-size: 0.65rem;
+      color: #90a4ae;
+    }
+    .footer a:hover { color: #0d7c66; }
+
+    @media (max-width: 400px) {
+      body { padding: 1.5rem 1rem; }
+      li { flex-wrap: wrap; }
+      .desc { width: 100%; padding-left: 0.9rem; }
+      .usage code { word-break: break-all; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="header">
+      <h1>medical protocol</h1>
+      <p class="subtitle">clinical workflows and components served as plain text for ai agents</p>
+    </div>
+
+    <section>
+      <h2>protocol</h2>
+      <ul>
+        <li>
+          <a href="/medical-protocol/protocol.md">protocol.md</a>
+          <span class="desc">core medical protocol — copy to your .claude/ directory</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/manifest.json">manifest.json</a>
+          <span class="desc">component registry with file lists and dependencies</span>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>workflows</h2>
+      <ul>
+        <li>
+          <a href="/medical-protocol/workflows/vital-signs.md">vital-signs.md</a>
+          <span class="desc">blood pressure, heart rate, SpO2, temperature, respiratory rate</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/workflows/ehr.md">ehr.md</a>
+          <span class="desc">electronic health records with patient management and clinical notes</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/workflows/dashboard.md">dashboard.md</a>
+          <span class="desc">combined clinical dashboard with vitals and records</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/workflows/customize.md">customize.md</a>
+          <span class="desc">modify existing interfaces in clinical language</span>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>components / vital signs</h2>
+      <ul>
+        <li>
+          <a href="/medical-protocol/components/vital-signs/vital-signs.tsx">vital-signs.tsx</a>
+          <span class="desc">main vital signs monitor component</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/vital-signs/signs/blood-pressure.tsx">blood-pressure.tsx</a>
+          <span class="desc">systolic/diastolic blood pressure</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/vital-signs/signs/heart-rate.tsx">heart-rate.tsx</a>
+          <span class="desc">pulse rate monitor</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/vital-signs/signs/blood-oxygen.tsx">blood-oxygen.tsx</a>
+          <span class="desc">SpO2 saturation</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/vital-signs/signs/temperature.tsx">temperature.tsx</a>
+          <span class="desc">body temperature</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/vital-signs/signs/respiratory-rate.tsx">respiratory-rate.tsx</a>
+          <span class="desc">breaths per minute</span>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>components / ehr</h2>
+      <ul>
+        <li>
+          <a href="/medical-protocol/components/ehr/ehr.tsx">ehr.tsx</a>
+          <span class="desc">main electronic health records component</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/ehr/page.tsx">page.tsx</a>
+          <span class="desc">ehr page entry point</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/ehr/patient-details/patient-details.tsx">patient-details.tsx</a>
+          <span class="desc">patient demographics and conditions</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/ehr/prev-evolutions/prev-evolutions.tsx">prev-evolutions.tsx</a>
+          <span class="desc">previous clinical notes and evolutions</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/ehr/sidebar/sidebar.tsx">sidebar.tsx</a>
+          <span class="desc">navigation sidebar</span>
+        </li>
+        <li>
+          <a href="/medical-protocol/components/ehr/references/references.tsx">references.tsx</a>
+          <span class="desc">clinical references and guidelines</span>
+        </li>
+      </ul>
+    </section>
+
+    <div class="usage">
+      <h2>quick start</h2>
+      <p class="prompt-label">add to your project's CLAUDE.md</p>
+      <p class="prompt"><code>Fetch and follow https://medical-protocol-workflows.vercel.app/medical-protocol/protocol.md</code></p>
+      <p class="prompt-label">then tell claude what you need</p>
+      <p class="prompt"><code>"I need a vital signs monitor for my clinic"</code></p>
+    </div>
+
+    <div class="footer">
+      <a href="/doctors">guide for doctors</a>
+      <span>plain text over https &middot; no auth &middot; no npm install</span>
+    </div>
+  </main>
+</body>
+</html>

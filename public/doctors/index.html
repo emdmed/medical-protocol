@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>medical protocol — for doctors</title>
+  <meta name="description" content="A plain-language guide for doctors using the medical protocol with Claude Code. No engineering knowledge required.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+      background: #f8fafb;
+      color: #37474f;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      line-height: 1.6;
+    }
+    main { max-width: 620px; width: 100%; }
+
+    .header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #cfd8dc;
+    }
+    h1 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1a2a33;
+      letter-spacing: 0.04em;
+    }
+    .subtitle {
+      font-size: 0.75rem;
+      color: #78909c;
+      margin-top: 0.3rem;
+    }
+
+    section { margin-bottom: 2.2rem; }
+    h2 {
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #78909c;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid #cfd8dc;
+    }
+
+    p {
+      font-size: 0.8rem;
+      margin-bottom: 0.6rem;
+      color: #37474f;
+    }
+
+    .step-list {
+      list-style: none;
+      counter-reset: steps;
+    }
+    .step-list li {
+      counter-increment: steps;
+      margin-bottom: 0.8rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+    }
+    .step-list li::before {
+      content: counter(steps);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      background: #cfd8dc;
+      color: #37474f;
+      border-radius: 50%;
+      font-size: 0.6rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .example-box {
+      padding: 0.8rem 1rem;
+      background: #eceff1;
+      border: 1px solid #cfd8dc;
+      border-radius: 4px;
+      margin-bottom: 0.6rem;
+    }
+    .example-box p {
+      margin-bottom: 0.3rem;
+      font-size: 0.75rem;
+    }
+    .example-box p:last-child { margin-bottom: 0; }
+    .example-label {
+      font-size: 0.6rem;
+      color: #90a4ae;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+    }
+
+    .capability-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+    .capability {
+      padding: 0.7rem 0.8rem;
+      background: #eceff1;
+      border: 1px solid #cfd8dc;
+      border-radius: 4px;
+    }
+    .capability-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #1a2a33;
+      margin-bottom: 0.2rem;
+    }
+    .capability-desc {
+      font-size: 0.7rem;
+      color: #78909c;
+    }
+
+    .warning-box {
+      padding: 0.8rem 1rem;
+      background: #fff3e0;
+      border: 1px solid #ffe0b2;
+      border-radius: 4px;
+      margin-bottom: 0.6rem;
+    }
+    .warning-box p {
+      font-size: 0.75rem;
+      color: #e65100;
+      margin-bottom: 0.3rem;
+    }
+    .warning-box p:last-child { margin-bottom: 0; }
+
+    .safe-box {
+      padding: 0.8rem 1rem;
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      border-radius: 4px;
+      margin-bottom: 0.6rem;
+    }
+    .safe-box p {
+      font-size: 0.75rem;
+      color: #2e7d32;
+      margin-bottom: 0.3rem;
+    }
+    .safe-box p:last-child { margin-bottom: 0; }
+
+    ul.plain {
+      list-style: none;
+      margin-bottom: 0.6rem;
+    }
+    ul.plain li {
+      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+    }
+    ul.plain li::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      background: #90a4ae;
+      border-radius: 1px;
+      flex-shrink: 0;
+      position: relative;
+      top: -1px;
+    }
+
+    a {
+      color: #546e7a;
+      text-decoration: none;
+      transition: color 0.12s ease;
+    }
+    a:hover { color: #0d7c66; }
+
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #cfd8dc;
+      font-size: 0.65rem;
+      color: #90a4ae;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer a { font-size: 0.65rem; color: #90a4ae; }
+    .footer a:hover { color: #0d7c66; }
+
+    @media (max-width: 500px) {
+      body { padding: 1.5rem 1rem; }
+      .capability-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="header">
+      <h1>medical protocol <span style="color: #90a4ae;">— for doctors</span></h1>
+      <p class="subtitle">describe what you need in your own words. the system builds it for you.</p>
+    </div>
+
+    <section>
+      <h2>what is this?</h2>
+      <p>This is a tool that lets you create clinical interfaces — vital signs monitors, patient record systems, and dashboards — just by describing what you need in plain language.</p>
+      <p>You don't need to know anything about programming. You speak in clinical terms, and the system handles everything else.</p>
+    </section>
+
+    <section>
+      <h2>how to get started</h2>
+      <ol class="step-list">
+        <li>Open Claude Code on your computer (your IT team can help set this up)</li>
+        <li>Add the following line to your project's configuration file:
+          <div class="example-box" style="margin-top: 0.4rem;">
+            <p><code>Fetch and follow https://medical-protocol-workflows.vercel.app/medical-protocol/protocol.md</code></p>
+          </div>
+        </li>
+        <li>Tell Claude what you need, in your own words</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>what you can say</h2>
+      <p>Just describe what you need as you would to a colleague. Here are some examples:</p>
+      <div class="example-box">
+        <p class="example-label">vital signs</p>
+        <p><code>"I need a vital signs monitor for my clinic"</code></p>
+        <p><code>"Set up blood pressure and heart rate tracking"</code></p>
+      </div>
+      <div class="example-box">
+        <p class="example-label">patient records</p>
+        <p><code>"I need a system to manage patient records and clinical notes"</code></p>
+        <p><code>"Build me a patient file with medical history and evolutions"</code></p>
+      </div>
+      <div class="example-box">
+        <p class="example-label">dashboard</p>
+        <p><code>"Give me a clinical dashboard with vitals and patient info"</code></p>
+        <p><code>"I want an overview of everything for one patient"</code></p>
+      </div>
+      <div class="example-box">
+        <p class="example-label">changes</p>
+        <p><code>"Remove respiratory rate from the monitor"</code></p>
+        <p><code>"Add an allergy field to the patient details"</code></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>what gets built</h2>
+      <div class="capability-grid">
+        <div class="capability">
+          <p class="capability-name">vital signs monitor</p>
+          <p class="capability-desc">blood pressure, heart rate, SpO2, temperature, respiratory rate with clinical alerts</p>
+        </div>
+        <div class="capability">
+          <p class="capability-name">patient records</p>
+          <p class="capability-desc">demographics, conditions, allergies, clinical notes, and previous evolutions</p>
+        </div>
+        <div class="capability">
+          <p class="capability-name">clinical dashboard</p>
+          <p class="capability-desc">combined view with vitals and patient information side by side</p>
+        </div>
+        <div class="capability">
+          <p class="capability-name">customizable</p>
+          <p class="capability-desc">add, remove, or rearrange anything by describing what you want changed</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>patient privacy</h2>
+      <div class="safe-box">
+        <p>Everything runs locally on your computer. No patient data is sent to any external server.</p>
+      </div>
+      <p>All patient information shown in the system is <strong>fictional sample data</strong> for demonstration purposes.</p>
+
+      <div class="warning-box">
+        <p><strong>Do not paste real patient names, IDs, or medical details into the chat.</strong></p>
+        <p>The conversation with Claude is processed by AI servers and is not a secure clinical system. Always use anonymized or fictional data when communicating with the assistant.</p>
+      </div>
+
+      <ul class="plain">
+        <li>The system does not connect to any external database by default</li>
+        <li>No data is uploaded to any cloud service or AI provider</li>
+        <li>If you want to connect to a real patient database, involve your IT and compliance teams first</li>
+        <li>This tool builds a <strong>prototype</strong> — using it with real patients requires a security review by qualified professionals</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>what you don't need to worry about</h2>
+      <ul class="plain">
+        <li>You will never be asked about technical details — the system decides those for you</li>
+        <li>You won't see code, error messages, or terminal output unless you ask for it</li>
+        <li>If something isn't right, just describe what you'd like changed and it will be adjusted</li>
+        <li>The system uses established clinical standards (like FHIR) automatically</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>need help?</h2>
+      <p>If the system doesn't understand your request, try rephrasing it using clinical terms like "vital signs", "patient record", "clinical notes", or "dashboard".</p>
+      <p>For technical setup, ask your institution's IT team to install Claude Code and configure the protocol file.</p>
+    </section>
+
+    <div class="footer">
+      <a href="/">&larr; back to protocol</a>
+      <span>no engineering required</span>
+    </div>
+  </main>
+</body>
+</html>

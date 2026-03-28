@@ -1,0 +1,6 @@
+{
+  "name": "medical-protocol-workflows",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CDN-hosted medical protocol workflows and components for Claude Code"
+}

@@ -1,0 +1,43 @@
+{
+  "vital-signs": {
+    "description": "Blood pressure, heart rate, SpO2, temperature, respiratory rate monitor",
+    "target": "components/vital-signs",
+    "shadcn": ["card", "button", "input", "select", "badge", "label", "textarea"],
+    "files": [
+      "vital-signs.tsx",
+      "components/edit-section.tsx",
+      "components/vital-signs-alert.tsx",
+      "components/vital-signs-fhir.tsx",
+      "hooks/useAnalyze.tsx",
+      "hooks/useClickOutside.tsx",
+      "hooks/useVitalSigns.tsx",
+      "signs/blood-oxygen.tsx",
+      "signs/blood-pressure.tsx",
+      "signs/heart-rate.tsx",
+      "signs/respiratory-rate.tsx",
+      "signs/temperature.tsx",
+      "types/vital-signs.ts",
+      "validations/blood-oxygen-validations.tsx",
+      "validations/blood-pressure-validations.tsx",
+      "validations/heart-rate-validations.tsx",
+      "validations/respiratory-rate-validations.tsx",
+      "validations/temperature-validations.tsx"
+    ]
+  },
+  "ehr": {
+    "description": "Electronic Health Records with patient management, clinical notes, sidebar",
+    "target": "app/ehr",
+    "shadcn": ["card", "button", "input", "textarea", "select", "tabs", "separator", "scroll-area", "sheet", "sidebar", "skeleton"],
+    "files": [
+      "ehr.tsx",
+      "page.tsx",
+      "clock/clock.tsx",
+      "patient-details/patient-details.tsx",
+      "prev-evolutions/prev-evolutions.tsx",
+      "references/references.tsx",
+      "sidebar/sidebar.tsx",
+      "utils/defaultRecords.ts",
+      "utils/generateHighlightedHTML.ts"
+    ]
+  }
+}
