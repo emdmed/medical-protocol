@@ -17,6 +17,27 @@
       "assistantRoute": "string — API route for analysis"
     },
     "dataFlow": "bidirectional — receives data, reports changes via onData",
+    "popups": {
+      "editSection": {
+        "positioning": "absolute bottom-10",
+        "direction": "above each vital sign input",
+        "trigger": "click on a vital sign value when editable=true",
+        "content": "save/delete buttons for the edited value"
+      },
+      "vitalSignsAlert": {
+        "positioning": "absolute bottom-[-22px]",
+        "direction": "below each vital sign input",
+        "trigger": "automatic when value is out of normal range",
+        "content": "red warning badge with alert text"
+      },
+      "assistantAnalysis": {
+        "positioning": "absolute top-12 z-50",
+        "direction": "below the vitals card",
+        "trigger": "click AI analysis button (assistant=true)",
+        "content": "AI-generated analysis card"
+      },
+      "note": "All popups use absolute positioning. Any parent Card wrapping this component MUST use overflow-visible to prevent clipping."
+    },
     "shadcn": [
       "card",
       "button",
@@ -61,6 +82,15 @@
       "onData": "(result: Result | null) => void — required, fires on every input change and on mount with null"
     },
     "dataFlow": "output only — reports Result via onData",
+    "popups": {
+      "resultPopup": {
+        "positioning": "absolute bottom-15 left-0",
+        "direction": "above the input fields",
+        "trigger": "automatic when valid analysis results are available",
+        "content": "badges showing disorders, compensation, expected values, anion gap"
+      },
+      "note": "Popup uses absolute positioning. Any parent Card wrapping this component MUST use overflow-visible to prevent clipping."
+    },
     "shadcn": [
       "card",
       "input",
@@ -139,6 +169,15 @@
       "maxHeight": "string (default '32rem')"
     },
     "dataFlow": "input only — read-only display",
+    "popups": {
+      "timelinePopover": {
+        "positioning": "shadcn Popover — side='right' align='start'",
+        "direction": "right of each timeline date button",
+        "trigger": "click on a timeline date entry",
+        "content": "clinical event details (w-80 popover)"
+      },
+      "note": "Uses shadcn Popover (portal-based, z-50). No overflow-visible needed on parent."
+    },
     "shadcn": [
       "button",
       "popover",
@@ -155,6 +194,30 @@
     "target": "app/ehr",
     "props": "none — self-contained root app",
     "dataFlow": "none — orchestrates VitalSigns, WaterBalance, AcidBase, BMI internally",
+    "popups": {
+      "loadingOverlay": {
+        "positioning": "absolute inset-0 z-10 backdrop-blur-sm",
+        "direction": "full-screen overlay covering the form",
+        "trigger": "while saving/analyzing a clinical note",
+        "content": "spinner with 'Guardando nota médica...' message"
+      },
+      "alertDialog": {
+        "positioning": "shadcn AlertDialog (portal-based, centered modal)",
+        "trigger": "click FilePlus button to create new evolution",
+        "content": "confirmation dialog with cancel/accept"
+      },
+      "prevEvolutionsDrawer": {
+        "positioning": "shadcn Drawer (portal-based, slides from bottom)",
+        "trigger": "click FileClock button",
+        "content": "previous medical records list (max-h-[85vh])"
+      },
+      "toolSelect": {
+        "positioning": "shadcn Select (portal-based dropdown)",
+        "trigger": "click 'Agregar' tool selector",
+        "content": "dropdown with Balance hídrico, EAB, BMI options"
+      },
+      "note": "All popups use shadcn portal-based components (z-50). No overflow-visible needed."
+    },
     "shadcn": [
       "card",
       "button",

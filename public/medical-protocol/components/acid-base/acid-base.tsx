@@ -16,6 +16,9 @@
  *   onData(result) reports to parent.
  *
  * @inputs  pH*, pCO2*, HCO3* (required for analysis), Na, Cl, Albumin (for anion gap)
+ *
+ * @note Add `overflow-visible` to any parent Card wrapping this component
+ *       so that the result popup (absolute bottom-15) is not clipped.
  */
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
