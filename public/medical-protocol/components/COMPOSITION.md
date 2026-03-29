@@ -1,10 +1,28 @@
-# Component Composition Patterns
+# Building Block Toolkit
 
-How to wire medical protocol components together. For individual component props and types, read the JSDoc header in each component file, or see `manifest.json` for a quick summary.
+Each component below is a self-contained **block** — a focused clinical tool that works on its own or wired together with others. Think of them as ingredients: pick the ones you need, combine them into a dashboard, embed them inside a note editor, or use one standalone.
+
+For individual block props and types, read the JSDoc header in each component file, or see `manifest.json` for a quick summary.
 
 ---
 
-## Dashboard: Multiple calculators in a grid
+## Block Catalog
+
+| Block | Category | What it does |
+|-------|----------|-------------|
+| **vital-signs** | Monitoring | Editable BP, HR, RR, Temp, SpO2/FiO2 with alerts and AI analysis |
+| **acid-base** | Calculator | ABG analyzer — disorder detection, compensation, anion gap |
+| **bmi** | Calculator | BMI calculator with imperial/metric toggle |
+| **water-balance** | Calculator | Fluid intake/output tracker with insensible loss |
+| **telemonitoring** | Monitoring | Real-time pulse oximetry animation (BPM + SpO2) |
+| **timeline** | Display | Scrollable clinical timeline with event popovers |
+| **clinical-notes** | Documentation | Encounter note editor with highlighting, tools, and local storage |
+
+---
+
+## Recipes
+
+### Dashboard: Multiple blocks in a grid
 
 ```tsx
 import VitalSigns from "@/components/vital-signs/vital-signs";
@@ -29,7 +47,7 @@ function Dashboard() {
 }
 ```
 
-## Read-only vitals (no editing, no border)
+### Read-only vitals (no editing, no border)
 
 ```tsx
 <VitalSigns
@@ -46,7 +64,7 @@ function Dashboard() {
 />
 ```
 
-## Vitals feeding real-time PulseOximetry
+### Vitals feeding real-time PulseOximetry
 
 ```tsx
 import VitalSigns from "@/components/vital-signs/vital-signs";
@@ -68,7 +86,7 @@ function MonitoringView() {
 }
 ```
 
-## Timeline alongside vitals
+### Timeline alongside vitals
 
 ```tsx
 import Timeline from "@/components/timeline/timeline";
@@ -89,7 +107,7 @@ function PatientHistory({ events, currentVitals }: {
 }
 ```
 
-## Collecting data from multiple components into one submission
+### Collecting data from multiple blocks into one submission
 
 ```tsx
 import VitalSigns from "@/components/vital-signs/vital-signs";
@@ -133,7 +151,7 @@ function AssessmentForm({ onSubmit }: { onSubmit: (data: PatientAssessment) => v
 - **overflow-hidden clipping**: shadcn `Card` uses `overflow-hidden` by default. Add `overflow-visible` to any Card wrapping VitalSigns or AcidBase — their popups use absolute positioning and will be clipped otherwise:
   - **VitalSigns**: edit buttons (`absolute bottom-10`, above inputs), alert badges (`absolute bottom-[-22px]`, below inputs), AI analysis card (`absolute top-12 z-50`, below the component)
   - **AcidBase**: result popup (`absolute bottom-15 left-0`, above inputs)
-  - Components that use shadcn portals (Timeline Popover, EHR AlertDialog/Drawer/Select) do NOT need this fix — portals render outside the DOM tree.
+  - Components that use shadcn portals (Timeline Popover, ClinicalNotes AlertDialog/Drawer/Select) do NOT need this fix — portals render outside the DOM tree.
 
 - **VitalSigns circular updates**: If your parent passes `data` and listens to `onData`, don't re-pass the same data back down in a useEffect loop. The hook uses ref-based dedup internally, but external effect chains can still infinite-loop.
 

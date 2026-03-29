@@ -4,27 +4,35 @@
 
 ## Phase 1: Clinical Requirements
 
-The doctor wants a combined clinical dashboard. Ask:
+The doctor wants a combined clinical dashboard. Present the available building blocks by category and ask which they'd like:
 
-- "Which of these would you like on your dashboard?"
-  - Vital signs monitoring
-  - Patient records (EHR)
+- "Which of these blocks would you like on your dashboard?"
+
+  **Monitoring**
+  - Vital signs (BP, HR, RR, Temp, SpO2)
+  - Pulse oximetry (real-time animated display)
+
+  **Calculators**
   - Blood gas / acid-base analyzer
   - BMI calculator
   - Fluid balance (water balance / I&O)
-  - Pulse oximetry (real-time telemonitoring)
+
+  **Documentation**
+  - Clinical notes (encounter note editor)
+
+  **Display**
   - Clinical timeline (hospitalization course)
-  - All core tools (vital signs + EHR) (Default)
+
+  Default: vital signs + clinical notes
 
 - "Is this for a single patient view or a clinic overview?" (Default: single patient)
 
 ### Setting-Aware Questions (based on Initial Clarification)
 
 - If **admitted patients**: Ask "Do you want the dashboard to highlight patients with abnormal readings?" (Default: yes)
-- If **multiple patients**: Ask "Should the dashboard show all patients at once, or one patient with a list to navigate?" (Default: one patient with a list)
 
 Do NOT ask about:
-- Layout arrangement (you decide — typically vitals on one side, records on the other)
+- Layout arrangement (you decide — typically vitals on one side, notes on the other)
 - Navigation structure (you decide)
 - Technical preferences
 
@@ -41,17 +49,17 @@ Silently perform all of the following:
    WebFetch: {CDN_BASE}/components/manifest.json
    ```
 
-3. **For each component the doctor selected**, follow the **Component Fetching Process** in the main protocol. All of the following are available in the manifest:
+3. **For each block the doctor selected**, follow the **Component Fetching Process** in the main protocol. All of the following are available in the manifest:
 
    - `vital-signs` → `{project}/components/vital-signs/`
-   - `ehr` → `{project}/app/ehr/`
+   - `clinical-notes` → `{project}/components/clinical-notes/`
    - `acid-base` → `{project}/components/acid-base/`
    - `bmi` → `{project}/components/bmi/`
    - `water-balance` → `{project}/components/water-balance/`
    - `telemonitoring` → `{project}/components/telemonitoring/`
    - `timeline` → `{project}/components/timeline/`
 
-   For each selected component, fetch its files from:
+   For each selected block, fetch its files from:
    ```
    For each file in manifest["{component}"].files:
      WebFetch: {CDN_BASE}/components/{component}/{file}
@@ -69,7 +77,7 @@ Silently perform all of the following:
    ```
    WebFetch: {CDN_BASE}/components/COMPOSITION.md
    ```
-   This contains typed examples for wiring components together and known gotchas (overflow clipping, circular updates, null guards).
+   This contains typed examples for wiring blocks together and known gotchas (overflow clipping, circular updates, null guards).
 
 Do not tell the doctor about any of these steps.
 
@@ -77,17 +85,17 @@ Do not tell the doctor about any of these steps.
 
 ## Phase 3: Build Page
 
-Create a dashboard page that combines the selected components:
+Create a dashboard page that combines the selected blocks:
 
 1. **Create `app/dashboard/page.tsx`** with a layout that includes:
    - A header with the clinic/dashboard name
-   - Selected components arranged in a responsive grid
+   - Selected blocks arranged in a responsive grid
    - Wrap the entire page in `ErrorBoundary` from `@/components/vital-signs/components/error-boundary`
 
-2. **Example layout** (adapt based on selected components):
+2. **Example layout** (adapt based on selected blocks):
    ```tsx
    import VitalSigns from "@/components/vital-signs/vital-signs"
-   import MedicalRecordsApp from "@/app/ehr/ehr"
+   import ClinicalNotes from "@/components/clinical-notes/clinical-notes"
    import AcidBase from "@/components/acid-base/acid-base"
    import BMICalculator from "@/components/bmi/bmi-calculator"
    import WaterBalance from "@/components/water-balance/water-balance"
@@ -100,9 +108,9 @@ Create a dashboard page that combines the selected components:
          <main className="min-h-screen bg-background p-6">
            <h1 className="text-2xl font-bold mb-6">Clinical Dashboard</h1>
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-             {/* Include only the components the doctor selected */}
+             {/* Include only the blocks the doctor selected */}
              <section><VitalSigns /></section>
-             <section><MedicalRecordsApp /></section>
+             <section><ClinicalNotes /></section>
            </div>
          </main>
        </ErrorBoundary>
@@ -110,7 +118,6 @@ Create a dashboard page that combines the selected components:
    }
    ```
 
-   > **Note:** The EHR component (`MedicalRecordsApp`) includes its own sidebar and layout. When embedding it in a dashboard, you may need to adapt its wrapper to fit within the grid — for example, removing `h-screen` from its root div and adjusting padding. Use the fetched source as a guide.
    > **Note:** Smaller widgets (acid-base, BMI, water-balance) work well grouped together in a single grid cell or a flex row. The timeline works best as a full-width section or sidebar.
 
 3. **Update the home page** to redirect to `/dashboard`
@@ -124,5 +131,5 @@ All layout decisions are yours. Optimize for clinical usability.
 1. **Run the Quality Checklist** from the main protocol — silently review theming, responsiveness, and shadcn polish. Fix any issues before proceeding.
 2. Run `npm run dev` in the background
 3. Tell the doctor:
-   > "Your clinical dashboard is ready with [list selected components]. You can view it at http://localhost:3000/dashboard"
-4. Ask: "Would you like to rearrange anything on the dashboard, or add any other clinical information?"
+   > "Your clinical dashboard is ready with [list selected blocks]. You can view it at http://localhost:3000/dashboard"
+4. Ask: "Would you like to rearrange anything on the dashboard, or add any other clinical tools?"

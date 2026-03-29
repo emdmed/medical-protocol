@@ -1,15 +1,19 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
+  "description": "Building blocks for clinical tools. Each component is a self-contained block that doctors mix and match — combine them into dashboards, embed them in notes, or use them standalone.",
   "context": "Read this first. For full props/types, open the component file (JSDoc header). For composition patterns, see COMPOSITION.md.",
   "shared": {
     "medical-disclaimer": {
       "description": "Medical disclaimer footer — included by all clinical components",
       "import": "@/components/medical-disclaimer",
-      "files": ["medical-disclaimer.tsx"]
+      "files": [
+        "medical-disclaimer.tsx"
+      ]
     }
   },
   "vital-signs": {
-    "version": "0.3.0",
+    "version": "0.4.0",
+    "category": "monitoring",
     "description": "Editable vital signs panel: BP, HR, RR, Temp, SpO2/FiO2",
     "import": "@/components/vital-signs/vital-signs",
     "types": "@/components/vital-signs/types/vital-signs",
@@ -80,7 +84,8 @@
     ]
   },
   "acid-base": {
-    "version": "0.3.0",
+    "version": "0.4.0",
+    "category": "calculator",
     "description": "ABG analyzer — disorder detection, compensation, anion gap",
     "import": "@/components/acid-base/acid-base",
     "types": "@/components/acid-base/types/interfaces",
@@ -113,7 +118,8 @@
     ]
   },
   "bmi": {
-    "version": "0.3.0",
+    "version": "0.4.0",
+    "category": "calculator",
     "description": "BMI calculator with imperial/metric toggle and category badges",
     "import": "@/components/bmi/bmi-calculator",
     "target": "components/bmi",
@@ -130,7 +136,8 @@
     ]
   },
   "telemonitoring": {
-    "version": "0.3.0",
+    "version": "0.4.0",
+    "category": "monitoring",
     "description": "Real-time pulse oximetry with animated heartbeat, BPM/SpO2",
     "import": "@/components/telemonitoring/pulse-oximetry/pulse-oximetry",
     "target": "components/telemonitoring",
@@ -147,7 +154,8 @@
     ]
   },
   "water-balance": {
-    "version": "0.3.0",
+    "version": "0.4.0",
+    "category": "calculator",
     "description": "Fluid intake/output tracker with insensible loss and net balance",
     "import": "@/components/water-balance/water-balance",
     "target": "components/water-balance",
@@ -167,7 +175,8 @@
     ]
   },
   "timeline": {
-    "version": "0.3.0",
+    "version": "0.4.0",
+    "category": "display",
     "description": "Scrollable clinical timeline with duration badges and popovers",
     "import": "@/components/timeline/timeline",
     "target": "components/timeline",
@@ -194,13 +203,14 @@
       "timeline.tsx"
     ]
   },
-  "ehr": {
-    "version": "0.3.0",
-    "description": "Full EHR app — patient management, clinical notes, sidebar. Self-contained root.",
-    "import": "@/app/ehr/ehr",
-    "target": "app/ehr",
-    "props": "none — self-contained root app",
-    "dataFlow": "none — orchestrates VitalSigns, WaterBalance, AcidBase, BMI internally",
+  "clinical-notes": {
+    "version": "0.4.0",
+    "category": "documentation",
+    "description": "Focused encounter note editor with clinical highlighting and local storage",
+    "import": "@/components/clinical-notes/clinical-notes",
+    "target": "components/clinical-notes",
+    "props": "none — self-contained",
+    "dataFlow": "none — orchestrates WaterBalance, AcidBase, BMI as inline tools",
     "popups": {
       "loadingOverlay": {
         "positioning": "absolute inset-0 z-10 backdrop-blur-sm",
@@ -234,9 +244,6 @@
       "tabs",
       "separator",
       "scroll-area",
-      "sheet",
-      "sidebar",
-      "skeleton",
       "alert-dialog",
       "badge"
     ],
@@ -244,18 +251,15 @@
       "@/components/water-balance/water-balance",
       "@/components/acid-base/acid-base",
       "@/components/bmi/bmi-calculator",
-      "@/components/theme-toggle",
       "@/components/ui/textarea-inv"
     ],
     "files": [
-      "ehr.tsx",
+      "clinical-notes.tsx",
       "page.tsx",
       "clock/clock.tsx",
       "patient-details/patient-details.tsx",
       "prev-evolutions/prev-evolutions.tsx",
       "references/references.tsx",
-      "sidebar/sidebar.tsx",
-      "utils/defaultRecords.ts",
       "utils/generateHighlightedHTML.ts"
     ]
   }

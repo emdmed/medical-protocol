@@ -44,7 +44,7 @@ https://medical-protocol.vercel.app/medical-protocol
 
 When the doctor opens Claude Code in a project that already has components installed (e.g., they built a vital signs monitor last week and now want changes):
 
-1. **Check what's already built** — silently scan the project for existing components (`components/vital-signs/`, `app/ehr/`, etc.)
+1. **Check what's already built** — silently scan the project for existing components (`components/vital-signs/`, `components/clinical-notes/`, etc.)
 2. **If the doctor asks for something that's already installed** (e.g., "add temperature alerts" and vital-signs already exists), route to the **customize** workflow — do not re-fetch or re-install components
 3. **If the doctor asks for something new** that doesn't exist yet (e.g., "now add patient records"), proceed with the appropriate workflow — it will fetch only the missing components
 4. **Never re-scaffold the project** if it already has a working Next.js setup
@@ -61,26 +61,35 @@ If it's unclear (e.g., the doctor mixes languages), ask once: "Would you prefer 
 
 ## Initial Clarification
 
-When the doctor's request is vague or general (e.g., "I need something to track vitals" or "build me a patient system"), ask the following three questions **in a single conversational message** before proceeding to Classification. If the request already makes the answers clear (e.g., "I need a vital signs monitor for admitted patients with data saved"), skip this section entirely.
+When the doctor's request is vague or general (e.g., "I need something to track vitals" or "build me a patient system"), ask the following questions **in a single conversational message** before proceeding to Classification. If the request already makes the answers clear (e.g., "I need a vital signs monitor for admitted patients with data saved"), skip this section entirely.
 
-**Ask all three together, conversationally — not as a numbered quiz. Provide defaults so the doctor can simply say "defaults are fine."**
+**Ask all together, conversationally — not as a numbered quiz. Provide defaults so the doctor can simply say "defaults are fine."**
 
-1. **Patient setting & priority**
+1. **What do you need to track or calculate?** Present the available building blocks as a menu:
+
+   | Block | What it does |
+   |-------|-------------|
+   | Vital signs | Blood pressure, heart rate, respiratory rate, temperature, oxygen saturation |
+   | Clinical notes | Encounter note editor with highlighting and local storage |
+   | Blood gas analyzer | ABG interpretation — disorders, compensation, anion gap |
+   | BMI calculator | Body mass index with category classification |
+   | Fluid balance | Intake/output tracking with insensible loss |
+   | Pulse oximetry | Real-time animated SpO2/BPM display |
+   | Clinical timeline | Day-by-day hospitalization course with event details |
+   | **Dashboard** | Combine any of the above into one view |
+
+   Default: vital signs + clinical notes (as a dashboard)
+
+2. **Patient setting**
    - "What type of patients is this for?"
-     - **In/out patients in private practice** — shorter visits, quick data entry, lower-acuity workflows
-     - **Admitted patients (hospital/clinic)** — continuous monitoring, more detailed records, higher-acuity workflows
+     - **In/out patients in private practice** — shorter visits, quick data entry
+     - **Admitted patients (hospital/clinic)** — continuous monitoring, detailed records
      - **Both**
    - Default: private practice (in/out patients)
 
-2. **Single patient vs patient management**
-   - "Will you work with one patient at a time, or do you need to manage a list of patients?"
-     - **One patient at a time** — focused view, no patient list needed
-     - **Multiple patients** — patient list or sidebar, ability to switch between patients
-   - Default: one patient at a time
-
 3. **Data persistence**
-   - "Should the system remember patient data between sessions, or start fresh each time?"
-     - **Remember data** — data is saved on your computer and available next time you open it
+   - "Should the system remember data between sessions, or start fresh each time?"
+     - **Remember data** — data is saved on your computer and available next time
      - **Start fresh** — data is only available during the current session
    - Default: remember data (stored locally on the doctor's computer)
 
@@ -89,8 +98,7 @@ When the doctor's request is vague or general (e.g., "I need something to track 
 - The answers feed into Classification and influence how each workflow is executed
 - Silently adapt the architecture based on the answers:
   - **Admitted patients + persistence** → local storage with patient identifiers, richer vital signs with alerts
-  - **Private practice + single patient + no persistence** → simple session-based state, minimal UI
-  - **Multiple patients** → patient list component, sidebar navigation
+  - **Private practice + no persistence** → simple session-based state, minimal UI
 
 ---
 
@@ -101,7 +109,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | Domain | Signal Words | Workflow |
 |---|---|---|
 | **vital-signs** | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate, vitals, monitor | `workflows/vital-signs.md` |
-| **ehr** | patient record, medical history, clinical notes, evolution, health record, EHR, EMR, patient file | `workflows/ehr.md` |
+| **clinical-notes** | clinical notes, encounter note, evolution, chart, patient note, write a note, documentation | `workflows/clinical-notes.md` |
 | **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | `workflows/acid-base.md` |
 | **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | `workflows/bmi.md` |
 | **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | `workflows/water-balance.md` |

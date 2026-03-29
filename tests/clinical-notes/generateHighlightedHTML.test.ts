@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateHighlightedHTML } from '../../public/medical-protocol/components/ehr/utils/generateHighlightedHTML';
+import { generateHighlightedHTML } from '../../public/medical-protocol/components/clinical-notes/utils/generateHighlightedHTML';
 
 describe('generateHighlightedHTML — HTML escaping (XSS prevention)', () => {
   it('escapes HTML tags in note text', () => {

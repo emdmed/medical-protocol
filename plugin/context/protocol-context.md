@@ -44,7 +44,7 @@ https://medical-protocol.vercel.app/medical-protocol
 
 When the doctor opens Claude Code in a project that already has components installed (e.g., they built a vital signs monitor last week and now want changes):
 
-1. **Check what's already built** — silently scan the project for existing components (`components/vital-signs/`, `app/ehr/`, etc.)
+1. **Check what's already built** — silently scan the project for existing components (`components/vital-signs/`, `components/clinical-notes/`, etc.)
 2. **If the doctor asks for something that's already installed** (e.g., "add temperature alerts" and vital-signs already exists), route to the **customize** workflow — do not re-fetch or re-install components
 3. **If the doctor asks for something new** that doesn't exist yet (e.g., "now add patient records"), proceed with the appropriate workflow — it will fetch only the missing components
 4. **Never re-scaffold the project** if it already has a working Next.js setup
@@ -101,7 +101,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | Domain | Signal Words | Workflow |
 |---|---|---|
 | **vital-signs** | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate, vitals, monitor | `workflows/vital-signs.md` |
-| **ehr** | patient record, medical history, clinical notes, evolution, health record, EHR, EMR, patient file | `workflows/ehr.md` |
+| **clinical-notes** | clinical notes, encounter note, evolution, chart, patient note, write a note, documentation | `workflows/clinical-notes.md` |
 | **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | `workflows/acid-base.md` |
 | **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | `workflows/bmi.md` |
 | **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | `workflows/water-balance.md` |

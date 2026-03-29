@@ -126,10 +126,9 @@ agent-browser snapshot -i
 
 3. **Alert rendering:** After entering a dangerous value, verify the alert is visible in the accessibility tree (look for "critical", "danger", "alert", or destructive styling references)
 
-### EHR (Electronic Health Record)
+### Clinical Notes
 
-1. **Patient sidebar navigation:** If a patient list exists, click a patient entry and verify the main content area updates
-2. **Note editor:** Find the clinical notes input area, click it, type sample text, and verify it persists in the UI
+1. **Note editor:** Find the clinical notes input area, click it, type sample text, and verify it persists in the UI
    ```bash
    agent-browser click @eN
    agent-browser type "Sample clinical note"
