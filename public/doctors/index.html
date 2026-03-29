@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Medical Protocol — For Doctors</title>
-  <meta name="description" content="Clinical tools built by describing what you need — vital signs, patient records, ABG analyzers, dashboards. No coding, no cloud. All data stays on your computer.">
+  <title data-i18n="meta.title">Medical Protocol — For Doctors</title>
+  <meta name="description" data-i18n-content="meta.description" content="Clinical tools built by describing what you need — vital signs, patient records, ABG analyzers, dashboards. No coding, no cloud. All data stays on your computer.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,6 +73,11 @@
     /* Hamburger icon */
     .hamburger { width: 24px; height: 18px; display: flex; flex-direction: column; justify-content: space-between; }
     .hamburger span { display: block; height: 2px; background: var(--text-muted); border-radius: 1px; }
+
+    /* ─── Language switcher ─── */
+    .lang-switch { display: flex; gap: 2px; background: var(--card); border-radius: 8px; padding: 2px; }
+    .lang-btn { background: none; border: none; color: var(--text-muted); font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .lang-btn.active { background: var(--accent); color: var(--bg); }
 
     /* ─── Container ─── */
     .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
@@ -157,14 +162,6 @@
       font-size: 28px; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 12px;
     }
     .bento__featured p { font-size: 15px; color: var(--text-muted); line-height: 1.6; max-width: 320px; }
-    .bento__arrow {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 48px; height: 48px; border-radius: 12px; background: var(--accent);
-      color: var(--bg); transition: all 0.2s; cursor: pointer; align-self: flex-start;
-    }
-    .bento__arrow:hover { background: var(--accent-hover); transform: scale(1.05); }
-    .bento__arrow svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
     .bento__info {
       background: linear-gradient(135deg, #1a9e8f, #2b7fc3); border-radius: 8px; padding: 32px;
       display: flex; flex-direction: column; justify-content: space-between;
@@ -203,13 +200,6 @@
     .product-card:hover { border-color: rgba(255,255,255,0.2); }
     .product-card h4 { font-size: 16px; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.02em; }
     .product-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
-    .product-card__arrow {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 40px; height: 40px; border-radius: 10px; background: var(--accent);
-      color: var(--bg); margin-top: 16px; transition: all 0.2s;
-    }
-    .product-card__arrow svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-    .product-card:hover .product-card__arrow { background: var(--accent-hover); }
     /* Dot pattern overlay */
     .product-card__dots {
       position: absolute; top: 12px; right: 12px;
@@ -591,21 +581,29 @@
     <nav class="nav">
       <a href="/" class="nav__brand">Medical Protocol</a>
       <div class="nav__links">
-        <a href="#tools" class="nav__link">Clinical tools</a>
-        <a href="#specialties" class="nav__link">Specialties</a>
-        <a href="#privacy" class="nav__link">Privacy</a>
-        <a href="#faq" class="nav__link">FAQ</a>
-        <a href="#start" class="nav__cta">Get started</a>
+        <a href="#tools" class="nav__link" data-i18n="nav.tools">Clinical tools</a>
+        <a href="#specialties" class="nav__link" data-i18n="nav.specialties">Specialties</a>
+        <a href="#privacy" class="nav__link" data-i18n="nav.privacy">Privacy</a>
+        <a href="#faq" class="nav__link" data-i18n="nav.faq">FAQ</a>
+        <a href="#start" class="nav__cta" data-i18n="nav.cta">Get started</a>
+        <div class="lang-switch">
+          <button class="lang-btn active" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" onclick="setLang('es')">ES</button>
+        </div>
       </div>
       <button class="nav__toggle" aria-label="Menu" onclick="document.querySelector('.nav__mobile-menu').classList.toggle('is-open')">
         <div class="hamburger"><span></span><span></span><span></span></div>
       </button>
       <div class="nav__mobile-menu">
-        <a href="#tools" class="nav__link" onclick="this.parentElement.classList.remove('is-open')">Clinical tools</a>
-        <a href="#specialties" class="nav__link" onclick="this.parentElement.classList.remove('is-open')">Specialties</a>
-        <a href="#privacy" class="nav__link" onclick="this.parentElement.classList.remove('is-open')">Privacy</a>
-        <a href="#faq" class="nav__link" onclick="this.parentElement.classList.remove('is-open')">FAQ</a>
-        <a href="#start" class="nav__cta" onclick="this.parentElement.classList.remove('is-open')">Get started</a>
+        <a href="#tools" class="nav__link" data-i18n="nav.tools" onclick="this.parentElement.classList.remove('is-open')">Clinical tools</a>
+        <a href="#specialties" class="nav__link" data-i18n="nav.specialties" onclick="this.parentElement.classList.remove('is-open')">Specialties</a>
+        <a href="#privacy" class="nav__link" data-i18n="nav.privacy" onclick="this.parentElement.classList.remove('is-open')">Privacy</a>
+        <a href="#faq" class="nav__link" data-i18n="nav.faq" onclick="this.parentElement.classList.remove('is-open')">FAQ</a>
+        <a href="#start" class="nav__cta" data-i18n="nav.cta" onclick="this.parentElement.classList.remove('is-open')">Get started</a>
+        <div class="lang-switch">
+          <button class="lang-btn active" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" onclick="setLang('es')">ES</button>
+        </div>
       </div>
     </nav>
   </div>
@@ -618,15 +616,15 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero__content" style="width:100%">
-      <p class="hero__eyebrow reveal">For surgeons, traumatologists, and clinicians</p>
-      <h1 class="reveal reveal-d1">
+      <p class="hero__eyebrow reveal" data-i18n="hero.eyebrow">For surgeons, traumatologists, and clinicians</p>
+      <h1 class="reveal reveal-d1" data-i18n="hero.title">
         Describe what you need. <em>It's built in minutes.</em>
       </h1>
       <div class="hero__bottom reveal reveal-d2">
-        <p class="hero__desc">
+        <p class="hero__desc" data-i18n="hero.desc">
           Vital signs monitors, ABG analyzers, patient records, fluid balance trackers, clinical dashboards &mdash; fully functional and ready for real data. No coding. No IT team. All data stays on your machine.
         </p>
-        <a href="#start" class="hero__cta">
+        <a href="#start" class="hero__cta" data-i18n="hero.cta">
           Get started
           <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
@@ -638,28 +636,25 @@
   <section id="tools" class="section">
     <div class="container">
       <div class="section-header reveal">
-        <p class="section-label">What you get</p>
-        <h2 class="section-title">Real clinical tools, <em>not toys.</em></h2>
+        <p class="section-label" data-i18n="tools.label">What you get</p>
+        <h2 class="section-title" data-i18n="tools.title">Real clinical tools, <em>not toys.</em></h2>
       </div>
       <div class="bento">
         <div class="bento__featured reveal reveal-d1">
           <div>
-            <p style="font-size:13px;color:var(--text-dim);margin-bottom:8px">Most requested</p>
-            <h3>Vital Signs Monitor</h3>
-            <p>Blood pressure, heart rate, SpO2, temperature, and respiratory rate &mdash; with clinical alerts for abnormal values and validated normal ranges.</p>
-          </div>
-          <div class="bento__arrow">
-            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <p style="font-size:13px;color:var(--text-dim);margin-bottom:8px" data-i18n="bento.mostRequested">Most requested</p>
+            <h3 data-i18n="bento.vitalsTitle">Vital Signs Monitor</h3>
+            <p data-i18n="bento.vitalsDesc">Blood pressure, heart rate, SpO2, temperature, and respiratory rate &mdash; with clinical alerts for abnormal values and validated normal ranges.</p>
           </div>
         </div>
         <div class="bento__info reveal reveal-d2">
           <div>
             <div class="bento__info-label">
-              <span>Clinically validated</span>
-              <span>246 tests</span>
+              <span data-i18n="bento.validated">Clinically validated</span>
+              <span data-i18n="bento.testCount">246 tests</span>
             </div>
-            <h3>Validated medical logic behind every calculation</h3>
-            <p>Winter's formula, anion gap computation, vital sign ranges, BMI categories, fluid balance &mdash; 246 unit tests ensure clinical accuracy.</p>
+            <h3 data-i18n="bento.validatedTitle">Validated medical logic behind every calculation</h3>
+            <p data-i18n="bento.validatedDesc">Winter's formula, anion gap computation, vital sign ranges, BMI categories, fluid balance &mdash; 246 unit tests ensure clinical accuracy.</p>
           </div>
           <div class="dot-grid">
             <span class="active"></span><span></span><span class="active"></span><span></span><span></span><span class="active"></span>
@@ -669,8 +664,8 @@
           </div>
         </div>
         <div class="bento__card reveal reveal-d3">
-          <h4>Patient Records</h4>
-          <p>Demographics, conditions, allergies, clinical notes, and searchable previous evolutions.</p>
+          <h4 data-i18n="bento.recordsTitle">Patient Records</h4>
+          <p data-i18n="bento.recordsDesc">Demographics, conditions, allergies, clinical notes, and searchable previous evolutions.</p>
         </div>
       </div>
 
@@ -678,39 +673,33 @@
       <div class="products" style="margin-top:8px">
         <div class="product-card reveal reveal-d1">
           <div class="product-card__dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          <h4>Clinical Dashboard</h4>
-          <p>Vitals, records, and calculators on one screen &mdash; see all your patients at a glance.</p>
-          <div class="product-card__arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          <h4 data-i18n="product.dashboardTitle">Clinical Dashboard</h4>
+          <p data-i18n="product.dashboardDesc">Vitals, records, and calculators on one screen &mdash; see all your patients at a glance.</p>
         </div>
         <div class="product-card reveal reveal-d2">
           <div class="product-card__dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          <h4>ABG Analyzer</h4>
-          <p>Enter pH, pCO2, and HCO3 &mdash; get instant disorder detection, compensation status, and anion gap interpretation.</p>
-          <div class="product-card__arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          <h4 data-i18n="product.abgTitle">ABG Analyzer</h4>
+          <p data-i18n="product.abgDesc">Enter pH, pCO2, and HCO3 &mdash; get instant disorder detection, compensation status, and anion gap interpretation.</p>
         </div>
         <div class="product-card reveal reveal-d3">
           <div class="product-card__dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          <h4>Pulse Oximetry</h4>
-          <p>Real-time SpO2 and heart rate display with animated waveforms and desaturation alerts.</p>
-          <div class="product-card__arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          <h4 data-i18n="product.pulseTitle">Pulse Oximetry</h4>
+          <p data-i18n="product.pulseDesc">Real-time SpO2 and heart rate display with animated waveforms and desaturation alerts.</p>
         </div>
         <div class="product-card reveal reveal-d4">
           <div class="product-card__dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          <h4>BMI Calculator</h4>
-          <p>Weight and height in, BMI category out &mdash; with imperial/metric toggle for pre-op assessments.</p>
-          <div class="product-card__arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          <h4 data-i18n="product.bmiTitle">BMI Calculator</h4>
+          <p data-i18n="product.bmiDesc">Weight and height in, BMI category out &mdash; with imperial/metric toggle for pre-op assessments.</p>
         </div>
         <div class="product-card reveal reveal-d5">
           <div class="product-card__dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          <h4>Fluid Balance</h4>
-          <p>Oral, IV, diuresis, insensible losses &mdash; net balance calculated automatically. Enter weight once.</p>
-          <div class="product-card__arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          <h4 data-i18n="product.fluidTitle">Fluid Balance</h4>
+          <p data-i18n="product.fluidDesc">Oral, IV, diuresis, insensible losses &mdash; net balance calculated automatically. Enter weight once.</p>
         </div>
         <div class="product-card reveal reveal-d6">
           <div class="product-card__dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          <h4>Clinical Timeline</h4>
-          <p>Chronological events with duration badges &mdash; surgical times, medication logs, recovery milestones.</p>
-          <div class="product-card__arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          <h4 data-i18n="product.timelineTitle">Clinical Timeline</h4>
+          <p data-i18n="product.timelineDesc">Chronological events with duration badges &mdash; surgical times, medication logs, recovery milestones.</p>
         </div>
       </div>
     </div>
@@ -720,38 +709,38 @@
   <section id="specialties" class="section section--alt">
     <div class="container">
       <div class="section-header reveal">
-        <p class="section-label">Built for how you actually work</p>
-        <h2 class="section-title">Your specialty, <em>your tools.</em></h2>
-        <p class="section-desc">Tell Claude what you need in your own words. It builds the right combination for your practice.</p>
+        <p class="section-label" data-i18n="specialties.label">Built for how you actually work</p>
+        <h2 class="section-title" data-i18n="specialties.title">Your specialty, <em>your tools.</em></h2>
+        <p class="section-desc" data-i18n="specialties.desc">Tell Claude what you need in your own words. It builds the right combination for your practice.</p>
       </div>
       <div class="services">
         <div class="service-card reveal reveal-d1">
           <div class="service-card__icon">
             <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
-          <p class="service-card__name">Trauma &amp; Emergency</p>
-          <p>Triage vitals, fluid balance, ABG interpretation, and event timeline &mdash; all on one screen between patients.</p>
+          <p class="service-card__name" data-i18n="service.traumaName">Trauma &amp; Emergency</p>
+          <p data-i18n="service.traumaDesc">Triage vitals, fluid balance, ABG interpretation, and event timeline &mdash; all on one screen between patients.</p>
         </div>
         <div class="service-card reveal reveal-d2">
           <div class="service-card__icon">
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
-          <p class="service-card__name">Surgery</p>
-          <p>Pre-op assessment with vitals and BMI, surgical timeline, structured clinical notes, and patient handoff summaries.</p>
+          <p class="service-card__name" data-i18n="service.surgeryName">Surgery</p>
+          <p data-i18n="service.surgeryDesc">Pre-op assessment with vitals and BMI, surgical timeline, structured clinical notes, and patient handoff summaries.</p>
         </div>
         <div class="service-card reveal reveal-d3">
           <div class="service-card__icon">
             <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
-          <p class="service-card__name">Internal Medicine</p>
-          <p>Multi-patient dashboards, acid-base analysis, fluid balance tracking, and pulse oximetry for rounds.</p>
+          <p class="service-card__name" data-i18n="service.internalName">Internal Medicine</p>
+          <p data-i18n="service.internalDesc">Multi-patient dashboards, acid-base analysis, fluid balance tracking, and pulse oximetry for rounds.</p>
         </div>
         <div class="service-card reveal reveal-d4">
           <div class="service-card__icon">
             <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </div>
-          <p class="service-card__name">Any specialty</p>
-          <p>Combine and customize any of the clinical tools for your specific workflow. Just describe what you need changed.</p>
+          <p class="service-card__name" data-i18n="service.anyName">Any specialty</p>
+          <p data-i18n="service.anyDesc">Combine and customize any of the clinical tools for your specific workflow. Just describe what you need changed.</p>
         </div>
       </div>
     </div>
@@ -761,9 +750,9 @@
   <section id="process" class="section">
     <div class="container">
       <div class="section-header reveal">
-        <p class="section-label">How it works</p>
-        <h2 class="section-title">Three steps. <em>Zero code.</em></h2>
-        <p class="section-desc">If you can describe what you need to a colleague, you can build it. No technical knowledge required.</p>
+        <p class="section-label" data-i18n="process.label">How it works</p>
+        <h2 class="section-title" data-i18n="process.title">Three steps. <em>Zero code.</em></h2>
+        <p class="section-desc" data-i18n="process.desc">If you can describe what you need to a colleague, you can build it. No technical knowledge required.</p>
       </div>
       <div class="process-layout">
         <div class="process-visual reveal reveal-d1">
@@ -785,7 +774,7 @@
         </div>
         <div class="process-right">
           <div class="process-header reveal reveal-d1">
-            <span class="process-header__title">From description to working interface</span>
+            <span class="process-header__title" data-i18n="process.headerTitle">From description to working interface</span>
             <div class="process-header__dots">
               <span class="process-header__dot active"></span>
               <span class="process-header__dot"></span>
@@ -793,23 +782,23 @@
             </div>
           </div>
           <div class="process-step reveal reveal-d2">
-            <h3>Step 1 <span>&mdash; Open Claude Code</span></h3>
-            <p>Create a folder on your computer, open your terminal, and type <strong style="color:var(--accent)">claude</strong>. Paste the install command. Claude sets everything up automatically &mdash; you never see code or technical details.</p>
+            <h3 data-i18n="process.step1Title">Step 1 <span>&mdash; Open Claude Code</span></h3>
+            <p data-i18n="process.step1Desc">Create a folder on your computer, open your terminal, and type <strong style="color:var(--accent)">claude</strong>. Paste the install command. Claude sets everything up automatically &mdash; you never see code or technical details.</p>
           </div>
           <div class="process-metrics reveal reveal-d3">
             <div class="process-metric">
               <div class="process-metric__icon">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
-              <div class="process-metric__label">Ready in</div>
-              <div class="process-metric__value">&lt; 5 minutes</div>
+              <div class="process-metric__label" data-i18n="process.metricTimeLabel">Ready in</div>
+              <div class="process-metric__value" data-i18n="process.metricTimeValue">&lt; 5 minutes</div>
             </div>
             <div class="process-metric">
               <div class="process-metric__icon">
                 <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               </div>
-              <div class="process-metric__label">Clinical tests</div>
-              <div class="process-metric__value">246 validated</div>
+              <div class="process-metric__label" data-i18n="process.metricTestsLabel">Clinical tests</div>
+              <div class="process-metric__value" data-i18n="process.metricTestsValue">246 validated</div>
             </div>
           </div>
         </div>
@@ -821,35 +810,35 @@
   <section id="privacy" class="section section--alt">
     <div class="container">
       <div class="section-header reveal">
-        <p class="section-label">Your data, your machine</p>
-        <h2 class="section-title">Patient privacy, <em>not an afterthought.</em></h2>
-        <p class="section-desc">No cloud. No accounts. No external databases. Everything runs on your computer.</p>
+        <p class="section-label" data-i18n="privacy.label">Your data, your machine</p>
+        <h2 class="section-title" data-i18n="privacy.title">Patient privacy, <em>not an afterthought.</em></h2>
+        <p class="section-desc" data-i18n="privacy.desc">No cloud. No accounts. No external databases. Everything runs on your computer.</p>
       </div>
       <div class="trust-grid">
         <div class="trust-card reveal reveal-d1">
           <div class="trust-card__icon trust-card__icon--green">&#x2713;</div>
-          <h3>Runs on your computer</h3>
-          <p>Patient data stays on your machine. Nothing is sent to external servers. The interfaces work offline once built.</p>
+          <h3 data-i18n="trust.localTitle">Runs on your computer</h3>
+          <p data-i18n="trust.localDesc">Patient data stays on your machine. Nothing is sent to external servers. The interfaces work offline once built.</p>
         </div>
         <div class="trust-card reveal reveal-d2">
           <div class="trust-card__icon trust-card__icon--amber">&#x26A0;</div>
-          <h3>Chat is separate from data</h3>
-          <p>Your conversation with Claude is processed externally. Enter patient data directly into the interfaces it builds &mdash; that stays on your machine.</p>
+          <h3 data-i18n="trust.separateTitle">Chat is separate from data</h3>
+          <p data-i18n="trust.separateDesc">Your conversation with Claude is processed externally. Enter patient data directly into the interfaces it builds &mdash; that stays on your machine.</p>
         </div>
         <div class="trust-card reveal reveal-d3">
           <div class="trust-card__icon trust-card__icon--blue">&#x1F6E1;</div>
-          <h3>Built-in safeguards</h3>
-          <p>If anything you ask could create a privacy risk &mdash; like connecting to an external service &mdash; Claude warns you first and explains in plain language.</p>
+          <h3 data-i18n="trust.safeguardsTitle">Built-in safeguards</h3>
+          <p data-i18n="trust.safeguardsDesc">If anything you ask could create a privacy risk &mdash; like connecting to an external service &mdash; Claude warns you first and explains in plain language.</p>
         </div>
       </div>
 
       <ul class="checklist reveal reveal-d4">
-        <li><span class="checklist__dot"></span>No data uploaded to any cloud service</li>
-        <li><span class="checklist__dot"></span>No external database connections by default</li>
-        <li><span class="checklist__dot"></span>No accounts, logins, or subscriptions for your data</li>
-        <li><span class="checklist__dot"></span>No technical decisions &mdash; you speak clinical language only</li>
-        <li><span class="checklist__dot"></span>Validated clinical standards applied automatically</li>
-        <li><span class="checklist__dot"></span>Describe changes in your own words &mdash; never touch code</li>
+        <li><span class="checklist__dot"></span><span data-i18n="checklist.noCloud">No data uploaded to any cloud service</span></li>
+        <li><span class="checklist__dot"></span><span data-i18n="checklist.noDb">No external database connections by default</span></li>
+        <li><span class="checklist__dot"></span><span data-i18n="checklist.noAccounts">No accounts, logins, or subscriptions for your data</span></li>
+        <li><span class="checklist__dot"></span><span data-i18n="checklist.noTech">No technical decisions &mdash; you speak clinical language only</span></li>
+        <li><span class="checklist__dot"></span><span data-i18n="checklist.validated">Validated clinical standards applied automatically</span></li>
+        <li><span class="checklist__dot"></span><span data-i18n="checklist.describe">Describe changes in your own words &mdash; never touch code</span></li>
       </ul>
     </div>
   </section>
@@ -858,33 +847,33 @@
   <section id="faq" class="section">
     <div class="container">
       <div class="section-header reveal">
-        <p class="section-label">Common questions</p>
-        <h2 class="section-title">Straight answers, <em>no jargon.</em></h2>
+        <p class="section-label" data-i18n="faq.label">Common questions</p>
+        <h2 class="section-title" data-i18n="faq.title">Straight answers, <em>no jargon.</em></h2>
       </div>
       <div class="faq-grid">
         <div class="faq-card reveal reveal-d1">
-          <h4>"I don't code &mdash; is this really for me?"</h4>
-          <p>That's exactly the point. You describe what you need in clinical language &mdash; "I need a vital signs monitor for my trauma patients" &mdash; and it's built for you. If something isn't right, you describe what to change. You never see code.</p>
+          <h4 data-i18n="faq.q1">"I don't code &mdash; is this really for me?"</h4>
+          <p data-i18n="faq.a1">That's exactly the point. You describe what you need in clinical language &mdash; "I need a vital signs monitor for my trauma patients" &mdash; and it's built for you. If something isn't right, you describe what to change. You never see code.</p>
         </div>
         <div class="faq-card reveal reveal-d2">
-          <h4>"Is patient data safe?"</h4>
-          <p>All data stays on your computer. There's no cloud database, no account, no login. The only thing that touches the internet is your conversation with Claude &mdash; and you should never paste patient data into that. Enter it directly into the interfaces.</p>
+          <h4 data-i18n="faq.q2">"Is patient data safe?"</h4>
+          <p data-i18n="faq.a2">All data stays on your computer. There's no cloud database, no account, no login. The only thing that touches the internet is your conversation with Claude &mdash; and you should never paste patient data into that. Enter it directly into the interfaces.</p>
         </div>
         <div class="faq-card reveal reveal-d3">
-          <h4>"How is this different from MDCalc?"</h4>
-          <p>MDCalc gives you one calculator at a time. Medical Protocol builds integrated clinical interfaces &mdash; your vitals feed into pulse oximetry, your ABG analyzer sits next to fluid balance, and everything lives in one dashboard customized to your workflow.</p>
+          <h4 data-i18n="faq.q3">"How is this different from MDCalc?"</h4>
+          <p data-i18n="faq.a3">MDCalc gives you one calculator at a time. Medical Protocol builds integrated clinical interfaces &mdash; your vitals feed into pulse oximetry, your ABG analyzer sits next to fluid balance, and everything lives in one dashboard customized to your workflow.</p>
         </div>
         <div class="faq-card reveal reveal-d4">
-          <h4>"What if it builds something wrong?"</h4>
-          <p>Clinical calculations are backed by 246 unit tests covering validated medical logic &mdash; Winter's formula, anion gap, vital sign ranges, BMI categories. If something doesn't look right, tell Claude and it fixes it immediately.</p>
+          <h4 data-i18n="faq.q4">"What if it builds something wrong?"</h4>
+          <p data-i18n="faq.a4">Clinical calculations are backed by 246 unit tests covering validated medical logic &mdash; Winter's formula, anion gap, vital sign ranges, BMI categories. If something doesn't look right, tell Claude and it fixes it immediately.</p>
         </div>
         <div class="faq-card reveal reveal-d5">
-          <h4>"Do I need IT approval?"</h4>
-          <p>Not for your personal laptop. It runs locally and stores data only on your machine. If your department later wants to adopt it officially, the architecture makes it straightforward to integrate with institutional systems.</p>
+          <h4 data-i18n="faq.q5">"Do I need IT approval?"</h4>
+          <p data-i18n="faq.a5">Not for your personal laptop. It runs locally and stores data only on your machine. If your department later wants to adopt it officially, the architecture makes it straightforward to integrate with institutional systems.</p>
         </div>
         <div class="faq-card reveal reveal-d6">
-          <h4>"What does it cost?"</h4>
-          <p>You need a Claude Code subscription from Anthropic. The medical interfaces themselves are free and open source. Think of it like a tool that understands medicine &mdash; the subscription is for the tool, not the medical features.</p>
+          <h4 data-i18n="faq.q6">"What does it cost?"</h4>
+          <p data-i18n="faq.a6">You need a Claude Code subscription from Anthropic. The medical interfaces themselves are free and open source. Think of it like a tool that understands medicine &mdash; the subscription is for the tool, not the medical features.</p>
         </div>
       </div>
     </div>
@@ -894,9 +883,9 @@
   <section id="start" class="cta-section section--alt">
     <div class="container">
       <div class="section-header reveal">
-        <p class="section-label">Get started</p>
-        <h2 class="section-title" style="margin-bottom:20px">Ready in minutes, <em>not months.</em></h2>
-        <p class="section-desc">Follow these steps from your personal computer. No technical background needed &mdash; we'll walk you through everything.</p>
+        <p class="section-label" data-i18n="onboard.label">Get started</p>
+        <h2 class="section-title" style="margin-bottom:20px" data-i18n="onboard.title">Ready in minutes, <em>not months.</em></h2>
+        <p class="section-desc" data-i18n="onboard.desc">Follow these steps from your personal computer. No technical background needed &mdash; we'll walk you through everything.</p>
       </div>
 
       <!-- Prerequisite -->
@@ -905,8 +894,8 @@
           <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
         <div class="onboard-prereq__text">
-          <h3>Before you start</h3>
-          <p>You need a <a href="https://claude.ai/download">Claude Code subscription</a> from Anthropic. It's a desktop tool that understands clinical language and builds interfaces for you. The medical tools themselves are free.</p>
+          <h3 data-i18n="onboard.prereqTitle">Before you start</h3>
+          <p data-i18n="onboard.prereqDesc">You need a <a href="https://claude.ai/download">Claude Code subscription</a> from Anthropic. It's a desktop tool that understands clinical language and builds interfaces for you. The medical tools themselves are free.</p>
         </div>
       </div>
 
@@ -923,31 +912,31 @@
           <div class="platform-step">
             <span class="platform-step__num">1</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Open the terminal</div>
-              <div class="platform-step__desc">Press <strong>Cmd + Space</strong> to open Spotlight, type <strong>Terminal</strong>, and press Enter. A window with a text cursor will appear &mdash; this is where you'll type commands.</div>
+              <div class="platform-step__title" data-i18n="step.mac1Title">Open the terminal</div>
+              <div class="platform-step__desc" data-i18n="step.mac1Desc">Press <strong>Cmd + Space</strong> to open Spotlight, type <strong>Terminal</strong>, and press Enter. A window with a text cursor will appear &mdash; this is where you'll type commands.</div>
             </div>
           </div>
           <div class="platform-step">
             <span class="platform-step__num">2</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Create a project folder</div>
-              <div class="platform-step__desc">Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.</div>
+              <div class="platform-step__title" data-i18n="step.createFolder">Create a project folder</div>
+              <div class="platform-step__desc" data-i18n="step.createFolderDesc">Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.</div>
               <span class="platform-step__cmd">mkdir ~/Desktop/clinic && cd ~/Desktop/clinic</span>
             </div>
           </div>
           <div class="platform-step">
             <span class="platform-step__num">3</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Start Claude Code</div>
-              <div class="platform-step__desc">Type this and press Enter. If it's your first time, it will ask you to sign in with your Anthropic account.</div>
+              <div class="platform-step__title" data-i18n="step.startClaude">Start Claude Code</div>
+              <div class="platform-step__desc" data-i18n="step.startClaudeDesc">Type this and press Enter. If it's your first time, it will ask you to sign in with your Anthropic account.</div>
               <span class="platform-step__cmd">claude</span>
             </div>
           </div>
           <div class="platform-step">
             <span class="platform-step__num">4</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Paste the install command</div>
-              <div class="platform-step__desc">Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.</div>
+              <div class="platform-step__title" data-i18n="step.pasteCmd">Paste the install command</div>
+              <div class="platform-step__desc" data-i18n="step.pasteCmdDesc">Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.</div>
             </div>
           </div>
         </div>
@@ -957,31 +946,31 @@
           <div class="platform-step">
             <span class="platform-step__num">1</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Open the terminal</div>
-              <div class="platform-step__desc">Press the <strong>Windows key</strong>, type <strong>PowerShell</strong>, and click "Windows PowerShell". A dark window with a text cursor will appear.</div>
+              <div class="platform-step__title" data-i18n="step.win1Title">Open the terminal</div>
+              <div class="platform-step__desc" data-i18n="step.win1Desc">Press the <strong>Windows key</strong>, type <strong>PowerShell</strong>, and click "Windows PowerShell". A dark window with a text cursor will appear.</div>
             </div>
           </div>
           <div class="platform-step">
             <span class="platform-step__num">2</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Create a project folder</div>
-              <div class="platform-step__desc">Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.</div>
+              <div class="platform-step__title" data-i18n="step.createFolder">Create a project folder</div>
+              <div class="platform-step__desc" data-i18n="step.createFolderDesc">Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.</div>
               <span class="platform-step__cmd">mkdir ~\Desktop\clinic; cd ~\Desktop\clinic</span>
             </div>
           </div>
           <div class="platform-step">
             <span class="platform-step__num">3</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Start Claude Code</div>
-              <div class="platform-step__desc">Type this and press Enter. If it's your first time, it will ask you to sign in with your Anthropic account.</div>
+              <div class="platform-step__title" data-i18n="step.startClaude">Start Claude Code</div>
+              <div class="platform-step__desc" data-i18n="step.startClaudeDesc">Type this and press Enter. If it's your first time, it will ask you to sign in with your Anthropic account.</div>
               <span class="platform-step__cmd">claude</span>
             </div>
           </div>
           <div class="platform-step">
             <span class="platform-step__num">4</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Paste the install command</div>
-              <div class="platform-step__desc">Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.</div>
+              <div class="platform-step__title" data-i18n="step.pasteCmd">Paste the install command</div>
+              <div class="platform-step__desc" data-i18n="step.pasteCmdDesc">Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.</div>
             </div>
           </div>
         </div>
@@ -991,31 +980,31 @@
           <div class="platform-step">
             <span class="platform-step__num">1</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Open the terminal</div>
-              <div class="platform-step__desc">Press <strong>Ctrl + Alt + T</strong> on most distributions, or find "Terminal" in your applications menu. A window with a text cursor will appear.</div>
+              <div class="platform-step__title" data-i18n="step.linux1Title">Open the terminal</div>
+              <div class="platform-step__desc" data-i18n="step.linux1Desc">Press <strong>Ctrl + Alt + T</strong> on most distributions, or find "Terminal" in your applications menu. A window with a text cursor will appear.</div>
             </div>
           </div>
           <div class="platform-step">
             <span class="platform-step__num">2</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Create a project folder</div>
-              <div class="platform-step__desc">Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.</div>
+              <div class="platform-step__title" data-i18n="step.createFolder">Create a project folder</div>
+              <div class="platform-step__desc" data-i18n="step.createFolderDesc">Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.</div>
               <span class="platform-step__cmd">mkdir ~/Desktop/clinic && cd ~/Desktop/clinic</span>
             </div>
           </div>
           <div class="platform-step">
             <span class="platform-step__num">3</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Start Claude Code</div>
-              <div class="platform-step__desc">Type this and press Enter. If it's your first time, it will ask you to sign in with your Anthropic account.</div>
+              <div class="platform-step__title" data-i18n="step.startClaude">Start Claude Code</div>
+              <div class="platform-step__desc" data-i18n="step.startClaudeDesc">Type this and press Enter. If it's your first time, it will ask you to sign in with your Anthropic account.</div>
               <span class="platform-step__cmd">claude</span>
             </div>
           </div>
           <div class="platform-step">
             <span class="platform-step__num">4</span>
             <div class="platform-step__content">
-              <div class="platform-step__title">Paste the install command</div>
-              <div class="platform-step__desc">Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.</div>
+              <div class="platform-step__title" data-i18n="step.pasteCmd">Paste the install command</div>
+              <div class="platform-step__desc" data-i18n="step.pasteCmdDesc">Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.</div>
             </div>
           </div>
         </div>
@@ -1023,7 +1012,7 @@
 
       <!-- Install command -->
       <div class="onboard-command reveal reveal-d3">
-        <p class="onboard-command__label">Copy this command and paste it into Claude Code</p>
+        <p class="onboard-command__label" data-i18n="onboard.cmdLabel">Copy this command and paste it into Claude Code</p>
         <div class="cta-terminal-card" onclick="copyCommand(this)">
           <div class="cta-terminal-card__bar">
             <span class="cta-terminal-card__dot"></span>
@@ -1031,7 +1020,7 @@
             <span class="cta-terminal-card__dot"></span>
           </div>
           <p class="cta-terminal-card__cmd">Fetch and follow https://medical-protocol.vercel.app/install</p>
-          <button class="copy-btn" aria-label="Copy command">
+          <button class="copy-btn" aria-label="Copy command" data-i18n-aria="copy.ariaLabel">
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
         </div>
@@ -1039,27 +1028,27 @@
 
       <!-- What happens next -->
       <div class="expect-section reveal reveal-d4">
-        <h3 class="expect-section__title">What happens after you paste the command</h3>
+        <h3 class="expect-section__title" data-i18n="expect.title">What happens after you paste the command</h3>
         <div class="expect-grid">
           <div class="expect-card">
             <div class="expect-card__num">1</div>
-            <h4>Claude sets up your project</h4>
-            <p>It downloads the medical protocol and configures everything automatically. You don't need to do anything &mdash; just wait about 30 seconds.</p>
+            <h4 data-i18n="expect.step1Title">Claude sets up your project</h4>
+            <p data-i18n="expect.step1Desc">It downloads the medical protocol and configures everything automatically. You don't need to do anything &mdash; just wait about 30 seconds.</p>
           </div>
           <div class="expect-card">
             <div class="expect-card__num">2</div>
-            <h4>Three quick clinical questions</h4>
-            <p>Claude asks about your clinical setting (ICU, ER, ward), whether you manage one or multiple patients, and if you want data saved between sessions.</p>
+            <h4 data-i18n="expect.step2Title">Three quick clinical questions</h4>
+            <p data-i18n="expect.step2Desc">Claude asks about your clinical setting (ICU, ER, ward), whether you manage one or multiple patients, and if you want data saved between sessions.</p>
           </div>
           <div class="expect-card">
             <div class="expect-card__num">3</div>
-            <h4>Describe what you need</h4>
-            <p>Tell Claude what you want in your own words &mdash; "I need a vital signs monitor for my trauma patients" or "build me a dashboard for ICU rounds."</p>
+            <h4 data-i18n="expect.step3Title">Describe what you need</h4>
+            <p data-i18n="expect.step3Desc">Tell Claude what you want in your own words &mdash; "I need a vital signs monitor for my trauma patients" or "build me a dashboard for ICU rounds."</p>
           </div>
           <div class="expect-card">
             <div class="expect-card__num">4</div>
-            <h4>Your interface opens in the browser</h4>
-            <p>A working clinical interface appears in your browser, ready for real patient data. Everything runs locally on your machine.</p>
+            <h4 data-i18n="expect.step4Title">Your interface opens in the browser</h4>
+            <p data-i18n="expect.step4Desc">A working clinical interface appears in your browser, ready for real patient data. Everything runs locally on your machine.</p>
           </div>
         </div>
       </div>
@@ -1069,12 +1058,297 @@
   <!-- Footer -->
   <footer class="footer">
     <div class="footer__inner">
-      <a href="/">&larr; Back to protocol</a>
-      <span>No coding required &middot; All data stays on your machine</span>
+      <a href="/" data-i18n="footer.back">&larr; Back to protocol</a>
+      <span data-i18n="footer.tagline">No coding required &middot; All data stays on your machine</span>
     </div>
   </footer>
 
   <script>
+    // ─── Translation dictionary ───
+    var translations = {
+      en: {
+        'meta.title': 'Medical Protocol — For Doctors',
+        'meta.description': 'Clinical tools built by describing what you need — vital signs, patient records, ABG analyzers, dashboards. No coding, no cloud. All data stays on your computer.',
+        'nav.tools': 'Clinical tools',
+        'nav.specialties': 'Specialties',
+        'nav.privacy': 'Privacy',
+        'nav.faq': 'FAQ',
+        'nav.cta': 'Get started',
+        'hero.eyebrow': 'For surgeons, traumatologists, and clinicians',
+        'hero.title': 'Describe what you need. <em>It\'s built in minutes.</em>',
+        'hero.desc': 'Vital signs monitors, ABG analyzers, patient records, fluid balance trackers, clinical dashboards &mdash; fully functional and ready for real data. No coding. No IT team. All data stays on your machine.',
+        'hero.cta': 'Get started <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+        'tools.label': 'What you get',
+        'tools.title': 'Real clinical tools, <em>not toys.</em>',
+        'bento.mostRequested': 'Most requested',
+        'bento.vitalsTitle': 'Vital Signs Monitor',
+        'bento.vitalsDesc': 'Blood pressure, heart rate, SpO2, temperature, and respiratory rate &mdash; with clinical alerts for abnormal values and validated normal ranges.',
+        'bento.validated': 'Clinically validated',
+        'bento.testCount': '246 tests',
+        'bento.validatedTitle': 'Validated medical logic behind every calculation',
+        'bento.validatedDesc': 'Winter\'s formula, anion gap computation, vital sign ranges, BMI categories, fluid balance &mdash; 246 unit tests ensure clinical accuracy.',
+        'bento.recordsTitle': 'Patient Records',
+        'bento.recordsDesc': 'Demographics, conditions, allergies, clinical notes, and searchable previous evolutions.',
+        'product.dashboardTitle': 'Clinical Dashboard',
+        'product.dashboardDesc': 'Vitals, records, and calculators on one screen &mdash; see all your patients at a glance.',
+        'product.abgTitle': 'ABG Analyzer',
+        'product.abgDesc': 'Enter pH, pCO2, and HCO3 &mdash; get instant disorder detection, compensation status, and anion gap interpretation.',
+        'product.pulseTitle': 'Pulse Oximetry',
+        'product.pulseDesc': 'Real-time SpO2 and heart rate display with animated waveforms and desaturation alerts.',
+        'product.bmiTitle': 'BMI Calculator',
+        'product.bmiDesc': 'Weight and height in, BMI category out &mdash; with imperial/metric toggle for pre-op assessments.',
+        'product.fluidTitle': 'Fluid Balance',
+        'product.fluidDesc': 'Oral, IV, diuresis, insensible losses &mdash; net balance calculated automatically. Enter weight once.',
+        'product.timelineTitle': 'Clinical Timeline',
+        'product.timelineDesc': 'Chronological events with duration badges &mdash; surgical times, medication logs, recovery milestones.',
+        'specialties.label': 'Built for how you actually work',
+        'specialties.title': 'Your specialty, <em>your tools.</em>',
+        'specialties.desc': 'Tell Claude what you need in your own words. It builds the right combination for your practice.',
+        'service.traumaName': 'Trauma &amp; Emergency',
+        'service.traumaDesc': 'Triage vitals, fluid balance, ABG interpretation, and event timeline &mdash; all on one screen between patients.',
+        'service.surgeryName': 'Surgery',
+        'service.surgeryDesc': 'Pre-op assessment with vitals and BMI, surgical timeline, structured clinical notes, and patient handoff summaries.',
+        'service.internalName': 'Internal Medicine',
+        'service.internalDesc': 'Multi-patient dashboards, acid-base analysis, fluid balance tracking, and pulse oximetry for rounds.',
+        'service.anyName': 'Any specialty',
+        'service.anyDesc': 'Combine and customize any of the clinical tools for your specific workflow. Just describe what you need changed.',
+        'process.label': 'How it works',
+        'process.title': 'Three steps. <em>Zero code.</em>',
+        'process.desc': 'If you can describe what you need to a colleague, you can build it. No technical knowledge required.',
+        'process.headerTitle': 'From description to working interface',
+        'process.step1Title': 'Step 1 <span>&mdash; Open Claude Code</span>',
+        'process.step1Desc': 'Create a folder on your computer, open your terminal, and type <strong style="color:var(--accent)">claude</strong>. Paste the install command. Claude sets everything up automatically &mdash; you never see code or technical details.',
+        'process.metricTimeLabel': 'Ready in',
+        'process.metricTimeValue': '&lt; 5 minutes',
+        'process.metricTestsLabel': 'Clinical tests',
+        'process.metricTestsValue': '246 validated',
+        'privacy.label': 'Your data, your machine',
+        'privacy.title': 'Patient privacy, <em>not an afterthought.</em>',
+        'privacy.desc': 'No cloud. No accounts. No external databases. Everything runs on your computer.',
+        'trust.localTitle': 'Runs on your computer',
+        'trust.localDesc': 'Patient data stays on your machine. Nothing is sent to external servers. The interfaces work offline once built.',
+        'trust.separateTitle': 'Chat is separate from data',
+        'trust.separateDesc': 'Your conversation with Claude is processed externally. Enter patient data directly into the interfaces it builds &mdash; that stays on your machine.',
+        'trust.safeguardsTitle': 'Built-in safeguards',
+        'trust.safeguardsDesc': 'If anything you ask could create a privacy risk &mdash; like connecting to an external service &mdash; Claude warns you first and explains in plain language.',
+        'checklist.noCloud': 'No data uploaded to any cloud service',
+        'checklist.noDb': 'No external database connections by default',
+        'checklist.noAccounts': 'No accounts, logins, or subscriptions for your data',
+        'checklist.noTech': 'No technical decisions &mdash; you speak clinical language only',
+        'checklist.validated': 'Validated clinical standards applied automatically',
+        'checklist.describe': 'Describe changes in your own words &mdash; never touch code',
+        'faq.label': 'Common questions',
+        'faq.title': 'Straight answers, <em>no jargon.</em>',
+        'faq.q1': '"I don\'t code &mdash; is this really for me?"',
+        'faq.a1': 'That\'s exactly the point. You describe what you need in clinical language &mdash; "I need a vital signs monitor for my trauma patients" &mdash; and it\'s built for you. If something isn\'t right, you describe what to change. You never see code.',
+        'faq.q2': '"Is patient data safe?"',
+        'faq.a2': 'All data stays on your computer. There\'s no cloud database, no account, no login. The only thing that touches the internet is your conversation with Claude &mdash; and you should never paste patient data into that. Enter it directly into the interfaces.',
+        'faq.q3': '"How is this different from MDCalc?"',
+        'faq.a3': 'MDCalc gives you one calculator at a time. Medical Protocol builds integrated clinical interfaces &mdash; your vitals feed into pulse oximetry, your ABG analyzer sits next to fluid balance, and everything lives in one dashboard customized to your workflow.',
+        'faq.q4': '"What if it builds something wrong?"',
+        'faq.a4': 'Clinical calculations are backed by 246 unit tests covering validated medical logic &mdash; Winter\'s formula, anion gap, vital sign ranges, BMI categories. If something doesn\'t look right, tell Claude and it fixes it immediately.',
+        'faq.q5': '"Do I need IT approval?"',
+        'faq.a5': 'Not for your personal laptop. It runs locally and stores data only on your machine. If your department later wants to adopt it officially, the architecture makes it straightforward to integrate with institutional systems.',
+        'faq.q6': '"What does it cost?"',
+        'faq.a6': 'You need a Claude Code subscription from Anthropic. The medical interfaces themselves are free and open source. Think of it like a tool that understands medicine &mdash; the subscription is for the tool, not the medical features.',
+        'onboard.label': 'Get started',
+        'onboard.title': 'Ready in minutes, <em>not months.</em>',
+        'onboard.desc': 'Follow these steps from your personal computer. No technical background needed &mdash; we\'ll walk you through everything.',
+        'onboard.prereqTitle': 'Before you start',
+        'onboard.prereqDesc': 'You need a <a href="https://claude.ai/download">Claude Code subscription</a> from Anthropic. It\'s a desktop tool that understands clinical language and builds interfaces for you. The medical tools themselves are free.',
+        'step.mac1Title': 'Open the terminal',
+        'step.mac1Desc': 'Press <strong>Cmd + Space</strong> to open Spotlight, type <strong>Terminal</strong>, and press Enter. A window with a text cursor will appear &mdash; this is where you\'ll type commands.',
+        'step.win1Title': 'Open the terminal',
+        'step.win1Desc': 'Press the <strong>Windows key</strong>, type <strong>PowerShell</strong>, and click "Windows PowerShell". A dark window with a text cursor will appear.',
+        'step.linux1Title': 'Open the terminal',
+        'step.linux1Desc': 'Press <strong>Ctrl + Alt + T</strong> on most distributions, or find "Terminal" in your applications menu. A window with a text cursor will appear.',
+        'step.createFolder': 'Create a project folder',
+        'step.createFolderDesc': 'Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.',
+        'step.startClaude': 'Start Claude Code',
+        'step.startClaudeDesc': 'Type this and press Enter. If it\'s your first time, it will ask you to sign in with your Anthropic account.',
+        'step.pasteCmd': 'Paste the install command',
+        'step.pasteCmdDesc': 'Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.',
+        'onboard.cmdLabel': 'Copy this command and paste it into Claude Code',
+        'copy.ariaLabel': 'Copy command',
+        'expect.title': 'What happens after you paste the command',
+        'expect.step1Title': 'Claude sets up your project',
+        'expect.step1Desc': 'It downloads the medical protocol and configures everything automatically. You don\'t need to do anything &mdash; just wait about 30 seconds.',
+        'expect.step2Title': 'Three quick clinical questions',
+        'expect.step2Desc': 'Claude asks about your clinical setting (ICU, ER, ward), whether you manage one or multiple patients, and if you want data saved between sessions.',
+        'expect.step3Title': 'Describe what you need',
+        'expect.step3Desc': 'Tell Claude what you want in your own words &mdash; "I need a vital signs monitor for my trauma patients" or "build me a dashboard for ICU rounds."',
+        'expect.step4Title': 'Your interface opens in the browser',
+        'expect.step4Desc': 'A working clinical interface appears in your browser, ready for real patient data. Everything runs locally on your machine.',
+        'footer.back': '&larr; Back to protocol',
+        'footer.tagline': 'No coding required &middot; All data stays on your machine'
+      },
+      es: {
+        'meta.title': 'Protocolo Médico — Para Médicos',
+        'meta.description': 'Herramientas clínicas construidas describiendo lo que necesita — signos vitales, historias clínicas, analizadores de gases arteriales, tableros. Sin programar, sin nube. Todos los datos quedan en su computadora.',
+        'nav.tools': 'Herramientas',
+        'nav.specialties': 'Especialidades',
+        'nav.privacy': 'Privacidad',
+        'nav.faq': 'Preguntas',
+        'nav.cta': 'Comenzar',
+        'hero.eyebrow': 'Para cirujanos, traumatólogos y médicos clínicos',
+        'hero.title': 'Describa lo que necesita. <em>Se construye en minutos.</em>',
+        'hero.desc': 'Monitores de signos vitales, analizadores de gases arteriales, historias clínicas, balances hídricos, tableros clínicos &mdash; completamente funcionales y listos para datos reales. Sin programar. Sin equipo de sistemas. Todos los datos quedan en su máquina.',
+        'hero.cta': 'Comenzar <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+        'tools.label': 'Lo que obtiene',
+        'tools.title': 'Herramientas clínicas reales, <em>no juguetes.</em>',
+        'bento.mostRequested': 'Más solicitado',
+        'bento.vitalsTitle': 'Monitor de Signos Vitales',
+        'bento.vitalsDesc': 'Presión arterial, frecuencia cardíaca, SpO2, temperatura y frecuencia respiratoria &mdash; con alertas clínicas para valores anormales y rangos normales validados.',
+        'bento.validated': 'Clínicamente validado',
+        'bento.testCount': '246 pruebas',
+        'bento.validatedTitle': 'Lógica médica validada detrás de cada cálculo',
+        'bento.validatedDesc': 'Fórmula de Winter, cálculo de anion gap, rangos de signos vitales, categorías de IMC, balance hídrico &mdash; 246 pruebas unitarias garantizan la precisión clínica.',
+        'bento.recordsTitle': 'Historias Clínicas',
+        'bento.recordsDesc': 'Datos demográficos, condiciones, alergias, notas clínicas y evoluciones anteriores con búsqueda.',
+        'product.dashboardTitle': 'Tablero Clínico',
+        'product.dashboardDesc': 'Signos vitales, historias y calculadoras en una sola pantalla &mdash; vea todos sus pacientes de un vistazo.',
+        'product.abgTitle': 'Analizador de Gases Arteriales',
+        'product.abgDesc': 'Ingrese pH, pCO2 y HCO3 &mdash; obtenga detección instantánea de trastornos, estado de compensación e interpretación del anion gap.',
+        'product.pulseTitle': 'Oximetría de Pulso',
+        'product.pulseDesc': 'Visualización en tiempo real de SpO2 y frecuencia cardíaca con formas de onda animadas y alertas de desaturación.',
+        'product.bmiTitle': 'Calculadora de IMC',
+        'product.bmiDesc': 'Ingrese peso y talla, obtenga la categoría de IMC &mdash; con cambio entre sistema imperial y métrico para evaluaciones prequirúrgicas.',
+        'product.fluidTitle': 'Balance Hídrico',
+        'product.fluidDesc': 'Oral, IV, diuresis, pérdidas insensibles &mdash; balance neto calculado automáticamente. Ingrese el peso una sola vez.',
+        'product.timelineTitle': 'Línea de Tiempo Clínica',
+        'product.timelineDesc': 'Eventos cronológicos con indicadores de duración &mdash; tiempos quirúrgicos, registros de medicación, hitos de recuperación.',
+        'specialties.label': 'Diseñado para su forma de trabajar',
+        'specialties.title': 'Su especialidad, <em>sus herramientas.</em>',
+        'specialties.desc': 'Dígale a Claude lo que necesita en sus propias palabras. Construye la combinación correcta para su práctica.',
+        'service.traumaName': 'Trauma y Emergencias',
+        'service.traumaDesc': 'Signos vitales de triage, balance hídrico, interpretación de gases arteriales y línea de tiempo de eventos &mdash; todo en una pantalla entre pacientes.',
+        'service.surgeryName': 'Cirugía',
+        'service.surgeryDesc': 'Evaluación prequirúrgica con signos vitales e IMC, línea de tiempo quirúrgica, notas clínicas estructuradas y resúmenes de entrega de pacientes.',
+        'service.internalName': 'Medicina Interna',
+        'service.internalDesc': 'Tableros multipaciente, análisis ácido-base, seguimiento de balance hídrico y oximetría de pulso para rondas.',
+        'service.anyName': 'Cualquier especialidad',
+        'service.anyDesc': 'Combine y personalice cualquiera de las herramientas clínicas para su flujo de trabajo específico. Solo describa lo que necesita cambiar.',
+        'process.label': 'Cómo funciona',
+        'process.title': 'Tres pasos. <em>Cero código.</em>',
+        'process.desc': 'Si puede describir lo que necesita a un colega, puede construirlo. No se requieren conocimientos técnicos.',
+        'process.headerTitle': 'De la descripción a la interfaz funcional',
+        'process.step1Title': 'Paso 1 <span>&mdash; Abra Claude Code</span>',
+        'process.step1Desc': 'Cree una carpeta en su computadora, abra su terminal y escriba <strong style="color:var(--accent)">claude</strong>. Pegue el comando de instalación. Claude configura todo automáticamente &mdash; usted nunca ve código ni detalles técnicos.',
+        'process.metricTimeLabel': 'Listo en',
+        'process.metricTimeValue': '&lt; 5 minutos',
+        'process.metricTestsLabel': 'Pruebas clínicas',
+        'process.metricTestsValue': '246 validadas',
+        'privacy.label': 'Sus datos, su máquina',
+        'privacy.title': 'Privacidad del paciente, <em>no una ocurrencia tardía.</em>',
+        'privacy.desc': 'Sin nube. Sin cuentas. Sin bases de datos externas. Todo se ejecuta en su computadora.',
+        'trust.localTitle': 'Se ejecuta en su computadora',
+        'trust.localDesc': 'Los datos del paciente permanecen en su máquina. Nada se envía a servidores externos. Las interfaces funcionan sin conexión una vez construidas.',
+        'trust.separateTitle': 'El chat está separado de los datos',
+        'trust.separateDesc': 'Su conversación con Claude se procesa externamente. Ingrese los datos del paciente directamente en las interfaces que construye &mdash; esos datos quedan en su máquina.',
+        'trust.safeguardsTitle': 'Protecciones integradas',
+        'trust.safeguardsDesc': 'Si algo que solicita pudiera crear un riesgo de privacidad &mdash; como conectarse a un servicio externo &mdash; Claude le advierte primero y se lo explica en lenguaje sencillo.',
+        'checklist.noCloud': 'Ningún dato se sube a ningún servicio en la nube',
+        'checklist.noDb': 'Sin conexiones a bases de datos externas por defecto',
+        'checklist.noAccounts': 'Sin cuentas, inicios de sesión ni suscripciones para sus datos',
+        'checklist.noTech': 'Sin decisiones técnicas &mdash; usted habla solo en lenguaje clínico',
+        'checklist.validated': 'Estándares clínicos validados se aplican automáticamente',
+        'checklist.describe': 'Describa los cambios en sus propias palabras &mdash; nunca toque código',
+        'faq.label': 'Preguntas frecuentes',
+        'faq.title': 'Respuestas directas, <em>sin jerga técnica.</em>',
+        'faq.q1': '"No sé programar &mdash; ¿esto es realmente para mí?"',
+        'faq.a1': 'Ese es exactamente el punto. Usted describe lo que necesita en lenguaje clínico &mdash; "Necesito un monitor de signos vitales para mis pacientes de trauma" &mdash; y se construye para usted. Si algo no está bien, describe qué cambiar. Nunca ve código.',
+        'faq.q2': '"¿Los datos del paciente están seguros?"',
+        'faq.a2': 'Todos los datos quedan en su computadora. No hay base de datos en la nube, ni cuenta, ni inicio de sesión. Lo único que toca internet es su conversación con Claude &mdash; y nunca debe pegar datos del paciente ahí. Ingréselos directamente en las interfaces.',
+        'faq.q3': '"¿En qué se diferencia de MDCalc?"',
+        'faq.a3': 'MDCalc le da una calculadora a la vez. Medical Protocol construye interfaces clínicas integradas &mdash; sus signos vitales alimentan la oximetría, su analizador de gases queda junto al balance hídrico, y todo vive en un tablero personalizado para su flujo de trabajo.',
+        'faq.q4': '"¿Qué pasa si construye algo incorrecto?"',
+        'faq.a4': 'Los cálculos clínicos están respaldados por 246 pruebas unitarias que cubren lógica médica validada &mdash; fórmula de Winter, anion gap, rangos de signos vitales, categorías de IMC. Si algo no se ve bien, dígale a Claude y lo corrige inmediatamente.',
+        'faq.q5': '"¿Necesito aprobación de sistemas?"',
+        'faq.a5': 'No para su computadora personal. Se ejecuta localmente y almacena datos solo en su máquina. Si su departamento luego quiere adoptarlo oficialmente, la arquitectura facilita la integración con sistemas institucionales.',
+        'faq.q6': '"¿Cuánto cuesta?"',
+        'faq.a6': 'Necesita una suscripción a Claude Code de Anthropic. Las interfaces médicas en sí son gratuitas y de código abierto. Piénselo como una herramienta que entiende medicina &mdash; la suscripción es por la herramienta, no por las funciones médicas.',
+        'onboard.label': 'Comenzar',
+        'onboard.title': 'Listo en minutos, <em>no en meses.</em>',
+        'onboard.desc': 'Siga estos pasos desde su computadora personal. No necesita conocimientos técnicos &mdash; le guiaremos en todo.',
+        'onboard.prereqTitle': 'Antes de comenzar',
+        'onboard.prereqDesc': 'Necesita una <a href="https://claude.ai/download">suscripción a Claude Code</a> de Anthropic. Es una herramienta de escritorio que entiende lenguaje clínico y construye interfaces para usted. Las herramientas médicas en sí son gratuitas.',
+        'step.mac1Title': 'Abra la terminal',
+        'step.mac1Desc': 'Presione <strong>Cmd + Espacio</strong> para abrir Spotlight, escriba <strong>Terminal</strong> y presione Enter. Aparecerá una ventana con un cursor de texto &mdash; aquí es donde escribirá los comandos.',
+        'step.win1Title': 'Abra la terminal',
+        'step.win1Desc': 'Presione la <strong>tecla Windows</strong>, escriba <strong>PowerShell</strong> y haga clic en "Windows PowerShell". Aparecerá una ventana oscura con un cursor de texto.',
+        'step.linux1Title': 'Abra la terminal',
+        'step.linux1Desc': 'Presione <strong>Ctrl + Alt + T</strong> en la mayoría de distribuciones, o busque "Terminal" en su menú de aplicaciones. Aparecerá una ventana con un cursor de texto.',
+        'step.createFolder': 'Cree una carpeta de proyecto',
+        'step.createFolderDesc': 'Escriba esto y presione Enter. Crea una carpeta llamada "clinic" en su Escritorio y se mueve a ella.',
+        'step.startClaude': 'Inicie Claude Code',
+        'step.startClaudeDesc': 'Escriba esto y presione Enter. Si es su primera vez, le pedirá que inicie sesión con su cuenta de Anthropic.',
+        'step.pasteCmd': 'Pegue el comando de instalación',
+        'step.pasteCmdDesc': 'Una vez que Claude esté ejecutándose y vea un campo de texto, pegue el comando del recuadro de abajo. Claude se encarga del resto.',
+        'onboard.cmdLabel': 'Copie este comando y péguelo en Claude Code',
+        'copy.ariaLabel': 'Copiar comando',
+        'expect.title': 'Qué sucede después de pegar el comando',
+        'expect.step1Title': 'Claude configura su proyecto',
+        'expect.step1Desc': 'Descarga el protocolo médico y configura todo automáticamente. No necesita hacer nada &mdash; solo espere unos 30 segundos.',
+        'expect.step2Title': 'Tres preguntas clínicas rápidas',
+        'expect.step2Desc': 'Claude le pregunta sobre su entorno clínico (UCI, urgencias, sala), si maneja uno o varios pacientes, y si desea guardar datos entre sesiones.',
+        'expect.step3Title': 'Describa lo que necesita',
+        'expect.step3Desc': 'Dígale a Claude lo que quiere en sus propias palabras &mdash; "Necesito un monitor de signos vitales para mis pacientes de trauma" o "constrúyame un tablero para rondas de UCI."',
+        'expect.step4Title': 'Su interfaz se abre en el navegador',
+        'expect.step4Desc': 'Una interfaz clínica funcional aparece en su navegador, lista para datos reales de pacientes. Todo se ejecuta localmente en su máquina.',
+        'footer.back': '&larr; Volver al protocolo',
+        'footer.tagline': 'Sin programar &middot; Todos los datos quedan en su máquina'
+      }
+    };
+
+    // ─── Language switcher ───
+    var currentLang = 'en';
+
+    function setLang(lang) {
+      if (!translations[lang]) return;
+      currentLang = lang;
+
+      // Update all data-i18n elements (innerHTML)
+      document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n');
+        if (translations[lang][key] !== undefined) {
+          el.innerHTML = translations[lang][key];
+        }
+      });
+
+      // Update meta description (content attribute)
+      var metaDesc = document.querySelector('[data-i18n-content="meta.description"]');
+      if (metaDesc && translations[lang]['meta.description']) {
+        metaDesc.setAttribute('content', translations[lang]['meta.description']);
+      }
+
+      // Update html lang attribute
+      document.documentElement.lang = lang;
+
+      // Update aria-labels
+      document.querySelectorAll('[data-i18n-aria]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n-aria');
+        if (translations[lang][key] !== undefined) {
+          el.setAttribute('aria-label', translations[lang][key]);
+        }
+      });
+
+      // Toggle active class on language buttons
+      document.querySelectorAll('.lang-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.textContent === lang.toUpperCase());
+      });
+
+      // Save preference
+      localStorage.setItem('lang', lang);
+    }
+
+    // ─── Auto-detect language on load ───
+    (function() {
+      var saved = localStorage.getItem('lang');
+      if (saved && translations[saved]) { setLang(saved); return; }
+      var browserLang = (navigator.language || navigator.languages && navigator.languages[0] || '');
+      if (browserLang.startsWith('es')) setLang('es');
+    })();
+
     // Scroll progress
     window.addEventListener('scroll', function() {
       var h = document.documentElement;
