@@ -43,8 +43,11 @@ Classify the doctor's request based on these signal words and route to the match
 | **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/timeline/SKILL.md` |
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined, multiple domains matched | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/dashboard/SKILL.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize, or request targets already-installed component | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/customize/SKILL.md` |
+| **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/troubleshoot/SKILL.md` |
 
 **If the request matches multiple domains**, prefer `dashboard` as it combines components.
+
+**If the doctor is reporting a problem** (signal words: not working, error, broken, crashed, blank/white screen, won't load, stuck, something wrong), always route to `troubleshoot` regardless of other domain matches.
 
 **If no domain matches**, ask: "Could you describe what clinical information you'd like to see or manage?"
 

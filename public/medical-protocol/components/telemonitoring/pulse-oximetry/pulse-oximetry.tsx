@@ -19,6 +19,7 @@
  */
 import { Activity } from "lucide-react"
 import { useState } from "react"
+import { MedicalDisclaimer } from "@/components/medical-disclaimer"
 
 interface PulseOximetryProps {
   bpm: number;
@@ -69,6 +70,7 @@ const PulseOximetry = ({ bpm, spo2, isBeating }: PulseOximetryProps) => {
         <span className={`text-sm ${isWarning && "text-orange-400"} ${isDanger && "text-red-500"}`}>bpm</span>
       </div>
     </div>
+    <MedicalDisclaimer />
   )
 }
 

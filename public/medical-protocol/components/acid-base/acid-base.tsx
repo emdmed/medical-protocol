@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Result, Values } from "./types/interfaces";
 import { analyze } from "./analyze";
 import Popup from "./components/popup";
+import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 import {
   Eye,
   LucideEyeOff,
@@ -259,6 +260,7 @@ const AcidBase = ({ onData }: AcidBaseProps) => {
           </div>
         </div>
       </CardContent>
+      <MedicalDisclaimer />
     </Card>
   );
 };

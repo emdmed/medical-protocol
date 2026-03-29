@@ -1,6 +1,13 @@
 {
   "version": "0.3.0",
   "context": "Read this first. For full props/types, open the component file (JSDoc header). For composition patterns, see COMPOSITION.md.",
+  "shared": {
+    "medical-disclaimer": {
+      "description": "Medical disclaimer footer — included by all clinical components",
+      "import": "@/components/medical-disclaimer",
+      "files": ["medical-disclaimer.tsx"]
+    }
+  },
   "vital-signs": {
     "version": "0.3.0",
     "description": "Editable vital signs panel: BP, HR, RR, Temp, SpO2/FiO2",

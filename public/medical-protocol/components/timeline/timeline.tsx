@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/popover';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { MedicalDisclaimer } from '@/components/medical-disclaimer';
 
 export interface TimelineItem {
   label: string;
@@ -209,6 +210,7 @@ const Timeline = ({ items = timelineData, maxHeight = "32rem" }: TimelineProps) 
           </Button>
         </div>
       </div>
+      <MedicalDisclaimer />
     </div>
   );
 };

@@ -1,3 +1,4 @@
 node_modules/
 .claude/hooks-state/
 .claude/settings.local.json
+marketing/

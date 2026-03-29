@@ -109,8 +109,11 @@ When the doctor describes what they need, classify into one of these domains bas
 | **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | `workflows/timeline.md` |
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `workflows/dashboard.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize | `workflows/customize.md` |
+| **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | `workflows/troubleshoot.md` |
 
 **If the request matches multiple domains**, prefer `dashboard` as it combines components.
+
+**If the doctor is reporting a problem** (signal words: not working, error, broken, crashed, blank/white screen, won't load, stuck, something wrong), always route to `troubleshoot` regardless of other domain matches.
 
 **If no domain matches**, ask: "Could you describe what clinical information you'd like to see or manage?"
 

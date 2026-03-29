@@ -37,6 +37,7 @@ import RespiratoryRate from "@/components/vital-signs/signs/respiratory-rate";
 import Temperature from "@/components/vital-signs/signs/temperature";
 import BloodOxygen from "@/components/vital-signs/signs/blood-oxygen";
 import VitalSignsFhir from "@/components/vital-signs/components/vital-signs-fhir";
+import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 
 import { useAnalyzeVitalSigns } from "@/components/vital-signs/hooks/useAnalyze";
 import { useClickOutside } from "./hooks/useClickOutside";
@@ -337,6 +338,7 @@ const VitalSigns = ({
           </Card>
         </div>
       )}
+      <MedicalDisclaimer />
     </div>
   );
 };

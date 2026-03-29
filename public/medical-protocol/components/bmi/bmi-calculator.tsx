@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, User, ToggleLeft, ToggleRight } from "lucide-react";
+import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 
 const calculateBMI = (w: string, hFt: string, hIn: string, hM: string, metric: boolean): string | null => {
   const weightNum = parseFloat(w);
@@ -301,6 +302,7 @@ const BMICalculator = () => {
           </div>
         </CardContent>
       </Card>
+      <MedicalDisclaimer />
     </div>
   );
 };

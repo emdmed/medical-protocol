@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
 import { Label } from "../ui/label";
+import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 
 interface WaterBalanceData {
   weight?: number | string;
@@ -300,6 +301,7 @@ const WaterBalanceCalculator = ({ data }: WaterBalanceProps) => {
           </div>
         </CardContent>
       </Card>
+      <MedicalDisclaimer />
     </div>
   );
 };

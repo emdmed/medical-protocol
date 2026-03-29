@@ -25,6 +25,7 @@ import BMICalculator from "@/components/bmi/bmi-calculator";
 import { generateHighlightedHTML } from "./utils/generateHighlightedHTML";
 import References from "./references/references";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -706,6 +707,7 @@ export default function MedicalRecordsApp() {
         </div>
         <div className="absolute bottom-0 p-2">
           {currentRecord.analysis && <References />}
+          <MedicalDisclaimer />
         </div>
       </div>
 
