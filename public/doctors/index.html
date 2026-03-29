@@ -349,16 +349,15 @@
     }
     .faq-card p { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
 
-    /* ─── CTA ─── */
+    /* ─── CTA / Onboarding ─── */
     .cta-section { padding: 140px 0 120px; }
     .cta-section h2 {
       font-size: clamp(36px, 5.5vw, 70px); font-weight: 500;
       letter-spacing: -0.04em; line-height: 0.95; margin-bottom: 20px;
     }
     .cta-section h2 em { font-style: normal; color: var(--text-dim); }
-    .cta-section__sub { font-size: 16px; color: var(--text-muted); margin-bottom: 48px; max-width: 400px; }
+    .cta-section__sub { font-size: 16px; color: var(--text-muted); margin-bottom: 48px; max-width: 500px; line-height: 1.7; }
 
-    .cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .cta-terminal-card {
       background: var(--card); border: 1px solid var(--card-border);
       border-radius: 8px; padding: 32px; cursor: pointer;
@@ -381,22 +380,103 @@
     .copy-btn svg { width: 14px; height: 14px; stroke: var(--text-dim); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .copy-btn--copied svg { stroke: var(--green); }
 
-    .cta-steps-card {
-      background: var(--card); border: 1px solid var(--card-border);
-      border-radius: 8px; padding: 32px; display: flex; flex-direction: column; gap: 20px;
+    /* Prerequisite card */
+    .onboard-prereq {
+      background: linear-gradient(135deg, rgba(26,158,143,0.1), rgba(43,127,195,0.1));
+      border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 28px 32px; margin-bottom: 32px;
+      display: flex; align-items: center; gap: 20px;
     }
-    .cta-step {
-      display: flex; align-items: center; gap: 16px;
-      font-size: 14px; color: var(--text-muted); line-height: 1.5;
+    .onboard-prereq__icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: rgba(26,158,143,0.15);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .cta-step__num {
-      width: 32px; height: 32px; border-radius: 8px;
+    .onboard-prereq__icon svg { width: 24px; height: 24px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .onboard-prereq__text h3 { font-size: 16px; font-weight: 500; margin-bottom: 4px; letter-spacing: -0.02em; }
+    .onboard-prereq__text p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .onboard-prereq__text a { color: var(--accent); text-decoration: underline; }
+
+    /* Platform tabs */
+    .platform-tabs {
+      display: flex; gap: 4px; margin-bottom: 0;
+    }
+    .platform-tab {
+      background: var(--card-alt); border: 1px solid var(--card-border);
+      border-bottom: none; border-radius: 8px 8px 0 0;
+      padding: 12px 24px; font-size: 14px; font-weight: 500;
+      color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+      font-family: inherit;
+    }
+    .platform-tab:hover { color: var(--text); }
+    .platform-tab.active {
+      background: var(--card); color: var(--text);
+      border-color: var(--card-border);
+    }
+
+    .platform-panel {
+      display: none; background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 0 8px 8px 8px; padding: 32px;
+    }
+    .platform-panel.active { display: block; }
+
+    .platform-step {
+      display: flex; gap: 16px; padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .platform-step:last-child { border-bottom: none; padding-bottom: 0; }
+    .platform-step:first-child { padding-top: 0; }
+    .platform-step__num {
+      width: 28px; height: 28px; border-radius: 8px;
       background: var(--bg); border: 1px solid var(--card-border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 600; color: var(--text-dim); flex-shrink: 0;
+      font-size: 12px; font-weight: 600; color: var(--text-dim); flex-shrink: 0;
+      margin-top: 1px;
     }
-    .cta-step code { color: var(--accent); font-family: monospace; }
-    .cta-hint { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+    .platform-step__content { flex: 1; }
+    .platform-step__title {
+      font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px;
+    }
+    .platform-step__desc {
+      font-size: 13px; color: var(--text-muted); line-height: 1.6;
+    }
+    .platform-step__cmd {
+      display: inline-block; margin-top: 6px; padding: 4px 10px;
+      background: var(--bg); border: 1px solid var(--card-border);
+      border-radius: 6px; font-family: monospace; font-size: 12px;
+      color: var(--accent);
+    }
+
+    /* Install command card */
+    .onboard-command { margin-top: 32px; }
+    .onboard-command__label {
+      font-size: 13px; color: var(--text-dim); margin-bottom: 8px; font-weight: 500;
+    }
+
+    /* What happens next */
+    .expect-section { margin-top: 48px; }
+    .expect-section__title {
+      font-size: 18px; font-weight: 500; letter-spacing: -0.02em;
+      margin-bottom: 20px; color: var(--text);
+    }
+    .expect-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .expect-card {
+      background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 8px; padding: 24px; transition: border-color 0.3s;
+    }
+    .expect-card:hover { border-color: rgba(255,255,255,0.2); }
+    .expect-card__num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 6px;
+      background: rgba(26,158,143,0.15); color: var(--accent);
+      font-size: 12px; font-weight: 600; margin-bottom: 12px;
+    }
+    .expect-card h4 {
+      font-size: 15px; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.02em;
+    }
+    .expect-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
 
     /* ─── Footer ─── */
     .footer {
@@ -463,9 +543,12 @@
       .checklist { grid-template-columns: 1fr; }
       .checklist li { align-items: flex-start; }
       .checklist__dot { margin-top: 6px; }
-      .cta-grid { grid-template-columns: 1fr; }
       .cta-terminal-card__cmd { font-size: 12px; word-break: break-word; }
       .faq-grid { grid-template-columns: 1fr; }
+      .onboard-prereq { flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px; }
+      .platform-tab { padding: 10px 16px; font-size: 13px; }
+      .platform-panel { padding: 24px; }
+      .expect-grid { grid-template-columns: 1fr; }
       .copy-btn { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
       .footer__inner { flex-direction: column; gap: 12px; text-align: center; }
       .section-header { margin-bottom: 48px; }
@@ -491,7 +574,10 @@
       .cta-section h2 { font-size: 28px; }
       .cta-terminal-card { padding: 20px; }
       .cta-terminal-card__cmd { font-size: 11px; }
-      .cta-steps-card { padding: 20px; }
+      .platform-tab { padding: 8px 12px; font-size: 12px; }
+      .platform-panel { padding: 20px; }
+      .platform-step__cmd { font-size: 11px; }
+      .expect-card { padding: 20px; }
     }
   </style>
 </head>
@@ -804,12 +890,140 @@
     </div>
   </section>
 
-  <!-- CTA -->
-  <section id="start" class="cta-section">
+  <!-- Get Started / Onboarding -->
+  <section id="start" class="cta-section section--alt">
     <div class="container">
-      <h2 class="reveal">Ready in minutes, <em>not months.</em></h2>
-      <p class="cta-section__sub reveal reveal-d1">You need <a href="https://claude.ai/download" style="color:var(--accent);text-decoration:underline">Claude Code</a> (Anthropic subscription required). The medical interfaces are free.</p>
-      <div class="cta-grid reveal reveal-d2">
+      <div class="section-header reveal">
+        <p class="section-label">Get started</p>
+        <h2 class="section-title" style="margin-bottom:20px">Ready in minutes, <em>not months.</em></h2>
+        <p class="section-desc">Follow these steps from your personal computer. No technical background needed &mdash; we'll walk you through everything.</p>
+      </div>
+
+      <!-- Prerequisite -->
+      <div class="onboard-prereq reveal reveal-d1">
+        <div class="onboard-prereq__icon">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="onboard-prereq__text">
+          <h3>Before you start</h3>
+          <p>You need a <a href="https://claude.ai/download">Claude Code subscription</a> from Anthropic. It's a desktop tool that understands clinical language and builds interfaces for you. The medical tools themselves are free.</p>
+        </div>
+      </div>
+
+      <!-- Platform tabs -->
+      <div class="reveal reveal-d2">
+        <div class="platform-tabs">
+          <button class="platform-tab active" onclick="switchPlatform('mac')" data-platform="mac">Mac</button>
+          <button class="platform-tab" onclick="switchPlatform('windows')" data-platform="windows">Windows</button>
+          <button class="platform-tab" onclick="switchPlatform('linux')" data-platform="linux">Linux</button>
+        </div>
+
+        <!-- Mac panel -->
+        <div class="platform-panel active" id="platform-mac">
+          <div class="platform-step">
+            <span class="platform-step__num">1</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Open the terminal</div>
+              <div class="platform-step__desc">Press <strong>Cmd + Space</strong> to open Spotlight, type <strong>Terminal</strong>, and press Enter. A window with a text cursor will appear &mdash; this is where you'll type commands.</div>
+            </div>
+          </div>
+          <div class="platform-step">
+            <span class="platform-step__num">2</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Create a project folder</div>
+              <div class="platform-step__desc">Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.</div>
+              <span class="platform-step__cmd">mkdir ~/Desktop/clinic && cd ~/Desktop/clinic</span>
+            </div>
+          </div>
+          <div class="platform-step">
+            <span class="platform-step__num">3</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Start Claude Code</div>
+              <div class="platform-step__desc">Type this and press Enter. If it's your first time, it will ask you to sign in with your Anthropic account.</div>
+              <span class="platform-step__cmd">claude</span>
+            </div>
+          </div>
+          <div class="platform-step">
+            <span class="platform-step__num">4</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Paste the install command</div>
+              <div class="platform-step__desc">Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Windows panel -->
+        <div class="platform-panel" id="platform-windows">
+          <div class="platform-step">
+            <span class="platform-step__num">1</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Open the terminal</div>
+              <div class="platform-step__desc">Press the <strong>Windows key</strong>, type <strong>PowerShell</strong>, and click "Windows PowerShell". A dark window with a text cursor will appear.</div>
+            </div>
+          </div>
+          <div class="platform-step">
+            <span class="platform-step__num">2</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Create a project folder</div>
+              <div class="platform-step__desc">Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.</div>
+              <span class="platform-step__cmd">mkdir ~\Desktop\clinic; cd ~\Desktop\clinic</span>
+            </div>
+          </div>
+          <div class="platform-step">
+            <span class="platform-step__num">3</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Start Claude Code</div>
+              <div class="platform-step__desc">Type this and press Enter. If it's your first time, it will ask you to sign in with your Anthropic account.</div>
+              <span class="platform-step__cmd">claude</span>
+            </div>
+          </div>
+          <div class="platform-step">
+            <span class="platform-step__num">4</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Paste the install command</div>
+              <div class="platform-step__desc">Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Linux panel -->
+        <div class="platform-panel" id="platform-linux">
+          <div class="platform-step">
+            <span class="platform-step__num">1</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Open the terminal</div>
+              <div class="platform-step__desc">Press <strong>Ctrl + Alt + T</strong> on most distributions, or find "Terminal" in your applications menu. A window with a text cursor will appear.</div>
+            </div>
+          </div>
+          <div class="platform-step">
+            <span class="platform-step__num">2</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Create a project folder</div>
+              <div class="platform-step__desc">Type this and press Enter. It creates a folder called "clinic" on your Desktop and moves into it.</div>
+              <span class="platform-step__cmd">mkdir ~/Desktop/clinic && cd ~/Desktop/clinic</span>
+            </div>
+          </div>
+          <div class="platform-step">
+            <span class="platform-step__num">3</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Start Claude Code</div>
+              <div class="platform-step__desc">Type this and press Enter. If it's your first time, it will ask you to sign in with your Anthropic account.</div>
+              <span class="platform-step__cmd">claude</span>
+            </div>
+          </div>
+          <div class="platform-step">
+            <span class="platform-step__num">4</span>
+            <div class="platform-step__content">
+              <div class="platform-step__title">Paste the install command</div>
+              <div class="platform-step__desc">Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Install command -->
+      <div class="onboard-command reveal reveal-d3">
+        <p class="onboard-command__label">Copy this command and paste it into Claude Code</p>
         <div class="cta-terminal-card" onclick="copyCommand(this)">
           <div class="cta-terminal-card__bar">
             <span class="cta-terminal-card__dot"></span>
@@ -821,20 +1035,32 @@
             <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           </button>
         </div>
-        <div class="cta-steps-card">
-          <div class="cta-step">
-            <span class="cta-step__num">1</span>
-            Create a folder and open your terminal there
+      </div>
+
+      <!-- What happens next -->
+      <div class="expect-section reveal reveal-d4">
+        <h3 class="expect-section__title">What happens after you paste the command</h3>
+        <div class="expect-grid">
+          <div class="expect-card">
+            <div class="expect-card__num">1</div>
+            <h4>Claude sets up your project</h4>
+            <p>It downloads the medical protocol and configures everything automatically. You don't need to do anything &mdash; just wait about 30 seconds.</p>
           </div>
-          <div class="cta-step">
-            <span class="cta-step__num">2</span>
-            Type <code>claude</code> to start Claude Code
+          <div class="expect-card">
+            <div class="expect-card__num">2</div>
+            <h4>Three quick clinical questions</h4>
+            <p>Claude asks about your clinical setting (ICU, ER, ward), whether you manage one or multiple patients, and if you want data saved between sessions.</p>
           </div>
-          <div class="cta-step">
-            <span class="cta-step__num">3</span>
-            Paste the command from the left
+          <div class="expect-card">
+            <div class="expect-card__num">3</div>
+            <h4>Describe what you need</h4>
+            <p>Tell Claude what you want in your own words &mdash; "I need a vital signs monitor for my trauma patients" or "build me a dashboard for ICU rounds."</p>
           </div>
-          <p class="cta-hint">If something goes wrong, just tell Claude what happened. It figures out the problem and fixes it.</p>
+          <div class="expect-card">
+            <div class="expect-card__num">4</div>
+            <h4>Your interface opens in the browser</h4>
+            <p>A working clinical interface appears in your browser, ready for real patient data. Everything runs locally on your machine.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -870,6 +1096,22 @@
         }, 2000);
       });
     }
+
+    // Platform tabs
+    function switchPlatform(platform) {
+      document.querySelectorAll('.platform-tab').forEach(function(tab) {
+        tab.classList.toggle('active', tab.dataset.platform === platform);
+      });
+      document.querySelectorAll('.platform-panel').forEach(function(panel) {
+        panel.classList.toggle('active', panel.id === 'platform-' + platform);
+      });
+    }
+    // Auto-detect platform
+    (function() {
+      var ua = navigator.userAgent || navigator.platform || '';
+      if (/Win/.test(ua)) switchPlatform('windows');
+      else if (/Linux/.test(ua) && !/Android/.test(ua)) switchPlatform('linux');
+    })();
 
     // Scroll reveal
     var observer = new IntersectionObserver(function(entries) {
