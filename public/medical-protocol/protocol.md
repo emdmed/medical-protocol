@@ -169,7 +169,7 @@ When a workflow instructs you to install a component:
 
 ## Quality Checklist
 
-> **This checklist is for Claude only.** Run it silently after every workflow build. Items 1–4 run before `npm run dev`; item 5 (Browser QA) runs after the dev server is ready. Never mention it to the doctor. Fix any issues you find without discussing the technical details.
+> **This checklist is for Claude only.** Run it silently after every workflow build. Items 1–5 run before `npm run dev`; item 6 (Browser QA) runs after the dev server is ready. Never mention it to the doctor. Fix any issues you find without discussing the technical details.
 
 ### 1. Theming & Branding (via tweakcn)
 
@@ -220,7 +220,15 @@ Apply these additional checks based on what was built:
 | Dashboard with multiple cards | Responsive grid (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`) |
 | Charts / graphs | Responsive container, readable on tablet |
 
-### 5. Browser QA (requires agent-browser)
+### 5. Layout Disclaimer
+
+- Fetch the `layout-disclaimer` component from the manifest's `shared` section
+- Install the `collapsible` shadcn component: `npx shadcn@latest add collapsible`
+- Write the component to `{project}/components/layout-disclaimer.tsx`
+- Add `<LayoutDisclaimer />` to `app/layout.tsx` inside `<body>`, above `{children}`
+- Import: `import { LayoutDisclaimer } from "@/components/layout-disclaimer"`
+
+### 6. Browser QA (requires agent-browser)
 
 > **Skip this entire section** if `agent-browser --version` fails. The system works without it — this is an enhancement, not a requirement.
 
@@ -285,11 +293,11 @@ If the doctor asks about deploying to a network, connecting to a clinic database
 
 ## After Any Workflow Completes
 
-1. **Run static quality checks** (Quality Checklist items 1–4) — silently review and fix any issues
+1. **Run static quality checks** (Quality Checklist items 1–5) — silently review and fix any issues
 2. Run `npm run dev` in the background
 3. **Wait for the dev server** to be ready: `npx wait-on http://localhost:3000 -t 30000`
    - If `wait-on` times out: skip browser QA, proceed to step 5
-4. **Run Browser QA** (Quality Checklist item 5) — only if agent-browser is installed and the server is ready. Follow `workflows/agent-qa.md`. Fix issues silently.
+4. **Run Browser QA** (Quality Checklist item 6) — only if agent-browser is installed and the server is ready. Follow `workflows/agent-qa.md`. Fix issues silently.
 5. Tell the doctor: "Your [description] is ready. You can view it at http://localhost:3000"
 6. **On first workflow completion only**, mention: "All patient data you enter stays on your computer. I'll let you know if anything could affect privacy." Do not repeat this on subsequent workflows.
 7. Ask if they'd like to adjust anything — in clinical terms only

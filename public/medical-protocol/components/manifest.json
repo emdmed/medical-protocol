@@ -9,6 +9,16 @@
       "files": [
         "medical-disclaimer.tsx"
       ]
+    },
+    "layout-disclaimer": {
+      "description": "Prominent medical disclaimer banner for app layout — collapsible, covers regulatory/AI/privacy",
+      "import": "@/components/layout-disclaimer",
+      "files": [
+        "layout-disclaimer.tsx"
+      ],
+      "shadcn": [
+        "collapsible"
+      ]
     }
   },
   "vital-signs": {

@@ -118,6 +118,8 @@ Create a dashboard page that combines the selected blocks:
    }
    ```
 
+   > **Note:** The `LayoutDisclaimer` banner is installed at the `app/layout.tsx` level by the Quality Checklist (item 5), so it appears on every page including the dashboard. No need to add it here.
+
    > **Note:** Smaller widgets (acid-base, BMI, water-balance) work well grouped together in a single grid cell or a flex row. The timeline works best as a full-width section or sidebar.
 
 3. **Update the home page** to redirect to `/dashboard`

@@ -468,6 +468,53 @@
     }
     .expect-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
 
+    /* ─── Disclaimer banner ─── */
+    .disclaimer {
+      border-top: 1px solid rgba(217, 169, 56, 0.25);
+      border-bottom: 1px solid rgba(217, 169, 56, 0.25);
+      background: rgba(217, 169, 56, 0.06);
+    }
+    .disclaimer__inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 40px;
+    }
+    .disclaimer__toggle {
+      display: flex; width: 100%; align-items: center; gap: 8px;
+      padding: 12px 0; background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: 14px; color: #d4a23c; text-align: left;
+    }
+    .disclaimer__toggle:hover { color: #e5b94e; }
+    .disclaimer__icon { width: 16px; height: 16px; flex-shrink: 0; }
+    .disclaimer__title { font-weight: 500; }
+    .disclaimer__action {
+      margin-left: auto; font-size: 12px; color: rgba(217, 169, 56, 0.7);
+    }
+    .disclaimer__chevron {
+      width: 14px; height: 14px; flex-shrink: 0;
+      color: rgba(217, 169, 56, 0.7); transition: transform 0.2s;
+    }
+    .disclaimer.is-open .disclaimer__chevron { transform: rotate(180deg); }
+    .disclaimer__body {
+      display: none; padding-bottom: 16px;
+      border-top: 1px solid rgba(217, 169, 56, 0.15);
+    }
+    .disclaimer.is-open .disclaimer__body { display: block; }
+    .disclaimer__body p {
+      font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.7;
+      margin-top: 12px;
+    }
+    .disclaimer__body ul {
+      list-style: disc; padding-left: 20px; margin-top: 8px;
+    }
+    .disclaimer__body li {
+      font-size: 14px; color: rgba(255,255,255,0.70); line-height: 1.7;
+      margin-top: 4px;
+    }
+    .disclaimer__body strong { color: rgba(255,255,255,0.85); }
+
+    @media (max-width: 768px) {
+      .disclaimer__inner { padding-left: 20px; padding-right: 20px; }
+    }
+
     /* ─── Footer ─── */
     .footer {
       border-top: 1px solid var(--card-border); padding: 32px 0;
@@ -1055,6 +1102,26 @@
     </div>
   </section>
 
+  <!-- Disclaimer -->
+  <div class="disclaimer" id="disclaimer">
+    <div class="disclaimer__inner">
+      <button class="disclaimer__toggle" onclick="toggleDisclaimer()" type="button">
+        <svg class="disclaimer__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span class="disclaimer__title" data-i18n="disclaimer.title">Clinical Support Tool — Not a Medical Device</span>
+        <span class="disclaimer__action" data-i18n="disclaimer.action">Learn more</span>
+        <svg class="disclaimer__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="disclaimer__body">
+        <p data-i18n="disclaimer.body">This tool is designed to assist healthcare professionals and has not been certified or cleared as a medical device by the FDA, EMA, or any regulatory body. It is not intended for clinical diagnosis or as a substitute for professional medical judgment.</p>
+        <ul>
+          <li data-i18n="disclaimer.ai"><strong>AI-assisted:</strong> Interface components and analysis features may be generated or powered by artificial intelligence. Always verify AI outputs independently.</li>
+          <li data-i18n="disclaimer.privacy"><strong>Data privacy:</strong> All patient data is processed and stored locally on your device. No clinical data is transmitted to external servers.</li>
+          <li data-i18n="disclaimer.responsibility"><strong>Clinical responsibility:</strong> Verify all values, calculations, and recommendations before making treatment decisions.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="footer">
     <div class="footer__inner">
@@ -1179,6 +1246,12 @@
         'expect.step3Desc': 'Tell Claude what you want in your own words &mdash; "I need a vital signs monitor for my trauma patients" or "build me a dashboard for ICU rounds."',
         'expect.step4Title': 'Your interface opens in the browser',
         'expect.step4Desc': 'A working clinical interface appears in your browser, ready for real patient data. Everything runs locally on your machine.',
+        'disclaimer.title': 'Clinical Support Tool — Not a Medical Device',
+        'disclaimer.action': 'Learn more',
+        'disclaimer.body': 'This tool is designed to assist healthcare professionals and has not been certified or cleared as a medical device by the FDA, EMA, or any regulatory body. It is not intended for clinical diagnosis or as a substitute for professional medical judgment.',
+        'disclaimer.ai': '<strong>AI-assisted:</strong> Interface components and analysis features may be generated or powered by artificial intelligence. Always verify AI outputs independently.',
+        'disclaimer.privacy': '<strong>Data privacy:</strong> All patient data is processed and stored locally on your device. No clinical data is transmitted to external servers.',
+        'disclaimer.responsibility': '<strong>Clinical responsibility:</strong> Verify all values, calculations, and recommendations before making treatment decisions.',
         'footer.back': '&larr; Back to protocol',
         'footer.tagline': 'No coding required &middot; All data stays on your machine'
       },
@@ -1295,6 +1368,12 @@
         'expect.step3Desc': 'Dígale a Claude lo que quiere en sus propias palabras &mdash; "Necesito un monitor de signos vitales para mis pacientes de trauma" o "constrúyame un tablero para rondas de UCI."',
         'expect.step4Title': 'Su interfaz se abre en el navegador',
         'expect.step4Desc': 'Una interfaz clínica funcional aparece en su navegador, lista para datos reales de pacientes. Todo se ejecuta localmente en su máquina.',
+        'disclaimer.title': 'Herramienta de Apoyo Clínico — No es un Dispositivo Médico',
+        'disclaimer.action': 'Más información',
+        'disclaimer.body': 'Esta herramienta está diseñada para asistir a profesionales de la salud y no ha sido certificada ni aprobada como dispositivo médico por la FDA, EMA ni ningún organismo regulador. No está destinada al diagnóstico clínico ni como sustituto del juicio médico profesional.',
+        'disclaimer.ai': '<strong>Asistido por IA:</strong> Los componentes de interfaz y las funciones de análisis pueden ser generados o impulsados por inteligencia artificial. Siempre verifique los resultados de la IA de forma independiente.',
+        'disclaimer.privacy': '<strong>Privacidad de datos:</strong> Todos los datos del paciente se procesan y almacenan localmente en su dispositivo. Ningún dato clínico se transmite a servidores externos.',
+        'disclaimer.responsibility': '<strong>Responsabilidad clínica:</strong> Verifique todos los valores, cálculos y recomendaciones antes de tomar decisiones de tratamiento.',
         'footer.back': '&larr; Volver al protocolo',
         'footer.tagline': 'Sin programar &middot; Todos los datos quedan en su máquina'
       }
@@ -1355,6 +1434,17 @@
       var pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
       document.getElementById('scrollProgress').style.width = pct + '%';
     });
+
+    // Disclaimer toggle
+    function toggleDisclaimer() {
+      var el = document.getElementById('disclaimer');
+      el.classList.toggle('is-open');
+      var action = el.querySelector('.disclaimer__action');
+      var isOpen = el.classList.contains('is-open');
+      var hideText = { en: 'Hide', es: 'Ocultar' };
+      var showText = { en: 'Learn more', es: 'Más información' };
+      action.textContent = isOpen ? (hideText[currentLang] || hideText.en) : (showText[currentLang] || showText.en);
+    }
 
     // Copy command
     function copyCommand(el) {
