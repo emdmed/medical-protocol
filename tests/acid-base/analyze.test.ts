@@ -66,8 +66,9 @@ describe('analyze — metabolic acidosis', () => {
 
   it('detects overcompensation (pCO2 too low)', () => {
     // Winter's: expected pCO2 = 1.5 * 14 + 8 = 29 ± 2 → 27-31
-    // Actual pCO2 = 20 → overcompensated
-    const result = analyze(abg('7.25', '20', '14'));
+    // Actual pCO2 = 25 → overcompensated (below 27)
+    // H-H: 6.1 + log10(14 / (0.03 * 25)) = 7.371, pH 7.30 → deviation 0.071
+    const result = analyze(abg('7.30', '25', '14'));
     expect(result!.disorder).toBe('Metabolic Acidosis');
     expect(result!.compensation).toBe('Overcompensated');
   });
@@ -184,23 +185,21 @@ describe('analyze — delta ratio', () => {
   });
 
   it('delta ratio < 1 indicates concurrent NAGMA', () => {
-    // AG = 140 - (100 + 10) = 30, delta AG = 30-12=18, delta HCO3 = 24-10=14
-    // Delta ratio = 18/14 ≈ 1.29 → pure HAGMA
-    // Need: delta AG < delta HCO3 → AG closer to 12 with low HCO3
-    // AG = 140 - (114 + 14) = 12 → too low to trigger high AG
-    // AG = 140 - (110 + 14) = 16, delta AG = 4, delta HCO3 = 10
+    // AG = 140 - (110 + 14) = 16 (High), delta AG = 4, delta HCO3 = 10
     // ratio = 0.4 < 1 → NAGMA also present
-    const result = analyze(abg('7.20', '29', '14', '140', '110'));
+    // H-H: 6.1 + log10(14 / (0.03 * 29)) = 7.307 → pH 7.25, deviation 0.057
+    const result = analyze(abg('7.25', '29', '14', '140', '110'));
     expect(result!.agStatus).toBe('High');
     expect(parseFloat(result!.deltaRatio!)).toBeLessThan(1);
     expect(result!.deltaRatioInterpretation).toContain('Normal AG metabolic acidosis');
   });
 
   it('delta ratio > 2 indicates concurrent metabolic alkalosis', () => {
-    // pH acidemic, HCO3=21 (just below 22) → Metabolic Acidosis
-    // AG = 140 - (96 + 21) = 23, delta AG = 23-12=11, delta HCO3 = 24-21=3
-    // ratio = 11/3 = 3.67 > 2 → met alkalosis also present
-    const result = analyze(abg('7.30', '30', '21', '140', '96'));
+    // pH acidemic, HCO3=20, pCO2=40 → Metabolic Acidosis
+    // AG = 140 - (96 + 20) = 24 (High), delta AG = 12, delta HCO3 = 4
+    // ratio = 3.0 > 2 → met alkalosis also present
+    // H-H: 6.1 + log10(20 / (0.03 * 40)) = 7.322, use pH 7.32
+    const result = analyze(abg('7.32', '40', '20', '140', '96'));
     expect(result!.disorder).toBe('Metabolic Acidosis');
     expect(result!.agStatus).toBe('High');
     expect(parseFloat(result!.deltaRatio!)).toBeGreaterThan(2);
@@ -214,9 +213,89 @@ describe('analyze — delta ratio', () => {
 });
 
 describe('analyze — mixed disorders', () => {
-  it('identifies mixed disorder when pH is acidemic but neither HCO3 nor pCO2 explains it', () => {
-    // pH < 7.35, HCO3 normal, pCO2 normal → mixed
+  it('flags incoherent values but still provides disorder analysis', () => {
+    // pH 7.30, pCO2 40, HCO3 24 → H-H predicts ~7.40, deviation ~0.10
+    // Incoherent but analysis still runs — classified as Mixed Disorder with flag
     const result = analyze(abg('7.30', '40', '24'));
     expect(result!.disorder).toBe('Mixed Disorder');
+    expect(result!.hhConsistency!.isCoherent).toBe(false);
+    expect(result!.hhConsistency!.warning).toContain('verify lab values');
+  });
+});
+
+describe('analyze — Henderson-Hasselbalch coherence validator', () => {
+  it('passes coherence for consistent values and proceeds with analysis', () => {
+    // H-H: 6.1 + log10(24 / (0.03 * 40)) = 7.401, measured 7.40 → deviation 0.001
+    const result = analyze(abg('7.40', '40', '24'));
+    expect(result!.hhConsistency!.isCoherent).toBe(true);
+    expect(result!.hhConsistency!.warning).toBeNull();
+    expect(result!.disorder).toBe('Normal');
+  });
+
+  it('flags incoherent values with warning but still runs full analysis', () => {
+    // H-H predicts ~7.40 but measured is 7.30 → deviation ~0.10
+    const result = analyze(abg('7.30', '40', '24'));
+    expect(result!.hhConsistency!.isCoherent).toBe(false);
+    expect(result!.hhConsistency!.warning).toContain('verify lab values');
+    // Analysis still proceeds — disorder is determined, not blocked
+    expect(result!.disorder).not.toBeNull();
+    expect(result!.disorder).toBe('Mixed Disorder');
+  });
+
+  it('includes expected pH, measured pH, and deviation', () => {
+    const result = analyze(abg('7.40', '40', '24'));
+    expect(result!.hhConsistency!.expectedPH).toBeDefined();
+    expect(result!.hhConsistency!.measured).toBe('7.40');
+    expect(parseFloat(result!.hhConsistency!.deviation)).toBeLessThanOrEqual(0.08);
+  });
+
+  it('tolerates small deviations within ±0.08', () => {
+    // H-H: 6.1 + log10(14 / (0.03 * 50)) = 7.07, measured 7.15 → deviation 0.08
+    const result = analyze(abg('7.15', '50', '14'));
+    expect(result!.hhConsistency!.isCoherent).toBe(true);
+    expect(result!.disorder).not.toBe('Inconclusive');
+  });
+});
+
+describe('analyze — metabolic alkalosis compensation tolerance', () => {
+  it('uses ±5 tolerance window', () => {
+    // Expected pCO2 = 0.7 * (32 - 24) + 40 = 45.6
+    // pCO2 = 50 is within ±5 (40.6 to 50.6) → compensated
+    const result = analyze(abg('7.50', '50', '32'));
+    expect(result!.disorder).toBe('Metabolic Alkalosis');
+    expect(result!.compensation).toBe('Compensated');
+  });
+
+  it('detects inadequate compensation outside ±5', () => {
+    // Expected pCO2 = 0.7 * (32 - 24) + 40 = 45.6, need pCO2 < 40.6
+    // H-H: 6.1 + log10(32 / (0.03 * 35)) = 7.584, use pH 7.58
+    const result = analyze(abg('7.58', '35', '32'));
+    expect(result!.disorder).toBe('Metabolic Alkalosis');
+    expect(result!.compensation).toBe('Inadequate compensation');
+  });
+});
+
+describe('analyze — pCO2 ceiling for metabolic alkalosis', () => {
+  it('caps expected pCO2 high at 55 mmHg for extreme HCO3', () => {
+    // HCO3 = 50 → expected pCO2 = 0.7 * (50-24) + 40 = 58.2, capped at 55
+    const result = analyze(abg('7.55', '52', '50'));
+    expect(result!.disorder).toBe('Metabolic Alkalosis');
+    expect(parseFloat(result!.expectedValues.high!)).toBeLessThanOrEqual(55);
+  });
+});
+
+describe('analyze — allDisorders includes delta-ratio disorders', () => {
+  it('includes Non-AG Metabolic Acidosis from delta ratio in allDisorders', () => {
+    // AG = 140 - (110 + 14) = 16, delta AG = 4, delta HCO3 = 10, ratio = 0.4
+    // H-H consistent: pH 7.25, deviation 0.057
+    const result = analyze(abg('7.25', '29', '14', '140', '110'));
+    expect(result!.allDisorders).toContain('Non-AG Metabolic Acidosis');
+  });
+
+  it('includes Metabolic Alkalosis from delta ratio in allDisorders', () => {
+    // AG = 140 - (96 + 20) = 24, delta AG = 12, delta HCO3 = 4, ratio = 3.0
+    // H-H consistent: pH 7.32, deviation 0.002
+    const result = analyze(abg('7.32', '40', '20', '140', '96'));
+    expect(result!.allDisorders).toContain('Metabolic Alkalosis');
   });
 });

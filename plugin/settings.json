@@ -17,6 +17,7 @@
       "Bash(git log *)",
       "Bash(gh api *)",
       "Bash(agent-browser *)",
+      "Bash(node packages/medprotocol/dist/index.js *)",
       "WebFetch(medical-protocol.vercel.app/*)",
       "Read",
       "Write",

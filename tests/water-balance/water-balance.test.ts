@@ -1,41 +1,11 @@
 import { describe, it, expect } from 'vitest';
-
-// These functions are internal to the component — replicated here for testing
-// the clinical calculation logic exactly as implemented in water-balance.tsx.
-const safeParseFloat = (value: any): number => {
-  if (value === '' || value === null || value === undefined) return 0;
-  const parsed = parseFloat(value);
-  return isNaN(parsed) ? 0 : parsed;
-};
-
-const calculateInsensibleLoss = (weightKg: any): string => {
-  return (safeParseFloat(weightKg) * 12).toFixed(0);
-};
-
-const calculateEndogenousGeneration = (weightKg: any): string => {
-  return (safeParseFloat(weightKg) * 4.5).toFixed(0);
-};
-
-const calculateDefecationLoss = (count: any): string => {
-  return (safeParseFloat(count) * 120).toFixed(0);
-};
-
-const calculateWaterBalance = (
-  weight: string,
-  fluidIntakeOral: string,
-  fluidIntakeIV: string,
-  diuresis: string,
-  defecationCount: string
-): string => {
-  const weightNum = safeParseFloat(weight);
-  const insensibleLoss = safeParseFloat(calculateInsensibleLoss(weightNum));
-  const endogenousGeneration = safeParseFloat(calculateEndogenousGeneration(weightNum));
-  const defecationLoss = safeParseFloat(calculateDefecationLoss(defecationCount));
-
-  const intake = safeParseFloat(fluidIntakeOral) + safeParseFloat(fluidIntakeIV) + endogenousGeneration;
-  const output = safeParseFloat(diuresis) + defecationLoss + insensibleLoss;
-  return (intake - output).toFixed(0);
-};
+import {
+  safeParseFloat,
+  calculateInsensibleLoss,
+  calculateEndogenousGeneration,
+  calculateDefecationLoss,
+  calculateWaterBalance,
+} from '../../lib/water-balance';
 
 describe('safeParseFloat', () => {
   it('returns 0 for empty string', () => {

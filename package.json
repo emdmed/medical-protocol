@@ -3,12 +3,16 @@
   "version": "0.4.0",
   "private": true,
   "description": "CDN-hosted medical protocol workflows and components for Claude Code",
+  "workspaces": ["packages/medprotocol"],
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "build": "npm run build -w packages/medprotocol",
+    "medprotocol": "node packages/medprotocol/dist/index.js",
     "version:bump": "bash scripts/bump-version.sh"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   }

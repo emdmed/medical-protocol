@@ -12,5 +12,5 @@
       "@/hooks/*": ["tests/__mocks__/hooks/*"]
     }
   },
-  "include": ["tests/**/*.ts", "public/**/*.ts", "public/**/*.tsx"]
+  "include": ["tests/**/*.ts", "public/**/*.ts", "public/**/*.tsx", "lib/**/*.ts"]
 }

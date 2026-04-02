@@ -1,0 +1,17 @@
+{
+  "name": "medprotocol",
+  "version": "0.4.0",
+  "description": "Medical calculations from the terminal — for AI agents and clinicians",
+  "license": "MIT",
+  "bin": { "medprotocol": "./dist/index.js" },
+  "files": ["dist/"],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --target node18 --out-dir dist",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": { "node": ">=18" },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^6.0.2"
+  }
+}

@@ -26,6 +26,13 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
 import { Label } from "../ui/label";
 import { MedicalDisclaimer } from "@/components/medical-disclaimer";
+import {
+  safeParseFloat,
+  calculateInsensibleLoss,
+  calculateEndogenousGeneration,
+  calculateDefecationLoss,
+  calculateWaterBalance as calculateWaterBalanceLib,
+} from "../../../../lib/water-balance";
 
 interface WaterBalanceData {
   weight?: number | string;
@@ -63,42 +70,8 @@ const WaterBalanceCalculator = ({ data }: WaterBalanceProps) => {
   const [tempDiuresis, setTempDiuresis] = useState("");
   const [tempDefecationCount, setTempDefecationCount] = useState("");
 
-  // Helper function to safely parse numbers
-  const safeParseFloat = (value) => {
-    if (value === "" || value === null || value === undefined) return 0;
-    const parsed = parseFloat(value);
-    return isNaN(parsed) ? 0 : parsed;
-  };
-
-  // Calculate weight-based values
-  const calculateInsensibleLoss = (weightKg) => {
-    return (safeParseFloat(weightKg) * 12).toFixed(0);
-  };
-
-  const calculateEndogenousGeneration = (weightKg) => {
-    return (safeParseFloat(weightKg) * 4.5).toFixed(0);
-  };
-
-  const calculateDefecationLoss = (count) => {
-    return (safeParseFloat(count) * 120).toFixed(0);
-  };
-
   const calculateWaterBalance = () => {
-    const weightNum = safeParseFloat(weight);
-    const insensibleLoss = safeParseFloat(calculateInsensibleLoss(weightNum));
-    const endogenousGeneration = safeParseFloat(
-      calculateEndogenousGeneration(weightNum),
-    );
-    const defecationLoss = safeParseFloat(
-      calculateDefecationLoss(defecationCount),
-    );
-
-    const intake =
-      safeParseFloat(fluidIntakeOral) +
-      safeParseFloat(fluidIntakeIV) +
-      endogenousGeneration;
-    const output = safeParseFloat(diuresis) + defecationLoss + insensibleLoss;
-    return (intake - output).toFixed(0);
+    return calculateWaterBalanceLib(weight, fluidIntakeOral, fluidIntakeIV, diuresis, defecationCount);
   };
 
   const currentBalance = calculateWaterBalance();

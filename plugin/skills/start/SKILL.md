@@ -44,6 +44,7 @@ Classify the doctor's request based on these signal words and route to the match
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined, multiple domains matched | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/dashboard/SKILL.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize, or request targets already-installed component | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/customize/SKILL.md` |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/troubleshoot/SKILL.md` |
+| **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/cli/SKILL.md` |
 
 **If the request matches multiple domains**, prefer `dashboard` as it combines components.
 

@@ -46,7 +46,7 @@ const DEFAULT_VALUES = {
   },
   HCO3: {
     min: 22,
-    max: 26
+    max: 28
   }
 }
 
