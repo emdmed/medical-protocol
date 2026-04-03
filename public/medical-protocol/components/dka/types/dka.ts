@@ -19,6 +19,10 @@ export interface DKAReading {
   insulinRate: string;
   gcs: string;
   urineOutput: string;
+  pCO2: string;     // mmHg
+  sodium: string;   // mEq/L (Na+)
+  chloride: string; // mEq/L (Cl-)
+  albumin: string;  // g/dL
 }
 
 export interface DKAPatientData {

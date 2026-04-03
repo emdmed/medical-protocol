@@ -8,6 +8,7 @@ Ask the doctor about their DKA monitoring needs:
 
 - "Will you be tracking glucose in mg/dL or mmol/L?" (Default: mg/dL)
 - "Do you need to monitor urine output alongside glucose and ketones?" (Default: yes)
+- Note: The component includes full blood gas analysis (ABG disorder classification, compensation, anion gap, delta ratio) on every reading — no extra setup needed.
 
 ### Setting-Aware Questions (based on Initial Clarification)
 
@@ -37,12 +38,18 @@ Silently perform all of the following:
 
 4. **Fetch each file** listed in `manifest["dka"].files` following the **Component Fetching Process** in the main protocol
 
-5. **Install shadcn components** listed in `manifest["dka"].shadcn`:
+5. **Fetch acid-base dependency files** — DKA uses the acid-base analyzer for blood gas analysis. Fetch the files listed in `manifest["acid-base"].files`:
+   - `analyze.ts` — ABG analysis engine (disorders, compensation, anion gap, delta ratio)
+   - `components/popup.tsx` — inline result display wrapper
+   - `utils/safeFloat.ts` — safe float parsing
+   - `types/interfaces.ts` — Values, Result types
+
+6. **Install shadcn components** listed in `manifest["dka"].shadcn`:
    ```
    npx shadcn@latest add {manifest["dka"].shadcn joined by spaces}
    ```
 
-6. **Clinical logic library:** The DKA component imports calculation functions from `lib/dka`. These must be created in the project:
+7. **Clinical logic library:** The DKA component imports calculation functions from `lib/dka`. These must be created in the project:
    - `calculateGlucoseReductionRate(current, previous, hours)` — rate of glucose drop per hour
    - `isGlucoseOnTarget(rate, unit)` — target: 50–70 mg/dL/hr or 3–4 mmol/L/hr
    - `calculateKetoneReductionRate(current, previous, hours)` — rate of ketone clearance per hour
@@ -78,5 +85,5 @@ All layout and architecture decisions are yours. Do not ask the doctor.
 1. **Run the Quality Checklist** from the main protocol — silently review theming, responsiveness, and shadcn polish. Fix any issues before proceeding.
 2. Run `npm run dev` in the background
 3. Tell the doctor:
-   > "Your DKA monitoring dashboard is ready. Enter the patient's weight, then add hourly readings with glucose, ketones, bicarbonate, pH, potassium, insulin rate, GCS, and urine output. It tracks reduction rates against targets and checks DKA resolution criteria. View it at http://localhost:3000/dka"
+   > "Your DKA monitoring dashboard is ready. Enter the patient's weight, then add hourly readings with glucose, ketones, bicarbonate, pH, pCO2, Na+, Cl-, albumin, potassium, insulin rate, GCS, and urine output. It tracks reduction rates against targets, checks DKA resolution criteria, and runs full blood gas analysis (disorder classification, compensation, anion gap, delta ratio) on every reading. View it at http://localhost:3000/dka"
 4. Ask: "Would you like to adjust anything about the monitoring parameters?"

@@ -33,7 +33,9 @@ Silently determine which files need to change:
 
 4. **If the doctor requests a component that isn't installed yet**, fetch it from the CDN following the component fetching process in the main protocol
 
-5. **If the doctor requests a feature that doesn't exist in the CDN** (e.g., a medication tracker, lab results viewer, scheduling system), build it from scratch:
+5. **If the project has multiple components wired together** (e.g., a dashboard, or clinical-notes with embedded calculators), fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards) before making changes
+
+6. **If the doctor requests a feature that doesn't exist in the CDN** (e.g., a medication tracker, lab results viewer, scheduling system), build it from scratch:
    - Follow the patterns established in the existing project code (file structure, naming conventions, hook patterns, shadcn usage)
    - Use the same state management approach (localStorage for persistence if enabled, React state otherwise)
    - Place new components in the appropriate directory (`components/` for reusable widgets, `app/{feature}/` for pages)

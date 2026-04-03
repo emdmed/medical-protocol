@@ -219,7 +219,7 @@ When a workflow instructs you to install a component:
 
 ### 3. Error Boundary
 
-- Wrap the top-level page component in `ErrorBoundary` (from `components/vital-signs/components/error-boundary`) so the app shows a recovery UI instead of a white screen on crash
+- Wrap the top-level page component in `ErrorBoundary` (from `components/error-boundary`) so the app shows a recovery UI instead of a white screen on crash
 - If the project doesn't have the error boundary file yet, create it following the pattern in the vital-signs CDN component
 
 ### 4. shadcn Component Polish

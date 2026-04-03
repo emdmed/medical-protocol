@@ -39,7 +39,9 @@ Silently perform all of the following:
 
 5. **Check `externalComponents`** in the manifest entry — some of these are now available as their own manifest entries on the CDN (water-balance, acid-base, bmi). Fetch those using the Component Fetching Process. For any remaining external imports that are not on the CDN (e.g., textarea-inv), create simplified versions, remove them, or replace with alternatives appropriate to the doctor's needs.
 
-6. **Install shadcn components** listed in `manifest["clinical-notes"].shadcn`:
+6. **Fetch the composition guide**: Since clinical-notes embeds multiple sub-components (water-balance, acid-base, bmi), fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns, typed examples, and known gotchas (overflow clipping, circular updates, null guards).
+
+7. **Install shadcn components** listed in `manifest["clinical-notes"].shadcn`:
    ```
    npx shadcn@latest add {manifest["clinical-notes"].shadcn joined by spaces}
    ```

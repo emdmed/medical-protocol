@@ -52,6 +52,8 @@ import {
   assessDKAResolution,
   suggestInsulinAdjustment,
 } from "../../../../lib/dka";
+import { analyze } from "../acid-base/analyze";
+import Popup from "../acid-base/components/popup";
 import type { DKAPatientData, DKAReading, DKAProps } from "./types/dka";
 
 const severityColor = (level: string): string => {
@@ -84,14 +86,12 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
   const [tempWeight, setTempWeight] = useState("");
 
   // New reading form
-  const [newGlucose, setNewGlucose] = useState("");
-  const [newKetones, setNewKetones] = useState("");
-  const [newBicarbonate, setNewBicarbonate] = useState("");
-  const [newPH, setNewPH] = useState("");
-  const [newPotassium, setNewPotassium] = useState("");
-  const [newInsulinRate, setNewInsulinRate] = useState("");
-  const [newGCS, setNewGCS] = useState("");
-  const [newUrineOutput, setNewUrineOutput] = useState("");
+  const emptyReading = {
+    glucose: "", ketones: "", bicarbonate: "", pH: "", potassium: "",
+    insulinRate: "", gcs: "", urineOutput: "", pCO2: "", sodium: "",
+    chloride: "", albumin: "",
+  };
+  const [newReading, setNewReading] = useState(emptyReading);
 
   const onDataRef = useRef(onData);
   onDataRef.current = onData;
@@ -112,32 +112,32 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
       ? patientData.readings[patientData.readings.length - 2]
       : null;
 
-  const hoursBetween = (a: DKAReading, b: DKAReading): string => {
+  const hoursBetween = (a: DKAReading, b: DKAReading): number => {
     const diff = (a.timestamp - b.timestamp) / 3600;
-    return diff > 0 ? diff.toFixed(1) : "1";
+    return diff > 0 ? diff : 1;
   };
 
   // Rate calculations
   const hours = latest && previous ? hoursBetween(latest, previous) : null;
   const glucoseRate =
     latest && previous && hours
-      ? calculateGlucoseReductionRate(latest.glucose, previous.glucose, hours)
+      ? calculateGlucoseReductionRate(latest.glucose, previous.glucose, String(hours))
       : null;
   const ketoneRate =
     latest && previous && hours
-      ? calculateKetoneReductionRate(latest.ketones, previous.ketones, hours)
+      ? calculateKetoneReductionRate(latest.ketones, previous.ketones, String(hours))
       : null;
   const bicarbRate =
     latest && previous && hours
       ? calculateBicarbonateIncreaseRate(
           latest.bicarbonate,
           previous.bicarbonate,
-          hours,
+          String(hours),
         )
       : null;
   const urineRate =
     latest && patientData.weight && hours
-      ? calculateUrineOutputRate(latest.urineOutput, patientData.weight, hours)
+      ? calculateUrineOutputRate(latest.urineOutput, patientData.weight, String(hours))
       : null;
 
   // Resolution
@@ -162,6 +162,21 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
         )
       : null;
 
+  // Blood gas analysis on latest reading
+  const abgResult = latest
+    ? analyze({
+        values: {
+          pH: latest.pH,
+          pCO2: latest.pCO2,
+          HCO3: latest.bicarbonate,
+          Na: latest.sodium,
+          Cl: latest.chloride,
+          Albumin: latest.albumin,
+        },
+        isChronic: false,
+      })
+    : null;
+
   const toggleUnit = () => {
     setPatientData((prev) => ({
       ...prev,
@@ -177,18 +192,62 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
     }
   };
 
+  const validateReading = (): boolean => {
+    const g = parseFloat(newReading.glucose);
+    if (isNaN(g) || g <= 0) return false;
+
+    const ph = parseFloat(newReading.pH);
+    if (newReading.pH && (isNaN(ph) || ph < 6.0 || ph > 8.0)) return false;
+
+    const gcs = parseFloat(newReading.gcs);
+    if (newReading.gcs && (isNaN(gcs) || gcs < 3 || gcs > 15)) return false;
+
+    const k = parseFloat(newReading.potassium);
+    if (newReading.potassium && (isNaN(k) || k < 0.5 || k > 10)) return false;
+
+    const ket = parseFloat(newReading.ketones);
+    if (newReading.ketones && (isNaN(ket) || ket < 0)) return false;
+
+    const bic = parseFloat(newReading.bicarbonate);
+    if (newReading.bicarbonate && (isNaN(bic) || bic < 0 || bic > 50)) return false;
+
+    const ins = parseFloat(newReading.insulinRate);
+    if (newReading.insulinRate && (isNaN(ins) || ins < 0)) return false;
+
+    const uo = parseFloat(newReading.urineOutput);
+    if (newReading.urineOutput && (isNaN(uo) || uo < 0)) return false;
+
+    const pco2 = parseFloat(newReading.pCO2);
+    if (newReading.pCO2 && (isNaN(pco2) || pco2 < 5 || pco2 > 120)) return false;
+
+    const na = parseFloat(newReading.sodium);
+    if (newReading.sodium && (isNaN(na) || na < 100 || na > 180)) return false;
+
+    const cl = parseFloat(newReading.chloride);
+    if (newReading.chloride && (isNaN(cl) || cl < 60 || cl > 140)) return false;
+
+    const alb = parseFloat(newReading.albumin);
+    if (newReading.albumin && (isNaN(alb) || alb < 0 || alb > 10)) return false;
+
+    return true;
+  };
+
   const addReading = () => {
     const reading: DKAReading = {
       id: Date.now().toString(),
       timestamp: Math.floor(Date.now() / 1000),
-      glucose: newGlucose,
-      ketones: newKetones,
-      bicarbonate: newBicarbonate,
-      pH: newPH,
-      potassium: newPotassium,
-      insulinRate: newInsulinRate,
-      gcs: newGCS,
-      urineOutput: newUrineOutput,
+      glucose: newReading.glucose,
+      ketones: newReading.ketones,
+      bicarbonate: newReading.bicarbonate,
+      pH: newReading.pH,
+      potassium: newReading.potassium,
+      insulinRate: newReading.insulinRate,
+      gcs: newReading.gcs,
+      urineOutput: newReading.urineOutput,
+      pCO2: newReading.pCO2,
+      sodium: newReading.sodium,
+      chloride: newReading.chloride,
+      albumin: newReading.albumin,
     };
 
     setPatientData((prev) => ({
@@ -197,14 +256,7 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
     }));
 
     // Reset form
-    setNewGlucose("");
-    setNewKetones("");
-    setNewBicarbonate("");
-    setNewPH("");
-    setNewPotassium("");
-    setNewInsulinRate("");
-    setNewGCS("");
-    setNewUrineOutput("");
+    setNewReading(emptyReading);
     setIsAddingReading(false);
   };
 
@@ -390,6 +442,60 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                   )}
                 </>
               )}
+
+              {/* Blood Gas Analysis */}
+              <Popup visible={!!abgResult}>
+                {abgResult && (
+                  <div className="w-full space-y-1 mt-1">
+                    <div className="text-xs font-medium opacity-70">
+                      Blood Gas Analysis
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {abgResult.allDisorders.map((d: string, i: number) => (
+                        <Badge
+                          key={i}
+                          className="text-[10px] bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        >
+                          {d}
+                        </Badge>
+                      ))}
+                      {abgResult.compensation !== "N/A" && (
+                        <Badge
+                          className={`text-[10px] ${
+                            abgResult.compensation === "Compensated"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                          }`}
+                        >
+                          {abgResult.compensation}
+                        </Badge>
+                      )}
+                      {abgResult.anionGap && (
+                        <Badge
+                          className={`text-[10px] ${
+                            abgResult.agStatus === "High"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          }`}
+                        >
+                          AG: {abgResult.anionGap}{" "}
+                          {abgResult.correctedAG ? "(corrected)" : ""}
+                        </Badge>
+                      )}
+                      {abgResult.deltaRatioInterpretation && (
+                        <Badge className="text-[10px] bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                          ΔΔ {abgResult.deltaRatio}: {abgResult.deltaRatioInterpretation}
+                        </Badge>
+                      )}
+                    </div>
+                    {abgResult.hhConsistency && !abgResult.hhConsistency.isCoherent && (
+                      <div className="text-[10px] text-red-600 dark:text-red-400 italic">
+                        ⚠ {abgResult.hhConsistency.warning}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Popup>
             </div>
           ) : (
             <div className="text-xs opacity-50 text-center py-4">
@@ -410,7 +516,7 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                     size="icon"
                     className="h-6 w-6"
                     onClick={addReading}
-                    disabled={!newGlucose}
+                    disabled={!validateReading()}
                   >
                     <Check className="h-3 w-3" />
                   </Button>
@@ -431,8 +537,8 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                     Glucose ({glucoseUnitLabel})
                   </Label>
                   <Input
-                    value={newGlucose}
-                    onChange={(e) => setNewGlucose(e.target.value)}
+                    value={newReading.glucose}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, glucose: e.target.value }))}
                     className="text-end h-7"
                     placeholder="0"
                   />
@@ -440,8 +546,8 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                 <div>
                   <Label className={labelClass}>Ketones (mmol/L)</Label>
                   <Input
-                    value={newKetones}
-                    onChange={(e) => setNewKetones(e.target.value)}
+                    value={newReading.ketones}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, ketones: e.target.value }))}
                     className="text-end h-7"
                     placeholder="0"
                   />
@@ -449,8 +555,8 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                 <div>
                   <Label className={labelClass}>HCO3 (mEq/L)</Label>
                   <Input
-                    value={newBicarbonate}
-                    onChange={(e) => setNewBicarbonate(e.target.value)}
+                    value={newReading.bicarbonate}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, bicarbonate: e.target.value }))}
                     className="text-end h-7"
                     placeholder="0"
                   />
@@ -458,8 +564,8 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                 <div>
                   <Label className={labelClass}>pH</Label>
                   <Input
-                    value={newPH}
-                    onChange={(e) => setNewPH(e.target.value)}
+                    value={newReading.pH}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, pH: e.target.value }))}
                     className="text-end h-7"
                     placeholder="7.00"
                   />
@@ -467,8 +573,8 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                 <div>
                   <Label className={labelClass}>K+ (mEq/L)</Label>
                   <Input
-                    value={newPotassium}
-                    onChange={(e) => setNewPotassium(e.target.value)}
+                    value={newReading.potassium}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, potassium: e.target.value }))}
                     className="text-end h-7"
                     placeholder="0"
                   />
@@ -476,8 +582,8 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                 <div>
                   <Label className={labelClass}>Insulin (U/hr)</Label>
                   <Input
-                    value={newInsulinRate}
-                    onChange={(e) => setNewInsulinRate(e.target.value)}
+                    value={newReading.insulinRate}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, insulinRate: e.target.value }))}
                     className="text-end h-7"
                     placeholder="0"
                   />
@@ -485,8 +591,8 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                 <div>
                   <Label className={labelClass}>GCS (3-15)</Label>
                   <Input
-                    value={newGCS}
-                    onChange={(e) => setNewGCS(e.target.value)}
+                    value={newReading.gcs}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, gcs: e.target.value }))}
                     className="text-end h-7"
                     placeholder="15"
                   />
@@ -494,10 +600,46 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                 <div>
                   <Label className={labelClass}>Urine (mL)</Label>
                   <Input
-                    value={newUrineOutput}
-                    onChange={(e) => setNewUrineOutput(e.target.value)}
+                    value={newReading.urineOutput}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, urineOutput: e.target.value }))}
                     className="text-end h-7"
                     placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label className={labelClass}>pCO2 (mmHg)</Label>
+                  <Input
+                    value={newReading.pCO2}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, pCO2: e.target.value }))}
+                    className="text-end h-7"
+                    placeholder="40"
+                  />
+                </div>
+                <div>
+                  <Label className={labelClass}>Na+ (mEq/L)</Label>
+                  <Input
+                    value={newReading.sodium}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, sodium: e.target.value }))}
+                    className="text-end h-7"
+                    placeholder="140"
+                  />
+                </div>
+                <div>
+                  <Label className={labelClass}>Cl- (mEq/L)</Label>
+                  <Input
+                    value={newReading.chloride}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, chloride: e.target.value }))}
+                    className="text-end h-7"
+                    placeholder="100"
+                  />
+                </div>
+                <div>
+                  <Label className={labelClass}>Albumin (g/dL)</Label>
+                  <Input
+                    value={newReading.albumin}
+                    onChange={(e) => setNewReading(prev => ({ ...prev, albumin: e.target.value }))}
+                    className="text-end h-7"
+                    placeholder="4.0"
                   />
                 </div>
               </div>
@@ -533,8 +675,8 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
                       })}
                     </span>
                     <span>
-                      Glu {r.glucose} | Ket {r.ketones} | pH {r.pH} | K+{" "}
-                      {r.potassium} | GCS {r.gcs}
+                      Glu {r.glucose} | Ket {r.ketones} | pH {r.pH} | pCO2{" "}
+                      {r.pCO2 || "—"} | K+ {r.potassium} | GCS {r.gcs}
                     </span>
                   </div>
                 ))}

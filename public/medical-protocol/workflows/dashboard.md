@@ -90,7 +90,7 @@ Create a dashboard page that combines the selected blocks:
 1. **Create `app/dashboard/page.tsx`** with a layout that includes:
    - A header with the clinic/dashboard name
    - Selected blocks arranged in a responsive grid
-   - Wrap the entire page in `ErrorBoundary` from `@/components/vital-signs/components/error-boundary`
+   - Wrap the entire page in `ErrorBoundary` from `@/components/error-boundary`
 
 2. **Example layout** (adapt based on selected blocks):
    ```tsx
@@ -100,7 +100,7 @@ Create a dashboard page that combines the selected blocks:
    import BMICalculator from "@/components/bmi/bmi-calculator"
    import WaterBalance from "@/components/water-balance/water-balance"
    import Timeline from "@/components/timeline/timeline"
-   import { ErrorBoundary } from "@/components/vital-signs/components/error-boundary"
+   import { ErrorBoundary } from "@/components/error-boundary"
 
    export default function DashboardPage() {
      return (

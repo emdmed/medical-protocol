@@ -19,6 +19,13 @@
       "shadcn": [
         "collapsible"
       ]
+    },
+    "error-boundary": {
+      "description": "Error boundary with recovery UI — wrap top-level pages to prevent white screens",
+      "import": "@/components/error-boundary",
+      "files": [
+        "error-boundary.tsx"
+      ]
     }
   },
   "vital-signs": {
@@ -74,7 +81,6 @@
     "files": [
       "vital-signs.tsx",
       "components/edit-section.tsx",
-      "components/error-boundary.tsx",
       "components/vital-signs-alert.tsx",
       "components/vital-signs-fhir.tsx",
       "hooks/useAnalyze.tsx",
@@ -244,7 +250,7 @@
   "dka": {
     "version": "0.4.0",
     "category": "monitoring",
-    "description": "DKA monitoring with hourly tracking of glucose, ketones, potassium, insulin, GCS, urine output",
+    "description": "DKA monitoring with hourly tracking, blood gas analysis (disorders, compensation, anion gap, delta ratio via acid-base analyzer)",
     "import": "@/components/dka/dka-monitor",
     "types": "@/components/dka/types/dka",
     "target": "components/dka",
@@ -270,6 +276,7 @@
       "label",
       "separator"
     ],
+    "dependencies": ["acid-base"],
     "files": [
       "dka-monitor.tsx",
       "types/dka.ts"
