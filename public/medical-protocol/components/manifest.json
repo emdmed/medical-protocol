@@ -105,13 +105,13 @@
     },
     "dataFlow": "output only — reports Result via onData",
     "popups": {
-      "resultPopup": {
-        "positioning": "absolute bottom-15 left-0",
-        "direction": "above the input fields",
+      "resultBadges": {
+        "positioning": "inline flow below inputs",
+        "direction": "below the input fields",
         "trigger": "automatic when valid analysis results are available",
         "content": "badges showing disorders, compensation, expected values, anion gap"
       },
-      "note": "Popup uses absolute positioning. Any parent Card wrapping this component MUST use overflow-visible to prevent clipping."
+      "note": "Result badges render inline below inputs — no absolute positioning, no overflow-visible needed on parent Cards."
     },
     "shadcn": [
       "card",

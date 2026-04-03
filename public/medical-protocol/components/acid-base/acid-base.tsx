@@ -17,8 +17,8 @@
  *
  * @inputs  pH*, pCO2*, HCO3* (required for analysis), Na, Cl, Albumin (for anion gap)
  *
- * @note Add `overflow-visible` to any parent Card wrapping this component
- *       so that the result popup (absolute bottom-15) is not clipped.
+ * @note Result badges render inline below the inputs (no absolute positioning).
+ *       No overflow-visible fix needed on parent Cards.
  */
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -126,44 +126,7 @@ const AcidBase = ({ onData }: AcidBaseProps) => {
   };
   return (
     <Card className="flex py-1 px-2 gap-2 relative w-fit">
-      <CardContent className="space-y-2 p-1 flex">
-        <Popup visible={isVisible}>
-          <div className="flex-col flex gap-1">
-            <div className="flex gap-1">
-              {result?.allDisorders?.map((disorder) => (
-                <Badge variant="destructive" className={animations}>
-                  {disorder}
-                </Badge>
-              ))}
-            </div>
-
-            <div className="flex gap-1">
-              {result?.compensation !== "N/A" && (
-                <div className="flex gap-1">
-                  <Badge variant="outline" className={animations}>
-                    {result?.compensation}
-                  </Badge>
-                  <Badge variant="outline" className={animations}>
-                    by {result?.compensatoryResponse}
-                  </Badge>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-1">
-              {result?.expectedValues.low && result?.expectedValues.high && (
-                <Badge className={animations}>
-                  E. HCO3: {result?.expectedValues.low} |{" "}
-                  {result?.expectedValues.high}
-                </Badge>
-              )}
-              {result?.anionGap && (
-                <Badge className={animations}>
-                  Anion Gap {result?.anionGap} ({result?.agStatus})
-                </Badge>
-              )}
-            </div>
-          </div>
-        </Popup>
+      <CardContent className="space-y-2 p-1 flex flex-col">
         <div className="flex gap-2 justify-between">
           <div className="flex gap-1">
             <div>
@@ -259,6 +222,42 @@ const AcidBase = ({ onData }: AcidBaseProps) => {
             </div>
           </div>
         </div>
+        <Popup visible={isVisible}>
+          <div className="flex-col flex gap-1">
+            <div className="flex flex-wrap gap-1">
+              {result?.allDisorders?.map((disorder, i) => (
+                <Badge key={i} variant="destructive" className={animations}>
+                  {disorder}
+                </Badge>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {result?.compensation !== "N/A" && (
+                <>
+                  <Badge variant="outline" className={animations}>
+                    {result?.compensation}
+                  </Badge>
+                  <Badge variant="outline" className={animations}>
+                    by {result?.compensatoryResponse}
+                  </Badge>
+                </>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {result?.expectedValues.low && result?.expectedValues.high && (
+                <Badge className={animations}>
+                  E. HCO3: {result?.expectedValues.low} |{" "}
+                  {result?.expectedValues.high}
+                </Badge>
+              )}
+              {result?.anionGap && (
+                <Badge className={animations}>
+                  Anion Gap {result?.anionGap} ({result?.agStatus})
+                </Badge>
+              )}
+            </div>
+          </div>
+        </Popup>
       </CardContent>
       <MedicalDisclaimer />
     </Card>

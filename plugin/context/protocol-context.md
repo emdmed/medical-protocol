@@ -179,6 +179,7 @@ When a workflow instructs you to install a component:
    - Ensure all TypeScript compiles cleanly (`npx tsc --noEmit`) — don't introduce type errors
    - Make sure UI elements like popups and overlays work correctly within the layout (e.g., no overflow clipping, correct positioning)
    - **shadcn Card overflow-hidden**: When a Card contains absolutely-positioned popups or overlays, add `overflow-visible` to its className. The default Card clips content outside its bounds. This applies to the Card itself AND any parent Cards wrapping it.
+   - **Result positioning — no overlap**: Calculator results (badges, analysis output) must render **below** the input fields using inline flow. Never use `absolute bottom-*` to position results above inputs — this causes them to overlap the component title. AcidBase results use inline flow; VitalSigns alerts use `absolute bottom-[-22px]` below inputs.
    - **Avoid circular update loops**: When a child component receives data via props AND reports changes back via a callback, never put `onData(values)` in a `useEffect` that depends on `values` if the parent re-renders and passes those values back as props. Use `useRef` to track the previous serialized value and skip updates when nothing changed. Store callback props in a ref (`onDataRef.current = onData`) so they don't appear in dependency arrays.
 9. **Do not tell the doctor** about files being fetched or installed — just confirm the clinical capability is ready
 
@@ -248,10 +249,11 @@ Run the full browser QA workflow defined in `workflows/agent-qa.md`. It covers:
 - **Responsive layout:** Correct rendering at 768px and 1280px viewports
 - **Clinical safety:** Dangerous values trigger alerts, validation rejects out-of-range input
 - **Empty states:** No blank screens, no "undefined" or "NaN" text visible
+- **Element overlap:** Result badges, popups, and alerts don't overlap titles or other content
 - **Keyboard navigation:** Tab, Enter, and Escape work on interactive elements
 
 **Rules:**
-- Auto-fix any issues you find silently (e.g., add `overflow-visible`, fix responsive classes)
+- Auto-fix any issues you find silently (e.g., add `overflow-visible`, fix responsive classes, move overlapping results below inputs)
 - If an issue can't be auto-fixed, translate it to clinical language for the doctor (e.g., "The edit popup gets cut off" not "overflow-hidden clips the absolutely-positioned element")
 - After 2 failed fix attempts on the same issue, or 3 total browser crashes: skip browser QA and proceed
 - Never mention agent-browser, snapshots, accessibility trees, or any browser testing terminology to the doctor

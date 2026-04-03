@@ -70,6 +70,9 @@ Test pattern: `tests/**/*.test.ts`
 - Edit popups: `absolute bottom-10` (above inputs)
 - Alert badges: `absolute bottom-[-22px]` (below inputs)
 - Analysis overlays: `absolute top-12 z-50` (below source card)
+- Calculator results (AcidBase): inline flow below inputs — no absolute positioning
 - Timeline/Clinical Notes use portal-based shadcn components (Popover, AlertDialog, Drawer) — no overflow fix needed.
+
+**Result overlap prevention:** Calculator result badges must render **below** inputs using inline flow. Never use `absolute bottom-*` to position results above inputs — this overlaps the component title.
 
 **Parent-child data flow:** Components receive data via props and report changes via callbacks. Use `useRef` to track previous values and skip no-op updates to avoid circular render loops.

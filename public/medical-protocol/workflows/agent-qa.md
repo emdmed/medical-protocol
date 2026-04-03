@@ -75,7 +75,32 @@ From the accessibility tree snapshot, check for:
 - No completely blank content areas where data should appear
 - Proper placeholder text or empty-state messages are shown
 
-### E. Keyboard Navigation
+### E. Element Overlap Detection
+
+Result badges, popups, alerts, and overlays must never overlap titles, labels, or other content. This is a recurring issue — check proactively.
+
+```bash
+agent-browser snapshot -i
+```
+
+1. **Check for overlapping elements:** In the accessibility tree, look for result badges or status indicators that appear *before* or *at the same vertical position as* titles or headings. If badges visually overlap card titles, the results need to be repositioned.
+
+2. **Verify result positioning:** For calculator components (Acid-Base, BMI, Water Balance), result badges/output should appear **below** the input fields, not above them. If results appear above inputs or over the component title, reposition them.
+
+3. **Check at both viewports:** Overlaps may only appear at certain widths.
+   ```bash
+   agent-browser set viewport 768 1024
+   agent-browser screenshot .qa-screenshots/overlap-tablet-$(date +%s).png
+   agent-browser set viewport 1280 800
+   agent-browser screenshot .qa-screenshots/overlap-desktop-$(date +%s).png
+   ```
+
+4. **Common fixes:**
+   - Move result/badge containers from above inputs to below inputs in the component layout
+   - Switch from absolute positioning to inline flow for result displays
+   - If absolute positioning is required, ensure `top-*` places content below the source, not `bottom-*` which places it above
+
+### F. Keyboard Navigation
 
 ```bash
 agent-browser press Tab
@@ -148,6 +173,11 @@ agent-browser snapshot -i
    agent-browser type "7.35"
    ```
 2. **Calculations produce results:** After entering inputs, check that result areas show computed values (not empty, not "NaN", not "0" when non-zero is expected)
+3. **Results do not overlap other content:** After results appear, take a snapshot and verify that result badges/text appear **below** the input fields — not overlapping the component title, labels, or other UI elements. This is a recurring issue especially with Acid-Base.
+   ```bash
+   agent-browser snapshot -i
+   agent-browser screenshot .qa-screenshots/calculator-results-$(date +%s).png
+   ```
 
 ### Telemonitoring
 
@@ -181,6 +211,7 @@ When you identify these issues during browser QA, fix them directly in the sourc
 | Symptom | Fix |
 |---|---|
 | Popup/overlay clipped or invisible | Add `overflow-visible` to the Card className and any parent Cards |
+| Result badges overlap title or labels | Move results below inputs using inline flow; avoid `absolute bottom-*` positioning that places content above the component |
 | Content overflows at 768px | Add responsive Tailwind classes (`w-full`, `overflow-x-auto`, responsive grid) |
 | Click on element does nothing | Check if the onClick handler is properly bound; ensure interactive elements are buttons, not divs |
 | Input field doesn't accept typing | Check for missing `value`/`onChange` props or controlled component issues |
@@ -226,7 +257,7 @@ This ensures no headless browser processes are left running.
 
 ```
 Prerequisites:  agent-browser --version → open http://localhost:3000
-Universal:      errors → console → snapshot → viewport 768 → viewport 1280 → empty state → keyboard
+Universal:      errors → console → snapshot → viewport 768 → viewport 1280 → empty state → overlap check → keyboard
 Component:      (match what was built — see Component-Specific Checks)
 On failure:     screenshot → auto-fix → retry → bail out after 2 attempts
 Always:         agent-browser close

@@ -148,10 +148,12 @@ function AssessmentForm({ onSubmit }: { onSubmit: (data: PatientAssessment) => v
 
 ## Gotchas
 
-- **overflow-hidden clipping**: shadcn `Card` uses `overflow-hidden` by default. Add `overflow-visible` to any Card wrapping VitalSigns or AcidBase — their popups use absolute positioning and will be clipped otherwise:
+- **overflow-hidden clipping**: shadcn `Card` uses `overflow-hidden` by default. Add `overflow-visible` to any Card wrapping VitalSigns — its popups use absolute positioning and will be clipped otherwise:
   - **VitalSigns**: edit buttons (`absolute bottom-10`, above inputs), alert badges (`absolute bottom-[-22px]`, below inputs), AI analysis card (`absolute top-12 z-50`, below the component)
-  - **AcidBase**: result popup (`absolute bottom-15 left-0`, above inputs)
+  - **AcidBase**: result badges render inline below inputs (no absolute positioning, no overflow fix needed)
   - Components that use shadcn portals (Timeline Popover, ClinicalNotes AlertDialog/Drawer/Select) do NOT need this fix — portals render outside the DOM tree.
+
+- **Result overlap prevention**: Calculator result badges/output must always render **below** the input fields using inline flow — never above them using `absolute bottom-*`. Absolute positioning above inputs causes results to overlap the component title. This applies to AcidBase, BMI, and Water Balance.
 
 - **VitalSigns circular updates**: If your parent passes `data` and listens to `onData`, don't re-pass the same data back down in a useEffect loop. The hook uses ref-based dedup internally, but external effect chains can still infinite-loop.
 
