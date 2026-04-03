@@ -213,6 +213,68 @@
       "timeline.tsx"
     ]
   },
+  "pafi": {
+    "version": "0.4.0",
+    "category": "calculator",
+    "description": "PaO2/FiO2 ratio calculator with ARDS classification",
+    "import": "@/components/pafi/pafi-calculator",
+    "target": "components/pafi",
+    "props": "none — self-contained",
+    "dataFlow": "none — internal state only",
+    "popups": {
+      "resultBadges": {
+        "positioning": "inline flow below inputs",
+        "direction": "below the input fields",
+        "trigger": "automatic when valid PaO2 and FiO2 values are entered",
+        "content": "PaFi ratio badge + ARDS classification badge"
+      },
+      "note": "Result badges render inline below inputs — no absolute positioning, no overflow-visible needed on parent Cards."
+    },
+    "shadcn": [
+      "card",
+      "input",
+      "button",
+      "badge",
+      "label"
+    ],
+    "files": [
+      "pafi-calculator.tsx"
+    ]
+  },
+  "dka": {
+    "version": "0.4.0",
+    "category": "monitoring",
+    "description": "DKA monitoring with hourly tracking of glucose, ketones, potassium, insulin, GCS, urine output",
+    "import": "@/components/dka/dka-monitor",
+    "types": "@/components/dka/types/dka",
+    "target": "components/dka",
+    "props": {
+      "data": "DKAPatientData — initial patient data with readings",
+      "onData": "(data: DKAPatientData) => void"
+    },
+    "dataFlow": "bidirectional — receives data, reports changes via onData",
+    "popups": {
+      "resultBadges": {
+        "positioning": "inline flow below inputs",
+        "direction": "below the input fields",
+        "trigger": "automatic when readings are available",
+        "content": "rate badges, resolution criteria badges, potassium classification"
+      },
+      "note": "All results render inline — no absolute positioning, no overflow-visible needed on parent Cards."
+    },
+    "shadcn": [
+      "card",
+      "input",
+      "button",
+      "badge",
+      "label",
+      "separator"
+    ],
+    "files": [
+      "dka-monitor.tsx",
+      "types/dka.ts"
+    ]
+  },
   "clinical-notes": {
     "version": "0.4.0",
     "category": "documentation",

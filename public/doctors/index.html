@@ -437,6 +437,43 @@
       color: var(--accent);
     }
 
+    /* Provider tabs */
+    .provider-tabs {
+      display: flex; gap: 8px; margin-bottom: 24px;
+    }
+    .provider-tab {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 20px; border-radius: 10px;
+      background: var(--card); border: 1px solid var(--card-border);
+      color: var(--text-muted); font-size: 14px; font-weight: 500;
+      font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .provider-tab:hover { border-color: rgba(255,255,255,0.2); }
+    .provider-tab.active {
+      background: rgba(26,158,143,0.1); border-color: var(--accent); color: var(--text);
+    }
+    .provider-tab__badge {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 2px 6px; border-radius: 4px; font-weight: 600;
+    }
+    .provider-tab__badge--active { background: rgba(26,158,143,0.2); color: var(--accent); }
+    .provider-tab__badge--soon { background: var(--card); color: var(--text-dim); }
+    .provider-panel { display: none; }
+    .provider-panel.active { display: block; }
+    .provider-soon {
+      text-align: center; padding: 48px 24px;
+      background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 12px;
+    }
+    .provider-soon__icon {
+      width: 48px; height: 48px; margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.06); border-radius: 12px;
+    }
+    .provider-soon__icon svg { width: 24px; height: 24px; stroke: var(--text-dim); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .provider-soon h3 { font-size: 18px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+    .provider-soon p { font-size: 14px; color: var(--text-muted); max-width: 400px; margin: 0 auto; line-height: 1.6; }
+
     /* Install command card */
     .onboard-command { margin-top: 32px; }
     .onboard-command__label {
@@ -940,6 +977,23 @@
         <p class="section-desc" data-i18n="onboard.desc">Follow these steps from your personal computer. No technical background needed &mdash; we'll walk you through everything.</p>
       </div>
 
+      <!-- Provider selector -->
+      <div class="reveal reveal-d1">
+        <div class="provider-tabs">
+          <button class="provider-tab active" onclick="switchProvider('claude-code')" data-provider="claude-code">
+            Claude Code
+            <span class="provider-tab__badge provider-tab__badge--active">Active</span>
+          </button>
+          <button class="provider-tab" onclick="switchProvider('v0')" data-provider="v0">
+            v0 by Vercel
+            <span class="provider-tab__badge provider-tab__badge--soon" data-i18n="provider.soon">Coming soon</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Claude Code provider panel -->
+      <div class="provider-panel active" id="provider-claude-code">
+
       <!-- Prerequisite -->
       <div class="onboard-prereq reveal reveal-d1">
         <div class="onboard-prereq__icon">
@@ -1104,6 +1158,20 @@
           </div>
         </div>
       </div>
+
+      </div><!-- /provider-claude-code -->
+
+      <!-- v0 provider panel -->
+      <div class="provider-panel" id="provider-v0">
+        <div class="provider-soon">
+          <div class="provider-soon__icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3 data-i18n="provider.v0Title">v0 support is coming soon</h3>
+          <p data-i18n="provider.v0Desc">We're working on a provider integration for v0 by Vercel. It will let you build clinical interfaces using v0's AI-powered interface builder. In the meantime, Claude Code is fully supported.</p>
+        </div>
+      </div><!-- /provider-v0 -->
+
     </div>
   </section>
 
@@ -1244,6 +1312,9 @@
         'step.pasteCmdDesc': 'Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.',
         'onboard.cmdLabel': 'Copy this command and paste it into Claude Code',
         'copy.ariaLabel': 'Copy command',
+        'provider.soon': 'Coming soon',
+        'provider.v0Title': 'v0 support is coming soon',
+        'provider.v0Desc': 'We\'re working on a provider integration for v0 by Vercel. It will let you build clinical interfaces using v0\'s AI-powered interface builder. In the meantime, Claude Code is fully supported.',
         'expect.title': 'What happens after you paste the command',
         'expect.step1Title': 'Claude sets up your project',
         'expect.step1Desc': 'It downloads the medical protocol and configures everything automatically. You don\'t need to do anything &mdash; just wait about 30 seconds.',
@@ -1368,6 +1439,9 @@
         'step.pasteCmdDesc': 'Una vez que Claude esté ejecutándose y vea un campo de texto, pegue el comando del recuadro de abajo. Claude se encarga del resto.',
         'onboard.cmdLabel': 'Copie este comando y péguelo en Claude Code',
         'copy.ariaLabel': 'Copiar comando',
+        'provider.soon': 'Próximamente',
+        'provider.v0Title': 'Soporte para v0 próximamente',
+        'provider.v0Desc': 'Estamos trabajando en una integración con v0 de Vercel. Le permitirá construir interfaces clínicas usando el constructor de interfaces con IA de v0. Mientras tanto, Claude Code está completamente soportado.',
         'expect.title': 'Qué sucede después de pegar el comando',
         'expect.step1Title': 'Claude configura su proyecto',
         'expect.step1Desc': 'Descarga el protocolo médico y configura todo automáticamente. No necesita hacer nada &mdash; solo espere unos 30 segundos.',
@@ -1467,6 +1541,16 @@
           btn.classList.remove('copy-btn--copied');
           btn.querySelector('svg').innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>';
         }, 2000);
+      });
+    }
+
+    // Provider tabs
+    function switchProvider(provider) {
+      document.querySelectorAll('.provider-tab').forEach(function(tab) {
+        tab.classList.toggle('active', tab.dataset.provider === provider);
+      });
+      document.querySelectorAll('.provider-panel').forEach(function(panel) {
+        panel.classList.toggle('active', panel.id === 'provider-' + provider);
       });
     }
 

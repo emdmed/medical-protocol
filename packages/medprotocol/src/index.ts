@@ -11,6 +11,8 @@ Commands:
   abg              Analyze arterial blood gas
   water-balance    Calculate fluid balance
   vitals           Evaluate vital signs
+  pafi             Calculate PaO2/FiO2 ratio (ARDS classification)
+  dka              Assess DKA parameters and resolution
 
 Global options:
   --json           Output as JSON (available on all commands)
@@ -21,7 +23,9 @@ Examples:
   medprotocol bmi --weight 70 --height-m 1.75 --metric
   medprotocol abg --ph 7.25 --pco2 29 --hco3 14
   medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2
-  medprotocol vitals --bp 120/80 --hr 72 --temp 37.0`;
+  medprotocol vitals --bp 120/80 --hr 72 --temp 37.0
+  medprotocol pafi --pao2 60 --fio2 40
+  medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl`;
 
 const command = process.argv[2];
 const commandArgs = process.argv.slice(3);
@@ -41,6 +45,8 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   abg: () => import("./commands/abg"),
   "water-balance": () => import("./commands/water-balance"),
   vitals: () => import("./commands/vitals"),
+  pafi: () => import("./commands/pafi"),
+  dka: () => import("./commands/dka"),
 };
 
 const loader = commands[command];

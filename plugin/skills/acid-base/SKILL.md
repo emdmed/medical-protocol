@@ -16,6 +16,10 @@ If the doctor's request is vague, ask these three questions in a single conversa
 2. **Single vs multiple patients** — "Will you work with one patient at a time, or manage a list?" Default: one at a time.
 3. **Data persistence** — "Should the system remember data between sessions?" Default: yes (stored locally).
 
+## Cross-Prompt: DKA Monitoring
+
+Before proceeding with the blood gas analyzer, ask the doctor: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, after completing this workflow, also read and execute `${CLAUDE_PLUGIN_ROOT}/skills/dka/SKILL.md`.
+
 ## Phase 1: Clinical Requirements
 
 Ask the doctor about their blood gas analysis needs:

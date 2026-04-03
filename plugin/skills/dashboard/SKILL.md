@@ -30,6 +30,10 @@ The doctor wants a combined clinical dashboard. Present the available building b
   - Blood gas / acid-base analyzer
   - BMI calculator
   - Fluid balance (water balance / I&O)
+  - PaFi calculator (PaO2/FiO2 ratio with ARDS classification)
+
+  **Critical Care**
+  - DKA monitoring (hourly glucose, ketones, potassium, insulin, GCS tracking)
 
   **Documentation**
   - Clinical notes (encounter note editor)
@@ -71,6 +75,8 @@ Silently perform all of the following:
    - `water-balance` → `{project}/components/water-balance/`
    - `telemonitoring` → `{project}/components/telemonitoring/`
    - `timeline` → `{project}/components/timeline/`
+   - `pafi` → `{project}/components/pafi/`
+   - `dka` → `{project}/components/dka/`
 
 5. Check `externalComponents` for each manifest entry — some external imports may now be available as their own manifest entries. Fetch those from the CDN. For remaining external imports not on the CDN, create simplified versions, remove them, or replace as appropriate.
 

@@ -128,6 +128,29 @@ function AssessmentForm({ onSubmit }: { onSubmit: (data: PatientAssessment) => v
 
 ---
 
+## Dashboard with PaFi and DKA monitoring
+
+```tsx
+import VitalSigns from "@/components/vital-signs/vital-signs";
+import AcidBase from "@/components/acid-base/acid-base";
+import PaFiCalculator from "@/components/pafi/pafi-calculator";
+import DKAMonitor from "@/components/dka/dka-monitor";
+import type { DKAPatientData } from "@/components/dka/types/dka";
+
+function ICUDashboard() {
+  const [dkaData, setDkaData] = useState<DKAPatientData | null>(null);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <VitalSigns onData={(data) => {}} editable />
+      <AcidBase onData={(result) => {}} />
+      <PaFiCalculator />
+      <DKAMonitor data={dkaData ?? undefined} onData={setDkaData} />
+    </div>
+  );
+}
+```
+
 ## Gotchas
 
 - **overflow-hidden clipping**: shadcn `Card` uses `overflow-hidden` by default. Add `overflow-visible` to any Card wrapping VitalSigns — its edit popups use absolute positioning. AcidBase result badges now render inline below inputs (no overflow fix needed).

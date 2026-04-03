@@ -55,6 +55,55 @@
       padding-bottom: 0.3rem;
       border-bottom: 1px solid #cfd8dc;
     }
+
+    .provider-block {
+      margin-bottom: 2.5rem;
+      padding: 1rem 1.2rem;
+      border: 1px solid #cfd8dc;
+      border-radius: 4px;
+      background: #fff;
+    }
+    .provider-block h2 {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0.3rem;
+    }
+    .provider-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #1a2a33;
+      margin-bottom: 0.15rem;
+    }
+    .provider-tag {
+      display: inline-block;
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
+      margin-left: 0.4rem;
+      position: relative;
+      top: -1px;
+    }
+    .tag-active {
+      background: #e0f2f1;
+      color: #00695c;
+    }
+    .tag-soon {
+      background: #eceff1;
+      color: #90a4ae;
+    }
+    .provider-desc {
+      font-size: 0.72rem;
+      color: #78909c;
+      margin-bottom: 0.8rem;
+    }
+    .provider-block section {
+      margin-bottom: 1rem;
+    }
+    .provider-block section:last-child {
+      margin-bottom: 0;
+    }
     ul { list-style: none; }
     li {
       margin-bottom: 0.15rem;
@@ -161,210 +210,246 @@
     </div>
 
     <section>
-      <h2>protocol</h2>
-      <ul>
-        <li>
-          <a href="/medical-protocol/protocol.md">protocol.md</a>
-          <span class="desc">core medical protocol — copy to your .claude/ directory</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/manifest.json">manifest.json</a>
-          <span class="desc">component registry with files and dependencies</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/COMPOSITION.md">COMPOSITION.md</a>
-          <span class="desc">integration patterns and data flow for combining components</span>
-        </li>
-      </ul>
+      <h2>providers</h2>
     </section>
 
-    <section>
-      <h2>workflows</h2>
+    <div class="provider-block">
+      <p class="provider-name">Claude Code <span class="provider-tag tag-active">active</span></p>
+      <p class="provider-desc">describe what you need in plain language — Claude Code builds it</p>
+
+      <section>
+        <h2>install</h2>
+        <p class="prompt" style="margin-bottom: 0.4rem;"><span>$ </span><code>Fetch and follow https://medical-protocol.vercel.app/install</code></p>
+        <ul>
+          <li>
+            <a href="/medical-protocol/providers/claude-code/protocol.md">protocol.md</a>
+            <span class="desc">core protocol — copy to your .claude/ directory</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/providers/claude-code/install.md">install.md</a>
+            <span class="desc">step-by-step install guide</span>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>workflows</h2>
+        <ul>
+          <li>
+            <a href="/medical-protocol/workflows/vital-signs.md">vital-signs.md</a>
+            <span class="desc">blood pressure, heart rate, SpO2, temperature, respiratory rate</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/ehr.md">ehr.md</a>
+            <span class="desc">electronic health records with patient management and clinical notes</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/acid-base.md">acid-base.md</a>
+            <span class="desc">ABG analysis with disorder detection and compensation</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/bmi.md">bmi.md</a>
+            <span class="desc">BMI calculator with imperial/metric and category badges</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/water-balance.md">water-balance.md</a>
+            <span class="desc">fluid intake/output tracker with insensible loss and net balance</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/telemonitoring.md">telemonitoring.md</a>
+            <span class="desc">pulse oximetry with real-time animation and alerts</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/timeline.md">timeline.md</a>
+            <span class="desc">scrollable clinical timeline with duration badges</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/dashboard.md">dashboard.md</a>
+            <span class="desc">combined clinical dashboard with vitals and records</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/pafi.md">pafi.md</a>
+            <span class="desc">PaO2/FiO2 ratio calculator with ARDS classification</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/dka.md">dka.md</a>
+            <span class="desc">DKA monitoring with hourly glucose, ketones, potassium tracking</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/customize.md">customize.md</a>
+            <span class="desc">modify existing interfaces in clinical language</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/workflows/agent-qa.md">agent-qa.md</a>
+            <span class="desc">automated browser QA testing for built interfaces</span>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>components / vital signs</h2>
+        <ul>
+          <li>
+            <a href="/medical-protocol/components/vital-signs/vital-signs.tsx">vital-signs.tsx</a>
+            <span class="desc">vital signs monitor — ready for real clinical data</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/vital-signs/signs/blood-pressure.tsx">blood-pressure.tsx</a>
+            <span class="desc">systolic/diastolic blood pressure</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/vital-signs/signs/heart-rate.tsx">heart-rate.tsx</a>
+            <span class="desc">pulse rate monitor</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/vital-signs/signs/blood-oxygen.tsx">blood-oxygen.tsx</a>
+            <span class="desc">SpO2 saturation</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/vital-signs/signs/temperature.tsx">temperature.tsx</a>
+            <span class="desc">body temperature</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/vital-signs/signs/respiratory-rate.tsx">respiratory-rate.tsx</a>
+            <span class="desc">breaths per minute</span>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>components / calculators & tools</h2>
+        <ul>
+          <li>
+            <a href="/medical-protocol/components/acid-base/acid-base.tsx">acid-base.tsx</a>
+            <span class="desc">ABG analyzer with disorder detection, compensation, anion gap</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/bmi/bmi-calculator.tsx">bmi-calculator.tsx</a>
+            <span class="desc">BMI calculator with imperial/metric toggle and category badges</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/water-balance/water-balance.tsx">water-balance.tsx</a>
+            <span class="desc">fluid intake/output tracker with insensible loss and net balance</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/pafi/pafi-calculator.tsx">pafi-calculator.tsx</a>
+            <span class="desc">PaO2/FiO2 ratio calculator with ARDS classification and FiO2 presets</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/dka/dka-monitor.tsx">dka-monitor.tsx</a>
+            <span class="desc">DKA monitoring with hourly tracking, resolution criteria, insulin suggestions</span>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>components / telemonitoring</h2>
+        <ul>
+          <li>
+            <a href="/medical-protocol/components/telemonitoring/pulse-oximetry/pulse-oximetry.tsx">pulse-oximetry.tsx</a>
+            <span class="desc">real-time pulse oximetry with animated heartbeat, BPM and SpO2</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/telemonitoring/pulse-oximetry/pulse-oximetry-simulator.tsx">pulse-oximetry-simulator.tsx</a>
+            <span class="desc">waveform simulator for pulse oximetry demo</span>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>components / timeline</h2>
+        <ul>
+          <li>
+            <a href="/medical-protocol/components/timeline/timeline.tsx">timeline.tsx</a>
+            <span class="desc">scrollable clinical timeline with duration badges and popovers</span>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>components / ehr</h2>
+        <ul>
+          <li>
+            <a href="/medical-protocol/components/ehr/ehr.tsx">ehr.tsx</a>
+            <span class="desc">electronic health records — ready for real clinical data</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/ehr/page.tsx">page.tsx</a>
+            <span class="desc">ehr page entry point</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/ehr/patient-details/patient-details.tsx">patient-details.tsx</a>
+            <span class="desc">patient demographics and conditions</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/ehr/prev-evolutions/prev-evolutions.tsx">prev-evolutions.tsx</a>
+            <span class="desc">previous clinical notes and evolutions</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/ehr/sidebar/sidebar.tsx">sidebar.tsx</a>
+            <span class="desc">navigation sidebar</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/ehr/references/references.tsx">references.tsx</a>
+            <span class="desc">clinical references and guidelines</span>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>shared resources</h2>
+        <ul>
+          <li>
+            <a href="/medical-protocol/components/manifest.json">manifest.json</a>
+            <span class="desc">component registry with files and dependencies</span>
+          </li>
+          <li>
+            <a href="/medical-protocol/components/COMPOSITION.md">COMPOSITION.md</a>
+            <span class="desc">integration patterns and data flow for combining components</span>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>quick calculator (CLI)</h2>
+        <ul>
+          <li>
+            <a>bmi</a>
+            <span class="desc">body mass index from weight and height</span>
+          </li>
+          <li>
+            <a>abg</a>
+            <span class="desc">arterial blood gas analysis with disorder detection</span>
+          </li>
+          <li>
+            <a>water-balance</a>
+            <span class="desc">fluid intake/output with insensible loss calculation</span>
+          </li>
+          <li>
+            <a>vitals</a>
+            <span class="desc">vital sign evaluation with abnormal value flagging</span>
+          </li>
+        </ul>
+        <p style="margin-top: 0.4rem; font-size: 0.7rem; color: #90a4ae;">
+          run via <code style="font-size: 0.7rem; color: #546e7a;">medprotocol &lt;command&gt; [options]</code>
+        </p>
+      </section>
+    </div>
+
+    <div class="provider-block" style="background: #f8fafb;">
+      <p class="provider-name">v0 by Vercel <span class="provider-tag tag-soon">coming soon</span></p>
+      <p class="provider-desc">AI-powered interface builder — provider integration in development</p>
       <ul>
         <li>
-          <a href="/medical-protocol/workflows/vital-signs.md">vital-signs.md</a>
-          <span class="desc">blood pressure, heart rate, SpO2, temperature, respiratory rate</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/workflows/ehr.md">ehr.md</a>
-          <span class="desc">electronic health records with patient management and clinical notes</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/workflows/acid-base.md">acid-base.md</a>
-          <span class="desc">ABG analysis with disorder detection and compensation</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/workflows/bmi.md">bmi.md</a>
-          <span class="desc">BMI calculator with imperial/metric and category badges</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/workflows/water-balance.md">water-balance.md</a>
-          <span class="desc">fluid intake/output tracker with insensible loss and net balance</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/workflows/telemonitoring.md">telemonitoring.md</a>
-          <span class="desc">pulse oximetry with real-time animation and alerts</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/workflows/timeline.md">timeline.md</a>
-          <span class="desc">scrollable clinical timeline with duration badges</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/workflows/dashboard.md">dashboard.md</a>
-          <span class="desc">combined clinical dashboard with vitals and records</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/workflows/customize.md">customize.md</a>
-          <span class="desc">modify existing interfaces in clinical language</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/workflows/agent-qa.md">agent-qa.md</a>
-          <span class="desc">automated browser QA testing for built interfaces</span>
+          <a href="/medical-protocol/providers/v0/README.md">README.md</a>
+          <span class="desc">integration status and requirements</span>
         </li>
       </ul>
-    </section>
-
-    <section>
-      <h2>components / vital signs</h2>
-      <ul>
-        <li>
-          <a href="/medical-protocol/components/vital-signs/vital-signs.tsx">vital-signs.tsx</a>
-          <span class="desc">vital signs monitor — ready for real clinical data</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/vital-signs/signs/blood-pressure.tsx">blood-pressure.tsx</a>
-          <span class="desc">systolic/diastolic blood pressure</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/vital-signs/signs/heart-rate.tsx">heart-rate.tsx</a>
-          <span class="desc">pulse rate monitor</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/vital-signs/signs/blood-oxygen.tsx">blood-oxygen.tsx</a>
-          <span class="desc">SpO2 saturation</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/vital-signs/signs/temperature.tsx">temperature.tsx</a>
-          <span class="desc">body temperature</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/vital-signs/signs/respiratory-rate.tsx">respiratory-rate.tsx</a>
-          <span class="desc">breaths per minute</span>
-        </li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>components / calculators & tools</h2>
-      <ul>
-        <li>
-          <a href="/medical-protocol/components/acid-base/acid-base.tsx">acid-base.tsx</a>
-          <span class="desc">ABG analyzer with disorder detection, compensation, anion gap</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/bmi/bmi-calculator.tsx">bmi-calculator.tsx</a>
-          <span class="desc">BMI calculator with imperial/metric toggle and category badges</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/water-balance/water-balance.tsx">water-balance.tsx</a>
-          <span class="desc">fluid intake/output tracker with insensible loss and net balance</span>
-        </li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>components / telemonitoring</h2>
-      <ul>
-        <li>
-          <a href="/medical-protocol/components/telemonitoring/pulse-oximetry/pulse-oximetry.tsx">pulse-oximetry.tsx</a>
-          <span class="desc">real-time pulse oximetry with animated heartbeat, BPM and SpO2</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/telemonitoring/pulse-oximetry/pulse-oximetry-simulator.tsx">pulse-oximetry-simulator.tsx</a>
-          <span class="desc">waveform simulator for pulse oximetry demo</span>
-        </li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>components / timeline</h2>
-      <ul>
-        <li>
-          <a href="/medical-protocol/components/timeline/timeline.tsx">timeline.tsx</a>
-          <span class="desc">scrollable clinical timeline with duration badges and popovers</span>
-        </li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>components / ehr</h2>
-      <ul>
-        <li>
-          <a href="/medical-protocol/components/ehr/ehr.tsx">ehr.tsx</a>
-          <span class="desc">electronic health records — ready for real clinical data</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/ehr/page.tsx">page.tsx</a>
-          <span class="desc">ehr page entry point</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/ehr/patient-details/patient-details.tsx">patient-details.tsx</a>
-          <span class="desc">patient demographics and conditions</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/ehr/prev-evolutions/prev-evolutions.tsx">prev-evolutions.tsx</a>
-          <span class="desc">previous clinical notes and evolutions</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/ehr/sidebar/sidebar.tsx">sidebar.tsx</a>
-          <span class="desc">navigation sidebar</span>
-        </li>
-        <li>
-          <a href="/medical-protocol/components/ehr/references/references.tsx">references.tsx</a>
-          <span class="desc">clinical references and guidelines</span>
-        </li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>quick calculator (CLI)</h2>
-      <ul>
-        <li>
-          <a>bmi</a>
-          <span class="desc">body mass index from weight and height</span>
-        </li>
-        <li>
-          <a>abg</a>
-          <span class="desc">arterial blood gas analysis with disorder detection</span>
-        </li>
-        <li>
-          <a>water-balance</a>
-          <span class="desc">fluid intake/output with insensible loss calculation</span>
-        </li>
-        <li>
-          <a>vitals</a>
-          <span class="desc">vital sign evaluation with abnormal value flagging</span>
-        </li>
-      </ul>
-      <p style="margin-top: 0.4rem; font-size: 0.7rem; color: #90a4ae;">
-        run via <code style="font-size: 0.7rem; color: #546e7a;">npm run medprotocol -- &lt;command&gt; [options]</code>
-      </p>
-    </section>
-
-    <div class="usage">
-      <h2>install</h2>
-      <p class="prompt-label">tell claude code</p>
-      <p class="prompt"><code>Fetch and follow https://medical-protocol.vercel.app/install</code></p>
-      <p class="prompt-label">then describe what you need</p>
-      <p class="prompt"><code>"I need a vital signs monitor for my clinic"</code></p>
-      <p style="margin-top: 0.6rem; font-size: 0.65rem; color: #90a4ae;">
-        <a href="/install" style="font-size: 0.65rem;">view install guide</a>
-      </p>
     </div>
 
     <div class="footer">
       <a href="/doctors">guide for doctors</a>
-      <span>runs locally &middot; data stays on your machine</span>
+      <span><a href="/install">install guide</a> &middot; runs locally &middot; data stays on your machine</span>
     </div>
   </main>
 </body>

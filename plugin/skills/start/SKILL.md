@@ -39,12 +39,16 @@ Classify the doctor's request based on these signal words and route to the match
 | **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/acid-base/SKILL.md` |
 | **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/bmi/SKILL.md` |
 | **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/water-balance/SKILL.md` |
+| **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/pafi/SKILL.md` |
+| **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/dka/SKILL.md` |
 | **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/telemonitoring/SKILL.md` |
 | **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/timeline/SKILL.md` |
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined, multiple domains matched | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/dashboard/SKILL.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize, or request targets already-installed component | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/customize/SKILL.md` |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/troubleshoot/SKILL.md` |
 | **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/cli/SKILL.md` |
+
+**Cross-prompt:** When the doctor requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.
 
 **If the request matches multiple domains**, prefer `dashboard` as it combines components.
 

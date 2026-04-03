@@ -52,6 +52,8 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 | `abg` | Analyzes arterial blood gas values (pH, pCO2, HCO3) and classifies the disturbance | `medprotocol abg --ph 7.25 --pco2 29 --hco3 14` |
 | `water-balance` | Calculates fluid balance from intake and output values | `medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2` |
 | `vitals` | Evaluates vital signs and flags abnormal values | `medprotocol vitals --bp 120/80 --hr 72 --temp 37.0` |
+| `pafi` | Calculates PaO2/FiO2 ratio and classifies ARDS severity | `medprotocol pafi --pao2 60 --fio2 40` |
+| `dka` | Evaluates DKA parameters: glucose reduction rate, resolution criteria | `medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl` |
 
 **When to suggest the quick calculator vs building an interface:**
 
@@ -101,6 +103,8 @@ When the doctor's request is vague or general (e.g., "I need something to track 
    | Blood gas analyzer | ABG interpretation — disorders, compensation, anion gap |
    | BMI calculator | Body mass index with category classification |
    | Fluid balance | Intake/output tracking with insensible loss |
+   | PaFi calculator | PaO2/FiO2 ratio with ARDS classification |
+   | DKA monitoring | Hourly glucose, ketones, potassium, insulin, GCS tracking |
    | Pulse oximetry | Real-time animated SpO2/BPM display |
    | Clinical timeline | Day-by-day hospitalization course with event details |
    | **Dashboard** | Combine any of the above into one view |
@@ -140,12 +144,16 @@ When the doctor describes what they need, classify into one of these domains bas
 | **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | `workflows/acid-base.md` |
 | **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | `workflows/bmi.md` |
 | **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | `workflows/water-balance.md` |
+| **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury | `workflows/pafi.md` |
+| **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking | `workflows/dka.md` |
 | **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | `workflows/telemonitoring.md` |
 | **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | `workflows/timeline.md` |
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `workflows/dashboard.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize | `workflows/customize.md` |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | `workflows/troubleshoot.md` |
 | **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Run the quick calculator directly (see Quick Calculator section above) |
+
+**Cross-prompt:** When the doctor requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.
 
 **If the request matches multiple domains**, prefer `dashboard` as it combines components.
 

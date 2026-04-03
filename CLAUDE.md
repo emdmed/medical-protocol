@@ -24,7 +24,13 @@ No linter configured. TypeScript strict mode only (`tsconfig.json`).
 
 ```
 public/medical-protocol/           # CDN deliverable (https://medical-protocol.vercel.app/medical-protocol/)
-├── protocol.md                    # Main protocol doctors copy to .claude/
+├── providers/                     # Provider-specific protocols and install guides
+│   ├── claude-code/
+│   │   ├── protocol.md            # Main protocol doctors copy to .claude/
+│   │   └── install.md             # Claude Code install guide
+│   └── v0/
+│       ├── protocol.md            # v0 protocol (stub — coming soon)
+│       └── README.md              # v0 integration notes
 ├── components/                    # React component source (TSX)
 │   ├── manifest.json              # Component registry with props/data-flow docs
 │   ├── COMPOSITION.md             # Usage patterns for combining components
@@ -32,6 +38,8 @@ public/medical-protocol/           # CDN deliverable (https://medical-protocol.v
 │   ├── acid-base/                 # ABG analyzer
 │   ├── bmi/                       # BMI calculator
 │   ├── water-balance/             # Fluid intake/output tracker
+│   ├── pafi/                      # PaO2/FiO2 ratio with ARDS classification
+│   ├── dka/                       # DKA monitoring (glucose, ketones, K+, GCS)
 │   ├── timeline/                  # Clinical timeline with popovers
 │   ├── telemonitoring/            # Pulse oximetry animation
 │   └── clinical-notes/             # Encounter note editor with highlighting

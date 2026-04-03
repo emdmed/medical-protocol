@@ -18,6 +18,8 @@ Determine which calculator the doctor needs based on their request:
 | `abg` | pH, blood gas, ABG, acidosis, alkalosis, anion gap, bicarbonate, pCO2 |
 | `water-balance` | fluid balance, intake, output, I/O, diuresis, fluid management |
 | `vitals` | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate |
+| `pafi` | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure |
+| `dka` | DKA, diabetic ketoacidosis, glucemia, ketones, glucose reduction rate |
 
 If the request could match multiple calculators, ask: "Which calculation would you like me to run?" and list the options in clinical language.
 
@@ -47,6 +49,17 @@ Ask the doctor for the required values **conversationally** — do not present a
 - Optional: respiratory rate, SpO2, FiO2
 - Example prompt: "What vital signs do you have?"
 
+**PaFi (PaO2/FiO2):**
+- PaO2 (mmHg), FiO2 (% — 21 for room air, up to 100)
+- Example prompt: "What are the PaO2 and FiO2 values?"
+
+**DKA:**
+- Current glucose value and unit (mg/dL or mmol/L)
+- Optional: previous glucose (for rate calculation), hours between readings
+- Optional: ketones, bicarbonate, pH (for resolution assessment)
+- Optional: insulin rate (for adjustment suggestion)
+- Example prompt: "What's the current glucose? Do you have a previous reading to calculate the rate?"
+
 If the doctor has already provided all needed values in their initial message, skip to Phase 3.
 
 ## Phase 3: Run the Calculation
@@ -63,6 +76,8 @@ npm run medprotocol -- bmi --weight 70 --height-m 1.75 --metric --json
 npm run medprotocol -- abg --ph 7.25 --pco2 29 --hco3 14 --json
 npm run medprotocol -- water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2 --json
 npm run medprotocol -- vitals --bp 120/80 --hr 72 --temp 37.0 --json
+npm run medprotocol -- pafi --pao2 60 --fio2 40 --json
+npm run medprotocol -- dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl --json
 ```
 
 Do not show the command or raw output to the doctor.
@@ -75,6 +90,8 @@ Translate the JSON output into clear clinical language:
 - **ABG**: State the primary disturbance, compensation status, and anion gap if calculated (e.g., "This shows a metabolic acidosis with respiratory compensation. The anion gap is elevated at 18.")
 - **Water Balance**: State the net balance and whether the patient is positive or negative (e.g., "The fluid balance is +300 mL — the patient is slightly positive for the day")
 - **Vitals**: State which values are normal and flag any abnormal readings (e.g., "Blood pressure and heart rate are within normal limits. Temperature is elevated at 38.5°C — low-grade fever.")
+- **PaFi**: State the PaFi ratio and ARDS classification (e.g., "The PaFi ratio is 150 — moderate ARDS. This indicates significant oxygenation impairment.")
+- **DKA**: State the glucose reduction rate and whether on target, resolution criteria status, and insulin suggestion if applicable (e.g., "Glucose is dropping at 30 mg/dL/hr — below the target of 54 mg/dL/hr. DKA not yet resolved: ketones and pH still abnormal.")
 
 After presenting results, offer two options:
 

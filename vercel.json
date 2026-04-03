@@ -1,6 +1,7 @@
 {
   "rewrites": [
-    { "source": "/install", "destination": "/install.md" }
+    { "source": "/install", "destination": "/install.md" },
+    { "source": "/medical-protocol/protocol.md", "destination": "/medical-protocol/providers/claude-code/protocol.md" }
   ],
   "headers": [
     {
