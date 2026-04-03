@@ -18,47 +18,31 @@ Before anything else, silently check if the current project already has componen
 
 ## Step 2: Initial Clarification
 
-When the doctor's request is vague or general (e.g., "I need something to track vitals" or "build me a patient system"), ask the following three questions **in a single conversational message** before proceeding to classification. If the request already makes the answers clear, skip this step entirely.
-
-**Ask all three together, conversationally — not as a numbered quiz. Provide defaults so the doctor can simply say "defaults are fine."**
-
-1. **Patient setting & priority** — "What type of patients is this for?" (in/out patients in private practice, admitted patients, or both). Default: private practice.
-2. **Single patient vs patient management** — "Will you work with one patient at a time, or do you need to manage a list of patients?" Default: one patient at a time.
-3. **Data persistence** — "Should the system remember patient data between sessions, or start fresh each time?" Default: remember data (stored locally).
-
-Never ask more than these three questions.
+Follow the **Initial Clarification** section from protocol-context.md. Skip if the doctor's request already makes the answers clear.
 
 ## Step 3: Classification
 
-Classify the doctor's request based on these signal words and route to the matching workflow skill:
+Follow the **Classification** section from protocol-context.md to match the doctor's request to a domain, then read and execute the corresponding SKILL.md:
 
-| Domain | Signal Words | Route to |
-|---|---|---|
-| **vital-signs** | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate, vitals, monitor | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/vitals/SKILL.md` |
-| **clinical-notes** | clinical notes, encounter note, evolution, chart, patient note, write a note, documentation | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/clinical-notes/SKILL.md` |
-| **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/acid-base/SKILL.md` |
-| **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/bmi/SKILL.md` |
-| **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/water-balance/SKILL.md` |
-| **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/pafi/SKILL.md` |
-| **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/dka/SKILL.md` |
-| **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/telemonitoring/SKILL.md` |
-| **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/timeline/SKILL.md` |
-| **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined, multiple domains matched | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/dashboard/SKILL.md` |
-| **customize** | change, modify, add field, remove, adjust, different layout, customize, or request targets already-installed component | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/customize/SKILL.md` |
-| **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/troubleshoot/SKILL.md` |
-| **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Read and execute `${CLAUDE_PLUGIN_ROOT}/skills/cli/SKILL.md` |
-
-**Cross-prompt:** When the doctor requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.
-
-**If the request matches multiple domains**, prefer `dashboard` as it combines components.
-
-**If the doctor is reporting a problem** (signal words: not working, error, broken, crashed, blank/white screen, won't load, stuck, something wrong), always route to `troubleshoot` regardless of other domain matches.
-
-**If no domain matches**, ask: "Could you describe what clinical information you'd like to see or manage?"
+| Domain | Route to |
+|---|---|
+| **vital-signs** | `${CLAUDE_PLUGIN_ROOT}/skills/vitals/SKILL.md` |
+| **clinical-notes** | `${CLAUDE_PLUGIN_ROOT}/skills/clinical-notes/SKILL.md` |
+| **acid-base** | `${CLAUDE_PLUGIN_ROOT}/skills/acid-base/SKILL.md` |
+| **bmi** | `${CLAUDE_PLUGIN_ROOT}/skills/bmi/SKILL.md` |
+| **water-balance** | `${CLAUDE_PLUGIN_ROOT}/skills/water-balance/SKILL.md` |
+| **pafi** | `${CLAUDE_PLUGIN_ROOT}/skills/pafi/SKILL.md` |
+| **dka** | `${CLAUDE_PLUGIN_ROOT}/skills/dka/SKILL.md` |
+| **telemonitoring** | `${CLAUDE_PLUGIN_ROOT}/skills/telemonitoring/SKILL.md` |
+| **timeline** | `${CLAUDE_PLUGIN_ROOT}/skills/timeline/SKILL.md` |
+| **dashboard** | `${CLAUDE_PLUGIN_ROOT}/skills/dashboard/SKILL.md` |
+| **customize** | `${CLAUDE_PLUGIN_ROOT}/skills/customize/SKILL.md` |
+| **troubleshoot** | `${CLAUDE_PLUGIN_ROOT}/skills/troubleshoot/SKILL.md` |
+| **cli** | `${CLAUDE_PLUGIN_ROOT}/skills/cli/SKILL.md` |
 
 ## Step 4: Execute
 
-Once classified, read the matched SKILL.md file and follow its phases exactly. Pass the Initial Clarification answers (patient setting, single vs multiple, persistence) as context to the workflow — it should silently adapt based on these answers.
+Once classified, read the matched SKILL.md file and follow its phases exactly. Pass the Initial Clarification answers (patient setting, single vs multiple, persistence) as context to the workflow.
 
 ## Interface Language
 
