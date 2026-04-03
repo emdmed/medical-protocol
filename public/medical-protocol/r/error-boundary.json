@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "error-boundary",
+  "type": "registry:block",
+  "title": "Error Boundary",
+  "description": "Error boundary with recovery UI — wrap top-level pages to prevent white screens",
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "components/error-boundary.tsx",
+      "content": "\"use client\";\n\nimport React, { Component, type ReactNode } from \"react\";\nimport { Card, CardContent } from \"@/components/ui/card\";\nimport { Button } from \"@/components/ui/button\";\n\ninterface ErrorBoundaryProps {\n  children: ReactNode;\n  fallbackMessage?: string;\n}\n\ninterface ErrorBoundaryState {\n  hasError: boolean;\n  error: Error | null;\n}\n\nexport class ErrorBoundary extends Component<\n  ErrorBoundaryProps,\n  ErrorBoundaryState\n> {\n  constructor(props: ErrorBoundaryProps) {\n    super(props);\n    this.state = { hasError: false, error: null };\n  }\n\n  static getDerivedStateFromError(error: Error): ErrorBoundaryState {\n    return { hasError: true, error };\n  }\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {\n    console.error(\"Application error:\", error, errorInfo);\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return (\n        <Card className=\"p-4\">\n          <CardContent className=\"flex flex-col items-center gap-3 p-4\">\n            <p className=\"text-sm text-muted-foreground\">\n              {this.props.fallbackMessage ||\n                \"Something went wrong loading this section.\"}\n            </p>\n            <Button\n              variant=\"outline\"\n              size=\"sm\"\n              onClick={() => this.setState({ hasError: false, error: null })}\n            >\n              Try again\n            </Button>\n          </CardContent>\n        </Card>\n      );\n    }\n\n    return this.props.children;\n  }\n}\n",
+      "type": "registry:component",
+      "target": ""
+    }
+  ]
+}

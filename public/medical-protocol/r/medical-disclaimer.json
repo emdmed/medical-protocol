@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "medical-disclaimer",
+  "type": "registry:block",
+  "title": "Medical Disclaimer",
+  "description": "Medical disclaimer footer — included by all clinical components",
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "components/medical-disclaimer.tsx",
+      "content": "import { TriangleAlert } from \"lucide-react\";\n\nexport function MedicalDisclaimer() {\n  return (\n    <p className=\"flex items-center gap-1.5 text-[10px] text-muted-foreground/60 pt-2 select-none\">\n      <TriangleAlert className=\"h-3 w-3 shrink-0\" />\n      <span>\n        For clinical support only — does not replace professional medical\n        judgment. Verify all values before making treatment decisions.\n      </span>\n    </p>\n  );\n}\n",
+      "type": "registry:component",
+      "target": ""
+    }
+  ]
+}

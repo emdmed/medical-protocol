@@ -1,16 +1,47 @@
-# v0 Provider — Coming Soon
+# v0 Provider
 
-## What This Will Be
+Integration for [v0.dev](https://v0.dev) by Vercel — doctors describe what they need, v0 builds a live preview using pre-built clinical components from the registry, and deploys with one click.
 
-A provider integration for [v0](https://v0.dev) by Vercel, enabling doctors to use the Medical Protocol system through v0's AI-powered interface builder.
+## How It Works
 
-## What v0 Integration Will Need
+1. Doctor opens [v0.dev](https://v0.dev)
+2. Pastes a prompt referencing the protocol URL (see [install guide](install.md))
+3. v0 reads the protocol, fetches registry components, and generates a working app
+4. Doctor previews and deploys — gets a URL that works on any device
 
-- Adapted protocol.md with v0-specific instructions (prompt engineering for v0's model)
-- Component templates compatible with v0's output format
-- Install flow that works within v0's workflow (no CLI steps)
-- Mapping of existing CDN components to v0-friendly prompts
+## Key Files
 
-## Status
+| File | Purpose |
+|------|---------|
+| [protocol.md](protocol.md) | Main protocol — v0 reads this to understand how to build clinical interfaces |
+| [install.md](install.md) | Doctor-facing install guide with example prompts |
+| [workflows/](workflows/) | Per-component build workflows (3-phase: requirements, build, preview) |
 
-Not yet implemented. The Claude Code provider is the only active provider at this time.
+## Component Registry
+
+All components are served as shadcn-compatible registry JSONs from:
+
+```
+https://medical-protocol.vercel.app/medical-protocol/r/{component}.json
+```
+
+Available components:
+
+| Component | Registry JSON |
+|-----------|--------------|
+| Vital Signs | `vital-signs.json` |
+| Clinical Notes | `clinical-notes.json` |
+| Acid-Base Analyzer | `acid-base.json` |
+| BMI Calculator | `bmi-calculator.json` |
+| Water Balance | `water-balance.json` |
+| PaFi Calculator | `pafi.json` |
+| DKA Monitor | `dka.json` |
+| Pulse Oximetry | `telemonitoring.json` |
+| Clinical Timeline | `timeline.json` |
+| Medical Disclaimer | `medical-disclaimer.json` |
+| Layout Disclaimer | `layout-disclaimer.json` |
+| Error Boundary | `error-boundary.json` |
+
+## Privacy
+
+All patient data stays in the browser's localStorage. The deployed app serves only interface code — no patient data is ever uploaded, transmitted, or stored on any server.

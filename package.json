@@ -9,7 +9,8 @@
     "test:watch": "vitest",
     "build": "npm run build -w packages/medprotocol",
     "medprotocol": "node packages/medprotocol/dist/index.js",
-    "version:bump": "bash scripts/bump-version.sh"
+    "version:bump": "bash scripts/bump-version.sh",
+    "registry:generate": "node scripts/generate-registry.mjs"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
