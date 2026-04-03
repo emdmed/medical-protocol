@@ -655,31 +655,51 @@ const DKAMonitor = ({ data, onData }: DKAProps) => {
             </Button>
           )}
 
-          {/* Reading history */}
+          {/* Reading history table */}
           {patientData.readings.length > 0 && (
             <>
               <Separator className="my-2" />
               <div className="text-xs font-medium opacity-70 mb-1">
                 History ({patientData.readings.length} readings)
               </div>
-              <div className="space-y-1 max-h-32 overflow-y-auto">
-                {[...patientData.readings].reverse().map((r) => (
-                  <div
-                    key={r.id}
-                    className="text-[10px] opacity-60 flex gap-2 flex-wrap"
-                  >
-                    <span>
-                      {new Date(r.timestamp * 1000).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                    <span>
-                      Glu {r.glucose} | Ket {r.ketones} | pH {r.pH} | pCO2{" "}
-                      {r.pCO2 || "—"} | K+ {r.potassium} | GCS {r.gcs}
-                    </span>
-                  </div>
-                ))}
+              <div className="overflow-x-auto max-h-48 overflow-y-auto">
+                <table className="w-full text-[10px] border-collapse">
+                  <thead>
+                    <tr className="border-b text-left opacity-70">
+                      <th className="py-1 pr-2 font-medium sticky top-0 bg-background">Time</th>
+                      <th className="py-1 px-1 font-medium sticky top-0 bg-background text-end">Glu</th>
+                      <th className="py-1 px-1 font-medium sticky top-0 bg-background text-end">Ket</th>
+                      <th className="py-1 px-1 font-medium sticky top-0 bg-background text-end">pH</th>
+                      <th className="py-1 px-1 font-medium sticky top-0 bg-background text-end">HCO3</th>
+                      <th className="py-1 px-1 font-medium sticky top-0 bg-background text-end">pCO2</th>
+                      <th className="py-1 px-1 font-medium sticky top-0 bg-background text-end">K+</th>
+                      <th className="py-1 px-1 font-medium sticky top-0 bg-background text-end">GCS</th>
+                      <th className="py-1 px-1 font-medium sticky top-0 bg-background text-end">Ins</th>
+                      <th className="py-1 pl-1 font-medium sticky top-0 bg-background text-end">UO</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...patientData.readings].reverse().map((r) => (
+                      <tr key={r.id} className="border-b border-muted opacity-70 hover:opacity-100">
+                        <td className="py-1 pr-2 whitespace-nowrap">
+                          {new Date(r.timestamp * 1000).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
+                        <td className="py-1 px-1 text-end">{r.glucose || "—"}</td>
+                        <td className="py-1 px-1 text-end">{r.ketones || "—"}</td>
+                        <td className="py-1 px-1 text-end">{r.pH || "—"}</td>
+                        <td className="py-1 px-1 text-end">{r.bicarbonate || "—"}</td>
+                        <td className="py-1 px-1 text-end">{r.pCO2 || "—"}</td>
+                        <td className="py-1 px-1 text-end">{r.potassium || "—"}</td>
+                        <td className="py-1 px-1 text-end">{r.gcs || "—"}</td>
+                        <td className="py-1 px-1 text-end">{r.insulinRate || "—"}</td>
+                        <td className="py-1 pl-1 text-end">{r.urineOutput || "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </>
           )}

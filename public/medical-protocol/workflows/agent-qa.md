@@ -100,7 +100,58 @@ agent-browser snapshot -i
    - Switch from absolute positioning to inline flow for result displays
    - If absolute positioning is required, ensure `top-*` places content below the source, not `bottom-*` which places it above
 
-### F. Keyboard Navigation
+### F. Calculation Correctness (medprotocol CLI)
+
+Verify that the component calculations match the canonical library output. Run `npx medprotocol` with known inputs and compare the JSON result against what the UI displays.
+
+1. **Build the CLI first** (workspace package — no install needed):
+   ```bash
+   npm run build -w packages/medprotocol
+   ```
+
+2. **Run the checks that match the built components.** Use `--json` for machine-readable output. Compare the JSON values against what the browser UI shows for the same inputs.
+
+   **BMI:**
+   ```bash
+   npx medprotocol bmi --weight 70 --height-m 1.75 --metric --json
+   ```
+   Expected: `bmi` ≈ 22.86, `category` = "Normal weight"
+
+   **ABG / Acid-Base:**
+   ```bash
+   npx medprotocol abg --ph 7.25 --pco2 29 --hco3 14 --json
+   ```
+   Expected: `disorder` is a metabolic acidosis variant, `compensation` is present
+
+   **Water Balance:**
+   ```bash
+   npx medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2 --json
+   ```
+   Expected: `balance` is a reasonable integer, `totalIntake` > 0, `totalOutput` > 0
+
+   **PaFi:**
+   ```bash
+   npx medprotocol pafi --pao2 60 --fio2 40 --json
+   ```
+   Expected: `paFi` = 150, `classification` includes "ARDS"
+
+   **Vital Signs:**
+   ```bash
+   npx medprotocol vitals --bp 150/95 --hr 110 --temp 38.5 --json
+   ```
+   Expected: `bloodPressure.category` is a hypertension stage, `heartRate.category` is tachycardia variant
+
+   **DKA:**
+   ```bash
+   npx medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl --json
+   ```
+   Expected: `glucoseRate` is a positive reduction rate, `glucoseOnTarget` is boolean
+
+3. **Verify against the UI:** If the browser is open, enter the same input values into the corresponding component and confirm the displayed result matches the CLI output. Mismatches indicate the UI component is using different logic than the shared library — fix the component to use the canonical library functions.
+
+4. **On failure:** If `npx medprotocol` exits with a non-zero code or the CLI output doesn't match the UI, log the mismatch and attempt to fix the component. After 2 failed attempts, skip and continue.
+
+### G. Keyboard Navigation
 
 ```bash
 agent-browser press Tab
@@ -257,7 +308,7 @@ This ensures no headless browser processes are left running.
 
 ```
 Prerequisites:  agent-browser --version → open http://localhost:3000
-Universal:      errors → console → snapshot → viewport 768 → viewport 1280 → empty state → overlap check → keyboard
+Universal:      errors → console → snapshot → viewport 768 → viewport 1280 → empty state → overlap check → calc correctness (npx medprotocol) → keyboard
 Component:      (match what was built — see Component-Specific Checks)
 On failure:     screenshot → auto-fix → retry → bail out after 2 attempts
 Always:         agent-browser close

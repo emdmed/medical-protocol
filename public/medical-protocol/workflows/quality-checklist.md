@@ -68,6 +68,7 @@ Run the full browser QA workflow defined in `workflows/agent-qa.md`. It covers:
 - **Page load:** No console errors, accessibility tree populated
 - **Interactive elements:** Click-to-edit, form inputs, navigation all functional
 - **Responsive layout:** Correct rendering at 768px and 1280px viewports
+- **Calculation correctness:** CLI (`npx medprotocol`) output matches UI results for the same inputs
 - **Clinical safety:** Dangerous values trigger alerts, validation rejects out-of-range input
 - **Empty states:** No blank screens, no "undefined" or "NaN" text visible
 - **Keyboard navigation:** Tab, Enter, and Escape work on interactive elements
