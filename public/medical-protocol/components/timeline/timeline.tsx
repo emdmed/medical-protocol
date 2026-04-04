@@ -126,7 +126,7 @@ const Timeline = ({ items = timelineData, maxHeight = "32rem" }: TimelineProps) 
   };
 
   const formatDate = (timestamp) => {
-    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+    return new Date(timestamp * 1000).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
       year: 'numeric'

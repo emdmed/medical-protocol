@@ -78,11 +78,12 @@ if echo "$CMD_LOWER" | grep -qE '\bdocker\s+push\b'; then
   deny "Blocked 'docker push'. Container images may contain patient data or clinical configs."
 fi
 
-# ─── Block: ssh with command execution (tunneling data out) ───
-if echo "$CMD_LOWER" | grep -qE '\bssh\s.*\s[^-]'; then
-  # ssh with a remote command (not just flags) could tunnel data
-  if echo "$CMD_LOWER" | grep -qvE '\bssh-keygen\b'; then
-    deny "Blocked SSH command execution. Remote commands could exfiltrate patient data."
+# ─── Block: ssh (except safe local key management) ───
+# Whitelist: ssh-keygen, ssh-add (local key operations only)
+# Block: all other ssh usage (connections, tunnels, remote commands)
+if echo "$CMD_LOWER" | grep -qE '\bssh\b'; then
+  if ! echo "$CMD_LOWER" | grep -qE '\bssh-(keygen|add)\b'; then
+    deny "Blocked SSH connection. Remote connections could exfiltrate patient data. Only ssh-keygen and ssh-add are allowed."
   fi
 fi
 

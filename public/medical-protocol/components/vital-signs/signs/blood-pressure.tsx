@@ -127,6 +127,7 @@ const BloodPressure = ({
       className={`px-2 cursor-pointer relative`}
       onClick={onClick}
       role="button"
+      aria-label="Edit blood pressure"
     >
       <div className="flex items-center" id="bloodPressure">
         <EditSection
@@ -145,6 +146,7 @@ const BloodPressure = ({
             placeholder="120"
             className="w-[60px] text-center"
             maxLength={3}
+            aria-label="Systolic blood pressure"
           />
           <span className="text-muted-foreground">/</span>
           <Input
@@ -155,6 +157,7 @@ const BloodPressure = ({
             placeholder="80"
             className="w-[60px] text-center"
             maxLength={3}
+            aria-label="Diastolic blood pressure"
           />
         </EditSection>
         {bloodPressureValue?.systolic && bloodPressureValue?.diastolic ? (

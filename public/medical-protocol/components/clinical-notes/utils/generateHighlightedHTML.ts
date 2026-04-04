@@ -66,9 +66,26 @@ function extractTermsByCategory(data: any): TermsByCategory {
   return termsByCategory;
 }
 
+function isInsideHtmlTag(text: string, offset: number): boolean {
+  const lastOpen = text.lastIndexOf('<', offset);
+  if (lastOpen === -1) return false;
+  const lastClose = text.lastIndexOf('>', offset);
+  return lastOpen > lastClose;
+}
+
+function isInsideHtmlEntity(text: string, offset: number, matchLength: number): boolean {
+  const lastAmp = text.lastIndexOf('&', offset);
+  if (lastAmp === -1) return false;
+  const semicolonAfter = text.indexOf(';', offset);
+  if (semicolonAfter === -1) return false;
+  // Check if there's an entity pattern spanning the match
+  const segment = text.substring(lastAmp, semicolonAfter + 1);
+  return /^&[a-zA-Z]+;$|^&#[0-9]+;$/.test(segment) && lastAmp < offset + matchLength && semicolonAfter >= offset;
+}
+
 function highlightTerms(text: string, termsByCategory: TermsByCategory): string {
   let result = text;
-  
+
   // Color mapping for different categories - simplified to first-order properties only
   const categoryColors: { [key: string]: string } = {
     'chief_complaint': 'bg-blue-500/30 text-foreground dark:text-blue-200',
@@ -79,7 +96,7 @@ function highlightTerms(text: string, termsByCategory: TermsByCategory): string 
     'surgery_performed': 'bg-teal-500/30 text-foreground dark:text-teal-200',
     'default': 'bg-yellow-500/30  text-foreground dark:text-yellow-200'
   };
-  
+
   // Section headers to avoid highlighting
   const sectionHeaders: RegExp[] = [
     /motivo\s+de\s+consulta/i,
@@ -87,45 +104,51 @@ function highlightTerms(text: string, termsByCategory: TermsByCategory): string 
     /antecedentes\s+personales/i,
     /examen\s+físico/i
   ];
-  
+
   // Sort categories by term length to avoid partial matches
   const sortedCategories = Object.entries(termsByCategory).map(([category, terms]) => ({
     category,
     terms: (terms as string[]).sort((a, b) => b.length - a.length)
   }));
-  
+
   sortedCategories.forEach(({ category, terms }) => {
     const colorClass = categoryColors[category] || categoryColors.default;
-    
+
     terms.forEach((term: string) => {
       if (!term) return;
-      
+
       // Skip section headers
       const isHeader = sectionHeaders.some(pattern => pattern.test(term));
       if (isHeader) return;
-      
+
       // Create regex to find the term - escape special characters
       const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`\\b${escapedTerm}\\b`, 'gi');
-      
+
       // Replace with highlighted version
       result = result.replace(regex, (match: string, offset: number, string: string) => {
-        // Don't highlight if already inside a span tag
+        // Don't highlight if inside an HTML tag (e.g. <span class="...">)
+        if (isInsideHtmlTag(string, offset)) return match;
+
+        // Don't highlight if inside an HTML entity (e.g. &amp; &lt; &#039;)
+        if (isInsideHtmlEntity(string, offset, match.length)) return match;
+
+        // Don't highlight if already inside a span's content
         const beforeMatch = string.substring(0, offset);
         const openSpans = (beforeMatch.match(/<span/g) || []).length;
         const closeSpans = (beforeMatch.match(/<\/span>/g) || []).length;
-        
+
         if (openSpans > closeSpans) return match;
-        
+
         // Don't highlight section headers
         const context = string.substring(Math.max(0, offset - 20), offset + match.length + 20);
         const inHeader = sectionHeaders.some(pattern => pattern.test(context));
         if (inHeader) return match;
-        
+
         return `<span class="${colorClass} px-1 rounded font-medium">${match}</span>`;
       });
     });
   });
-  
+
   return result;
 }

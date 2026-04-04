@@ -175,8 +175,8 @@ export interface BloodPressureCategory {
 }
 
 export interface TemperatureProps {
-  temperatureValue: string | number;
-  setTemperatureValue: (value: string | number) => void;
+  temperatureValue: string | number | null;
+  setTemperatureValue: (value: string | number | null) => void;
   useFahrenheit?: boolean;
   setClickedComponent: (component: string) => void;
   clickedComponent: string;
@@ -184,16 +184,16 @@ export interface TemperatureProps {
 }
 
 export interface RespiratoryRateProps {
-  respiratoryRateValue: number;
-  setRespiratoryRateValue: (value: string | number) => void;
+  respiratoryRateValue: string | number | null;
+  setRespiratoryRateValue: (value: string | number | null) => void;
   setClickedComponent: (component: string) => void;
   clickedComponent: string;
   editable: boolean;
 }
 
 export interface HeartRateProps {
-  heartRateValue: number;
-  setHeartRateValue: (value: number) => void;
+  heartRateValue: number | null;
+  setHeartRateValue: (value: number | null) => void;
   setClickedComponent: (component: string) => void;
   clickedComponent: string;
   editable: boolean;

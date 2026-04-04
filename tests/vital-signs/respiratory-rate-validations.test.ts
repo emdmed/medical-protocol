@@ -65,6 +65,10 @@ describe('getRespiratoryRateCategory', () => {
     expect(getRespiratoryRateCategory(0)).toBeNull();
   });
 
+  it('returns null for null', () => {
+    expect(getRespiratoryRateCategory(null)).toBeNull();
+  });
+
   it('returns null for empty string', () => {
     expect(getRespiratoryRateCategory('')).toBeNull();
   });
@@ -102,11 +106,11 @@ describe('parseRespiratoryRateValue', () => {
     expect(parseRespiratoryRateValue(16)).toBe(16);
   });
 
-  it('returns 0 for non-numeric', () => {
-    expect(parseRespiratoryRateValue('abc')).toBe(0);
+  it('returns null for non-numeric', () => {
+    expect(parseRespiratoryRateValue('abc')).toBeNull();
   });
 
-  it('returns 0 for empty string', () => {
-    expect(parseRespiratoryRateValue('')).toBe(0);
+  it('returns null for empty string', () => {
+    expect(parseRespiratoryRateValue('')).toBeNull();
   });
 });

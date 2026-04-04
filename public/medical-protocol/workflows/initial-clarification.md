@@ -28,15 +28,22 @@ When the doctor's request is vague or general (e.g., "I need something to track 
      - **Both**
    - Default: private practice (in/out patients)
 
-3. **Data persistence**
+3. **Single patient vs patient management**
+   - "Will you work with one patient at a time, or do you need to manage a list of patients?"
+     - **One patient at a time** — focused view, no patient list needed
+     - **Multiple patients** — patient list or sidebar, ability to switch between patients
+   - Default: one patient at a time
+
+4. **Data persistence**
    - "Should the system remember data between sessions, or start fresh each time?"
      - **Remember data** — data is saved on your computer and available next time
      - **Start fresh** — data is only available during the current session
    - Default: remember data (stored locally on the doctor's computer)
 
 **Rules:**
-- Never ask more than these three questions — keep it brief
+- Never ask more than these four questions — keep it brief
 - The answers feed into Classification and influence how each workflow is executed
 - Silently adapt the architecture based on the answers:
   - **Admitted patients + persistence** → local storage with patient identifiers, richer vital signs with alerts
-  - **Private practice + no persistence** → simple session-based state, minimal UI
+  - **Private practice + single patient + no persistence** → simple session-based state, minimal UI
+  - **Multiple patients** → patient list component, sidebar navigation

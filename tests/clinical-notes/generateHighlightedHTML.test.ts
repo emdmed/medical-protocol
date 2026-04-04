@@ -108,7 +108,63 @@ describe('generateHighlightedHTML — edge cases', () => {
     });
     // Should still work without double-highlighting
     const spanCount = (result.match(/<span/g) || []).length;
-    // "headache" appears once in text, so at most 1 span for it
-    expect(spanCount).toBeGreaterThanOrEqual(0);
+    // "headache" appears once in text, so exactly 1 highlight span
+    expect(spanCount).toBe(1);
+  });
+});
+
+describe('generateHighlightedHTML — HTML tag and entity safety', () => {
+  it('does not break HTML structure when a term matches an HTML tag name', () => {
+    // "span" could match inside <span ...> tags from prior highlights
+    const result = generateHighlightedHTML('headache span of treatment', {
+      analysis: 'test',
+      chief_complaint: ['headache', 'span'],
+    });
+    // "headache" should be highlighted
+    expect(result).toContain('<span');
+    // The result should not contain broken tags like <<span
+    expect(result).not.toMatch(/<<span/);
+  });
+
+  it('does not break HTML entities when a term matches entity content', () => {
+    // "amp" appears inside &amp; entities
+    const result = generateHighlightedHTML('AT&T amp reading', {
+      analysis: 'test',
+      chief_complaint: ['amp'],
+    });
+    // &amp; entity should remain intact
+    expect(result).toContain('&amp;');
+    // "amp" as a standalone word should still be highlighted
+    expect(result).toContain('<span');
+  });
+
+  it('does not match terms inside class attributes of existing spans', () => {
+    // "rounded" appears in the span class attribute
+    const result = generateHighlightedHTML('headache rounded assessment', {
+      analysis: 'test',
+      chief_complaint: ['headache', 'rounded'],
+    });
+    // Should not produce broken HTML from matching inside class="... rounded ..."
+    const brokenAttr = result.match(/<span[^>]*<span/);
+    expect(brokenAttr).toBeNull();
+  });
+
+  it('preserves &lt; and &gt; entities from escaped angle brackets', () => {
+    const result = generateHighlightedHTML('<script>alert("xss")</script> headache', {
+      analysis: 'test',
+      chief_complaint: ['headache', 'lt', 'gt'],
+    });
+    // Entities should remain intact
+    expect(result).toContain('&lt;');
+    expect(result).toContain('&gt;');
+    expect(result).not.toContain('<script>');
+  });
+
+  it('preserves &#039; numeric entities', () => {
+    const result = generateHighlightedHTML("patient's headache", {
+      analysis: 'test',
+      chief_complaint: ['headache'],
+    });
+    expect(result).toContain('&#039;');
   });
 });

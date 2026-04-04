@@ -1,7 +1,7 @@
 import { useRef, useEffect } from "react";
 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components//ui/button";
+import { Button } from "@/components/ui/button";
 
 import VitalSignsAlert from "@/components/vital-signs/components/vital-signs-alert";
 import EditSection from "@/components/vital-signs/components/edit-section";
@@ -34,7 +34,7 @@ const Temperature: React.FC<TemperatureProps> = ({
     if (inputRef.current) {
       inputRef.current.value = "";
     }
-    setTemperatureValue("");
+    setTemperatureValue(null);
   };
 
   const handleCancel = (): void => {
@@ -69,7 +69,7 @@ const Temperature: React.FC<TemperatureProps> = ({
   const limits = getTemperatureLimits(useFahrenheit);
 
   return (
-    <div className="px-2 cursor-pointer relative">
+    <div className="px-2 cursor-pointer relative" role="button" aria-label="Edit temperature">
       <div className="flex items-center" onClick={handleEditClick}>
         <EditSection
           clickedComponent={clickedComponent}
@@ -91,6 +91,7 @@ const Temperature: React.FC<TemperatureProps> = ({
               step="0.1"
               type="number"
               placeholder={useFahrenheit ? "98.6" : "36"}
+              aria-label={`Temperature in degrees ${useFahrenheit ? "Fahrenheit" : "Celsius"}`}
             />
           </div>
         </EditSection>

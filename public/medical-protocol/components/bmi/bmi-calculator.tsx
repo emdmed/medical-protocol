@@ -20,15 +20,6 @@ import { Check, X, User, ToggleLeft, ToggleRight } from "lucide-react";
 import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 import { calculateBMI, getBMICategory } from "../../../../lib/bmi";
 
-const getBMIColor = (bmi: string | null): string => {
-  if (!bmi) return "";
-  const bmiNum = parseFloat(bmi);
-  if (bmiNum < 18.5) return "";
-  if (bmiNum < 25) return "";
-  if (bmiNum < 30) return "";
-  return "";
-};
-
 const BMICalculator = () => {
   const [weight, setWeight] = useState("154");
   const [heightFt, setHeightFt] = useState("5");
@@ -255,7 +246,7 @@ const BMICalculator = () => {
           <div className="flex items-center gap-2">
             <div className="text-2xl font-bold">{currentBMI || "--"}</div>
 
-            <Badge className={`text-xs font-medium ${getBMIColor(currentBMI)}`}>
+            <Badge className="text-xs font-medium">
               {currentCategory}
             </Badge>
           </div>

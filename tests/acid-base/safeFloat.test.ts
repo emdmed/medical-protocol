@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { safeFloat } from '../../public/medical-protocol/components/acid-base/utils/safeFloat';
+import { safeParseFloat } from '../../lib/water-balance';
 
 describe('safeFloat', () => {
   it('parses valid integer string', () => {
@@ -32,5 +33,34 @@ describe('safeFloat', () => {
 
   it('parses zero', () => {
     expect(safeFloat('0')).toBe(0);
+  });
+});
+
+describe('safeFloat vs safeParseFloat — intentional behavior difference', () => {
+  // safeFloat (acid-base): empty → null (missing lab value should not calculate)
+  // safeParseFloat (water-balance): empty → 0 (empty fluid field contributes zero to sum)
+  // Both are correct for their clinical context.
+
+  it('safeFloat returns null for empty string (missing lab values block calculation)', () => {
+    expect(safeFloat('')).toBeNull();
+  });
+
+  it('safeParseFloat returns 0 for empty string (empty fluid fields contribute zero)', () => {
+    expect(safeParseFloat('')).toBe(0);
+  });
+
+  it('safeFloat returns null for non-numeric input', () => {
+    expect(safeFloat('abc')).toBeNull();
+  });
+
+  it('safeParseFloat returns 0 for non-numeric input', () => {
+    expect(safeParseFloat('abc')).toBe(0);
+  });
+
+  it('both parse valid numbers identically', () => {
+    expect(safeFloat('42')).toBe(42);
+    expect(safeParseFloat('42')).toBe(42);
+    expect(safeFloat('7.4')).toBeCloseTo(7.4);
+    expect(safeParseFloat('7.4')).toBeCloseTo(7.4);
   });
 });

@@ -165,6 +165,53 @@ When a workflow instructs you to install a component:
    - **Avoid circular update loops**: When a child component receives data via props AND reports changes back via a callback, never put `onData(values)` in a `useEffect` that depends on `values` if the parent re-renders and passes those values back as props. Use `useRef` to track the previous serialized value and skip updates when nothing changed. Store callback props in a ref (`onDataRef.current = onData`) so they don't appear in dependency arrays.
 10. **Do not tell the doctor** about files being fetched or installed — just confirm the clinical capability is ready
 
+### Manifest Schema Reference
+
+The manifest (`{CDN_BASE}/components/manifest.json`) is a JSON object with these top-level keys:
+
+| Key | Type | Description |
+|---|---|---|
+| `version` | string | Component registry version (e.g. `"0.4.0"`) |
+| `description` | string | Human-readable description of the registry |
+| `context` | string | How to use this file |
+| `shared` | object | Shared components (medical-disclaimer, layout-disclaimer, error-boundary) — keyed by name, each has `description`, `import`, `files`, optional `shadcn` |
+
+Each **component entry** (e.g. `manifest["vital-signs"]`) has:
+
+| Field | Type | Description |
+|---|---|---|
+| `version` | string | Component version |
+| `category` | string | `"monitoring"`, `"calculator"`, `"display"`, or `"documentation"` |
+| `description` | string | What the component does |
+| `import` | string | Import path (e.g. `"@/components/vital-signs/vital-signs"`) |
+| `types` | string | Types import path (if separate types file exists) |
+| `target` | string | Where to write in the doctor's project (e.g. `"components/vital-signs"`) |
+| `props` | string or object | Prop summary — either `"none — self-contained"` or an object with prop names as keys and type descriptions as values |
+| `dataFlow` | string | `"bidirectional"`, `"input only"`, `"output only"`, or `"none"` |
+| `popups` | object | Popup/overlay positioning details (optional) |
+| `shadcn` | string[] | Required shadcn components to install (e.g. `["card", "button", "input"]`) |
+| `files` | string[] | Files to fetch from `{CDN_BASE}/components/{target}/{file}` |
+| `dependencies` | string[] | Other manifest components this one requires (e.g. DKA depends on `["acid-base"]`) |
+| `externalComponents` | string[] | Imports the component expects that are **not on the CDN** — see below |
+
+### Understanding `externalComponents`
+
+Some components import modules that aren't available on the CDN. These are listed in `externalComponents`. When you encounter them:
+
+1. **Check if it's a shadcn hook or component** (e.g. `@/hooks/use-mobile`) — if so, create it using standard shadcn patterns or install via `npx shadcn@latest add`
+2. **Check if it's another manifest component** (e.g. `@/components/water-balance/water-balance`) — if so, fetch and install that component first
+3. **Check if it's a project-specific UI variant** (e.g. `@/components/ui/textarea-inv`) — if so, create it as a thin wrapper around the standard shadcn component
+
+Example from `clinical-notes`:
+```json
+"externalComponents": [
+  "@/components/water-balance/water-balance",  // → fetch from manifest["water-balance"]
+  "@/components/acid-base/acid-base",          // → fetch from manifest["acid-base"]
+  "@/components/bmi/bmi-calculator",           // → fetch from manifest["bmi"]
+  "@/components/ui/textarea-inv"               // → create as textarea variant
+]
+```
+
 ---
 
 ## Quality Checklist

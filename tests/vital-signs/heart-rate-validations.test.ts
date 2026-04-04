@@ -42,9 +42,23 @@ describe('validateHeartRateInput', () => {
   it('returns false for empty string', () => {
     expect(validateHeartRateInput('')).toBe(false);
   });
+
+  it('returns false for negative values', () => {
+    expect(validateHeartRateInput('-50')).toBe(false);
+  });
+
+  it('returns false for extremely large values', () => {
+    expect(validateHeartRateInput('500')).toBe(false);
+    expect(validateHeartRateInput('99999')).toBe(false);
+  });
+
 });
 
 describe('getHeartRateCategory', () => {
+  it('returns null for null', () => {
+    expect(getHeartRateCategory(null)).toBeNull();
+  });
+
   it('returns null for zero (falsy)', () => {
     expect(getHeartRateCategory(0)).toBeNull();
   });
@@ -79,12 +93,12 @@ describe('parseHeartRateValue', () => {
     expect(parseHeartRateValue('72')).toBe(72);
   });
 
-  it('returns 0 for non-numeric string', () => {
-    expect(parseHeartRateValue('abc')).toBe(0);
+  it('returns null for non-numeric string', () => {
+    expect(parseHeartRateValue('abc')).toBeNull();
   });
 
-  it('returns 0 for empty string', () => {
-    expect(parseHeartRateValue('')).toBe(0);
+  it('returns null for empty string', () => {
+    expect(parseHeartRateValue('')).toBeNull();
   });
 
   it('truncates decimal values (parseInt behavior)', () => {

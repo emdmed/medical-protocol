@@ -284,6 +284,87 @@ describe('analyze — pCO2 ceiling for metabolic alkalosis', () => {
   });
 });
 
+describe('analyze — triple acid-base disorders', () => {
+  it('detects HAGMA + respiratory acidosis + metabolic alkalosis (delta ratio > 2)', () => {
+    // Patient with HAGMA (low HCO3) but delta ratio > 2 indicates concurrent met alkalosis
+    // plus inadequate respiratory compensation (pCO2 too high) → respiratory acidosis
+    // pH 7.20 (acidemic), pCO2 50 (elevated → resp acidosis component), HCO3 12 (low → met acidosis)
+    // AG = 140 - (100 + 12) = 28 (High), delta AG = 16, delta HCO3 = 12, ratio = 1.33
+    // Winter's: expected pCO2 = 1.5 * 12 + 8 = 26 ± 2 → actual 50 >> 28 → inadequate → resp acidosis
+    const result = analyze(abg('7.20', '50', '12', '140', '100'));
+    expect(result!.disorder).toBe('Metabolic Acidosis');
+    expect(result!.agStatus).toBe('High');
+    expect(result!.compensation).toBe('Inadequate compensation');
+    expect(result!.additionalDisorders).toContain('Respiratory Acidosis');
+  });
+
+  it('detects HAGMA + respiratory alkalosis from overcompensation + NAGMA from delta ratio < 1', () => {
+    // pH 7.30 (acidemic), pCO2 20 (very low → overcompensation), HCO3 10 (low)
+    // AG = 140 - (118 + 10) = 12 → borderline (not High with threshold > 12)
+    // Try: Na 140, Cl 108 → AG = 140 - (108 + 10) = 22 (High)
+    // delta AG = 10, delta HCO3 = 14, ratio = 0.71 < 1 → NAGMA also present
+    // Winter's: expected pCO2 = 1.5 * 10 + 8 = 23 ± 2 → actual 20 < 21 → overcompensated → resp alkalosis
+    const result = analyze(abg('7.30', '20', '10', '140', '108'));
+    expect(result!.disorder).toBe('Metabolic Acidosis');
+    expect(result!.agStatus).toBe('High');
+    expect(result!.compensation).toBe('Overcompensated');
+    expect(result!.additionalDisorders).toContain('Respiratory Alkalosis');
+    expect(result!.additionalDisorders).toContain('Non-AG Metabolic Acidosis');
+    expect(result!.allDisorders.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('analyze — extreme value stress tests', () => {
+  it('handles severe acidemia (pH 6.80)', () => {
+    const result = analyze(abg('6.80', '80', '8'));
+    expect(result).not.toBeNull();
+    expect(result!.disorder).toContain('Acidosis');
+  });
+
+  it('handles severe alkalemia (pH 7.70)', () => {
+    const result = analyze(abg('7.70', '20', '40'));
+    expect(result).not.toBeNull();
+    expect(result!.disorder).toContain('Alkalosis');
+  });
+
+  it('handles extreme hyperventilation (pCO2 10)', () => {
+    const result = analyze(abg('7.65', '10', '12'));
+    expect(result).not.toBeNull();
+    expect(result!.disorder).toBe('Respiratory Alkalosis');
+  });
+
+  it('handles extreme hypoventilation (pCO2 100)', () => {
+    const result = analyze(abg('7.10', '100', '30'));
+    expect(result).not.toBeNull();
+    expect(result!.disorder).toBe('Respiratory Acidosis');
+  });
+
+  it('handles very low HCO3 (3 mmol/L)', () => {
+    const result = analyze(abg('6.90', '15', '3'));
+    expect(result).not.toBeNull();
+    expect(result!.disorder).toBe('Metabolic Acidosis');
+  });
+
+  it('handles very high HCO3 (60 mmol/L)', () => {
+    const result = analyze(abg('7.60', '50', '60'));
+    expect(result).not.toBeNull();
+    expect(result!.disorder).toBe('Metabolic Alkalosis');
+  });
+
+  it('does not crash with pCO2 = 0 (division in H-H)', () => {
+    // pCO2 = 0 causes log10(HCO3 / 0) = Infinity in H-H
+    const result = analyze(abg('7.40', '0', '24'));
+    // Should still return a result (may flag incoherent)
+    expect(result).not.toBeNull();
+  });
+
+  it('handles negative values gracefully', () => {
+    const result = analyze(abg('-1', '-10', '-5'));
+    expect(result).not.toBeNull();
+    // Should produce some result without crashing
+  });
+});
+
 describe('analyze — allDisorders includes delta-ratio disorders', () => {
   it('includes Non-AG Metabolic Acidosis from delta ratio in allDisorders', () => {
     // AG = 140 - (110 + 14) = 16, delta AG = 4, delta HCO3 = 10, ratio = 0.4

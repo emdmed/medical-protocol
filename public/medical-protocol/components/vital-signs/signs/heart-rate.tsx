@@ -33,7 +33,7 @@ const HeartRate = ({
     if (inputRef.current) {
       inputRef.current.value = "";
     }
-    setHeartRateValue(0);
+    setHeartRateValue(null);
   };
 
   const handleCancel = (): void => {
@@ -66,6 +66,7 @@ const HeartRate = ({
       className="px-2 cursor-pointer relative heart_rate_container"
       onClick={handleEditClick}
       role="button"
+      aria-label="Edit heart rate"
     >
       <div className="flex items-center" id="heartRate">
         <EditSection
@@ -86,6 +87,7 @@ const HeartRate = ({
               min={HEART_RATE_LIMITS.MIN.toString()}
               max={HEART_RATE_LIMITS.MAX.toString()}
               onChange={onChange}
+              aria-label="Heart rate in beats per minute"
             />
           </div>
         </EditSection>
