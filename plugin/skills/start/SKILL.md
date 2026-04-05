@@ -4,9 +4,9 @@ description: Start the medical protocol — describe what you need in clinical t
 allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
 ---
 
-Read and follow all rules from ${CLAUDE_PLUGIN_ROOT}/context/protocol-context.md.
-
-You are assisting a healthcare professional who does not code. They describe what they need in clinical language. You handle ALL technical decisions silently. Never use programming jargon.
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/project-setup.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/classification.md
 
 ## Step 1: Returning Project Check
 

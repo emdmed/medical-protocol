@@ -4,7 +4,10 @@ description: "[Internal] Build a clinical notes editor — encounter notes, high
 allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
 ---
 
-Read and follow all rules from ${CLAUDE_PLUGIN_ROOT}/context/protocol-context.md.
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
 
 ## Component
 

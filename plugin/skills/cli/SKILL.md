@@ -4,7 +4,8 @@ description: "[Internal] Run quick clinical calculations from the terminal — B
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 ---
 
-Read and follow all rules from ${CLAUDE_PLUGIN_ROOT}/context/protocol-context.md.
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/cli-calculator.md
 
 You are running quick clinical calculations for a healthcare professional using the command-line calculator. Follow the phases below exactly.
 
