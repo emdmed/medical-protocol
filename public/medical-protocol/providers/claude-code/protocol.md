@@ -29,6 +29,30 @@ npx shadcn@latest init -d
 ```
 Then continue with the workflow. Do not tell the doctor about this step.
 
+**After scaffolding (or on first workflow if `CLAUDE.md` doesn't exist at the project root)**, create a `CLAUDE.md` at the project root with project rules that persist across sessions:
+
+```markdown
+# Medical Protocol Project
+
+## Testing
+
+Never install testing frameworks (vitest, jest, playwright) or write test files.
+Testing means running the QA workflow:
+
+1. `npm run dev` → `npx wait-on http://localhost:3000 -t 30000`
+2. `npm run build -w packages/medprotocol`
+3. Verify calculations: `npx medprotocol` with `--json`, then compare against browser UI via agent-browser (agent-qa.md Section F)
+4. Verify interface: full browser QA via agent-browser — page load, console errors, responsive layout, empty states, overlap detection, keyboard nav (agent-qa.md Sections A–E, G)
+
+## Patterns
+
+- shadcn Card + absolute positioning: add `overflow-visible` when Card contains popups/overlays
+- Calculator results render below inputs using inline flow — never `absolute bottom-*`
+- Parent-child data flow: use `useRef` to track previous values and skip no-op callback updates
+```
+
+If `CLAUDE.md` already exists, verify it contains the Testing section. If not, append it.
+
 ---
 
 ## CDN Base URL
@@ -114,6 +138,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `workflows/dashboard.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize | `workflows/customize.md` |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | `workflows/troubleshoot.md` |
+| **test** | test, verify, check calculations, are the numbers correct, validate results, QA, make sure it works | Run the QA workflow (see Testing / Verification section below) |
 | **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Run the quick calculator directly (see Quick Calculator section above) |
 
 **Cross-prompt:** When the doctor requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.
@@ -232,6 +257,20 @@ Summary: theming (tweakcn), responsiveness, error boundary, shadcn polish, layou
 1. Never send patient data to external services — all storage must be local
 2. If the doctor pastes real patient data in chat, warn them immediately
 3. On first workflow completion, mention: "All patient data you enter stays on your computer."
+
+---
+
+## Testing / Verification
+
+When the doctor asks to "test", "verify", or "check" that things work correctly:
+
+**Never install testing frameworks** (vitest, jest, playwright, etc.) or write test files. Testing means running the QA workflow with agent-browser and `npx medprotocol`.
+
+1. Start the dev server: `npm run dev` (background), then `npx wait-on http://localhost:3000 -t 30000`
+2. Build the CLI: `npm run build -w packages/medprotocol`
+3. **Verify calculations** — run `npx medprotocol` with known inputs (`--json`), then enter the same values in the browser UI via agent-browser and confirm the results match (see `agent-qa.md` Section F)
+4. **Verify the interface** — run the full browser QA via agent-browser: page load, console errors, responsive layout, empty states, overlap detection, keyboard navigation (see `agent-qa.md` Sections A–E, G)
+5. **Report in clinical language**: "All calculations are correct" or "The blood gas analysis showed a different result than expected — I've fixed it." Never mention test frameworks, CLI tools, or QA workflows.
 
 ---
 
