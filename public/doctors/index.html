@@ -147,6 +147,7 @@
       font-size: 16px; color: var(--text-muted); max-width: 400px;
       line-height: 1.7; font-weight: 400;
     }
+    .hero__ctas { display: flex; gap: 12px; flex-shrink: 0; }
     .hero__cta {
       display: inline-flex; align-items: center; gap: 8px;
       background: var(--accent); color: var(--bg); font-size: 15px; font-weight: 500;
@@ -155,6 +156,31 @@
     }
     .hero__cta:hover { background: var(--accent-hover); }
     .hero__cta svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .hero__cta--ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--text-muted); font-size: 15px; font-weight: 500;
+      padding: 12px 24px; border-radius: 4px; text-decoration: none;
+      border: 1px solid var(--card-border); transition: all 0.2s; flex-shrink: 0;
+    }
+    .hero__cta--ghost:hover { color: var(--text); border-color: var(--text-muted); }
+    .hero__cta--ghost svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ─── Trust bar ─── */
+    .trust-bar {
+      max-width: 1024px; margin: 0 auto; padding: 0 24px;
+      position: relative; z-index: 1;
+    }
+    .trust-bar__inner {
+      display: flex; justify-content: center; gap: 40px;
+      padding: 24px 0; border-top: 1px solid rgba(255,255,255,0.10);
+    }
+    .trust-bar__item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; color: var(--text-muted); font-weight: 400;
+    }
+    .trust-bar__value {
+      font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
+    }
 
     /* ─── Sections ─── */
     .section { padding: 96px 0; border-top: 1px solid rgba(255,255,255,0.20); position: relative; z-index: 1; }
@@ -641,7 +667,11 @@
       .hero h1 { font-size: clamp(28px, 8vw, 40px); }
       .hero-bg img { opacity: 0.12; }
       .hero__bottom { flex-direction: column; align-items: flex-start; gap: 24px; }
+      .hero__ctas { flex-direction: column; width: 100%; }
       .hero__cta { width: 100%; justify-content: center; }
+      .hero__cta--ghost { width: 100%; justify-content: center; }
+      .trust-bar__inner { gap: 24px; flex-wrap: wrap; justify-content: flex-start; }
+      .trust-bar__item { font-size: 13px; }
       .bento { grid-template-columns: 1fr; }
       .bento__featured { min-height: 260px; }
       .products { grid-template-columns: 1fr; }
@@ -747,21 +777,36 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero__content" style="width:100%">
-      <p class="hero__eyebrow reveal" data-i18n="hero.eyebrow">For surgeons, traumatologists, and clinicians</p>
+      <p class="hero__eyebrow reveal" data-i18n="hero.eyebrow">No coding. No cloud. No waiting for IT.</p>
       <h1 class="reveal reveal-d1" data-i18n="hero.title">
         Describe what you need. <em>It's built in minutes.</em>
       </h1>
       <div class="hero__bottom reveal reveal-d2">
         <p class="hero__desc" data-i18n="hero.desc">
-          Vital signs monitors, ABG analyzers, patient records, fluid balance trackers, clinical dashboards &mdash; fully functional and ready for real data. No coding. No IT team. All data stays on your machine.
+          Vital signs, ABG analyzers, fluid balance, clinical dashboards. Fully functional, ready for real patients. All data stays on your machine.
         </p>
-        <a href="#start" class="hero__cta" data-i18n="hero.cta">
-          Get started
-          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
+        <div class="hero__ctas">
+          <a href="#start" class="hero__cta" data-i18n="hero.cta">
+            Get started
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a href="https://medical-protocol-demo.vercel.app/dashboard" target="_blank" rel="noopener" class="hero__cta--ghost" data-i18n="hero.demo">
+            See live demo
+            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- Trust bar -->
+  <div class="trust-bar reveal reveal-d3">
+    <div class="trust-bar__inner">
+      <span class="trust-bar__item" data-i18n="trust.tests"><span class="trust-bar__value">527</span> validated clinical tests</span>
+      <span class="trust-bar__item" data-i18n="trust.components"><span class="trust-bar__value">11</span> clinical components</span>
+      <span class="trust-bar__item" data-i18n="trust.fhir"><span class="trust-bar__value">FHIR R4</span> compliant</span>
+    </div>
+  </div>
 
   <!-- What gets built -->
   <section id="tools" class="section">
@@ -1327,10 +1372,14 @@
         'nav.privacy': 'Privacy',
         'nav.faq': 'FAQ',
         'nav.cta': 'Get started',
-        'hero.eyebrow': 'For surgeons, traumatologists, and clinicians',
+        'hero.eyebrow': 'No coding. No cloud. No waiting for IT.',
         'hero.title': 'Describe what you need. <em>It\'s built in minutes.</em>',
-        'hero.desc': 'Vital signs monitors, ABG analyzers, patient records, fluid balance trackers, clinical dashboards &mdash; fully functional and ready for real data. No coding. No IT team. All data stays on your machine.',
+        'hero.desc': 'Vital signs, ABG analyzers, fluid balance, clinical dashboards. Fully functional, ready for real patients. All data stays on your machine.',
         'hero.cta': 'Get started <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+        'hero.demo': 'See live demo <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+        'trust.tests': '<span class="trust-bar__value">527</span> validated clinical tests',
+        'trust.components': '<span class="trust-bar__value">11</span> clinical components',
+        'trust.fhir': '<span class="trust-bar__value">FHIR R4</span> compliant',
         'tools.label': 'What you get',
         'tools.title': 'Real clinical tools, <em>not toys.</em>',
         'bento.mostRequested': 'Most requested',
@@ -1468,10 +1517,14 @@
         'nav.privacy': 'Privacidad',
         'nav.faq': 'Preguntas',
         'nav.cta': 'Comenzar',
-        'hero.eyebrow': 'Para cirujanos, traumatólogos y médicos clínicos',
+        'hero.eyebrow': 'Sin programar. Sin nube. Sin esperar a sistemas.',
         'hero.title': 'Describa lo que necesita. <em>Se construye en minutos.</em>',
-        'hero.desc': 'Monitores de signos vitales, analizadores de gases arteriales, historias clínicas, balances hídricos, tableros clínicos &mdash; completamente funcionales y listos para datos reales. Sin programar. Sin equipo de sistemas. Todos los datos quedan en su máquina.',
+        'hero.desc': 'Signos vitales, gases arteriales, balance hídrico, tableros clínicos. Completamente funcionales, listos para pacientes reales. Todos los datos quedan en su máquina.',
         'hero.cta': 'Comenzar <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+        'hero.demo': 'Ver demo en vivo <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+        'trust.tests': '<span class="trust-bar__value">527</span> pruebas clínicas validadas',
+        'trust.components': '<span class="trust-bar__value">11</span> componentes clínicos',
+        'trust.fhir': '<span class="trust-bar__value">FHIR R4</span> compatible',
         'tools.label': 'Lo que obtiene',
         'tools.title': 'Herramientas clínicas reales, <em>no juguetes.</em>',
         'bento.mostRequested': 'Más solicitado',
