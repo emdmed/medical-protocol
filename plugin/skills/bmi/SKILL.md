@@ -8,6 +8,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Component
 
@@ -25,3 +26,9 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
 - **Persistence enabled**: Store last-entered weight/height in localStorage
 
 Do NOT ask about BMI formula details, display preferences, or technical preferences.
+
+## NEVER
+- Show BMI without the WHO category classification
+- Use BMI alone for pediatric patients — use age/sex-specific percentiles
+- Display decimal precision beyond 1 place (e.g., 24.3, not 24.3127)
+- Omit height/weight units in the display

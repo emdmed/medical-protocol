@@ -8,6 +8,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Component
 
@@ -29,3 +30,9 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
 - **Persistence enabled**: "Should notes be organized by visit date?" (Default: yes)
 
 Do NOT ask about database setup, authentication, layout, or technical integrations.
+
+## NEVER
+- Pre-fill notes with fictional patient data that looks realistic
+- Allow saving a note without a date/timestamp
+- Strip formatting from pasted clinical text without warning
+- Show previous notes without clearly marking the date of each entry

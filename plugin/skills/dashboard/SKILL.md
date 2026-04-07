@@ -8,6 +8,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 Also read ${CLAUDE_PLUGIN_ROOT}/context/composition.md for component integration patterns and gotchas.
 
 ## Component
@@ -51,3 +52,9 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 - Timeline works best as a full-width section or sidebar
 - Check `externalComponents` for each manifest entry — some are available as their own manifest entries
 - Update home page to redirect to `/dashboard`
+
+## NEVER
+- Combine components without testing that their data flows don't conflict
+- Hide component errors silently — always show which block has an issue
+- Use different unit systems across blocks in the same dashboard
+- Remove a block without confirming with the doctor first

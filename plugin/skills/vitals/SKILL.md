@@ -8,6 +8,10 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/vitals/reference/normal-ranges.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/vitals/reference/critical-values.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/vitals/reference/pediatric-ranges.md
 
 ## Component
 
@@ -33,3 +37,10 @@ Ask which vital signs to monitor:
 - **Private practice**: "Record vitals during the visit, or also review past readings?" (Default: record only)
 
 **FHIR support**: Include silently. Do NOT ask about layout, colors, or storage.
+
+## NEVER
+- Display vital sign values without units (always show mmHg, bpm, °F/°C, %, breaths/min)
+- Use color alone to indicate abnormal values — always include text labels
+- Show "normal" ranges without citing the source (adult vs pediatric vs geriatric)
+- Default to metric if doctor's context specifies imperial, or vice versa
+- Suppress alerts for critical values (e.g., systolic >180 or <90)

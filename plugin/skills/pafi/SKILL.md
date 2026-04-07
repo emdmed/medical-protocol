@@ -8,6 +8,9 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/pafi/reference/ards-berlin-criteria.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/pafi/reference/ventilation-targets.md
 
 ## Component
 
@@ -25,3 +28,9 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
 - **Multiple patients**: Route to the dashboard workflow instead, offering PaFi as a dashboard widget
 
 Do NOT ask about ARDS classification details, formulas, or technical preferences.
+
+## NEVER
+- Classify ARDS severity without confirming bilateral infiltrates and timing
+- Show PaO2/FiO2 ratio without the FiO2 value used
+- Use SpO2 as a substitute for PaO2 without flagging it as estimated
+- Omit PEEP value when classifying ARDS severity (Berlin criteria require PEEP ≥5)

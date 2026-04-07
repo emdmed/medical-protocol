@@ -8,6 +8,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Component
 
@@ -26,3 +27,9 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
 - **Multiple patients**: Route to the dashboard workflow instead, offering water balance as a dashboard widget
 
 Do NOT ask about calculation formulas, display preferences, or technical preferences.
+
+## NEVER
+- Calculate fluid balance without including insensible losses
+- Show intake without output in the same view — balance requires both
+- Omit body weight when it affects fluid calculations
+- Display cumulative balance without hourly/per-shift breakdown option

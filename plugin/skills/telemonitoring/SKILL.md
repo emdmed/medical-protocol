@@ -8,6 +8,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Component
 
@@ -26,3 +27,9 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
 - **Multiple patients**: Route to the dashboard workflow instead, offering telemonitoring as a dashboard widget
 
 Do NOT ask about device connectivity, technical preferences, or animation/design choices.
+
+## NEVER
+- Display SpO2 or heart rate values without units (% and bpm)
+- Use animation that could be mistaken for a real device reading without a "SIMULATED" label
+- Suppress alarms for critically low SpO2 (< 90%) or heart rate (< 40 or > 150 bpm)
+- Show a flat heart rate line without an alert — could mask disconnection or arrest

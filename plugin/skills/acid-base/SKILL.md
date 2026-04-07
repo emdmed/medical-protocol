@@ -8,6 +8,10 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/acid-base/reference/compensation-formulas.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/acid-base/reference/anion-gap-interpretation.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/acid-base/reference/mixed-disorders.md
 
 ## Component
 
@@ -32,3 +36,10 @@ Ask the doctor about their blood gas analysis needs:
 - **Multiple patients**: Route to the dashboard workflow instead, offering acid-base as a dashboard widget
 
 Do NOT ask about technical integrations, display preferences, or formulas.
+
+## NEVER
+- Show an acid-base interpretation without displaying the input values used
+- Classify a disorder without checking for compensation
+- Ignore anion gap when Na⁺ and Cl⁻ are available
+- Display pH without at least 2 decimal places
+- Skip delta-delta ratio when anion gap is elevated

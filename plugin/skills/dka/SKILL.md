@@ -8,6 +8,10 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/dka/reference/resolution-criteria.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/dka/reference/insulin-protocol.md
+Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/dka/reference/potassium-management.md
 
 ## Component
 
@@ -31,3 +35,10 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
 - **Multiple patients**: Route to the dashboard workflow instead, offering DKA as a dashboard widget
 
 Do NOT ask about formulas, resolution criteria details, or technical preferences.
+
+## NEVER
+- Omit potassium tracking — hypokalemia during insulin therapy is life-threatening
+- Show glucose reduction rate without the time interval
+- Mark DKA as "resolved" without checking ALL resolution criteria (pH >7.3, HCO3 >15, AG <12)
+- Hide GCS tracking for admitted patients — cerebral edema detection requires it
+- Allow insulin dose changes without displaying current glucose trend

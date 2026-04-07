@@ -7,6 +7,7 @@ allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/project-setup.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/classification.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Step 1: Returning Project Check
 
@@ -15,6 +16,10 @@ Before anything else, silently check if the current project already has componen
 - If the doctor asks for something that's already installed, route to the **customize** workflow — do not re-fetch or re-install components.
 - If the doctor asks for something new that doesn't exist yet, proceed with classification below.
 - Never re-scaffold the project if it already has a working setup.
+
+### New Project Suggestion
+
+If this is a brand-new project (no existing components found), suggest: "Would you like me to learn about your practice first so I can tailor everything to your workflow? Just say 'teach me' or we can jump straight into building."
 
 ## Step 2: Initial Clarification
 
@@ -39,6 +44,8 @@ Follow the **Classification** section from protocol-context.md to match the doct
 | **customize** | `${CLAUDE_PLUGIN_ROOT}/skills/customize/SKILL.md` |
 | **troubleshoot** | `${CLAUDE_PLUGIN_ROOT}/skills/troubleshoot/SKILL.md` |
 | **cli** | `${CLAUDE_PLUGIN_ROOT}/skills/cli/SKILL.md` |
+| **teach-clinical** | `${CLAUDE_PLUGIN_ROOT}/skills/teach-clinical/SKILL.md` |
+| **protocol-audit** | `${CLAUDE_PLUGIN_ROOT}/skills/protocol-audit/SKILL.md` |
 
 ## Step 4: Execute
 

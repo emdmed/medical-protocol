@@ -8,6 +8,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Component
 
@@ -27,3 +28,9 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
 - **Multiple patients**: Route to the dashboard workflow instead, offering timeline as a per-patient view
 
 Do NOT ask about visual design, technical preferences, or data format.
+
+## NEVER
+- Display events without dates or timestamps
+- Use ambiguous time references (e.g., "recently") — always show exact dates
+- Overlap event markers so that entries become unreadable
+- Omit the event type/category in the timeline display
