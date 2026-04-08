@@ -135,6 +135,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking | `workflows/dka.md` |
 | **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | `workflows/telemonitoring.md` |
 | **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | `workflows/timeline.md` |
+| **cardiology** | ASCVD, cardiovascular risk, HEART score, chest pain triage, CHA₂DS₂-VASc, atrial fibrillation, AF stroke risk, cardiac risk | `workflows/cardiology.md` |
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `workflows/dashboard.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize | `workflows/customize.md` |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | `workflows/troubleshoot.md` |

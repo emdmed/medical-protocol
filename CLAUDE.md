@@ -42,7 +42,8 @@ public/medical-protocol/           # CDN deliverable (https://medical-protocol.v
 │   ├── dka/                       # DKA monitoring (glucose, ketones, K+, GCS)
 │   ├── timeline/                  # Clinical timeline with popovers
 │   ├── telemonitoring/            # Pulse oximetry animation
-│   └── clinical-notes/             # Encounter note editor with highlighting
+│   ├── clinical-notes/            # Encounter note editor with highlighting
+│   └── cardiology/                # ASCVD, HEART Score, CHA₂DS₂-VASc calculators
 └── workflows/                     # Doctor-facing workflow docs fetched at runtime
 
 plugin/                            # Claude plugin definition
@@ -84,3 +85,5 @@ Test pattern: `tests/**/*.test.ts`
 **Result overlap prevention:** Calculator result badges must render **below** inputs using inline flow. Never use `absolute bottom-*` to position results above inputs — this overlaps the component title.
 
 **Parent-child data flow:** Components receive data via props and report changes via callbacks. Use `useRef` to track previous values and skip no-op updates to avoid circular render loops.
+
+**Adding a new module:** Follow the 4-step checklist in [`.patterns/new-module/new-module.md`](.patterns/new-module/new-module.md). Skipping any step makes the module invisible at runtime.
