@@ -44,7 +44,7 @@ Follow the **Classification** section from protocol-context.md to match the doct
 | **customize** | `${CLAUDE_PLUGIN_ROOT}/skills/customize/SKILL.md` |
 | **troubleshoot** | `${CLAUDE_PLUGIN_ROOT}/skills/troubleshoot/SKILL.md` |
 | **cli** | `${CLAUDE_PLUGIN_ROOT}/skills/cli/SKILL.md` |
-| **teach-clinical** | `${CLAUDE_PLUGIN_ROOT}/skills/teach-clinical/SKILL.md` |
+| **start-protocol** | `${CLAUDE_PLUGIN_ROOT}/skills/start-protocol/SKILL.md` |
 | **protocol-audit** | `${CLAUDE_PLUGIN_ROOT}/skills/protocol-audit/SKILL.md` |
 
 ## Step 4: Execute

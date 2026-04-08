@@ -13,6 +13,7 @@ Commands:
   vitals           Evaluate vital signs
   pafi             Calculate PaO2/FiO2 ratio (ARDS classification)
   dka              Assess DKA parameters and resolution
+  cardiology       Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
 
 Global options:
   --json           Output as JSON (available on all commands)
@@ -25,7 +26,10 @@ Examples:
   medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2
   medprotocol vitals --bp 120/80 --hr 72 --temp 37.0
   medprotocol pafi --pao2 60 --fio2 40
-  medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl`;
+  medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl
+  medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
+  medprotocol cardiology heart --history 1 --ecg 0 --age 2 --risk-factors 1 --troponin 0
+  medprotocol cardiology chadsvasc --hypertension --age75 --diabetes`;
 
 const command = process.argv[2];
 const commandArgs = process.argv.slice(3);
@@ -47,6 +51,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   vitals: () => import("./commands/vitals"),
   pafi: () => import("./commands/pafi"),
   dka: () => import("./commands/dka"),
+  cardiology: () => import("./commands/cardiology"),
 };
 
 const loader = commands[command];

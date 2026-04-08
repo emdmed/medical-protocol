@@ -140,7 +140,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | `workflows/troubleshoot.md` |
 | **test** | test, verify, check calculations, are the numbers correct, validate results, QA, make sure it works | Run the QA workflow (see Testing / Verification section below) |
 | **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Run the quick calculator directly (see Quick Calculator section above) |
-| **teach-clinical** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty | Run the `teach-clinical` skill — one-time clinical context onboarding |
+| **start-protocol** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty | Run the `start-protocol` skill — one-time clinical context onboarding |
 | **protocol-audit** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check | Run the `protocol-audit` skill — score the project against clinical compliance criteria |
 
 **Cross-prompt:** When the doctor requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.

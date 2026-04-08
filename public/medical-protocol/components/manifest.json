@@ -376,5 +376,39 @@
       "sepsis-monitor.tsx",
       "types/sepsis.ts"
     ]
+  },
+  "cardiology": {
+    "version": "0.4.0",
+    "category": "calculator",
+    "description": "Cardiology risk calculators: ASCVD (Pooled Cohort Equations), HEART Score (chest pain triage), CHA₂DS₂-VASc (AF stroke risk)",
+    "import": "@/components/cardiology/cardiology",
+    "types": "@/components/cardiology/types/interfaces",
+    "target": "components/cardiology",
+    "props": "none — self-contained",
+    "dataFlow": "none — internal state only",
+    "popups": {
+      "resultBadges": {
+        "positioning": "inline flow below inputs",
+        "direction": "below the input fields",
+        "trigger": "automatic when valid inputs are saved",
+        "content": "risk percentage/score badge + category classification badge"
+      },
+      "note": "Result badges render inline below inputs — no absolute positioning, no overflow-visible needed on parent Cards."
+    },
+    "shadcn": [
+      "card",
+      "input",
+      "button",
+      "badge",
+      "label",
+      "tabs"
+    ],
+    "files": [
+      "cardiology.tsx",
+      "components/ascvd-calculator.tsx",
+      "components/heart-score-calculator.tsx",
+      "components/chadsvasc-calculator.tsx",
+      "types/interfaces.ts"
+    ]
   }
 }
