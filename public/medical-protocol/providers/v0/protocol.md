@@ -27,6 +27,24 @@ The doctor is using v0.dev to build their clinical interface. You (v0's Claude) 
 
 ---
 
+## Available Tools
+
+| Tool | What it does |
+|---|---|
+| vital-signs | Monitor BP, HR, RR, Temp, SpO2, FiO2 |
+| acid-base | Arterial blood gas analysis with anion gap |
+| water-balance | Fluid intake/output tracking |
+| bmi | Body mass index calculator |
+| pafi | PaO2/FiO2 ratio with ARDS classification |
+| dka | DKA monitoring (glucose, ketones, K⁺, GCS) |
+| timeline | Clinical event timeline |
+| telemonitoring | Real-time pulse oximetry display |
+| clinical-notes | Encounter note editor |
+| cardiology | ASCVD, HEART Score, CHA₂DS₂-VASc |
+| dashboard | Combined overview of multiple tools |
+
+---
+
 ## Component Registry
 
 Registry: https://medical-protocol.vercel.app/medical-protocol/r/

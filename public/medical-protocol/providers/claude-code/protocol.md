@@ -14,6 +14,30 @@
 
 ---
 
+## Available Tools
+
+| Tool | What it does |
+|---|---|
+| vital-signs | Monitor BP, HR, RR, Temp, SpO2, FiO2 |
+| acid-base | Arterial blood gas analysis with anion gap |
+| water-balance | Fluid intake/output tracking |
+| bmi | Body mass index calculator |
+| pafi | PaO2/FiO2 ratio with ARDS classification |
+| dka | DKA monitoring (glucose, ketones, K⁺, GCS) |
+| timeline | Clinical event timeline |
+| telemonitoring | Real-time pulse oximetry display |
+| clinical-notes | Encounter note editor |
+| cardiology | ASCVD, HEART Score, CHA₂DS₂-VASc |
+| dashboard | Combined overview of multiple tools |
+| customize | Modify layout, add/remove fields |
+| troubleshoot | Fix errors, blank screens, broken UI |
+| test | Verify calculations and run QA |
+| cli | Quick terminal-based calculations |
+| start-protocol | Configure doctor preferences and specialty |
+| protocol-audit | Audit protocol quality and compliance |
+
+---
+
 ## Project Check (run before any workflow)
 
 Before starting any workflow, silently check if the current directory has a working Next.js project:
