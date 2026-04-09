@@ -3,454 +3,224 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>medical protocol</title>
-  <meta name="description" content="Fully functional clinical interfaces — vital signs, patient records, dashboards — built by describing what you need. All data stays on your computer.">
-  <meta property="og:title" content="medical protocol">
+  <title>Medical Protocol</title>
+  <meta name="description" content="Fully functional clinical interfaces — vital signs, ABG analyzers, fluid balance, dashboards. Describe what you need, Claude builds it. All data stays on your computer.">
+  <meta property="og:title" content="Medical Protocol">
   <meta property="og:description" content="Fully functional clinical interfaces built by describing what you need. All data stays on your computer.">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="medical protocol">
+  <meta name="twitter:title" content="Medical Protocol">
   <meta name="twitter:description" content="Fully functional clinical interfaces built by describing what you need.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300..800&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    :root {
+      --bg: #0a0e14;
+      --card: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.15);
+      --text: #eaf0f6;
+      --text-muted: #8a9bb0;
+      --text-dim: #6b7d94;
+      --accent: #4a90d9;
+      --accent-hover: #6aade8;
+      --font-display: 'DM Serif Display', serif;
+    }
+
     body {
-      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
-      background: #f8fafb;
-      color: #37474f;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 2rem 1.5rem;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.6;
-    }
-    main { max-width: 600px; width: 100%; }
-
-    .header {
-      margin-bottom: 3rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid #cfd8dc;
-    }
-    h1 {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #1a2a33;
-      letter-spacing: 0.04em;
-    }
-    h1 span { color: #90a4ae; }
-    .subtitle {
-      font-size: 0.75rem;
-      color: #78909c;
-      margin-top: 0.3rem;
+      overflow: hidden;
+      height: 100vh;
     }
 
-    section { margin-bottom: 1.8rem; }
-    h2 {
-      font-size: 0.65rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #78909c;
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.3rem;
-      border-bottom: 1px solid #cfd8dc;
+    /* ─── Background pattern ─── */
+    .bg-pattern {
+      pointer-events: none; position: fixed; inset: 0; z-index: 0;
+      opacity: 0.55;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 1px, transparent 0),
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 0),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 0);
+      background-size: 40px 40px, 20px 20px, 20px 20px;
+    }
+    .bg-guide-lines {
+      pointer-events: none; position: fixed; inset: 0; z-index: 0;
+    }
+    .bg-guide-lines__inner {
+      max-width: 1100px; height: 100%; margin: 0 auto;
+      display: flex; justify-content: space-between;
+    }
+    .bg-guide-lines__line {
+      height: 100%; width: 0; border-left: 1px solid rgba(255,255,255,0.08);
     }
 
-    .provider-block {
-      margin-bottom: 2.5rem;
-      padding: 1rem 1.2rem;
-      border: 1px solid #cfd8dc;
-      border-radius: 4px;
-      background: #fff;
+    /* ─── Hero background (split 50/50) ─── */
+    .hero-bg {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
+      pointer-events: none; overflow: hidden;
     }
-    .provider-block h2 {
-      border-bottom: none;
-      padding-bottom: 0;
-      margin-bottom: 0.3rem;
+    .hero-bg__half {
+      position: absolute; top: 0; bottom: 0; width: 50%;
+      overflow: hidden;
     }
-    .provider-name {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #1a2a33;
-      margin-bottom: 0.15rem;
+    .hero-bg__half--left { left: 0; }
+    .hero-bg__half--right { right: 0; }
+    .hero-bg__half img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center top;
+      opacity: 0.18; filter: saturate(0.3);
     }
-    .provider-tag {
-      display: inline-block;
-      font-size: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 0.1rem 0.4rem;
-      border-radius: 2px;
-      margin-left: 0.4rem;
-      position: relative;
-      top: -1px;
+    .hero-bg__half--left img { transform: scaleX(-1); }
+    .hero-bg__half--right img { transform: scaleX(-1); }
+    .hero-bg__seam {
+      position: absolute; top: 0; bottom: 0; left: 50%; z-index: 1;
+      width: 120px; transform: translateX(-50%);
+      background: linear-gradient(to right, transparent, var(--bg) 40%, var(--bg) 60%, transparent);
+      pointer-events: none;
     }
-    .tag-active {
-      background: #e0f2f1;
-      color: #00695c;
-    }
-    .tag-soon {
-      background: #eceff1;
-      color: #90a4ae;
-    }
-    .provider-desc {
-      font-size: 0.72rem;
-      color: #78909c;
-      margin-bottom: 0.8rem;
-    }
-    .provider-block section {
-      margin-bottom: 1rem;
-    }
-    .provider-block section:last-child {
-      margin-bottom: 0;
-    }
-    ul { list-style: none; }
-    li {
-      margin-bottom: 0.15rem;
-      display: flex;
-      align-items: baseline;
-      gap: 0.5rem;
-    }
-    li::before {
-      content: '';
-      display: inline-block;
-      width: 4px;
-      height: 4px;
-      background: #90a4ae;
-      border-radius: 1px;
-      flex-shrink: 0;
-      position: relative;
-      top: -1px;
-    }
-    a {
-      color: #546e7a;
-      text-decoration: none;
-      font-size: 0.8rem;
-      transition: color 0.12s ease;
-    }
-    a:hover { color: #0d7c66; }
-    .desc {
-      color: #90a4ae;
-      font-size: 0.72rem;
-    }
-    .desc::before {
-      content: '—';
-      margin-right: 0.3rem;
+    .hero-bg::after {
+      content: ''; position: absolute; inset: 0; z-index: 2;
+      background:
+        linear-gradient(to bottom, var(--bg) 0%, transparent 15%, transparent 50%, var(--bg) 90%),
+        linear-gradient(to right, var(--bg) 0%, transparent 30%, transparent 70%, var(--bg) 100%);
     }
 
-    .usage {
-      margin-top: 2.5rem;
-      padding: 1rem 1.2rem;
-      background: #eceff1;
-      border: 1px solid #cfd8dc;
-      border-radius: 4px;
+    /* ─── Hero (full viewport) ─── */
+    .hero {
+      height: 100vh; display: flex; align-items: flex-end;
+      padding: 0 24px 80px; max-width: 1024px; margin: 0 auto;
+      position: relative; z-index: 1;
     }
-    .usage h2 {
-      border-bottom: none;
-      padding-bottom: 0;
-      margin-bottom: 0.5rem;
+    .hero__content { width: 100%; }
+    .hero__eyebrow {
+      font-size: 14px; font-weight: 500; color: var(--accent);
+      margin-bottom: 24px; letter-spacing: 0.05em; text-transform: uppercase;
     }
-    .usage .prompt {
-      font-size: 0.75rem;
-      color: #546e7a;
-      margin-bottom: 0.4rem;
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(48px, 7.5vw, 110px); font-weight: 600; line-height: 0.9;
+      letter-spacing: -0.02em; color: var(--text); margin-bottom: 40px;
+      max-width: 900px;
     }
-    .usage .prompt:last-child {
-      margin-bottom: 0;
+    .hero h1 em {
+      font-style: normal; color: var(--text-dim);
     }
-    .usage .prompt span {
-      color: #90a4ae;
-      user-select: none;
+    .hero__bottom {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: 40px; width: 100%;
     }
-    .usage code {
-      font-size: 0.75rem;
-      color: #1a2a33;
+    .hero__desc {
+      font-size: 16px; color: var(--text-muted); max-width: 400px;
+      line-height: 1.7; font-weight: 400;
     }
-    .usage .prompt-label {
-      font-size: 0.6rem;
-      color: #90a4ae;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-top: 0.6rem;
-      margin-bottom: 0.2rem;
+    .hero__ctas { display: flex; gap: 12px; flex-shrink: 0; }
+    .hero__cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent); color: var(--bg); font-size: 15px; font-weight: 500;
+      padding: 12px 24px; border-radius: 4px; text-decoration: none;
+      transition: all 0.2s; flex-shrink: 0;
     }
-    .usage .prompt-label:first-of-type {
-      margin-top: 0;
+    .hero__cta:hover { background: var(--accent-hover); }
+    .hero__cta svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .hero__cta--ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: var(--text-muted); font-size: 15px; font-weight: 500;
+      padding: 12px 24px; border-radius: 4px; text-decoration: none;
+      border: 1px solid var(--card-border); transition: all 0.2s; flex-shrink: 0;
     }
+    .hero__cta--ghost:hover { color: var(--text); border-color: var(--text-muted); }
+    .hero__cta--ghost svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    /* ─── Scroll animations ─── */
+    .reveal {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.is-visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.08s; }
+    .reveal-d2 { transition-delay: 0.16s; }
 
-    .footer {
-      margin-top: 3rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid #cfd8dc;
-      font-size: 0.65rem;
-      color: #90a4ae;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+      .hero { padding: 0 16px 48px; }
+      .hero h1 { font-size: clamp(28px, 8vw, 40px); }
+      .hero__bottom { flex-direction: column; align-items: flex-start; gap: 24px; }
+      .hero__ctas { flex-direction: column; width: 100%; }
+      .hero__cta { width: 100%; justify-content: center; }
+      .hero__cta--ghost { width: 100%; justify-content: center; }
+      .hero-bg__half img { opacity: 0.12; }
     }
-    .footer a {
-      font-size: 0.65rem;
-      color: #90a4ae;
-    }
-    .footer a:hover { color: #0d7c66; }
-
     @media (max-width: 400px) {
-      body { padding: 1.5rem 1rem; }
-      li { flex-wrap: wrap; }
-      .desc { width: 100%; padding-left: 0.9rem; }
-      .usage code { word-break: break-all; }
+      .hero { padding: 0 12px 40px; }
+      .hero h1 { font-size: 28px; }
+      .hero__desc { font-size: 14px; }
     }
   </style>
 </head>
 <body>
-  <main>
-    <div class="header">
-      <h1>medical protocol</h1>
-      <p class="subtitle">fully functional clinical interfaces — describe what you need, claude builds it</p>
+
+  <!-- Background pattern -->
+  <div class="bg-pattern"></div>
+  <div class="bg-guide-lines">
+    <div class="bg-guide-lines__inner">
+      <div class="bg-guide-lines__line"></div>
+      <div class="bg-guide-lines__line"></div>
     </div>
+  </div>
 
-    <section>
-      <h2>providers</h2>
-    </section>
+  <!-- Hero background (split 50/50) -->
+  <div class="hero-bg">
+    <div class="hero-bg__half hero-bg__half--left">
+      <img src="/hero.jpg" alt="" loading="eager">
+    </div>
+    <div class="hero-bg__half hero-bg__half--right">
+      <img src="/hero-engineers.jpg" alt="" loading="eager">
+    </div>
+    <div class="hero-bg__seam"></div>
+  </div>
 
-    <div class="provider-block">
-      <p class="provider-name">Claude Code <span class="provider-tag tag-active">active</span></p>
-      <p class="provider-desc">describe what you need in plain language — Claude Code builds it</p>
-
-      <section>
-        <h2>install</h2>
-        <p class="prompt" style="margin-bottom: 0.4rem;"><span>$ </span><code>Fetch and follow https://medical-protocol.vercel.app/install</code></p>
-        <ul>
-          <li>
-            <a href="/medical-protocol/providers/claude-code/protocol.md">protocol.md</a>
-            <span class="desc">core protocol — copy to your .claude/ directory</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/providers/claude-code/install.md">install.md</a>
-            <span class="desc">step-by-step install guide</span>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>workflows</h2>
-        <ul>
-          <li>
-            <a href="/medical-protocol/workflows/vital-signs.md">vital-signs.md</a>
-            <span class="desc">blood pressure, heart rate, SpO2, temperature, respiratory rate</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/ehr.md">ehr.md</a>
-            <span class="desc">electronic health records with patient management and clinical notes</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/acid-base.md">acid-base.md</a>
-            <span class="desc">ABG analysis with disorder detection and compensation</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/bmi.md">bmi.md</a>
-            <span class="desc">BMI calculator with imperial/metric and category badges</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/water-balance.md">water-balance.md</a>
-            <span class="desc">fluid intake/output tracker with insensible loss and net balance</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/telemonitoring.md">telemonitoring.md</a>
-            <span class="desc">pulse oximetry with real-time animation and alerts</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/timeline.md">timeline.md</a>
-            <span class="desc">scrollable clinical timeline with duration badges</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/dashboard.md">dashboard.md</a>
-            <span class="desc">combined clinical dashboard with vitals and records</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/pafi.md">pafi.md</a>
-            <span class="desc">PaO2/FiO2 ratio calculator with ARDS classification</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/dka.md">dka.md</a>
-            <span class="desc">DKA monitoring with hourly glucose, ketones, potassium tracking</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/customize.md">customize.md</a>
-            <span class="desc">modify existing interfaces in clinical language</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/workflows/agent-qa.md">agent-qa.md</a>
-            <span class="desc">automated browser QA testing for built interfaces</span>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>components / vital signs</h2>
-        <ul>
-          <li>
-            <a href="/medical-protocol/components/vital-signs/vital-signs.tsx">vital-signs.tsx</a>
-            <span class="desc">vital signs monitor — ready for real clinical data</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/vital-signs/signs/blood-pressure.tsx">blood-pressure.tsx</a>
-            <span class="desc">systolic/diastolic blood pressure</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/vital-signs/signs/heart-rate.tsx">heart-rate.tsx</a>
-            <span class="desc">pulse rate monitor</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/vital-signs/signs/blood-oxygen.tsx">blood-oxygen.tsx</a>
-            <span class="desc">SpO2 saturation</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/vital-signs/signs/temperature.tsx">temperature.tsx</a>
-            <span class="desc">body temperature</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/vital-signs/signs/respiratory-rate.tsx">respiratory-rate.tsx</a>
-            <span class="desc">breaths per minute</span>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>components / calculators & tools</h2>
-        <ul>
-          <li>
-            <a href="/medical-protocol/components/acid-base/acid-base.tsx">acid-base.tsx</a>
-            <span class="desc">ABG analyzer with disorder detection, compensation, anion gap</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/bmi/bmi-calculator.tsx">bmi-calculator.tsx</a>
-            <span class="desc">BMI calculator with imperial/metric toggle and category badges</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/water-balance/water-balance.tsx">water-balance.tsx</a>
-            <span class="desc">fluid intake/output tracker with insensible loss and net balance</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/pafi/pafi-calculator.tsx">pafi-calculator.tsx</a>
-            <span class="desc">PaO2/FiO2 ratio calculator with ARDS classification and FiO2 presets</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/dka/dka-monitor.tsx">dka-monitor.tsx</a>
-            <span class="desc">DKA monitoring with hourly tracking, resolution criteria, insulin suggestions</span>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>components / telemonitoring</h2>
-        <ul>
-          <li>
-            <a href="/medical-protocol/components/telemonitoring/pulse-oximetry/pulse-oximetry.tsx">pulse-oximetry.tsx</a>
-            <span class="desc">real-time pulse oximetry with animated heartbeat, BPM and SpO2</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/telemonitoring/pulse-oximetry/pulse-oximetry-simulator.tsx">pulse-oximetry-simulator.tsx</a>
-            <span class="desc">waveform simulator for pulse oximetry demo</span>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>components / timeline</h2>
-        <ul>
-          <li>
-            <a href="/medical-protocol/components/timeline/timeline.tsx">timeline.tsx</a>
-            <span class="desc">scrollable clinical timeline with duration badges and popovers</span>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>components / ehr</h2>
-        <ul>
-          <li>
-            <a href="/medical-protocol/components/ehr/ehr.tsx">ehr.tsx</a>
-            <span class="desc">electronic health records — ready for real clinical data</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/ehr/page.tsx">page.tsx</a>
-            <span class="desc">ehr page entry point</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/ehr/patient-details/patient-details.tsx">patient-details.tsx</a>
-            <span class="desc">patient demographics and conditions</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/ehr/prev-evolutions/prev-evolutions.tsx">prev-evolutions.tsx</a>
-            <span class="desc">previous clinical notes and evolutions</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/ehr/sidebar/sidebar.tsx">sidebar.tsx</a>
-            <span class="desc">navigation sidebar</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/ehr/references/references.tsx">references.tsx</a>
-            <span class="desc">clinical references and guidelines</span>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>shared resources</h2>
-        <ul>
-          <li>
-            <a href="/medical-protocol/components/manifest.json">manifest.json</a>
-            <span class="desc">component registry with files and dependencies</span>
-          </li>
-          <li>
-            <a href="/medical-protocol/components/COMPOSITION.md">COMPOSITION.md</a>
-            <span class="desc">integration patterns and data flow for combining components</span>
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>quick calculator (CLI)</h2>
-        <ul>
-          <li>
-            <a>bmi</a>
-            <span class="desc">body mass index from weight and height</span>
-          </li>
-          <li>
-            <a>abg</a>
-            <span class="desc">arterial blood gas analysis with disorder detection</span>
-          </li>
-          <li>
-            <a>water-balance</a>
-            <span class="desc">fluid intake/output with insensible loss calculation</span>
-          </li>
-          <li>
-            <a>vitals</a>
-            <span class="desc">vital sign evaluation with abnormal value flagging</span>
-          </li>
-        </ul>
-        <p style="margin-top: 0.4rem; font-size: 0.7rem; color: #90a4ae;">
-          run via <code style="font-size: 0.7rem; color: #546e7a;">medprotocol &lt;command&gt; [options]</code>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__content">
+      <p class="hero__eyebrow reveal">Describe it. Build it. Keep your data.</p>
+      <h1 class="reveal reveal-d1">
+        Clinical interfaces <em>built by AI, verified by science.</em>
+      </h1>
+      <div class="hero__bottom reveal reveal-d2">
+        <p class="hero__desc">
+          Vital signs monitors, ABG analyzers, fluid trackers, and full dashboards &mdash; describe what you need in plain language and get production-ready medical software. No coding. No cloud.
         </p>
-      </section>
+        <div class="hero__ctas">
+          <a href="/doctors" class="hero__cta">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            For doctors
+          </a>
+          <a href="/engineers" class="hero__cta">
+            <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            For engineers
+          </a>
+          <a href="/protocol-hub" class="hero__cta--ghost">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Protocol hub
+          </a>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="provider-block" style="background: #f8fafb;">
-      <p class="provider-name">v0 by Vercel <span class="provider-tag tag-soon">coming soon</span></p>
-      <p class="provider-desc">AI-powered interface builder — provider integration in development</p>
-      <ul>
-        <li>
-          <a href="/medical-protocol/providers/v0/README.md">README.md</a>
-          <span class="desc">integration status and requirements</span>
-        </li>
-      </ul>
-    </div>
+  <script>
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) { e.target.classList.add('is-visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+  </script>
 
-    <div class="footer">
-      <a href="/doctors">guide for doctors</a>
-      <span><a href="/install">install guide</a> &middot; runs locally &middot; data stays on your machine</span>
-    </div>
-  </main>
 </body>
 </html>
