@@ -72,8 +72,8 @@ if echo "$FETCH_URL" | grep -qE 'manifest\.json$'; then
   fi
 fi
 
-# ─── Check 5: Workflow validation (for .md files in workflows/) ───
-if echo "$FETCH_URL" | grep -qE 'workflows/.*\.md$'; then
+# ─── Check 5: Workflow validation (for .md files in providers/*/workflows/) ───
+if echo "$FETCH_URL" | grep -qE 'providers/.*/workflows/.*\.md$'; then
   if ! echo "$RESPONSE" | head -c 3000 | grep -qiE '(phase|step|workflow|clinical|component|fetch)'; then
     echo "<medical-protocol-hook>WARNING: Workflow file from $FETCH_URL doesn't contain expected workflow structure (no phase/step markers found). Verify the URL.</medical-protocol-hook>"
     exit 0

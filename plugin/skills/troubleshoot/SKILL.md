@@ -14,7 +14,7 @@ Tell the doctor: "Let me take a look." Do not ask them technical questions.
 
 ## Step 2: Fetch and Follow the Troubleshoot Workflow
 
-1. **Fetch the workflow**: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/workflows/troubleshoot.md`
+1. **Fetch the workflow**: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/troubleshoot.md`
 2. **Follow all four phases** in the workflow exactly as written:
    - **Phase 1**: Silent Diagnosis — run all checks, identify the issue category
    - **Phase 2**: Auto-Fix — attempt to fix the issue silently

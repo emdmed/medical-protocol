@@ -114,7 +114,7 @@ If it's unclear (e.g., the doctor mixes languages), ask once: "Would you prefer 
 
 ## Initial Clarification
 
-When the doctor's request is vague, fetch and follow: `{CDN_BASE}/workflows/initial-clarification.md`
+When the doctor's request is vague, fetch and follow: `{CDN_BASE}/providers/claude-code/workflows/initial-clarification.md`
 
 If the request is specific enough (e.g., "I need a vital signs monitor for admitted patients"), skip directly to Classification.
 
@@ -128,34 +128,34 @@ When the doctor describes what they need, classify into one of these domains bas
 
 | Domain | Signal Words | Workflow |
 |---|---|---|
-| **vital-signs** | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate, vitals, monitor | `workflows/vital-signs.md` |
-| **clinical-notes** | clinical notes, encounter note, evolution, chart, patient note, write a note, documentation | `workflows/clinical-notes.md` |
-| **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | `workflows/bmi.md` |
-| **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | `workflows/timeline.md` |
-| **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | `workflows/telemonitoring.md` |
+| **vital-signs** | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate, vitals, monitor | `providers/claude-code/workflows/vital-signs.md` |
+| **clinical-notes** | clinical notes, encounter note, evolution, chart, patient note, write a note, documentation | `providers/claude-code/workflows/clinical-notes.md` |
+| **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | `providers/claude-code/workflows/bmi.md` |
+| **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | `providers/claude-code/workflows/timeline.md` |
+| **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | `providers/claude-code/workflows/telemonitoring.md` |
 
 ### ICU / Critical Care
 
 | Domain | Signal Words | Workflow |
 |---|---|---|
-| **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | `workflows/acid-base.md` |
-| **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | `workflows/water-balance.md` |
-| **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury | `workflows/pafi.md` |
-| **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking | `workflows/dka.md` |
+| **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | `providers/claude-code/workflows/acid-base.md` |
+| **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | `providers/claude-code/workflows/water-balance.md` |
+| **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury | `providers/claude-code/workflows/pafi.md` |
+| **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking | `providers/claude-code/workflows/dka.md` |
 
 ### Cardiology
 
 | Domain | Signal Words | Workflow |
 |---|---|---|
-| **cardiology** | ASCVD, cardiovascular risk, HEART score, chest pain triage, CHA₂DS₂-VASc, atrial fibrillation, AF stroke risk, cardiac risk | `workflows/cardiology.md` |
+| **cardiology** | ASCVD, cardiovascular risk, HEART score, chest pain triage, CHA₂DS₂-VASc, atrial fibrillation, AF stroke risk, cardiac risk | `providers/claude-code/workflows/cardiology.md` |
 
 ### Utilities
 
 | Domain | Signal Words | Workflow |
 |---|---|---|
-| **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `workflows/dashboard.md` |
-| **customize** | change, modify, add field, remove, adjust, different layout, customize | `workflows/customize.md` |
-| **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | `workflows/troubleshoot.md` |
+| **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `providers/claude-code/workflows/dashboard.md` |
+| **customize** | change, modify, add field, remove, adjust, different layout, customize | `providers/claude-code/workflows/customize.md` |
+| **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | `providers/claude-code/workflows/troubleshoot.md` |
 | **test** | test, verify, check calculations, are the numbers correct, validate results, QA, make sure it works | Run the QA workflow (see Testing / Verification section below) |
 | **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Run the quick calculator directly (see Quick Calculator section above) |
 | **start-protocol** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty | Run the `start-protocol` skill — one-time clinical context onboarding |
@@ -177,7 +177,7 @@ When the doctor describes what they need, classify into one of these domains bas
 
 Once classified, fetch and follow the workflow:
 
-1. **Fetch the workflow**: `WebFetch` the workflow markdown from `{CDN_BASE}/workflows/{domain}.md`
+1. **Fetch the workflow**: `WebFetch` the workflow markdown from `{CDN_BASE}/providers/claude-code/workflows/{domain}.md`
 2. **Follow all phases** in the workflow exactly as written
 3. **Fetch components** as instructed by the workflow using the manifest
 
@@ -263,7 +263,7 @@ Example from `clinical-notes`:
 
 > **For Claude only.** Run silently after every workflow build. Never mention it to the doctor.
 
-Fetch and follow the full checklist: `WebFetch` from `{CDN_BASE}/workflows/quality-checklist.md`
+Fetch and follow the full checklist: `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/quality-checklist.md`
 
 Summary: theming (tweakcn), responsiveness, error boundary, shadcn polish, layout disclaimer, browser QA.
 
@@ -271,7 +271,7 @@ Summary: theming (tweakcn), responsiveness, error boundary, shadcn polish, layou
 
 ## Patient Privacy & Data Protection
 
-> All data stays on the doctor's computer. Fetch the full privacy rules when needed: `{CDN_BASE}/workflows/patient-privacy.md`
+> All data stays on the doctor's computer. Fetch the full privacy rules when needed: `{CDN_BASE}/providers/claude-code/workflows/patient-privacy.md`
 
 **Essential rules (always active):**
 1. Never send patient data to external services — all storage must be local
@@ -300,7 +300,7 @@ When the doctor asks to "test", "verify", or "check" that things work correctly:
 2. Run `npm run dev` in the background
 3. **Wait for the dev server** to be ready: `npx wait-on http://localhost:3000 -t 30000`
    - If `wait-on` times out: skip browser QA, proceed to step 5
-4. **Run Browser QA** (Quality Checklist item 6) — only if agent-browser is installed and the server is ready. Follow `workflows/agent-qa.md`. Fix issues silently.
+4. **Run Browser QA** (Quality Checklist item 6) — only if agent-browser is installed and the server is ready. Follow `providers/claude-code/workflows/agent-qa.md`. Fix issues silently.
 5. Tell the doctor: "Your [description] is ready. You can view it at http://localhost:3000"
 6. **On first workflow completion only**, mention: "All patient data you enter stays on your computer. I'll let you know if anything could affect privacy." Do not repeat this on subsequent workflows.
 7. Ask if they'd like to adjust anything — in clinical terms only

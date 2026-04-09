@@ -30,6 +30,6 @@ When the doctor opens Claude Code in a project that already has components insta
 
 ## Initial Clarification
 
-When the doctor's request is vague or general (e.g., "I need something to track vitals" or "build me a patient system"), fetch and follow: `{CDN_BASE}/workflows/initial-clarification.md`
+When the doctor's request is vague or general (e.g., "I need something to track vitals" or "build me a patient system"), fetch and follow: `{CDN_BASE}/providers/claude-code/workflows/initial-clarification.md`
 
 If the request is specific enough (e.g., "I need a vital signs monitor for admitted patients"), skip directly to Classification.

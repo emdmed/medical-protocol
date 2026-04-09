@@ -27,10 +27,12 @@ public/medical-protocol/           # CDN deliverable (https://medical-protocol.v
 ├── providers/                     # Provider-specific protocols and install guides
 │   ├── claude-code/
 │   │   ├── protocol.md            # Main protocol doctors copy to .claude/
-│   │   └── install.md             # Claude Code install guide
+│   │   ├── install.md             # Claude Code install guide
+│   │   └── workflows/             # Claude Code workflow docs fetched at runtime
 │   └── v0/
 │       ├── protocol.md            # v0 protocol (stub — coming soon)
-│       └── README.md              # v0 integration notes
+│       ├── README.md              # v0 integration notes
+│       └── workflows/             # v0-specific workflow docs
 ├── components/                    # React component source (TSX)
 │   ├── manifest.json              # Component registry with props/data-flow docs
 │   ├── COMPOSITION.md             # Usage patterns for combining components
@@ -44,7 +46,6 @@ public/medical-protocol/           # CDN deliverable (https://medical-protocol.v
 │   ├── telemonitoring/            # Pulse oximetry animation
 │   ├── clinical-notes/            # Encounter note editor with highlighting
 │   └── cardiology/                # ASCVD, HEART Score, CHA₂DS₂-VASc calculators
-└── workflows/                     # Doctor-facing workflow docs fetched at runtime
 
 plugin/                            # Claude plugin definition
 ├── .claude-plugin/plugin.json     # Plugin manifest

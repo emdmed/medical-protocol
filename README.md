@@ -15,9 +15,10 @@ This repo serves static files via Vercel that Claude Code fetches at runtime. Do
 
 ## Structure
 
-- `public/medical-protocol/protocol.md` — Main protocol (copy to `.claude/`)
-- `public/medical-protocol/workflows/` — Workflow definitions fetched by Claude at runtime
-- `public/medical-protocol/components/` — Component source code fetched by Claude at runtime
+- `public/medical-protocol/providers/` — Provider-specific protocols, install guides, and workflows
+  - `claude-code/` — Claude Code provider (protocol.md, install.md, workflows/)
+  - `v0/` — v0 by Vercel provider (protocol.md, install.md, workflows/)
+- `public/medical-protocol/components/` — Component source code fetched by providers at runtime
 
 ## Deployment
 

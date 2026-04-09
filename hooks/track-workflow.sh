@@ -19,7 +19,7 @@ if [ "$TOOL_NAME" = "WebFetch" ]; then
   FETCH_URL=$(echo "$INPUT" | jq -r '.tool_input.url // ""' 2>/dev/null) || FETCH_URL=""
 
   # Workflow file fetched from CDN → mark workflow as active
-  if echo "$FETCH_URL" | grep -qE 'medical-protocol\.vercel\.app.*workflows/.*\.md'; then
+  if echo "$FETCH_URL" | grep -qE 'medical-protocol\.vercel\.app.*providers/.*/workflows/.*\.md'; then
     mkdir -p "$STATE_DIR"
     touch "$STATE_DIR/.workflow_active"
   fi
