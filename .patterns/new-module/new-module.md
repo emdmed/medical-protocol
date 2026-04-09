@@ -9,6 +9,8 @@ When creating a new clinical domain/module, **all four** of these must be comple
 
 **If any step is skipped, the module exists in code but Claude Code cannot find or install it.** Step 4 is the most commonly missed — without it, the protocol has no signal words to match and will never route to the module.
 
+> **Adding a new provider** (not a module)? That's a different checklist: create the provider directory under `public/medical-protocol/providers/{provider}/`, add its `protocol.md` and `install.md`, then register it in `public/medical-protocol/providers/manifest.json`.
+
 ## Why Each Step Matters
 
 | Step | What breaks without it |

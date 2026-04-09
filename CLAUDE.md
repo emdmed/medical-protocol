@@ -25,6 +25,7 @@ No linter configured. TypeScript strict mode only (`tsconfig.json`).
 ```
 public/medical-protocol/           # CDN deliverable (https://medical-protocol.vercel.app/medical-protocol/)
 ├── providers/                     # Provider-specific protocols and install guides
+│   ├── manifest.json              # Provider registry (name, status, install paths)
 │   ├── claude-code/
 │   │   ├── protocol.md            # Main protocol doctors copy to .claude/
 │   │   ├── install.md             # Claude Code install guide

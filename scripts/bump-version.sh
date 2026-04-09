@@ -68,10 +68,13 @@ update_json "$ROOT/public/medical-protocol/components/manifest.json" "
   }
 "
 
-# --- 3. packages/medprotocol/package.json ---
+# --- 3. providers/manifest.json ---
+update_json "$ROOT/public/medical-protocol/providers/manifest.json" "obj.version = '$VERSION';"
+
+# --- 4. packages/medprotocol/package.json ---
 update_json "$ROOT/packages/medprotocol/package.json" "obj.version = '$VERSION';"
 
-# --- 4. plugin.json ---
+# --- 5. plugin.json ---
 update_json "$ROOT/plugin/.claude-plugin/plugin.json" "obj.version = '$VERSION';"
 
 echo ""
