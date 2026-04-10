@@ -91,6 +91,28 @@
         linear-gradient(to right, var(--bg) 0%, transparent 30%, transparent 70%, var(--bg) 100%);
     }
 
+    /* ─── Nav ─── */
+    .nav-wrap {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.20);
+      background: rgba(9,9,11,0.90); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    }
+    .nav {
+      max-width: 1024px; margin: 0 auto; padding: 0 24px;
+      display: flex; justify-content: space-between; align-items: center; height: 64px;
+    }
+    .nav__brand {
+      font-family: var(--font-display); font-weight: 600; font-size: 22px;
+      color: var(--text); text-decoration: none;
+    }
+    .nav__links { display: flex; gap: 12px; align-items: center; }
+    .nav__link {
+      color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 400;
+      padding: 8px 16px; border-radius: 4px; border: 1px solid var(--card-border);
+      transition: all 0.2s;
+    }
+    .nav__link:hover { color: var(--text); border-color: var(--text-muted); }
+
     /* ─── Hero (full viewport) ─── */
     .hero {
       height: 100vh; display: flex; align-items: flex-end;
@@ -147,6 +169,8 @@
 
     /* ─── Responsive ─── */
     @media (max-width: 768px) {
+      .nav__links { gap: 8px; }
+      .nav__link { font-size: 12px; padding: 6px 10px; }
       .hero { padding: 0 16px 48px; }
       .hero h1 { font-size: clamp(28px, 8vw, 40px); }
       .hero__bottom { flex-direction: column; align-items: flex-start; gap: 24px; }
@@ -182,6 +206,18 @@
       <img src="/hero-engineers.jpg" alt="" loading="eager">
     </div>
     <div class="hero-bg__seam"></div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav-wrap">
+    <nav class="nav">
+      <a href="/" class="nav__brand">Medical Protocol</a>
+      <div class="nav__links">
+        <a href="/doctors" class="nav__link">For doctors</a>
+        <a href="/engineers" class="nav__link">For engineers</a>
+        <a href="/protocol-hub" class="nav__link">Protocol hub</a>
+      </div>
+    </nav>
   </div>
 
   <!-- Hero -->
