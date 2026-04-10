@@ -1088,20 +1088,6 @@
         <p class="section-desc" data-i18n="onboard.desc">You'll need Node.js 18+ and a Claude Code subscription. Takes about 3 minutes.</p>
       </div>
 
-      <!-- Provider selector -->
-      <div class="reveal reveal-d1">
-        <div class="provider-tabs">
-          <button class="provider-tab active" onclick="switchProvider('claude-code')" data-provider="claude-code">
-            Claude Code
-            <span class="provider-tab__badge provider-tab__badge--active">Active</span>
-          </button>
-          <button class="provider-tab" onclick="switchProvider('v0')" data-provider="v0">
-            v0 by Vercel
-            <span class="provider-tab__badge provider-tab__badge--active">Active</span>
-          </button>
-        </div>
-      </div>
-
       <!-- Claude Code provider panel -->
       <div class="provider-panel active" id="provider-claude-code">
 
@@ -1272,64 +1258,6 @@
 
       </div><!-- /provider-claude-code -->
 
-      <!-- v0 provider panel -->
-      <div class="provider-panel" id="provider-v0">
-
-      <!-- Prerequisite -->
-      <div class="onboard-prereq reveal reveal-d1">
-        <div class="onboard-prereq__icon">
-          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <div class="onboard-prereq__text">
-          <h3 data-i18n="onboard.v0PrereqTitle">Before you start</h3>
-          <p data-i18n="onboard.v0PrereqDesc">You need a <a href="https://v0.dev">v0 by Vercel</a> account. v0 builds interfaces from descriptions and deploys them instantly. The medical components are free.</p>
-        </div>
-      </div>
-
-      <!-- Steps -->
-      <div class="reveal reveal-d2" style="display:flex;flex-direction:column;gap:16px">
-        <div class="platform-panel active" style="display:block">
-          <div class="platform-step">
-            <span class="platform-step__num">1</span>
-            <div class="platform-step__content">
-              <div class="platform-step__title" data-i18n="step.v0Open">Open v0.dev</div>
-              <div class="platform-step__desc" data-i18n="step.v0OpenDesc">Go to <a href="https://v0.dev" style="color:var(--accent);border-bottom:1px solid var(--accent);text-decoration:none">v0.dev</a> in your browser and start a new chat.</div>
-            </div>
-          </div>
-          <div class="platform-step">
-            <span class="platform-step__num">2</span>
-            <div class="platform-step__content">
-              <div class="platform-step__title" data-i18n="step.v0Describe">Describe your application</div>
-              <div class="platform-step__desc" data-i18n="step.v0DescribeDesc">Paste the command below into v0's chat, followed by what you want &mdash; "I need a vital signs monitor" or "build me a DKA monitoring dashboard."</div>
-            </div>
-          </div>
-          <div class="platform-step">
-            <span class="platform-step__num">3</span>
-            <div class="platform-step__content">
-              <div class="platform-step__title" data-i18n="step.v0Deploy">Preview and deploy</div>
-              <div class="platform-step__desc" data-i18n="step.v0DeployDesc">v0 shows a live preview. When it looks right, deploy with one click &mdash; you get a URL you can open on any device. Data stays in your browser.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Install command -->
-      <div class="onboard-command reveal reveal-d3">
-        <p class="onboard-command__label" data-i18n="onboard.v0CmdLabel">Start your v0 message with this</p>
-        <div class="cta-terminal-card" onclick="copyV0Command(this)">
-          <div class="cta-terminal-card__bar">
-            <span class="cta-terminal-card__dot"></span>
-            <span class="cta-terminal-card__dot"></span>
-            <span class="cta-terminal-card__dot"></span>
-          </div>
-          <p class="cta-terminal-card__cmd">Read the medical protocol at https://medical-protocol.vercel.app/medical-protocol/providers/v0/protocol.md &mdash; it has pre-built clinical components in a registry. Install and use them as-is, never rebuild them from scratch.</p>
-          <button class="copy-btn" aria-label="Copy command">
-            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          </button>
-        </div>
-      </div>
-
-      </div><!-- /provider-v0 -->
 
     </div>
   </section>
@@ -1484,15 +1412,6 @@
         'step.pasteCmdDesc': 'Once Claude is running and you see a text prompt, paste the command from the box below. Claude takes over from here.',
         'onboard.cmdLabel': 'Copy this command and paste it into Claude Code',
         'copy.ariaLabel': 'Copy command',
-        'onboard.v0PrereqTitle': 'Before you start',
-        'onboard.v0PrereqDesc': 'You need a <a href="https://v0.dev">v0 by Vercel</a> account. v0 builds interfaces from descriptions and deploys them instantly. The medical components are free.',
-        'step.v0Open': 'Open v0.dev',
-        'step.v0OpenDesc': 'Go to <a href="https://v0.dev" style="color:var(--accent);border-bottom:1px solid var(--accent);text-decoration:none">v0.dev</a> in your browser and start a new chat.',
-        'step.v0Describe': 'Describe your application',
-        'step.v0DescribeDesc': 'Paste the command below into v0\'s chat, followed by what you want &mdash; "I need a vital signs monitor" or "build me a DKA monitoring dashboard."',
-        'step.v0Deploy': 'Preview and deploy',
-        'step.v0DeployDesc': 'v0 shows a live preview. When it looks right, deploy with one click &mdash; you get a URL you can open on any device. Data stays in your browser.',
-        'onboard.v0CmdLabel': 'Start your v0 message with this',
         'expect.title': 'What happens after you paste the command',
         'expect.step1Title': 'Agent loads the protocol',
         'expect.step1Desc': 'Claude downloads validated components, the medprotocol CLI, privacy hooks, and QA pipeline. Your project is configured with clinical infrastructure in ~30 seconds.',
@@ -1630,15 +1549,6 @@
         'step.pasteCmdDesc': 'Una vez que Claude esté ejecutándose y vea un campo de texto, pegue el comando del recuadro de abajo. Claude se encarga del resto.',
         'onboard.cmdLabel': 'Copie este comando y péguelo en Claude Code',
         'copy.ariaLabel': 'Copiar comando',
-        'onboard.v0PrereqTitle': 'Antes de comenzar',
-        'onboard.v0PrereqDesc': 'Necesita una cuenta en <a href="https://v0.dev">v0 de Vercel</a>. v0 construye interfaces a partir de descripciones y las despliega al instante. Los componentes médicos son gratuitos.',
-        'step.v0Open': 'Abra v0.dev',
-        'step.v0OpenDesc': 'Vaya a <a href="https://v0.dev" style="color:var(--accent);border-bottom:1px solid var(--accent);text-decoration:none">v0.dev</a> en su navegador y comience un nuevo chat.',
-        'step.v0Describe': 'Describa lo que necesita',
-        'step.v0DescribeDesc': 'Pegue el comando de abajo en el chat de v0, seguido de lo que quiere &mdash; "Necesito un monitor de signos vitales" o "constrúyame un tablero de monitoreo de CAD."',
-        'step.v0Deploy': 'Vista previa y despliegue',
-        'step.v0DeployDesc': 'v0 muestra una vista previa en vivo. Cuando se vea bien, despliegue con un clic &mdash; obtiene una URL que puede abrir en cualquier dispositivo. Los datos quedan en su navegador.',
-        'onboard.v0CmdLabel': 'Comience su mensaje en v0 con esto',
         'expect.title': 'Qué sucede después de pegar el comando',
         'expect.step1Title': 'El agente carga el protocolo',
         'expect.step1Desc': 'Claude descarga componentes validados, el CLI medprotocol, hooks de privacidad y pipeline de QA. Su proyecto se configura con infraestructura clínica en ~30 segundos.',
@@ -1741,31 +1651,8 @@
       });
     }
 
-    // Copy v0 command
-    function copyV0Command(el) {
-      var cmd = 'Read the medical protocol at https://medical-protocol.vercel.app/medical-protocol/providers/v0/protocol.md — it has pre-built clinical components in a registry. Install and use them as-is, never rebuild them from scratch.';
-      navigator.clipboard.writeText(cmd).then(function() {
-        var btn = el.querySelector('.copy-btn');
-        if (!btn) return;
-        btn.classList.add('copy-btn--copied');
-        btn.querySelector('svg').innerHTML = '<polyline points="20 6 9 17 4 12"/>';
-        setTimeout(function() {
-          btn.classList.remove('copy-btn--copied');
-          btn.querySelector('svg').innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>';
-        }, 2000);
-      });
-    }
 
     // Provider tabs
-    function switchProvider(provider) {
-      document.querySelectorAll('.provider-tab').forEach(function(tab) {
-        tab.classList.toggle('active', tab.dataset.provider === provider);
-      });
-      document.querySelectorAll('.provider-panel').forEach(function(panel) {
-        panel.classList.toggle('active', panel.id === 'provider-' + provider);
-      });
-    }
-
     // Platform tabs
     function switchPlatform(platform) {
       document.querySelectorAll('.platform-tab').forEach(function(tab) {
