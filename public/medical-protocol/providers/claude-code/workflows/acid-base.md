@@ -18,7 +18,7 @@ Do NOT ask about technical integrations, display preferences, or which formulas 
 
 ## Phase 2: Fetch & Install
 
-Follow the **Component Fetching Process** from the main protocol for the `acid-base` component.
+Follow the **Component Installation Process** from the main protocol for the `acid-base` component.
 
 ---
 

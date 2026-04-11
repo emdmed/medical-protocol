@@ -15,8 +15,6 @@ When the doctor's request is vague or general (e.g., "I need something to track 
    | Fluid balance | Intake/output tracking with insensible loss |
    | PaFi calculator | PaO2/FiO2 ratio with ARDS classification |
    | DKA monitoring | Hourly glucose, ketones, potassium, insulin, GCS tracking |
-   | Pulse oximetry | Real-time animated SpO2/BPM display |
-   | Clinical timeline | Day-by-day hospitalization course with event details |
    | **Dashboard** | Combine any of the above into one view |
 
    Default: vital signs + clinical notes (as a dashboard)

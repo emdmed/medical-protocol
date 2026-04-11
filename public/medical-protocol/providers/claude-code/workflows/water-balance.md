@@ -16,7 +16,7 @@ Do NOT ask about calculation formulas, display preferences, or technical prefere
 
 ## Phase 2: Fetch & Install
 
-Follow the **Component Fetching Process** from the main protocol for the `water-balance` component.
+Follow the **Component Installation Process** from the main protocol for the `water-balance` component.
 
 ---
 

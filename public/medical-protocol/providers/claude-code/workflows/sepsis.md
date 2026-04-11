@@ -20,7 +20,7 @@ Do NOT ask about SOFA scoring thresholds, Sepsis-3 criteria, vasopressor dose cu
 
 ## Phase 2: Fetch & Install
 
-Follow the **Component Fetching Process** from the main protocol for the `sepsis` component.
+Follow the **Component Installation Process** from the main protocol for the `sepsis` component.
 
 **Clinical logic library:** The sepsis component imports calculation functions from `lib/sepsis`. Create in the project:
 - `calculateRespirationSOFA(paO2, fiO2, onVentilation)` — PaO2/FiO2 ratio → 0-4

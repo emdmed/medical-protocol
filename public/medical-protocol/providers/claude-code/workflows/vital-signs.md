@@ -23,7 +23,7 @@ Ask the doctor which vital signs they need to monitor:
 
 ## Phase 2: Fetch & Install
 
-Follow the **Component Fetching Process** from the main protocol for the `vital-signs` component.
+Follow the **Component Installation Process** from the main protocol for the `vital-signs` component.
 
 ---
 

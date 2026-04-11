@@ -69,14 +69,13 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
 # Do component directories exist?
 ls components/ 2>/dev/null
 
-# Can we reach the CDN?
-curl -s -o /dev/null -w "%{http_code}" https://medical-protocol.vercel.app/medical-protocol/components/manifest.json
+# Is the medical-ui CLI available?
+npx medical-ui --help 2>/dev/null
 
 # TypeScript compiles cleanly?
 npx tsc --noEmit 2>&1 | head -20
 ```
 
-- **CDN unreachable** → Category: `component-cdn`
 - **No components installed** → Category: `component-missing`
 - **TypeScript errors** → Category: `component-typescript`
 
@@ -149,8 +148,7 @@ For each detected category, attempt the fix silently. Do not describe the fix to
 
 | Category | Auto-Fix |
 |---|---|
-| `component-cdn` | Cannot auto-fix (network issue). Go to Phase 3. |
-| `component-missing` | Re-run the appropriate workflow to fetch and install components. Ask the doctor what they were trying to build if unclear. |
+| `component-missing` | Re-run the appropriate workflow to install components with `npx medical-ui add <component>`. Ask the doctor what they were trying to build if unclear. |
 | `component-typescript` | Read the TypeScript errors, fix them silently. Common fixes: missing imports, type mismatches from shadcn version differences, missing shadcn components (`npx shadcn@latest add {missing}`). |
 
 ### Browser Issues
@@ -165,7 +163,7 @@ For each detected category, attempt the fix silently. Do not describe the fix to
 
 | Category | Auto-Fix |
 |---|---|
-| `data-no-storage` | Add localStorage persistence to the components following the patterns in the CDN reference components. |
+| `data-no-storage` | Add localStorage persistence to the components following the patterns in the installed component code. |
 | `data-quota` | Cannot fully auto-fix. Clear old/unused localStorage keys if safe. Go to Phase 3 if quota is genuinely full. |
 | `data-cleared` | Cannot auto-fix (data is gone). Go to Phase 3. |
 
@@ -207,7 +205,6 @@ If auto-fix fails, explain the problem in plain language based on the category:
 
 | Category | What to Tell the Doctor |
 |---|---|
-| `component-cdn` | "I can't download the components because your internet connection seems to be down. Please check your Wi-Fi or network cable and try again." |
 | `component-missing` | "The clinical tools aren't installed yet. Tell me what you need (e.g., vital signs monitor, patient records) and I'll set it up." |
 | `component-typescript` | "There was a technical issue with the interface code. I've fixed it — your system should work normally now." |
 

@@ -230,16 +230,6 @@ agent-browser snapshot -i
    agent-browser screenshot .qa-screenshots/calculator-results-$(date +%s).png
    ```
 
-### Telemonitoring
-
-1. **Display renders with data:** Take a snapshot and verify monitoring display elements are present
-2. **Connection status:** Check for connection indicator elements in the accessibility tree
-
-### Timeline
-
-1. **Events display:** Take a snapshot and verify timeline entries/events are present in the tree
-2. **Proper ordering:** If multiple events exist, verify they appear in chronological order (dates descending or ascending consistently)
-
 ---
 
 ## Error Handling

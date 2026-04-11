@@ -1,12 +1,10 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## What This Is
 
-CDN-hosted medical protocol system for Claude Code. Serves static files via Vercel that Claude Code fetches at runtime. Doctors copy `protocol.md` into `.claude/`, describe clinical needs in plain language, and Claude Code builds everything — no coding required.
+CDN-hosted medical protocol system for Claude Code. Components in `public/` are served as static assets via Vercel — no build step. Doctors copy `protocol.md` into `.claude/`, describe clinical needs, and Claude Code builds everything.
 
-**Not a typical web app.** Components live in `public/` (served as static assets via CDN), not in a `src/` directory. There's no build step for production — Vercel serves files directly from `public/`.
+**Component delivery:** `npx medical-ui add <component>` (CLI at `/home/enrique/projects/medicalui-cli`) copies component files into doctor projects and installs shadcn deps — same model as shadcn/ui. This repo hosts the source files the CLI pulls from.
 
 ## Commands
 
@@ -15,77 +13,66 @@ npm test                              # Run all ~246 unit tests (Vitest)
 npm run test:watch                    # Watch mode
 npx vitest run tests/vital-signs/     # Run a single test directory
 npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
-npm run version:bump 0.4.0            # Bump version in package.json, manifest.json, plugin.json
+npm run version:bump 0.4.0            # Bump version across 5 files
+npm run registry:generate             # Regenerate public/medical-protocol/r/*.json
+npm run build                         # Build medprotocol CLI
+npx medprotocol <cmd> [opts]          # CLI calculators (bmi, abg, vitals, pafi, dka, water-balance, cardiology)
 ```
 
-No linter configured. TypeScript strict mode only (`tsconfig.json`).
+No linter. TypeScript strict mode (`tsconfig.json`).
 
 ## Architecture
 
 ```
-public/medical-protocol/           # CDN deliverable (https://medical-protocol.vercel.app/medical-protocol/)
-├── providers/                     # Provider-specific protocols and install guides
-│   ├── manifest.json              # Provider registry (name, status, install paths)
-│   ├── claude-code/
-│   │   ├── protocol.md            # Main protocol doctors copy to .claude/
-│   │   ├── install.md             # Claude Code install guide
-│   │   └── workflows/             # Claude Code workflow docs fetched at runtime
-│   └── v0/
-│       ├── protocol.md            # v0 protocol (stub — coming soon)
-│       ├── README.md              # v0 integration notes
-│       └── workflows/             # v0-specific workflow docs
-├── components/                    # React component source (TSX)
-│   ├── manifest.json              # Component registry with props/data-flow docs
-│   ├── COMPOSITION.md             # Usage patterns for combining components
-│   ├── vital-signs/               # BP, HR, RR, Temp, SpO2, FiO2
-│   ├── acid-base/                 # ABG analyzer
-│   ├── bmi/                       # BMI calculator
-│   ├── water-balance/             # Fluid intake/output tracker
-│   ├── pafi/                      # PaO2/FiO2 ratio with ARDS classification
-│   ├── dka/                       # DKA monitoring (glucose, ketones, K+, GCS)
-│   ├── timeline/                  # Clinical timeline with popovers
-│   ├── telemonitoring/            # Pulse oximetry animation
-│   ├── clinical-notes/            # Encounter note editor with highlighting
-│   └── cardiology/                # ASCVD, HEART Score, CHA₂DS₂-VASc calculators
-
-plugin/                            # Claude plugin definition
-├── .claude-plugin/plugin.json     # Plugin manifest
-├── settings.json                  # Permission whitelist (blocks git push, npm publish)
-├── hooks/                         # Pre/post-tool hooks (privacy guard, QA reminder)
-├── skills/                        # Medical workflow skills (start, vitals, clinical-notes, etc.)
-└── context/                       # Plugin context files
-
-tests/                             # Vitest unit tests for clinical logic
-├── __mocks__/                     # Mocks for shadcn UI, hooks, lucide-react
-└── [component]/                   # Test files per component
+public/medical-protocol/
+├── providers/                     # Provider protocols + install guides
+│   ├── manifest.json              # Provider registry
+│   ├── claude-code/               # protocol.md, install.md, 16 workflows/
+│   └── v0/                        # v0 protocol (stub, 13 workflows)
+├── components/                    # React TSX source (CDN-served, CLI-installed)
+│   ├── manifest.json              # Component registry (canonical)
+│   └── {module}/                  # 12 modules (see below)
+├── r/                             # shadcn-compatible registry JSONs (generated)
+lib/                               # Shared calculation logic (used by components + CLI)
+├── acid-base/ bmi.ts cardiology.ts dka.ts pafi.ts sepsis.ts water-balance.ts
+packages/medprotocol/              # CLI calculator tool (7 commands)
+plugin/                            # Claude plugin: settings.json, hooks/, skills/ (17), context/ (13)
+tests/                             # Vitest — 18 test files, clinical logic only, no UI rendering
+scripts/                           # bump-version.sh, generate-registry.mjs
+hooks/                             # Git hooks: privacy-guard, qa-reminder, track-workflow, validate-fetch
+.patterns/                         # Reusable guides: new-module checklist, medprotocol CLI
 ```
 
-## Testing
+### Component Modules (12)
 
-Tests cover **clinical logic only** (validations, calculations, classifications) — not UI rendering. Vitest aliases mock out shadcn/ui components, hooks, and lucide-react icons so tests run without React DOM.
+| Module | Key Files | Data Flow |
+|--------|-----------|-----------|
+| vital-signs | Main + 5 sign inputs, edit, alert, FHIR, hooks, validations | Bidirectional (data + onData) |
+| sepsis | sepsis-monitor.tsx (829 lines, SOFA/qSOFA/hour-1 bundle) | Bidirectional |
+| dka | dka-monitor.tsx (ABG integration) | Bidirectional |
+| acid-base | acid-base.tsx, analyze.ts, popup.tsx | Output only (onData) |
+| bmi | bmi-calculator.tsx (imperial/metric) | Self-contained |
+| water-balance | water-balance.tsx (intake/output tracker) | Input only (data) |
+| pafi | pafi-calculator.tsx (PaO2/FiO2, ARDS) | Self-contained |
+| cardiology | Tabs: ASCVD, HEART, CHA₂DS₂-VASc | Self-contained |
+| clinical-notes | Editor orchestrator, patient details, clock, prev-evolutions, references | Self-contained |
+| timeline | Scrollable clinical events with popovers | Input only |
+| telemonitoring | pulse-oximetry.tsx + simulator | Input only |
+| shared | medical-disclaimer.tsx, layout-disclaimer.tsx, error-boundary.tsx | — |
 
-Test pattern: `tests/**/*.test.ts`
+## Key Details
 
-## Key Technical Details
+- **Target stack:** React 19, Next.js (app router), shadcn/ui v4+, Tailwind, TypeScript
+- **No production deps** — devDependencies only (typescript, vitest)
+- **CDN:** 1h cache, CORS `*` (`vercel.json`)
+- **Component docs:** JSDoc headers in TSX + `manifest.json` as canonical registry
+- **Testing:** Logic-only via Vitest; UI QA via agent-browser (workflows/agent-qa.md)
+- **Plugin:** 17 skills with SKILL.md + reference docs, 4 hooks (privacy, QA, workflow tracking, fetch validation), 13 context files
+- **Version:** 0.4.0 (synced across package.json, both manifests, medprotocol/package.json, plugin.json)
 
-- **Target stack for generated projects:** React 19, Next.js (app router), shadcn/ui v4+, Tailwind CSS, TypeScript
-- **No production dependencies** — devDependencies only (typescript, vitest)
-- **CDN caching:** 1 hour (3600s) with CORS `*` (configured in `vercel.json`)
-- **Component docs:** Each TSX file has a JSDoc header with props, data flow, and popup positioning info. The `manifest.json` is the canonical component registry.
+## Patterns
 
-## Patterns to Follow
-
-**shadcn Card + absolute positioning:** Default Card uses `overflow-hidden`. When a Card contains absolutely-positioned popups or overlays, add `overflow-visible` to its className (and any parent Cards wrapping it).
-
-**Popup positioning conventions:**
-- Edit popups: `absolute bottom-10` (above inputs)
-- Alert badges: `absolute bottom-[-22px]` (below inputs)
-- Analysis overlays: `absolute top-12 z-50` (below source card)
-- Calculator results (AcidBase): inline flow below inputs — no absolute positioning
-- Timeline/Clinical Notes use portal-based shadcn components (Popover, AlertDialog, Drawer) — no overflow fix needed.
-
-**Result overlap prevention:** Calculator result badges must render **below** inputs using inline flow. Never use `absolute bottom-*` to position results above inputs — this overlaps the component title.
-
-**Parent-child data flow:** Components receive data via props and report changes via callbacks. Use `useRef` to track previous values and skip no-op updates to avoid circular render loops.
-
-**Adding a new module:** Follow the 4-step checklist in [`.patterns/new-module/new-module.md`](.patterns/new-module/new-module.md). Skipping any step makes the module invisible at runtime.
+- **Card + absolute popups:** Add `overflow-visible` to Card className (default clips). Applies to parent Cards too.
+- **Popup positions:** Edit: `absolute bottom-10`; Alerts: `absolute bottom-[-22px]`; Overlays: `absolute top-12 z-50`; Calculator results: inline flow only (never `absolute bottom-*`). Portal-based components (Popover, AlertDialog, Drawer) need no fix.
+- **Parent-child data:** Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.
+- **New module:** 4 steps in [`.patterns/new-module/new-module.md`](.patterns/new-module/new-module.md) — skip any and it's invisible at runtime.

@@ -16,9 +16,13 @@ Do NOT ask about database setup, authentication, layout, or technical integratio
 
 ## Phase 2: Fetch & Install
 
-Follow the **Component Fetching Process** from the main protocol for the `clinical-notes` component.
+Follow the **Component Installation Process** from the main protocol for the `clinical-notes` component:
 
-**External components:** Check `externalComponents` in the manifest — some (water-balance, acid-base, bmi) are available as their own manifest entries on the CDN. Fetch those. For remaining external imports not on the CDN (e.g., textarea-inv), create simplified versions or replace.
+```bash
+npx medical-ui add clinical-notes
+```
+
+**External components:** Some dependencies (water-balance, acid-base, bmi) are available as their own CLI components — install them with `npx medical-ui add <component>`. For remaining external imports not in the CLI (e.g., textarea-inv), create simplified versions or replace.
 
 **Composition guide:** Since clinical-notes embeds multiple sub-components, fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns and known gotchas.
 

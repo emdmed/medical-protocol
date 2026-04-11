@@ -15,7 +15,7 @@ Do NOT ask about BMI formula details, display preferences, or technical preferen
 
 ## Phase 2: Fetch & Install
 
-Follow the **Component Fetching Process** from the main protocol for the `bmi` component.
+Follow the **Component Installation Process** from the main protocol for the `bmi` component.
 
 ---
 

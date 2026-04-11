@@ -6,15 +6,13 @@ Present the available building blocks by category and ask which they'd like:
 
 - "Which of these blocks would you like on your dashboard?"
 
-  **Monitoring** — Vital signs (BP, HR, RR, Temp, SpO2) · Pulse oximetry (real-time animated display)
+  **Monitoring** — Vital signs (BP, HR, RR, Temp, SpO2)
 
   **Calculators** — Blood gas / acid-base analyzer · BMI calculator · Fluid balance (water balance / I&O) · PaFi calculator (PaO2/FiO2 ratio with ARDS classification)
 
   **Critical Care** — DKA monitoring (hourly glucose, ketones, potassium, insulin, GCS tracking)
 
   **Documentation** — Clinical notes (encounter note editor)
-
-  **Display** — Clinical timeline (hospitalization course)
 
   Default: vital signs + clinical notes
 
@@ -30,9 +28,9 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 
 ## Phase 2: Fetch & Install
 
-For each block the doctor selected, follow the **Component Fetching Process** from the main protocol. Available manifest entries: `vital-signs`, `clinical-notes`, `acid-base`, `bmi`, `water-balance`, `telemonitoring`, `timeline`, `pafi`, `dka`.
+For each block the doctor selected, follow the **Component Installation Process** from the main protocol. Install each component with `npx medical-ui add <component>`. Available components: `vital-signs`, `clinical-notes`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`.
 
-Check `externalComponents` for each manifest entry — some external imports are available as their own manifest entries. Fetch those from the CDN.
+Check if any installed component has dependencies on other components — if so, install those too with `npx medical-ui add`.
 
 Fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards).
 

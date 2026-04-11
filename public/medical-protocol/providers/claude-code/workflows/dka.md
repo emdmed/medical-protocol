@@ -19,9 +19,17 @@ Do NOT ask about clinical thresholds, resolution criteria, insulin adjustment fo
 
 ## Phase 2: Fetch & Install
 
-Follow the **Component Fetching Process** from the main protocol for the `dka` component.
+Follow the **Component Installation Process** from the main protocol for the `dka` component:
 
-**Acid-base dependency:** Also fetch the `acid-base` component from the manifest — DKA uses it for blood gas analysis on every reading. Files needed: `analyze.ts`, `components/popup.tsx`, `utils/safeFloat.ts`, `types/interfaces.ts`.
+```bash
+npx medical-ui add dka
+```
+
+**Acid-base dependency:** Also install the `acid-base` component — DKA uses it for blood gas analysis on every reading:
+
+```bash
+npx medical-ui add acid-base
+```
 
 **Clinical logic library:** The DKA component imports calculation functions from `lib/dka`. Create in the project:
 - `calculateGlucoseReductionRate(current, previous, hours)` — rate of glucose drop per hour

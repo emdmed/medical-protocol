@@ -16,7 +16,7 @@ Do NOT ask about ARDS classification thresholds, display preferences, or technic
 
 ## Phase 2: Fetch & Install
 
-Follow the **Component Fetching Process** from the main protocol for the `pafi` component.
+Follow the **Component Installation Process** from the main protocol for the `pafi` component.
 
 **Clinical logic library:** The PaFi component imports calculation functions from `lib/pafi`. Create in the project:
 - `calculatePaFi(paO2, fiO2)` — PaO2 / (FiO2 / 100), returns rounded number or null
