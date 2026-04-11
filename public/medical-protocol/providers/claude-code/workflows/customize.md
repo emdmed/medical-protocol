@@ -30,7 +30,7 @@ Silently determine which files need to change:
 1. **Read the existing project structure** — check what components are already installed
 2. **Read the JSDoc header** at the top of each component's main TSX file to understand its props, usage, data flow, and integration points before making changes
 
-3. **If the doctor requests a component that isn't installed yet**, install it with `npx medical-ui add <component>`
+3. **If the doctor requests a component that isn't installed yet**, install it with `npx medical-ui-cli add <component>`
 
 4. **If the project has multiple components wired together** (e.g., a dashboard, or clinical-notes with embedded calculators), fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards) before making changes
 

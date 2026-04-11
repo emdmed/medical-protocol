@@ -22,13 +22,13 @@ Do NOT ask about clinical thresholds, resolution criteria, insulin adjustment fo
 Follow the **Component Installation Process** from the main protocol for the `dka` component:
 
 ```bash
-npx medical-ui add dka
+npx medical-ui-cli add dka
 ```
 
 **Acid-base dependency:** Also install the `acid-base` component — DKA uses it for blood gas analysis on every reading:
 
 ```bash
-npx medical-ui add acid-base
+npx medical-ui-cli add acid-base
 ```
 
 **Clinical logic library:** The DKA component imports calculation functions from `lib/dka`. Create in the project:

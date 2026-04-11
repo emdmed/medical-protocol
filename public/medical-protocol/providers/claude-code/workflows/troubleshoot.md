@@ -70,7 +70,7 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
 ls components/ 2>/dev/null
 
 # Is the medical-ui CLI available?
-npx medical-ui --help 2>/dev/null
+npx medical-ui-cli --help 2>/dev/null
 
 # TypeScript compiles cleanly?
 npx tsc --noEmit 2>&1 | head -20
@@ -148,7 +148,7 @@ For each detected category, attempt the fix silently. Do not describe the fix to
 
 | Category | Auto-Fix |
 |---|---|
-| `component-missing` | Re-run the appropriate workflow to install components with `npx medical-ui add <component>`. Ask the doctor what they were trying to build if unclear. |
+| `component-missing` | Re-run the appropriate workflow to install components with `npx medical-ui-cli add <component>`. Ask the doctor what they were trying to build if unclear. |
 | `component-typescript` | Read the TypeScript errors, fix them silently. Common fixes: missing imports, type mismatches from shadcn version differences, missing shadcn components (`npx shadcn@latest add {missing}`). |
 
 ### Browser Issues

@@ -28,9 +28,9 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 
 ## Phase 2: Fetch & Install
 
-For each block the doctor selected, follow the **Component Installation Process** from the main protocol. Install each component with `npx medical-ui add <component>`. Available components: `vital-signs`, `clinical-notes`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`.
+For each block the doctor selected, follow the **Component Installation Process** from the main protocol. Install each component with `npx medical-ui-cli add <component>`. Available components: `vital-signs`, `clinical-notes`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`.
 
-Check if any installed component has dependencies on other components — if so, install those too with `npx medical-ui add`.
+Check if any installed component has dependencies on other components — if so, install those too with `npx medical-ui-cli add`.
 
 Fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards).
 

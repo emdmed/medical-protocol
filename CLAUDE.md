@@ -4,7 +4,7 @@
 
 CDN-hosted medical protocol system for Claude Code. Components in `public/` are served as static assets via Vercel — no build step. Doctors copy `protocol.md` into `.claude/`, describe clinical needs, and Claude Code builds everything.
 
-**Component delivery:** `npx medical-ui add <component>` (CLI at `/home/enrique/projects/medicalui-cli`) copies component files into doctor projects and installs shadcn deps — same model as shadcn/ui. This repo hosts the source files the CLI pulls from.
+**Component delivery:** `npx medical-ui-cli add <component>` (CLI at `/home/enrique/projects/medicalui-cli`) copies component files into doctor projects and installs shadcn deps — same model as shadcn/ui. This repo hosts the source files the CLI pulls from.
 
 ## Commands
 
