@@ -15,6 +15,7 @@ Commands:
   dka              Assess DKA parameters and resolution
   cardiology       Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
   sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)
+  ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
 
 Global options:
   --json           Output as JSON (available on all commands)
@@ -33,7 +34,11 @@ Examples:
   medprotocol cardiology chadsvasc --hypertension --age75 --diabetes
   medprotocol sepsis sofa --pao2 80 --fio2 40 --platelets 90 --gcs 13
   medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13
-  medprotocol sepsis lactate --initial 4.2 --repeat 2.1`;
+  medprotocol sepsis lactate --initial 4.2 --repeat 2.1
+  medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male
+  medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 45
+  medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300
+  medprotocol ckd treatment --egfr 35 --acr 300 --diabetes`;
 
 const command = process.argv[2];
 const commandArgs = process.argv.slice(3);
@@ -57,6 +62,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   dka: () => import("./commands/dka"),
   cardiology: () => import("./commands/cardiology"),
   sepsis: () => import("./commands/sepsis"),
+  ckd: () => import("./commands/ckd"),
 };
 
 const loader = commands[command];

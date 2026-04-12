@@ -169,6 +169,12 @@ When the doctor describes what they need, classify into one of these domains bas
 |---|---|---|
 | **cardiology** | ASCVD, cardiovascular risk, HEART score, chest pain triage, CHA₂DS₂-VASc, atrial fibrillation, AF stroke risk, cardiac risk | `providers/claude-code/workflows/cardiology.md` |
 
+### Nephrology
+
+| Domain | Signal Words | Workflow |
+|---|---|---|
+| **ckd** | CKD, chronic kidney disease, eGFR, creatinine clearance, kidney function, KDIGO, nephrology, proteinuria, albuminuria, UACR, ACR, renal, kidney failure, KFRE, dialysis referral | `providers/claude-code/workflows/ckd.md` |
+
 ### Utilities
 
 | Domain | Signal Words | Workflow |
