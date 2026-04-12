@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Medical protocol system for Claude Code. Provider protocols and workflows in `public/` are served as static assets via Vercel. Doctors copy `protocol.md` into `.claude/`, describe clinical needs, and Claude Code builds everything.
+Medical protocol system for Claude Code. Provider protocols and workflows in `public/` are served as static strings (markdown, JSON) via Vercel — no HTML. Doctors copy `protocol.md` into `.claude/`, describe clinical needs, and Claude Code builds everything.
 
 **Component delivery:** `npx medical-ui-cli add <component>` (CLI at `/home/enrique/projects/medicalui-cli`) copies component files into doctor projects and installs shadcn deps — same model as shadcn/ui. Component source files live in the medical-ui-cli repo, not here.
 
@@ -28,12 +28,15 @@ public/medical-protocol/
 │   ├── manifest.json              # Provider registry
 │   ├── claude-code/               # protocol.md, install.md, 15 workflows/
 │   └── v0/                        # v0 protocol (stub, 10 workflows)
+context/                           # Shared medical context (provider-agnostic)
+├── composition.md                 # Component wiring patterns, gotchas
+├── sepsis.md                      # Sepsis types, functions, cross-component data
 lib/                               # Shared calculation + validation logic
 ├── acid-base/                     # analyze.ts, safeFloat.ts, interfaces.ts, index.ts
 ├── vital-signs-validations/       # 5 validation files + types.ts
 ├── bmi.ts cardiology.ts cardiology-types.ts dka.ts pafi.ts sepsis.ts water-balance.ts
 packages/medprotocol/              # CLI calculator tool (8 commands)
-plugin/                            # Claude plugin: settings.json, hooks/, skills/ (14), context/ (12)
+plugin/                            # Claude plugin: settings.json, hooks/, skills/ (14), context/ (10)
 tests/                             # Vitest — test files, clinical logic only, no UI rendering
 scripts/                           # bump-version.sh
 hooks/                             # Git hooks: privacy-guard, qa-reminder, track-workflow, validate-fetch
@@ -45,7 +48,8 @@ hooks/                             # Git hooks: privacy-guard, qa-reminder, trac
 - **Target stack:** React 19, Next.js (app router), shadcn/ui v4+, Tailwind, TypeScript
 - **No production deps** — devDependencies only (typescript, vitest)
 - **Testing:** Logic-only via Vitest; UI QA via agent-browser (workflows/agent-qa.md)
-- **Plugin:** 14 skills with SKILL.md + reference docs, 4 hooks (privacy, QA, workflow tracking, fetch validation), 12 context files
+- **CDN serves strings only** — markdown and JSON, no HTML
+- **Plugin:** 14 skills with SKILL.md + reference docs, 4 hooks (privacy, QA, workflow tracking, fetch validation), 10 context files
 - **Version:** 0.4.0 (synced across package.json, provider manifest, medprotocol/package.json, plugin.json)
 
 ## Patterns
