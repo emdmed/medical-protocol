@@ -1,15 +1,15 @@
 {
   "rewrites": [
-    { "source": "/install", "destination": "/install.md" },
-    { "source": "/v0", "destination": "/medical-protocol/providers/v0/install.md" },
-    { "source": "/medical-protocol/protocol.md", "destination": "/medical-protocol/providers/claude-code/protocol.md" }
+    { "source": "/", "destination": "/install.md" },
+    { "source": "/install", "destination": "/install.md" }
   ],
   "headers": [
     {
-      "source": "/medical-protocol/providers/(.*)",
+      "source": "/medical-protocol/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600" }
+        { "key": "Cache-Control", "value": "public, max-age=3600" },
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
       ]
     },
     {

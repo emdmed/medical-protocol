@@ -9,15 +9,6 @@
       "install": "providers/claude-code/install.md",
       "protocol": "providers/claude-code/protocol.md",
       "quickStart": "curl -fsSL https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/install.md | claude"
-    },
-    "v0": {
-      "name": "v0 by Vercel",
-      "status": "coming-soon",
-      "recommended": false,
-      "description": "AI-powered interface builder with pre-built clinical component registry.",
-      "install": "providers/v0/install.md",
-      "protocol": "providers/v0/protocol.md",
-      "quickStart": null
     }
   }
 }

@@ -26,8 +26,7 @@ No linter. TypeScript strict mode (`tsconfig.json`).
 public/medical-protocol/
 ├── providers/                     # Provider protocols + install guides
 │   ├── manifest.json              # Provider registry
-│   ├── claude-code/               # protocol.md, install.md, 15 workflows/
-│   └── v0/                        # v0 protocol (stub, 10 workflows)
+│   └── claude-code/               # protocol.md, install.md, 15 workflows/
 context/                           # Shared medical context (provider-agnostic)
 ├── composition.md                 # Component wiring patterns, gotchas
 ├── sepsis.md                      # Sepsis types, functions, cross-component data

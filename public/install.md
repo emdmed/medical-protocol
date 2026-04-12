@@ -15,8 +15,3 @@ The fully supported provider. Claude Code reads the protocol, fetches components
 curl -fsSL https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/install.md | claude
 ```
 
-### v0 by Vercel (Coming Soon)
-
-v0 provider support is in development.
-
-**Status:** [providers/v0/README.md](https://medical-protocol.vercel.app/medical-protocol/providers/v0/README.md)

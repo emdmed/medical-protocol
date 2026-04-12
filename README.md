@@ -19,7 +19,6 @@ Doctors copy `protocol.md` into their `.claude/` directory, then describe what t
 
 - `public/medical-protocol/providers/` — Provider-specific protocols, install guides, and workflows
   - `claude-code/` — Claude Code provider (protocol.md, install.md, workflows/)
-  - `v0/` — v0 by Vercel provider (protocol.md, install.md, workflows/)
 - `lib/` — Shared calculation and validation logic (acid-base, cardiology, vital signs, etc.)
 - `packages/medprotocol/` — CLI calculator tool
 - `tests/` — Vitest test suite
