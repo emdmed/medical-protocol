@@ -9,15 +9,16 @@ When the doctor's request is vague or general (e.g., "I need something to track 
    | Block | What it does |
    |-------|-------------|
    | Vital signs | Blood pressure, heart rate, respiratory rate, temperature, oxygen saturation |
-   | Clinical notes | Encounter note editor with highlighting and local storage |
    | Blood gas analyzer | ABG interpretation — disorders, compensation, anion gap |
    | BMI calculator | Body mass index with category classification |
    | Fluid balance | Intake/output tracking with insensible loss |
    | PaFi calculator | PaO2/FiO2 ratio with ARDS classification |
    | DKA monitoring | Hourly glucose, ketones, potassium, insulin, GCS tracking |
+   | Cardiology | ASCVD, HEART Score, CHA₂DS₂-VASc risk calculators |
+   | Sepsis | SOFA, qSOFA, lactate clearance assessment |
    | **Dashboard** | Combine any of the above into one view |
 
-   Default: vital signs + clinical notes (as a dashboard)
+   Default: vital signs + acid-base (as a dashboard)
 
 2. **Patient setting**
    - "What type of patients is this for?"

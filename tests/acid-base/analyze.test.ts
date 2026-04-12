@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { analyze } from '../../public/medical-protocol/components/acid-base/analyze';
+import { analyze } from '../../lib/acid-base/analyze';
 
 // Helper to create ABG values
 const abg = (

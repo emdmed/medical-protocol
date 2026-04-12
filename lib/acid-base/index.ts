@@ -1,7 +1,7 @@
 /**
  * CLI-safe acid-base analysis wrapper — typed interface over analyze.ts.
  */
-export { analyze } from "../../public/medical-protocol/components/acid-base/analyze";
+export { analyze } from "./analyze";
 
 export interface ABGValues {
   pH: string;

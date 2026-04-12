@@ -31,7 +31,6 @@ All 8 component workflows (`vital-signs.md`, `acid-base.md`, `bmi.md`, etc.) con
 Each component that has dependencies handles them differently:
 
 - **dka.md**: Explicitly lists acid-base files to fetch (analyze.ts, popup.tsx, safeFloat.ts)
-- **clinical-notes.md**: Lists water-balance, acid-base, bmi as `externalComponents` but leaves fetch order to Claude
 - **dashboard.md**: Says "for each selected block, follow Component Fetching Process" but doesn't address transitive deps
 - **pafi.md**: Requires creating `lib/pafi` with calculation functions — unique pattern not used elsewhere
 

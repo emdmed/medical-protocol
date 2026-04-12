@@ -12,6 +12,8 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 | `vitals` | Evaluates vital signs and flags abnormal values | `npm run medprotocol -- vitals --bp 120/80 --hr 72 --temp 37.0` |
 | `pafi` | Calculates PaO2/FiO2 ratio and classifies ARDS severity | `npm run medprotocol -- pafi --pao2 60 --fio2 40` |
 | `dka` | Evaluates DKA parameters: glucose reduction rate, resolution criteria | `npm run medprotocol -- dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl` |
+| `cardiology` | Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc) | `npm run medprotocol -- cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120` |
+| `sepsis` | Sepsis assessment (SOFA, qSOFA, lactate clearance) | `npm run medprotocol -- sepsis qsofa --rr 24 --sbp 90 --gcs 13` |
 
 **When to suggest the quick calculator vs building an interface:**
 

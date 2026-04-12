@@ -5,7 +5,7 @@ import {
   getBloodPressureCategory,
   parseBloodPressureValues,
   BLOOD_PRESSURE_LIMITS,
-} from '../../public/medical-protocol/components/vital-signs/validations/blood-pressure-validations';
+} from '../../lib/vital-signs-validations/blood-pressure-validations';
 
 describe('validateBloodPressureInput', () => {
   it('returns null for valid normal BP (120/80)', () => {

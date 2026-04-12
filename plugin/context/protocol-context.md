@@ -54,6 +54,8 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 | `vitals` | Evaluates vital signs and flags abnormal values | `npm run medprotocol -- vitals --bp 120/80 --hr 72 --temp 37.0` |
 | `pafi` | Calculates PaO2/FiO2 ratio and classifies ARDS severity | `npm run medprotocol -- pafi --pao2 60 --fio2 40` |
 | `dka` | Evaluates DKA parameters: glucose reduction rate, resolution criteria | `npm run medprotocol -- dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl` |
+| `cardiology` | Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc) | `npm run medprotocol -- cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120` |
+| `sepsis` | Sepsis assessment (SOFA, qSOFA, lactate clearance) | `npm run medprotocol -- sepsis qsofa --rr 24 --sbp 90 --gcs 13` |
 
 **When to suggest the quick calculator vs building an interface:**
 
@@ -73,7 +75,7 @@ When the doctor's request is simple enough for the quick calculator, offer it as
 
 When the doctor opens Claude Code in a project that already has components installed (e.g., they built a vital signs monitor last week and now want changes):
 
-1. **Check what's already built** — silently scan the project for existing components (`components/vital-signs/`, `components/clinical-notes/`, etc.)
+1. **Check what's already built** — silently scan the project for existing components (`components/vital-signs/`, `components/acid-base/`, etc.)
 2. **If the doctor asks for something that's already installed** (e.g., "add temperature alerts" and vital-signs already exists), route to the **customize** workflow — do not re-fetch or re-install components
 3. **If the doctor asks for something new** that doesn't exist yet (e.g., "now add patient records"), proceed with the appropriate workflow — it will fetch only the missing components
 4. **Never re-scaffold the project** if it already has a working Next.js setup
@@ -103,14 +105,11 @@ When the doctor describes what they need, classify into one of these domains bas
 | Domain | Signal Words | Workflow |
 |---|---|---|
 | **vital-signs** | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate, vitals, monitor | `providers/claude-code/workflows/vital-signs.md` |
-| **clinical-notes** | clinical notes, encounter note, evolution, chart, patient note, write a note, documentation | `providers/claude-code/workflows/clinical-notes.md` |
 | **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | `providers/claude-code/workflows/acid-base.md` |
 | **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | `providers/claude-code/workflows/bmi.md` |
 | **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | `providers/claude-code/workflows/water-balance.md` |
 | **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury | `providers/claude-code/workflows/pafi.md` |
 | **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking | `providers/claude-code/workflows/dka.md` |
-| **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | `providers/claude-code/workflows/telemonitoring.md` |
-| **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | `providers/claude-code/workflows/timeline.md` |
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `providers/claude-code/workflows/dashboard.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize | `providers/claude-code/workflows/customize.md` |
 | **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Route to `cli` skill |
@@ -199,12 +198,11 @@ Some components import modules that aren't available on the CDN. These are liste
 2. **Check if it's another manifest component** (e.g. `@/components/water-balance/water-balance`) — if so, fetch and install that component first
 3. **Check if it's a project-specific UI variant** (e.g. `@/components/ui/textarea-inv`) — if so, create it as a thin wrapper around the standard shadcn component
 
-Example from `clinical-notes`:
+Example:
 ```json
 "externalComponents": [
   "@/components/water-balance/water-balance",  // → fetch from manifest["water-balance"]
   "@/components/acid-base/acid-base",          // → fetch from manifest["acid-base"]
-  "@/components/bmi/bmi-calculator",           // → fetch from manifest["bmi"]
   "@/components/ui/textarea-inv"               // → create as textarea variant
 ]
 ```

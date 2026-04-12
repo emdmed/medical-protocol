@@ -1,10 +1,12 @@
 # Medical Protocol Workflows
 
-CDN-hosted protocol, workflows, and component source files for the Medical Protocol for Claude Code.
+Medical protocol workflows, calculation logic, and CLI for Claude Code.
 
 ## What is this?
 
-This repo serves static files via Vercel that Claude Code fetches at runtime. Doctors copy `protocol.md` into their `.claude/` directory, then describe what they need in plain clinical language. Claude Code handles everything else.
+This repo contains provider protocols and workflows served via Vercel, plus shared calculation logic and a CLI tool. Components are delivered separately via `npx medical-ui-cli add <component>`.
+
+Doctors copy `protocol.md` into their `.claude/` directory, then describe what they need in plain clinical language. Claude Code handles everything else.
 
 ## For Doctors
 
@@ -18,8 +20,10 @@ This repo serves static files via Vercel that Claude Code fetches at runtime. Do
 - `public/medical-protocol/providers/` — Provider-specific protocols, install guides, and workflows
   - `claude-code/` — Claude Code provider (protocol.md, install.md, workflows/)
   - `v0/` — v0 by Vercel provider (protocol.md, install.md, workflows/)
-- `public/medical-protocol/components/` — Component source code fetched by providers at runtime
+- `lib/` — Shared calculation and validation logic (acid-base, cardiology, vital signs, etc.)
+- `packages/medprotocol/` — CLI calculator tool
+- `tests/` — Vitest test suite
 
 ## Deployment
 
-Deployed to Vercel. Files are served as static assets from the `public/` directory.
+Deployed to Vercel. Provider files are served as static assets from `public/medical-protocol/providers/`.

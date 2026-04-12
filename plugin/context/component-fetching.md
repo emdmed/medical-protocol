@@ -74,12 +74,11 @@ Some components import modules that aren't available on the CDN. These are liste
 2. **Check if it's another manifest component** (e.g. `@/components/water-balance/water-balance`) — if so, fetch and install that component first
 3. **Check if it's a project-specific UI variant** (e.g. `@/components/ui/textarea-inv`) — if so, create it as a thin wrapper around the standard shadcn component
 
-Example from `clinical-notes`:
+Example:
 ```json
 "externalComponents": [
   "@/components/water-balance/water-balance",  // → fetch from manifest["water-balance"]
   "@/components/acid-base/acid-base",          // → fetch from manifest["acid-base"]
-  "@/components/bmi/bmi-calculator",           // → fetch from manifest["bmi"]
   "@/components/ui/textarea-inv"               // → create as textarea variant
 ]
 ```

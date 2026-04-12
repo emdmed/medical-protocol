@@ -8,13 +8,11 @@ Present the available building blocks by category and ask which they'd like:
 
   **Monitoring** — Vital signs (BP, HR, RR, Temp, SpO2)
 
-  **Calculators** — Blood gas / acid-base analyzer · BMI calculator · Fluid balance (water balance / I&O) · PaFi calculator (PaO2/FiO2 ratio with ARDS classification)
+  **Calculators** — Blood gas / acid-base analyzer · BMI calculator · Fluid balance (water balance / I&O) · PaFi calculator (PaO2/FiO2 ratio with ARDS classification) · Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
 
-  **Critical Care** — DKA monitoring (hourly glucose, ketones, potassium, insulin, GCS tracking)
+  **Critical Care** — DKA monitoring (hourly glucose, ketones, potassium, insulin, GCS tracking) · Sepsis assessment (SOFA, qSOFA, lactate clearance)
 
-  **Documentation** — Clinical notes (encounter note editor)
-
-  Default: vital signs + clinical notes
+  Default: vital signs + acid-base
 
 - "Is this for a single patient view or a clinic overview?" (Default: single patient)
 
@@ -28,7 +26,7 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 
 ## Phase 2: Fetch & Install
 
-For each block the doctor selected, follow the **Component Installation Process** from the main protocol. Install each component with `npx medical-ui-cli add <component>`. Available components: `vital-signs`, `clinical-notes`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`.
+For each block the doctor selected, follow the **Component Installation Process** from the main protocol. Install each component with `npx medical-ui-cli add <component>`. Available components: `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`.
 
 Check if any installed component has dependencies on other components — if so, install those too with `npx medical-ui-cli add`.
 
@@ -47,7 +45,6 @@ Create `app/dashboard/page.tsx` with:
 
 Layout guidance:
 - Smaller widgets (acid-base, BMI, water-balance) work well grouped together
-- Timeline works best as a full-width section or sidebar
 
 Update the home page to redirect to `/dashboard`.
 

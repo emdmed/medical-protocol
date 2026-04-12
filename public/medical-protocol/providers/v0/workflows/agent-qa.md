@@ -147,15 +147,6 @@ agent-browser snapshot -i
 
 3. **Alert rendering:** After entering a dangerous value, verify the alert is visible in the accessibility tree (look for "critical", "danger", "alert", or destructive styling references)
 
-### Clinical Notes
-
-1. **Note editor:** Find the clinical notes input area, click it, type sample text, and verify it persists in the UI
-   ```bash
-   agent-browser click @eN
-   agent-browser type "Sample clinical note"
-   agent-browser snapshot -i
-   ```
-
 ### Dashboard
 
 1. **All sections render:** Take a snapshot and verify multiple card/section elements are present (not just one)
@@ -175,16 +166,6 @@ agent-browser snapshot -i
 1. **Weight entry:** Enter a patient weight and verify it's accepted
 2. **Reading entry:** Add a reading with glucose, ketones, and basic ABG values — verify rate calculations appear
 3. **Blood gas analysis:** Verify that ABG interpretation badges appear for each reading
-
-### Telemonitoring
-
-1. **Display renders with data:** Take a snapshot and verify monitoring display elements are present
-2. **Connection status:** Check for connection indicator elements in the accessibility tree
-
-### Timeline
-
-1. **Events display:** Take a snapshot and verify timeline entries/events are present in the tree
-2. **Proper ordering:** If multiple events exist, verify they appear in chronological order (dates descending or ascending consistently)
 
 ---
 

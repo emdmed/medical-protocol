@@ -58,17 +58,7 @@ update_json() {
 # --- 1. package.json ---
 update_json "$ROOT/package.json" "obj.version = '$VERSION';"
 
-# --- 2. manifest.json (top-level + each component) ---
-update_json "$ROOT/public/medical-protocol/components/manifest.json" "
-  obj.version = '$VERSION';
-  for (const key of Object.keys(obj)) {
-    if (obj[key] && typeof obj[key] === 'object' && 'version' in obj[key]) {
-      obj[key].version = '$VERSION';
-    }
-  }
-"
-
-# --- 3. providers/manifest.json ---
+# --- 2. providers/manifest.json ---
 update_json "$ROOT/public/medical-protocol/providers/manifest.json" "obj.version = '$VERSION';"
 
 # --- 4. packages/medprotocol/package.json ---

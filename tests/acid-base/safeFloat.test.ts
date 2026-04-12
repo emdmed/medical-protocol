@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { safeFloat } from '../../public/medical-protocol/components/acid-base/utils/safeFloat';
+import { safeFloat } from '../../lib/acid-base/safeFloat';
 import { safeParseFloat } from '../../lib/water-balance';
 
 describe('safeFloat', () => {

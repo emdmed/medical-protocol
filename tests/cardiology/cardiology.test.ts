@@ -16,7 +16,7 @@ import type {
   ASCVDInputs,
   HEARTInputs,
   CHADSVAScInputs,
-} from "../../public/medical-protocol/components/cardiology/types/interfaces";
+} from "../../lib/cardiology-types";
 
 // ── Helper ─────────────────────────────────────────────
 

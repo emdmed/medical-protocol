@@ -14,6 +14,7 @@ Commands:
   pafi             Calculate PaO2/FiO2 ratio (ARDS classification)
   dka              Assess DKA parameters and resolution
   cardiology       Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
+  sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)
 
 Global options:
   --json           Output as JSON (available on all commands)
@@ -29,7 +30,10 @@ Examples:
   medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl
   medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
   medprotocol cardiology heart --history 1 --ecg 0 --age 2 --risk-factors 1 --troponin 0
-  medprotocol cardiology chadsvasc --hypertension --age75 --diabetes`;
+  medprotocol cardiology chadsvasc --hypertension --age75 --diabetes
+  medprotocol sepsis sofa --pao2 80 --fio2 40 --platelets 90 --gcs 13
+  medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13
+  medprotocol sepsis lactate --initial 4.2 --repeat 2.1`;
 
 const command = process.argv[2];
 const commandArgs = process.argv.slice(3);
@@ -52,6 +56,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   pafi: () => import("./commands/pafi"),
   dka: () => import("./commands/dka"),
   cardiology: () => import("./commands/cardiology"),
+  sepsis: () => import("./commands/sepsis"),
 };
 
 const loader = commands[command];

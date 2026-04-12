@@ -8,7 +8,7 @@ Fetch the components the doctor needs from the registry:
 https://medical-protocol.vercel.app/medical-protocol/r/{component}.json
 ```
 
-Available: vital-signs, clinical-notes, acid-base, bmi-calculator, water-balance, telemonitoring, timeline, pafi, dka
+Available: vital-signs, acid-base, bmi-calculator, water-balance, pafi, dka, cardiology, sepsis
 
 ## Phase 1: Clinical Requirements
 
@@ -18,24 +18,19 @@ The doctor wants a combined clinical dashboard. Present the available building b
 
   **Monitoring**
   - Vital signs (BP, HR, RR, Temp, SpO2)
-  - Pulse oximetry (real-time animated display)
 
   **Calculators**
   - Blood gas / acid-base analyzer
   - BMI calculator
   - Fluid balance (water balance / I&O)
   - PaFi calculator (PaO2/FiO2 ratio with ARDS classification)
+  - Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
 
   **Critical Care**
   - DKA monitoring (hourly glucose, ketones, potassium, insulin, GCS tracking)
+  - Sepsis assessment (SOFA, qSOFA, lactate clearance)
 
-  **Documentation**
-  - Clinical notes (encounter note editor)
-
-  **Display**
-  - Clinical timeline (hospitalization course)
-
-  Default: vital signs + clinical notes
+  Default: vital signs + acid-base
 
 - "Is this for a single patient view or a clinic overview?" (Default: single patient)
 
@@ -57,20 +52,19 @@ Do NOT ask about:
 After installation, import the components. Exact import paths for each component:
 ```tsx
 import VitalSigns from "@/components/vital-signs/vital-signs";
-import ClinicalNotes from "@/components/clinical-notes/clinical-notes";
 import AcidBase from "@/components/acid-base/acid-base";
 import BMICalculator from "@/components/bmi/bmi-calculator";
 import WaterBalanceCalculator from "@/components/water-balance/water-balance";
-import PulseOximetry from "@/components/telemonitoring/pulse-oximetry/pulse-oximetry";
-import Timeline from "@/components/timeline/timeline";
 import PaFiCalculator from "@/components/pafi/pafi-calculator";
 import DKAMonitor from "@/components/dka/dka-monitor";
+import Cardiology from "@/components/cardiology/cardiology";
+import SepsisMonitor from "@/components/sepsis/sepsis-monitor";
 ```
 
 Build only the dashboard page that imports and renders the selected components in a responsive grid layout.
 
 - Include a header with the clinic/dashboard name.
-- Arrange selected blocks in a responsive grid — smaller widgets (acid-base, BMI, water-balance, pafi) work well grouped together; the timeline works best as a full-width section or sidebar; DKA monitoring is wide and works best full-width.
+- Arrange selected blocks in a responsive grid — smaller widgets (acid-base, BMI, water-balance, pafi) work well grouped together; DKA monitoring is wide and works best full-width.
 - Read `manifest.json` for each component's props, types, and data flow direction.
 - Read `COMPOSITION.md` for patterns on combining components, data flow between blocks, and overflow-visible gotchas.
 

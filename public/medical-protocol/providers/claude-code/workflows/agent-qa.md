@@ -202,15 +202,6 @@ agent-browser snapshot -i
 
 3. **Alert rendering:** After entering a dangerous value, verify the alert is visible in the accessibility tree (look for "critical", "danger", "alert", or destructive styling references)
 
-### Clinical Notes
-
-1. **Note editor:** Find the clinical notes input area, click it, type sample text, and verify it persists in the UI
-   ```bash
-   agent-browser click @eN
-   agent-browser type "Sample clinical note"
-   agent-browser snapshot -i
-   ```
-
 ### Dashboard
 
 1. **All sections render:** Take a snapshot and verify multiple card/section elements are present (not just one)

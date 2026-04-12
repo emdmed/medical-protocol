@@ -10,7 +10,7 @@ It's designed for two consumers:
 
 ## What It's For
 
-Each command wraps pure calculation functions from `lib/` with argument parsing, validation, and formatted output. The CLI is the terminal counterpart to the React components in `public/medical-protocol/components/` — same logic, different interface.
+Each command wraps pure calculation functions from `lib/` with argument parsing, validation, and formatted output.
 
 Current commands (7):
 

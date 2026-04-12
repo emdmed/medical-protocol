@@ -4,7 +4,7 @@ import {
   getHeartRateCategory,
   parseHeartRateValue,
   HEART_RATE_LIMITS,
-} from '../../public/medical-protocol/components/vital-signs/validations/heart-rate-validations';
+} from '../../lib/vital-signs-validations/heart-rate-validations';
 
 describe('validateHeartRateInput', () => {
   it('returns true for normal heart rate (72)', () => {

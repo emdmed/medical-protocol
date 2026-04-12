@@ -5,7 +5,7 @@ import BloodOxygenValidations, {
   utils,
   hasValidBloodOxygenInput,
   hasValidFio2Input,
-} from '../../public/medical-protocol/components/vital-signs/validations/blood-oxygen-validations';
+} from '../../lib/vital-signs-validations/blood-oxygen-validations';
 
 describe('spo2.isValid', () => {
   it('returns true for normal SpO2 (98%)', () => {

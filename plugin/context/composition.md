@@ -46,49 +46,6 @@ function Dashboard() {
 />
 ```
 
-## Vitals feeding real-time PulseOximetry
-
-```tsx
-import VitalSigns from "@/components/vital-signs/vital-signs";
-import PulseOximetry from "@/components/telemonitoring/pulse-oximetry/pulse-oximetry";
-
-function MonitoringView() {
-  const [vitals, setVitals] = useState<IVitalSignsData | null>(null);
-
-  return (
-    <div className="flex gap-4 items-start">
-      <VitalSigns onData={(data) => setVitals(data)} />
-      <PulseOximetry
-        bpm={vitals?.heartRate ?? 0}
-        spo2={vitals?.bloodOxygen?.saturation ?? 0}
-        isBeating={!!vitals?.heartRate}
-      />
-    </div>
-  );
-}
-```
-
-## Timeline alongside vitals
-
-```tsx
-import Timeline from "@/components/timeline/timeline";
-import VitalSigns from "@/components/vital-signs/vital-signs";
-import type { TimelineItem } from "@/components/timeline/timeline";
-import type { IVitalSignsData } from "@/components/vital-signs/types/vital-signs";
-
-function PatientHistory({ events, currentVitals }: {
-  events: TimelineItem[];
-  currentVitals: IVitalSignsData;
-}) {
-  return (
-    <div className="grid grid-cols-[1fr_auto] gap-4">
-      <VitalSigns data={currentVitals} editable={false} assistant={false} />
-      <Timeline items={events} maxHeight="20rem" />
-    </div>
-  );
-}
-```
-
 ## Collecting data from multiple components into one submission
 
 ```tsx

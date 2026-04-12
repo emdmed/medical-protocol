@@ -5,14 +5,11 @@ When the doctor describes what they need, classify into one of these domains bas
 | Domain | Signal Words | Workflow |
 |---|---|---|
 | **vital-signs** | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate, vitals, monitor | `providers/claude-code/workflows/vital-signs.md` |
-| **clinical-notes** | clinical notes, encounter note, evolution, chart, patient note, write a note, documentation | `providers/claude-code/workflows/clinical-notes.md` |
 | **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | `providers/claude-code/workflows/acid-base.md` |
 | **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | `providers/claude-code/workflows/bmi.md` |
 | **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | `providers/claude-code/workflows/water-balance.md` |
 | **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury | `providers/claude-code/workflows/pafi.md` |
 | **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking | `providers/claude-code/workflows/dka.md` |
-| **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | `providers/claude-code/workflows/telemonitoring.md` |
-| **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | `providers/claude-code/workflows/timeline.md` |
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `providers/claude-code/workflows/dashboard.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize | `providers/claude-code/workflows/customize.md` |
 | **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Route to `cli` skill |

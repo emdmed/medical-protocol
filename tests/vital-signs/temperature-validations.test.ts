@@ -7,7 +7,7 @@ import {
   parseTemperatureValue,
   getTemperatureLimits,
   TEMPERATURE_LIMITS,
-} from '../../public/medical-protocol/components/vital-signs/validations/temperature-validations';
+} from '../../lib/vital-signs-validations/temperature-validations';
 
 describe('validateTemperatureInput', () => {
   it('returns true for empty/falsy value (allows clearing)', () => {

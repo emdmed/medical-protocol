@@ -37,9 +37,6 @@ The doctor is using v0.dev to build their clinical interface. You (v0's Claude) 
 | bmi | Body mass index calculator |
 | pafi | PaO2/FiO2 ratio with ARDS classification |
 | dka | DKA monitoring (glucose, ketones, K⁺, GCS) |
-| timeline | Clinical event timeline |
-| telemonitoring | Real-time pulse oximetry display |
-| clinical-notes | Encounter note editor |
 | cardiology | ASCVD, HEART Score, CHA₂DS₂-VASc |
 | dashboard | Combined overview of multiple tools |
 
@@ -49,7 +46,7 @@ The doctor is using v0.dev to build their clinical interface. You (v0's Claude) 
 
 Registry: https://medical-protocol.vercel.app/medical-protocol/r/
 
-Available: vital-signs, clinical-notes, acid-base, bmi-calculator, water-balance, telemonitoring, timeline, pafi, dka, layout-disclaimer, medical-disclaimer
+Available: vital-signs, acid-base, bmi-calculator, water-balance, pafi, dka, cardiology, sepsis, layout-disclaimer, medical-disclaimer
 
 To add a component, fetch its registry JSON:
 https://medical-protocol.vercel.app/medical-protocol/r/{component}.json
@@ -128,17 +125,16 @@ When the doctor's request is vague or general (e.g., "I need something to track 
    | Block | What it does |
    |-------|-------------|
    | Vital signs | Blood pressure, heart rate, respiratory rate, temperature, oxygen saturation |
-   | Clinical notes | Encounter note editor with highlighting and local storage |
    | Blood gas analyzer | ABG interpretation — disorders, compensation, anion gap |
    | BMI calculator | Body mass index with category classification |
    | Fluid balance | Intake/output tracking with insensible loss |
    | PaFi calculator | PaO2/FiO2 ratio with ARDS classification |
    | DKA monitoring | Hourly glucose, ketones, potassium, insulin, GCS tracking with blood gas analysis |
-   | Pulse oximetry | Real-time animated SpO2/BPM display |
-   | Clinical timeline | Day-by-day hospitalization course with event details |
+   | Cardiology | ASCVD, HEART Score, CHA₂DS₂-VASc risk calculators |
+   | Sepsis | SOFA, qSOFA, lactate clearance assessment |
    | **Dashboard** | Combine any of the above into one view |
 
-   Default: vital signs + clinical notes (as a dashboard)
+   Default: vital signs + acid-base (as a dashboard)
 
 2. **Patient setting**
    - "What type of patients is this for?"
@@ -169,14 +165,11 @@ When the doctor describes what they need, classify into one of these domains bas
 | Domain | Signal Words | Workflow |
 |---|---|---|
 | **vital-signs** | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate, vitals, monitor | `workflows/vital-signs.md` |
-| **clinical-notes** | clinical notes, encounter note, evolution, chart, patient note, write a note, documentation | `workflows/clinical-notes.md` |
 | **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 | `workflows/acid-base.md` |
 | **bmi** | BMI, body mass index, weight, height, obesity, underweight, overweight | `workflows/bmi.md` |
 | **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management | `workflows/water-balance.md` |
 | **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury | `workflows/pafi.md` |
 | **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking | `workflows/dka.md` |
-| **telemonitoring** | pulse oximeter, remote monitoring, real-time SpO2, continuous monitoring, telemonitoring | `workflows/telemonitoring.md` |
-| **timeline** | timeline, hospitalization course, clinical events, patient history over time, day-by-day | `workflows/timeline.md` |
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `workflows/dashboard.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize | `workflows/customize.md` |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | `workflows/troubleshoot.md` |

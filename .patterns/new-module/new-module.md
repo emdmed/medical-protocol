@@ -1,13 +1,14 @@
 # New Module Checklist
 
-When creating a new clinical domain/module, **all four** of these must be completed or the module won't be discoverable at runtime:
+When creating a new clinical domain/module, **all three** of these must be completed or the module won't be discoverable at runtime:
 
-1. **Component code** — `public/medical-protocol/components/{module}/` with TSX files and types
-2. **manifest.json entry** — Add the module to `public/medical-protocol/components/manifest.json` with version, category, description, import path, props, dataFlow, shadcn deps, and files list
-3. **Workflow file** — Create `public/medical-protocol/providers/claude-code/workflows/{module}.md` with Phases 1–4 (Clinical Requirements, Fetch & Install, Build Page, Quality & Preview). For v0, also create `public/medical-protocol/providers/v0/workflows/{module}.md`.
-4. **Classification row in protocol.md** — Add a row to the domain classification table in `public/medical-protocol/providers/claude-code/protocol.md` with signal words that route doctors to the new workflow
+1. **Component code** — Component source lives in the medical-ui-cli repo. Add the module there with TSX files, types, and registry entry.
+2. **Workflow file** — Create `public/medical-protocol/providers/claude-code/workflows/{module}.md` with Phases 1–4 (Clinical Requirements, Install, Build Page, Quality & Preview). For v0, also create `public/medical-protocol/providers/v0/workflows/{module}.md`.
+3. **Classification row in protocol.md** — Add a row to the domain classification table in `public/medical-protocol/providers/claude-code/protocol.md` with signal words that route doctors to the new workflow
 
-**If any step is skipped, the module exists in code but Claude Code cannot find or install it.** Step 4 is the most commonly missed — without it, the protocol has no signal words to match and will never route to the module.
+**If any step is skipped, the module exists in code but Claude Code cannot find or install it.** Step 3 is the most commonly missed — without it, the protocol has no signal words to match and will never route to the module.
+
+If the module includes **pure calculation/validation logic** used by tests or the CLI, add those files to `lib/` in this repo.
 
 > **Adding a new provider** (not a module)? That's a different checklist: create the provider directory under `public/medical-protocol/providers/{provider}/`, add its `protocol.md` and `install.md`, then register it in `public/medical-protocol/providers/manifest.json`.
 
@@ -15,7 +16,6 @@ When creating a new clinical domain/module, **all four** of these must be comple
 
 | Step | What breaks without it |
 |------|----------------------|
-| Component code | Nothing to install |
-| manifest.json | Fetch process can't locate or download files |
+| Component code (in medical-ui-cli) | Nothing to install |
 | Workflow file | No phases to guide the build |
 | protocol.md row | No signal words → domain never matched → module invisible |

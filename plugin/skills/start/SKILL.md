@@ -11,7 +11,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Step 1: Returning Project Check
 
-Before anything else, silently check if the current project already has components installed (e.g., `components/vital-signs/`, `components/clinical-notes/`, etc.):
+Before anything else, silently check if the current project already has components installed (e.g., `components/vital-signs/`, `components/acid-base/`, etc.):
 
 - If the doctor asks for something that's already installed, route to the **customize** workflow — do not re-fetch or re-install components.
 - If the doctor asks for something new that doesn't exist yet, proceed with classification below.
@@ -32,14 +32,11 @@ Follow the **Classification** section from protocol-context.md to match the doct
 | Domain | Route to |
 |---|---|
 | **vital-signs** | `${CLAUDE_PLUGIN_ROOT}/skills/vitals/SKILL.md` |
-| **clinical-notes** | `${CLAUDE_PLUGIN_ROOT}/skills/clinical-notes/SKILL.md` |
 | **acid-base** | `${CLAUDE_PLUGIN_ROOT}/skills/acid-base/SKILL.md` |
 | **bmi** | `${CLAUDE_PLUGIN_ROOT}/skills/bmi/SKILL.md` |
 | **water-balance** | `${CLAUDE_PLUGIN_ROOT}/skills/water-balance/SKILL.md` |
 | **pafi** | `${CLAUDE_PLUGIN_ROOT}/skills/pafi/SKILL.md` |
 | **dka** | `${CLAUDE_PLUGIN_ROOT}/skills/dka/SKILL.md` |
-| **telemonitoring** | `${CLAUDE_PLUGIN_ROOT}/skills/telemonitoring/SKILL.md` |
-| **timeline** | `${CLAUDE_PLUGIN_ROOT}/skills/timeline/SKILL.md` |
 | **dashboard** | `${CLAUDE_PLUGIN_ROOT}/skills/dashboard/SKILL.md` |
 | **customize** | `${CLAUDE_PLUGIN_ROOT}/skills/customize/SKILL.md` |
 | **troubleshoot** | `${CLAUDE_PLUGIN_ROOT}/skills/troubleshoot/SKILL.md` |

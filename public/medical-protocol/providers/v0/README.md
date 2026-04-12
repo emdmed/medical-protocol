@@ -30,14 +30,11 @@ Available components:
 | Component | Registry JSON |
 |-----------|--------------|
 | Vital Signs | `vital-signs.json` |
-| Clinical Notes | `clinical-notes.json` |
 | Acid-Base Analyzer | `acid-base.json` |
 | BMI Calculator | `bmi-calculator.json` |
 | Water Balance | `water-balance.json` |
 | PaFi Calculator | `pafi.json` |
 | DKA Monitor | `dka.json` |
-| Pulse Oximetry | `telemonitoring.json` |
-| Clinical Timeline | `timeline.json` |
 | Medical Disclaimer | `medical-disclaimer.json` |
 | Layout Disclaimer | `layout-disclaimer.json` |
 | Error Boundary | `error-boundary.json` |
