@@ -23,11 +23,11 @@ If this is a brand-new project (no existing components found), suggest: "Would y
 
 ## Step 2: Initial Clarification
 
-Follow the **Initial Clarification** section from protocol-context.md. Skip if the doctor's request already makes the answers clear.
+Follow the **Initial Clarification** section from classification.md. Skip if the doctor's request already makes the answers clear.
 
 ## Step 3: Classification
 
-Follow the **Classification** section from protocol-context.md to match the doctor's request to a domain, then read and execute the corresponding SKILL.md:
+Follow the **Classification** section from classification.md to match the doctor's request to a domain, then read and execute the corresponding SKILL.md:
 
 | Domain | Route to |
 |---|---|
