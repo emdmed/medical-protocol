@@ -1,10 +1,21 @@
 # CLAUDE.md
 
-## What This Is
+## System Overview — 3 Parts
 
-Medical protocol system for Claude Code. Provider protocols and workflows in `public/` are served as static strings (markdown, JSON) via Vercel — no HTML. Doctors copy `protocol.md` into `.claude/`, describe clinical needs, and Claude Code builds everything.
+This project is one piece of a three-part medical protocol system. Know which part you're in before making changes.
 
-**Component delivery:** `npx medical-ui-cli add <component>` (CLI at `/home/enrique/projects/medicalui-cli`) copies component files into doctor projects and installs shadcn deps — same model as shadcn/ui. Component source files live in the medical-ui-cli repo, not here.
+| Part | What it does | Where it lives |
+|------|-------------|----------------|
+| **1. Workflows & Plugin** (this repo) | Markdown protocols, workflows, context, skills, and hooks that agents like Claude Code consume. Served as static strings via Vercel CDN. Also contains `lib/` with pure calculation logic and `packages/medprotocol/` CLI. | `/home/enrique/projects/medical-protocol-workflows` |
+| **2. medprotocol CLI** (this repo) | Terminal calculator tool (9 commands). Imports logic from `lib/`. No UI. | `packages/medprotocol/` in this repo |
+| **3. medical-ui-cli** (separate repo) | shadcn-style React component delivery. `npx medical-ui-cli add <component>` copies components into doctor projects. | `/home/enrique/projects/medicalui-cli` |
+
+### Boundaries — read this
+
+- **This repo has NO React, no Next.js, no UI code.** The target stack (React 19, Next.js, shadcn/ui v4+, Tailwind) describes what doctors end up with in their projects, not this repo.
+- **Never create component files here.** Components live in the medical-ui-cli repo.
+- **`lib/` is the shared bridge.** Pure TypeScript calculation/validation logic consumed by both the CLI (`packages/medprotocol/`) and the UI components (in the other repo). No framework deps.
+- **No production deps.** Only devDependencies (typescript, vitest). Do not `npm install` runtime packages.
 
 ## Commands
 
@@ -34,7 +45,7 @@ lib/                               # Shared calculation + validation logic
 ├── acid-base/                     # analyze.ts, safeFloat.ts, interfaces.ts, index.ts
 ├── vital-signs-validations/       # 5 validation files + types.ts
 ├── bmi.ts cardiology.ts cardiology-types.ts dka.ts pafi.ts sepsis.ts water-balance.ts
-packages/medprotocol/              # CLI calculator tool (8 commands)
+packages/medprotocol/              # CLI calculator tool (9 commands)
 plugin/                            # Claude plugin: settings.json, hooks/, skills/ (14), context/ (10)
 tests/                             # Vitest — test files, clinical logic only, no UI rendering
 scripts/                           # bump-version.sh
@@ -44,8 +55,8 @@ hooks/                             # Git hooks: privacy-guard, qa-reminder, trac
 
 ## Key Details
 
-- **Target stack:** React 19, Next.js (app router), shadcn/ui v4+, Tailwind, TypeScript
-- **No production deps** — devDependencies only (typescript, vitest)
+- **Doctor's target stack:** React 19, Next.js (app router), shadcn/ui v4+, Tailwind, TypeScript — but none of that is in this repo
+- **No production deps** — devDependencies only (typescript, vitest). Do not add runtime packages.
 - **Testing:** Logic-only via Vitest; UI QA via agent-browser (workflows/agent-qa.md)
 - **CDN serves strings only** — markdown and JSON, no HTML
 - **Plugin:** 14 skills with SKILL.md + reference docs, 4 hooks (privacy, QA, workflow tracking, fetch validation), 10 context files
