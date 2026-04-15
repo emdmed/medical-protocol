@@ -26,4 +26,11 @@ export interface ABGResult {
   deltaRatio: string | null;
   deltaRatioInterpretation: string | null;
   allDisorders: string[];
+  hhConsistency: {
+    expectedPH: string;
+    measured: string;
+    deviation: string;
+    isCoherent: boolean;
+    warning: string | null;
+  };
 }

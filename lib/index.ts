@@ -3,7 +3,7 @@
  * Provides a single import point: import { calculateBMI, analyze, ... } from '../lib';
  */
 
-export { safeParseFloat } from "./utils/safeParseFloat";
+export { safeParseFloat, safeParseFloatOrNull } from "./utils/safeParseFloat";
 
 export { calculateBMI, getBMICategory } from "./bmi";
 

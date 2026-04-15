@@ -432,14 +432,14 @@ describe('calculateEGFRSlope', () => {
     expect(calculateEGFRSlope(readings)).toBe(0);
   });
 
-  it('returns 0 for fewer than 2 readings', () => {
-    expect(calculateEGFRSlope(JSON.stringify([{ egfr: 50, date: '2024-01-01' }]))).toBe(0);
-    expect(calculateEGFRSlope(JSON.stringify([]))).toBe(0);
+  it('returns null for fewer than 2 readings', () => {
+    expect(calculateEGFRSlope(JSON.stringify([{ egfr: 50, date: '2024-01-01' }]))).toBeNull();
+    expect(calculateEGFRSlope(JSON.stringify([]))).toBeNull();
   });
 
-  it('returns 0 for invalid JSON', () => {
-    expect(calculateEGFRSlope('not json')).toBe(0);
-    expect(calculateEGFRSlope('')).toBe(0);
+  it('returns null for invalid JSON', () => {
+    expect(calculateEGFRSlope('not json')).toBeNull();
+    expect(calculateEGFRSlope('')).toBeNull();
   });
 
   it('handles 2-point readings', () => {

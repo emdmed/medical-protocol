@@ -1,5 +1,7 @@
-export const safeFloat = (val: string): number | null => {
-  if (val.trim() === "") return null;
-  const num = parseFloat(val);
-  return isNaN(num) ? null : num;
-};
+/**
+ * @deprecated Use safeParseFloatOrNull from lib/utils/safeParseFloat instead.
+ * Kept for backward compatibility — delegates to the canonical implementation.
+ */
+import { safeParseFloatOrNull } from "../utils/safeParseFloat";
+
+export const safeFloat = (val: string): number | null => safeParseFloatOrNull(val);

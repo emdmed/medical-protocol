@@ -250,18 +250,19 @@ export const checkFinerenoneEligibility = (
 /**
  * Calculate eGFR slope (mL/min/1.73m²/year) via linear regression.
  * Input: JSON string of [{egfr: number, date: string}]
+ * Returns null if input is invalid or insufficient (< 2 valid readings).
  */
 export const calculateEGFRSlope = (
   readings: string,
-): number => {
+): number | null => {
   let data: { egfr: number; date: string }[];
   try {
     data = JSON.parse(readings);
   } catch {
-    return 0;
+    return null;
   }
 
-  if (!Array.isArray(data) || data.length < 2) return 0;
+  if (!Array.isArray(data) || data.length < 2) return null;
 
   const points = data
     .map((r) => ({
@@ -271,7 +272,7 @@ export const calculateEGFRSlope = (
     .filter((p) => !isNaN(p.egfr) && !isNaN(p.time))
     .sort((a, b) => a.time - b.time);
 
-  if (points.length < 2) return 0;
+  if (points.length < 2) return null;
 
   // Convert ms to years
   const msPerYear = 365.25 * 24 * 60 * 60 * 1000;
@@ -285,7 +286,7 @@ export const calculateEGFRSlope = (
   const sumX2 = years.reduce((acc, x) => acc + x * x, 0);
 
   const denom = n * sumX2 - sumX * sumX;
-  if (denom === 0) return 0;
+  if (denom === 0) return null;
 
   const slope = (n * sumXY - sumX * sumY) / denom;
   return Math.round(slope * 10) / 10;
