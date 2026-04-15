@@ -2,11 +2,7 @@
  * Pure PaFi (PaO2/FiO2) calculation functions — shared between React component and CLI.
  */
 
-const safeParseFloat = (value: string): number => {
-  if (value === "" || value === null || value === undefined) return 0;
-  const parsed = parseFloat(value);
-  return isNaN(parsed) ? 0 : parsed;
-};
+import { safeParseFloat } from "./utils/safeParseFloat";
 
 export const calculatePaFi = (paO2: string, fiO2: string): string | null => {
   const paO2Num = safeParseFloat(paO2);

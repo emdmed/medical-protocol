@@ -3,11 +3,7 @@
  * Based on Sepsis-3 (2016 Third International Consensus) and Surviving Sepsis Campaign.
  */
 
-const safeParseFloat = (value: any): number => {
-  if (value === "" || value === null || value === undefined) return 0;
-  const parsed = parseFloat(value);
-  return isNaN(parsed) ? 0 : parsed;
-};
+import { safeParseFloat } from "./utils/safeParseFloat";
 
 // ─── SOFA Organ Scoring (each 0-4) ──────────────────────────────────
 

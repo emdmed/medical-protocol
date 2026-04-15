@@ -2,11 +2,8 @@
  * Pure water-balance calculation functions — shared between React component and CLI.
  */
 
-export const safeParseFloat = (value: any): number => {
-  if (value === "" || value === null || value === undefined) return 0;
-  const parsed = parseFloat(value);
-  return isNaN(parsed) ? 0 : parsed;
-};
+import { safeParseFloat } from "./utils/safeParseFloat";
+export { safeParseFloat };
 
 export const calculateInsensibleLoss = (weightKg: any): string => {
   return (safeParseFloat(weightKg) * 12).toFixed(0);

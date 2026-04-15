@@ -9,14 +9,7 @@ import type {
   HEARTInputs,
   CHADSVAScInputs,
 } from "./cardiology-types";
-
-// ── Helpers ────────────────────────────────────────────
-
-const safeParseFloat = (value: string): number => {
-  if (value === "" || value === null || value === undefined) return 0;
-  const parsed = parseFloat(value);
-  return isNaN(parsed) ? 0 : parsed;
-};
+import { safeParseFloat } from "./utils/safeParseFloat";
 
 // ── ASCVD (Pooled Cohort Equations 2013) ───────────────
 

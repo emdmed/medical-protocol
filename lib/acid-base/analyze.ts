@@ -1,7 +1,7 @@
 import { safeFloat } from "./safeFloat";
-import { ExpectedValues } from "./interfaces";
+import { Values, ExpectedValues } from "./interfaces";
 
-export const analyze = ({ values, isChronic }) => {
+export const analyze = ({ values, isChronic }: { values: Values; isChronic: boolean }) => {
   const pH = safeFloat(values.pH);
   const pCO2 = safeFloat(values.pCO2);
   const HCO3 = safeFloat(values.HCO3);
@@ -18,6 +18,7 @@ export const analyze = ({ values, isChronic }) => {
   // Flags inconsistent inputs — analysis still proceeds but results should be treated with caution
   const expectedPH = 6.1 + Math.log10(HCO3 / (0.03 * pCO2));
   const hhDeviation = Math.abs(pH - expectedPH);
+  // Tolerance 0.08: accounts for rounding in lab-reported values (Emmett & Narins, AJKD 2001)
   const hhConsistency = {
     expectedPH: expectedPH.toFixed(2),
     measured: pH.toFixed(2),
@@ -137,8 +138,9 @@ export const analyze = ({ values, isChronic }) => {
   }
 
   // Now calculate expected compensation based on primary disorder
+  // Compensation formulas: Adrogué & Madias, NEJM 1998; Narins & Emmett, Medicine 1980
   if (primaryDisorder === "Metabolic Acidosis") {
-    // Winter's formula: Expected pCO2 = 1.5 × [HCO3-] + 8 ± 2
+    // Winter's formula: Expected pCO2 = 1.5 × [HCO3-] + 8 ± 2 (Winter, Ann Intern Med 1967)
     const expectedPCO2 = 1.5 * HCO3 + 8;
     expectedValues.low = (expectedPCO2 - 2).toFixed(1);
     expectedValues.high = (expectedPCO2 + 2).toFixed(1);
@@ -159,7 +161,7 @@ export const analyze = ({ values, isChronic }) => {
       compensation = "Compensated";
     }
   } else if (primaryDisorder === "Metabolic Alkalosis") {
-    // Expected pCO2 = 0.7 × ΔHCO3 + 40 ± 5, capped at 55 mmHg physiological ceiling
+    // Expected pCO2 = 0.7 × ΔHCO3 + 40 ± 5 (Javaheri & Kazemi, NEJM 1980), capped at 55 mmHg physiological ceiling
     const rawExpectedPCO2 = 0.7 * (HCO3 - 24) + 40;
     const expectedPCO2 = Math.min(rawExpectedPCO2, 55);
     expectedValues.low = (expectedPCO2 - 5).toFixed(1);
@@ -181,6 +183,7 @@ export const analyze = ({ values, isChronic }) => {
       compensation = "Compensated";
     }
   } else if (primaryDisorder === "Respiratory Acidosis") {
+    // Acute: ΔHCO3 = 0.1 × ΔpCO2 ± 3; Chronic: ΔHCO3 = 0.35 × ΔpCO2 ± 3 (Brackett et al., NEJM 1965; Schwartz & Relman, NEJM 1963)
     if (isChronic) {
       // Chronic: ΔHCO3 = 0.35 × ΔpCO2
       const expectedHCO3 = 24 + 0.35 * (pCO2 - 40);
@@ -225,6 +228,7 @@ export const analyze = ({ values, isChronic }) => {
       }
     }
   } else if (primaryDisorder === "Respiratory Alkalosis") {
+    // Acute: ΔHCO3 = 0.2 × ΔpCO2 ± 2; Chronic: ΔHCO3 = 0.5 × ΔpCO2 ± 2 (Arbus et al., NEJM 1969; Gennari et al., NEJM 1972)
     if (isChronic) {
       // Chronic: ΔHCO3 = 0.5 × ΔpCO2
       const expectedHCO3 = 24 - 0.5 * (40 - pCO2);
@@ -288,9 +292,9 @@ export const analyze = ({ values, isChronic }) => {
 
     // Albumin correction for anion gap (if albumin is provided)
     if (Alb !== null && Alb > 0) {
-      // Corrected AG = Uncorrected AG + 2.5 × (4.0 - measured albumin)
+      // Corrected AG = Uncorrected AG + 2.5 × (4.0 - measured albumin) (Figge et al., Crit Care Med 1998)
       correctedAG = uncorrectedAG + 2.5 * (4.0 - Alb);
-      // Use corrected AG for status determination
+      // AG thresholds: >12 High, <8 Low (Kraut & Madias, NEJM 2014; normal AG 8–12 mEq/L)
       agStatus = correctedAG > 12 ? "High" : correctedAG < 8 ? "Low" : "Normal";
       // Set anionGap to corrected value for display
       anionGap = correctedAG;
@@ -301,6 +305,7 @@ export const analyze = ({ values, isChronic }) => {
   }
 
   // ---- Delta ratio (if high anion gap metabolic acidosis) ----
+  // Delta-delta: ΔAG / ΔHCO3; <1 = concurrent NAGMA, 1-2 = pure HAGMA, >2 = concurrent met alk (Wrenn, Ann Emerg Med 1990)
   let deltaRatio: number | null = null;
   let deltaRatioInterpretation: string | null = null;
 
@@ -373,13 +378,6 @@ export const analyze = ({ values, isChronic }) => {
     deltaRatioInterpretation,
     allDisorders,
     hhConsistency,
-    debug: {
-      Na,
-      Cl,
-      HCO3,
-      Alb,
-      calculatedAG: anionGap
-    }
   };
 
   return result;

@@ -1,9 +1,7 @@
-import { TriangleAlert, Thermometer, LucideIcon } from "lucide-react";
-
 export interface TemperatureStatus {
   type: "fever" | "hypothermia" | "normal";
   label: string;
-  icon: LucideIcon;
+  icon: string;
   color: string;
   bgColor: string;
 }
@@ -72,7 +70,7 @@ export const getTemperatureStatus = (
     return {
       type: "fever",
       label: "Fever",
-      icon: TriangleAlert,
+      icon: "triangle-alert",
       color: "text-destructive",
       bgColor: "border-destructive",
     };
@@ -82,7 +80,7 @@ export const getTemperatureStatus = (
     return {
       type: "hypothermia",
       label: "Low",
-      icon: Thermometer,
+      icon: "thermometer",
       color: "text-destructive",
       bgColor: "border-destructive",
     };
@@ -91,7 +89,7 @@ export const getTemperatureStatus = (
   return null;
 };
 
-export const parseTemperatureValue = (value: string | number): number => {
+export const parseTemperatureValue = (value: string | number): number | null => {
   if(!value) return null
   const parsed = parseFloat(value.toString());
   return isNaN(parsed) ? 0 : parsed;
