@@ -28,4 +28,4 @@ export {
   getTemperatureStatusCli,
 } from "./temperature";
 
-export { BloodOxygenValidations } from "./blood-oxygen";
+export { bloodOxygenValidations, BloodOxygenValidations } from "./blood-oxygen";

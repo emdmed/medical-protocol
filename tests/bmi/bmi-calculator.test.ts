@@ -55,6 +55,37 @@ describe('calculateBMI — metric', () => {
   it('returns null for negative weight', () => {
     expect(calculateBMI('-10', '', '', '1.75', true)).toBeNull();
   });
+
+  it('returns null for negative height', () => {
+    expect(calculateBMI('70', '', '', '-1.75', true)).toBeNull();
+  });
+
+  it('returns null for weight exceeding upper bound (metric)', () => {
+    expect(calculateBMI('701', '', '', '1.75', true)).toBeNull();
+  });
+
+  it('returns null for height exceeding upper bound (metric)', () => {
+    expect(calculateBMI('70', '', '', '2.80', true)).toBeNull();
+  });
+
+  it('returns null for NaN weight', () => {
+    expect(calculateBMI('abc', '', '', '1.75', true)).toBeNull();
+  });
+
+  it('returns null for NaN height', () => {
+    expect(calculateBMI('70', '', '', 'abc', true)).toBeNull();
+  });
+});
+
+describe('calculateBMI — imperial upper bounds', () => {
+  it('returns null for weight exceeding upper bound (imperial)', () => {
+    expect(calculateBMI('1501', '5', '9', '', false)).toBeNull();
+  });
+
+  it('returns null for height exceeding upper bound (imperial)', () => {
+    // 9 feet 1 inch = 109 inches > 108
+    expect(calculateBMI('154', '9', '1', '', false)).toBeNull();
+  });
 });
 
 describe('getBMICategory', () => {

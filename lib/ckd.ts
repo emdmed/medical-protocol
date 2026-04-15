@@ -264,13 +264,23 @@ export const calculateEGFRSlope = (
 
   if (!Array.isArray(data) || data.length < 2) return null;
 
-  const points = data
+  const parsed = data
     .map((r) => ({
       egfr: typeof r.egfr === "number" ? r.egfr : parseFloat(String(r.egfr)),
       time: new Date(r.date).getTime(),
     }))
     .filter((p) => !isNaN(p.egfr) && !isNaN(p.time))
     .sort((a, b) => a.time - b.time);
+
+  // Deduplicate by timestamp — keep last reading per date to avoid division by zero
+  const seen = new Set<number>();
+  const points: typeof parsed = [];
+  for (let i = parsed.length - 1; i >= 0; i--) {
+    if (!seen.has(parsed[i].time)) {
+      seen.add(parsed[i].time);
+      points.unshift(parsed[i]);
+    }
+  }
 
   if (points.length < 2) return null;
 

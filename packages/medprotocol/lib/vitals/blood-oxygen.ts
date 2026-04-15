@@ -3,7 +3,7 @@
  * Logic mirrors blood-oxygen-validations.tsx.
  */
 
-export const BloodOxygenValidations = {
+export const bloodOxygenValidations = {
   spo2: {
     isValid: (value: string | number): boolean => {
       const num = parseFloat(String(value));
@@ -21,9 +21,9 @@ export const BloodOxygenValidations = {
     },
 
     getSeverity: (value: string | number): "critical" | "low" | "normal" | "invalid" => {
-      if (!BloodOxygenValidations.spo2.isValid(value)) return "invalid";
-      if (BloodOxygenValidations.spo2.isCritical(value)) return "critical";
-      if (BloodOxygenValidations.spo2.isLow(value)) return "low";
+      if (!bloodOxygenValidations.spo2.isValid(value)) return "invalid";
+      if (bloodOxygenValidations.spo2.isCritical(value)) return "critical";
+      if (bloodOxygenValidations.spo2.isLow(value)) return "low";
       return "normal";
     },
 
@@ -67,3 +67,6 @@ export const BloodOxygenValidations = {
     },
   },
 };
+
+/** @deprecated Use bloodOxygenValidations instead */
+export const BloodOxygenValidations = bloodOxygenValidations;

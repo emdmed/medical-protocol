@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import BloodOxygenValidations, {
+import bloodOxygenValidations, {
   spo2,
   fio2,
   utils,

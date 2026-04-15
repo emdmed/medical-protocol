@@ -16,7 +16,7 @@ import {
   TEMPERATURE_LIMITS,
   validateTemperatureInput,
 } from "../../lib/vitals/temperature";
-import { BloodOxygenValidations } from "../../lib/vitals/blood-oxygen";
+import { bloodOxygenValidations } from "../../lib/vitals/blood-oxygen";
 import { formatHeader, formatTable, printResult, formatError } from "../format";
 
 const USAGE = `Usage: medprotocol vitals [options]
@@ -174,19 +174,19 @@ export const run = (argv: string[]): void => {
 
   // SpO2 / FiO2
   if (values.spo2) {
-    if (!BloodOxygenValidations.spo2.isValid(values.spo2)) {
+    if (!bloodOxygenValidations.spo2.isValid(values.spo2)) {
       errors.push("SpO2 must be 70–100%");
     } else {
       const spo2 = parseFloat(values.spo2);
-      const severity = BloodOxygenValidations.spo2.getSeverity(values.spo2);
+      const severity = bloodOxygenValidations.spo2.getSeverity(values.spo2);
       const fio2Val = values.fio2 ? parseFloat(values.fio2) : 21;
       const fio2Valid =
-        !values.fio2 || BloodOxygenValidations.fio2.isValid(values.fio2);
+        !values.fio2 || bloodOxygenValidations.fio2.isValid(values.fio2);
 
       if (values.fio2 && !fio2Valid) {
         errors.push("FiO2 must be 21–100%");
       } else {
-        const ratio = BloodOxygenValidations.utils.calculateRatio(
+        const ratio = bloodOxygenValidations.utils.calculateRatio(
           values.spo2,
           String(fio2Val),
         );

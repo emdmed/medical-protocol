@@ -450,6 +450,25 @@ describe('calculateEGFRSlope', () => {
     const slope = calculateEGFRSlope(readings);
     expect(slope).toBeCloseTo(-10, 0);
   });
+
+  it('deduplicates readings with identical timestamps (keeps last per date)', () => {
+    const readings = JSON.stringify([
+      { egfr: 60, date: '2024-01-01' },
+      { egfr: 55, date: '2024-01-01' },  // duplicate date — should keep this one (last)
+      { egfr: 50, date: '2025-01-01' },
+    ]);
+    const slope = calculateEGFRSlope(readings);
+    // With dedup: 55 → 50 over 1 year = -5
+    expect(slope).toBeCloseTo(-5, 0);
+  });
+
+  it('returns null when all readings share the same timestamp', () => {
+    const readings = JSON.stringify([
+      { egfr: 60, date: '2024-01-01' },
+      { egfr: 55, date: '2024-01-01' },
+    ]);
+    expect(calculateEGFRSlope(readings)).toBeNull();
+  });
 });
 
 // ─── isRapidDecline ─────────────────────────────────────────────────

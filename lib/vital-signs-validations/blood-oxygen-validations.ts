@@ -1,4 +1,4 @@
-export const BloodOxygenValidations = {
+export const bloodOxygenValidations = {
   spo2: {
     isValid: (value) => {
       const num = parseFloat(value);
@@ -27,7 +27,7 @@ export const BloodOxygenValidations = {
     },
 
     getSeverity: (value) => {
-      if (!BloodOxygenValidations.spo2.isValid(value)) return 'invalid';
+      if (!bloodOxygenValidations.spo2.isValid(value)) return 'invalid';
 
       const num = parseFloat(value);
       if (num < 90) return 'critical';
@@ -69,7 +69,7 @@ export const BloodOxygenValidations = {
     },
 
     getDeliveryMethod: (value) => {
-      if (!BloodOxygenValidations.fio2.isValid(value)) return 'invalid';
+      if (!bloodOxygenValidations.fio2.isValid(value)) return 'invalid';
 
       const num = parseFloat(value);
       if (num === 21) return 'room air';
@@ -109,9 +109,12 @@ export const BloodOxygenValidations = {
   }
 };
 
-export const hasValidBloodOxygenInput = BloodOxygenValidations.spo2.isValid;
-export const hasValidFio2Input = BloodOxygenValidations.fio2.isValid;
+export const hasValidBloodOxygenInput = bloodOxygenValidations.spo2.isValid;
+export const hasValidFio2Input = bloodOxygenValidations.fio2.isValid;
 
-export const { spo2, fio2, utils } = BloodOxygenValidations;
+export const { spo2, fio2, utils } = bloodOxygenValidations;
 
-export default BloodOxygenValidations;
+/** @deprecated Use bloodOxygenValidations instead */
+export const BloodOxygenValidations = bloodOxygenValidations;
+
+export default bloodOxygenValidations;
