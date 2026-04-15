@@ -274,11 +274,6 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
     }
   }
 
-  // Special handling for normal pH with compensated disorders
-  if (isNormalPH && compensation === "Compensated") {
-    compensation = "Compensated";
-  }
-
   // ---- Anion gap calculation ----
   let anionGap: number | null = null;
   let agStatus: string | null = null;
@@ -366,7 +361,6 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
     disorder: primaryDisorder,
     compensatoryResponse,
     additionalDisorders,
-    mixedDisorders: [...additionalDisorders], // for backward compatibility
     compensation,
     interpretation,
     expectedValues,

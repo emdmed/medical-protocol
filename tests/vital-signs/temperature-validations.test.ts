@@ -154,8 +154,8 @@ describe('parseTemperatureValue', () => {
     expect(parseTemperatureValue(0)).toBeNull();
   });
 
-  it('returns 0 for non-numeric string', () => {
-    expect(parseTemperatureValue('abc')).toBe(0);
+  it('returns null for non-numeric string', () => {
+    expect(parseTemperatureValue('abc')).toBeNull();
   });
 });
 

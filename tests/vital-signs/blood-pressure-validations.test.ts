@@ -110,7 +110,7 @@ describe('getBloodPressureCategory', () => {
     expect(getBloodPressureCategory(120, 80)).toBeNull();
   });
 
-  it('returns High when systolic > 130', () => {
+  it('returns High when systolic >= 130', () => {
     expect(getBloodPressureCategory(140, 80)).toEqual({ category: 'High' });
   });
 
@@ -126,8 +126,8 @@ describe('getBloodPressureCategory', () => {
     expect(getBloodPressureCategory(100, 55)).toEqual({ category: 'Low' });
   });
 
-  it('boundary: systolic exactly 130 is normal (not > 130)', () => {
-    expect(getBloodPressureCategory(130, 80)).toBeNull();
+  it('boundary: systolic exactly 130 is High (>= 130)', () => {
+    expect(getBloodPressureCategory(130, 80)).toEqual({ category: 'High' });
   });
 
   it('boundary: systolic exactly 90 is normal (not < 90)', () => {

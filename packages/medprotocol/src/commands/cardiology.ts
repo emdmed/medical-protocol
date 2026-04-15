@@ -82,6 +82,11 @@ const runASCVD = (argv: string[], json: boolean): void => {
     strict: true,
   });
 
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
+
   const missing: string[] = [];
   if (!values.age) missing.push("--age");
   if (!values.sex) missing.push("--sex");
@@ -173,6 +178,11 @@ const runHEART = (argv: string[], json: boolean): void => {
     strict: true,
   });
 
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
+
   const missing: string[] = [];
   if (!values.history) missing.push("--history");
   if (!values.ecg) missing.push("--ecg");
@@ -249,6 +259,11 @@ const runCHADSVASc = (argv: string[], json: boolean): void => {
     },
     strict: true,
   });
+
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
 
   const inputs: CHADSVAScInputs = {
     chf: values.chf!,

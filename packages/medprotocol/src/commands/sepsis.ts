@@ -88,6 +88,11 @@ const runSOFA = (argv: string[], json: boolean): void => {
     strict: true,
   });
 
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
+
   const reading = {
     paO2: values.pao2!,
     fiO2: values.fio2!,
@@ -161,6 +166,11 @@ const runQSOFA = (argv: string[], json: boolean): void => {
     strict: true,
   });
 
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
+
   const missing: string[] = [];
   if (!values.rr) missing.push("--rr");
   if (!values.sbp) missing.push("--sbp");
@@ -210,6 +220,11 @@ const runLactate = (argv: string[], json: boolean): void => {
     },
     strict: true,
   });
+
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
 
   const missing: string[] = [];
   if (!values.initial) missing.push("--initial");

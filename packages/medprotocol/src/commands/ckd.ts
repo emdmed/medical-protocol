@@ -69,6 +69,11 @@ const runEGFR = (argv: string[], json: boolean): void => {
     strict: true,
   });
 
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
+
   const missing: string[] = [];
   if (!values.creatinine) missing.push("--creatinine");
   if (!values.age) missing.push("--age");
@@ -114,6 +119,11 @@ const runStage = (argv: string[], json: boolean): void => {
     },
     strict: true,
   });
+
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
 
   const missing: string[] = [];
   if (!values.creatinine) missing.push("--creatinine");
@@ -174,6 +184,11 @@ const runKFRE = (argv: string[], json: boolean): void => {
     strict: true,
   });
 
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
+
   const missing: string[] = [];
   if (!values.age) missing.push("--age");
   if (!values.sex) missing.push("--sex");
@@ -224,6 +239,11 @@ const runTreatment = (argv: string[], json: boolean): void => {
     },
     strict: true,
   });
+
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
 
   const missing: string[] = [];
   if (!values.egfr) missing.push("--egfr");

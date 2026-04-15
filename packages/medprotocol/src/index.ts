@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const VERSION = "0.4.0";
+import { version as VERSION } from "../package.json";
 
 const USAGE = `medprotocol — Medical calculations from the terminal
 
