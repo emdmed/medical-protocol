@@ -99,8 +99,13 @@ Ask the doctor:
      ```
      claude plugin install medical-protocol --scope project
      ```
-  3. If the install succeeds: tell the doctor "Clinical skills are installed. Let's continue."
-  4. If the install fails for any reason: tell the doctor "I wasn't able to install the skills automatically, but everything else is set up. You can still describe what you need and I'll build it for you." Then move to step 4.
+  3. If the install fails with an `EXDEV` (cross-device link) error — this happens on Linux when `/tmp` is a separate filesystem (e.g. tmpfs) — retry with a temp directory on the same device:
+     ```
+     mkdir -p "$HOME/.claude/tmp"
+     TMPDIR="$HOME/.claude/tmp" claude plugin install medical-protocol --scope project
+     ```
+  4. If the install succeeds: tell the doctor "Clinical skills are installed. Let's continue."
+  5. If the install still fails for any other reason: tell the doctor "I wasn't able to install the skills automatically, but everything else is set up. You can still describe what you need and I'll build it for you." Then move to step 4.
 
 - **If the doctor says no** (or wants to skip): move to step 4. The system works without skills — they just make the experience better.
 
