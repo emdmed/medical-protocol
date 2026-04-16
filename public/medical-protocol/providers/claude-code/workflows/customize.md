@@ -32,7 +32,10 @@ Silently determine which files need to change:
 
 3. **If the doctor requests a component that isn't installed yet**, install it with `npx medical-ui-cli add <component>`
 
-4. **If the project has multiple components wired together** (e.g., a dashboard with embedded calculators), fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards) before making changes
+4. **If the project has multiple components wired together** (e.g., a dashboard with embedded calculators), review the installed component code and follow these composition rules before making changes:
+   - Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.
+   - Add `overflow-visible` to any shadcn Card that contains absolutely-positioned popups or overlays.
+   - Null-guard all cross-component data.
 
 6. **If the doctor requests a feature that doesn't exist in the CDN** (e.g., a medication tracker, lab results viewer, scheduling system), build it from scratch:
    - Follow the patterns established in the existing project code (file structure, naming conventions, hook patterns, shadcn usage)

@@ -5,3 +5,4 @@ packages/medprotocol/dist/
 .claude/settings.local.json
 marketing/
 docs/
+.patterns/advisor-research-template/

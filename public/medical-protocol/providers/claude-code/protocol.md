@@ -224,13 +224,19 @@ npx medical-ui-cli debug             # Diagnostic info
 When a workflow instructs you to install a component:
 
 1. **Install the component**: Run `npx medical-ui-cli add {component-name}` silently. This copies the full component folder (all files, subdirectories) into the project's `components/` directory and installs all required shadcn dependencies automatically.
-2. **Check for dependencies**: Some components depend on others (e.g., DKA depends on `acid-base`). The CLI does **not** auto-install dependent components — you must install them separately. Check the manifest at `{CDN_BASE}/components/manifest.json` for the `dependencies` field.
-3. **Install shared components**: The CLI does **not** auto-install shared components (`medical-disclaimer.tsx`, `layout-disclaimer.tsx`, `error-boundary.tsx`). If the installed component imports any of these, fetch them from `{CDN_BASE}/components/{file-path}` and write them to the project.
+2. **Check for dependencies**: Some components depend on others. The CLI does **not** auto-install dependent components — you must install them separately. Known dependencies:
+   - `dka` depends on `acid-base` — install acid-base first
+   - `sepsis` depends on `vital-signs` and `water-balance`
+   - Other components are self-contained
+3. **Install shared components**: The CLI does **not** auto-install shared components (`medical-disclaimer.tsx`, `layout-disclaimer.tsx`, `error-boundary.tsx`). After installing, check the component's imports — if it references any of these shared files that don't exist in the project, create them as simple React components following the patterns in the installed code.
 4. **Handle `externalComponents`** (if present in the manifest entry): these are imports the component expects that are not available via the CLI. You must either create them or remove/replace those imports:
    - **shadcn hook or component** (e.g. `@/hooks/use-mobile`) — create it using standard shadcn patterns or install via `npx shadcn@latest add`
    - **Another manifest component** (e.g. `@/components/water-balance/water-balance`) — install it via `npx medical-ui-cli add {name}`
    - **Project-specific UI variant** (e.g. `@/components/ui/textarea-inv`) — create it as a thin wrapper around the standard shadcn component
-5. **When composing multiple components**, fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns, typed examples, and known gotchas. This is only needed when wiring components together — skip for single-component workflows.
+5. **When composing multiple components**, follow these integration rules (only needed when wiring components together — skip for single-component workflows):
+   - Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.
+   - Add `overflow-visible` to any shadcn Card that contains absolutely-positioned popups or overlays.
+   - Null-guard all cross-component data.
 6. **Post-install review** — after installation, review the installed code and adapt if needed:
    - Ensure all TypeScript compiles cleanly (`npx tsc --noEmit`) — don't introduce type errors
    - Make sure UI elements like popups and overlays work correctly within the layout (e.g., no overflow clipping, correct positioning)
@@ -238,51 +244,31 @@ When a workflow instructs you to install a component:
    - **Avoid circular update loops**: When a child component receives data via props AND reports changes back via a callback, never put `onData(values)` in a `useEffect` that depends on `values` if the parent re-renders and passes those values back as props. Use `useRef` to track the previous serialized value and skip updates when nothing changed. Store callback props in a ref (`onDataRef.current = onData`) so they don't appear in dependency arrays.
 7. **Do not tell the doctor** about the CLI, files being installed, or any technical details — just confirm the clinical capability is ready
 
-### Manifest Schema Reference
+### Component Reference
 
-The manifest (`{CDN_BASE}/components/manifest.json`) is a JSON object with these top-level keys:
+Components are delivered via `npx medical-ui-cli add <name>`. Available components:
 
-| Key | Type | Description |
-|---|---|---|
-| `version` | string | Component registry version (e.g. `"0.4.0"`) |
-| `description` | string | Human-readable description of the registry |
-| `context` | string | How to use this file |
-| `shared` | object | Shared components (medical-disclaimer, layout-disclaimer, error-boundary) — keyed by name, each has `description`, `import`, `files`, optional `shadcn` |
+| Component | Category | Dependencies | Description |
+|---|---|---|---|
+| `vital-signs` | monitoring | none | BP, HR, RR, Temp, SpO2 monitor |
+| `acid-base` | calculator | none | Blood gas / acid-base analyzer |
+| `bmi` | calculator | none | BMI calculator |
+| `water-balance` | monitoring | none | Fluid balance tracker |
+| `pafi` | calculator | none | PaO2/FiO2 with ARDS classification |
+| `dka` | critical-care | `acid-base` | DKA monitoring |
+| `cardiology` | calculator | none | ASCVD, HEART, CHA₂DS₂-VASc |
+| `sepsis` | critical-care | `vital-signs`, `water-balance` | SOFA, qSOFA, lactate clearance |
+| `ckd` | calculator | none | eGFR, KDIGO staging, KFRE |
 
-Each **component entry** (e.g. `manifest["vital-signs"]`) has:
+Each installed component folder contains a JSDoc header in its main TSX file documenting props, usage, data flow, and behavior — read this before modifying.
 
-| Field | Type | Description |
-|---|---|---|
-| `version` | string | Component version |
-| `category` | string | `"monitoring"`, `"calculator"`, `"display"`, or `"documentation"` |
-| `description` | string | What the component does |
-| `import` | string | Import path (e.g. `"@/components/vital-signs/vital-signs"`) |
-| `types` | string | Types import path (if separate types file exists) |
-| `target` | string | Where to write in the doctor's project (e.g. `"components/vital-signs"`) |
-| `props` | string or object | Prop summary — either `"none — self-contained"` or an object with prop names as keys and type descriptions as values |
-| `dataFlow` | string | `"bidirectional"`, `"input only"`, `"output only"`, or `"none"` |
-| `popups` | object | Popup/overlay positioning details (optional) |
-| `shadcn` | string[] | Required shadcn components to install (e.g. `["card", "button", "input"]`) |
-| `files` | string[] | Files to fetch from `{CDN_BASE}/components/{target}/{file}` |
-| `dependencies` | string[] | Other manifest components this one requires (e.g. DKA depends on `["acid-base"]`) |
-| `externalComponents` | string[] | Imports the component expects that are **not on the CDN** — see below |
+### Handling Missing Imports After Installation
 
-### Understanding `externalComponents`
+After installing a component, check its imports. If it references modules that don't exist in the project:
 
-Some components import modules that aren't available on the CDN. These are listed in `externalComponents`. When you encounter them:
-
-1. **Check if it's a shadcn hook or component** (e.g. `@/hooks/use-mobile`) — if so, create it using standard shadcn patterns or install via `npx shadcn@latest add`
-2. **Check if it's another manifest component** (e.g. `@/components/water-balance/water-balance`) — if so, fetch and install that component first
-3. **Check if it's a project-specific UI variant** (e.g. `@/components/ui/textarea-inv`) — if so, create it as a thin wrapper around the standard shadcn component
-
-Example:
-```json
-"externalComponents": [
-  "@/components/water-balance/water-balance",  // → fetch from manifest["water-balance"]
-  "@/components/acid-base/acid-base",          // → fetch from manifest["acid-base"]
-  "@/components/ui/textarea-inv"               // → create as textarea variant
-]
-```
+1. **shadcn hook or component** (e.g. `@/hooks/use-mobile`) — create it using standard shadcn patterns or install via `npx shadcn@latest add`
+2. **Another component** (e.g. `@/components/water-balance/water-balance`) — install it via `npx medical-ui-cli add {name}`
+3. **Project-specific UI variant** (e.g. `@/components/ui/textarea-inv`) — create it as a thin wrapper around the standard shadcn component
 
 ---
 

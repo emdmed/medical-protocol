@@ -37,7 +37,7 @@ Silently determine which files need to change:
    mkdir -p .claude/hooks-state && touch .claude/hooks-state/.workflow_active
    ```
 
-3. Fetch the manifest (`{CDN_BASE}/components/manifest.json`) and use its `target` and `files` fields to locate the right files. The manifest's `props` and `dataFlow` fields tell you how each component accepts data and reports changes — read these before modifying anything.
+3. Read the installed component files in the project's `components/` directory. Each main TSX file has a JSDoc header documenting its props, data flow, and behavior — read these before modifying anything.
 
 4. Read the JSDoc header at the top of the main component file to understand its props, usage, and integration points before making changes.
 

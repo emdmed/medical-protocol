@@ -30,7 +30,10 @@ For each block the doctor selected, follow the **Component Installation Process*
 
 Check if any installed component has dependencies on other components — if so, install those too with `npx medical-ui-cli add`.
 
-Fetch `{CDN_BASE}/components/COMPOSITION.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards).
+Refer to the composition context for integration patterns and known gotchas (overflow clipping, circular updates, null guards). Key rules:
+- Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.
+- Add `overflow-visible` to any shadcn Card that contains absolutely-positioned popups or overlays.
+- When wiring multiple components on a single page, null-guard all cross-component data.
 
 Install all shadcn components from the selected manifests (deduplicated).
 
