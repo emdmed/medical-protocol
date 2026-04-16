@@ -1,6 +1,6 @@
 # Component Composition Patterns
 
-How to wire medical protocol components together. For individual component props and types, read the JSDoc header in each component file, or see `manifest.json` for a quick summary.
+How to wire medical protocol components together. For individual component props and types, read the JSDoc header in each component's main TSX file after installing via `npx medical-ui-cli add <name>`.
 
 ---
 

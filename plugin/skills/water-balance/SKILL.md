@@ -12,7 +12,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Component
 
-- **Manifest entry:** `water-balance`
+- **Component:** `water-balance` (install via `npx medical-ui-cli add water-balance`)
 - **Route:** `app/water-balance/page.tsx`
 - **Preview message:** "Your fluid balance tracker is ready. Enter the patient's weight, fluid intake (oral and IV), urine output, and stool count — it calculates the net balance including insensible losses. View it at http://localhost:3000/water-balance"
 

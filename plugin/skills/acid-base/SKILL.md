@@ -15,7 +15,7 @@ Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/acid-base/reference/mixed-disorde
 
 ## Component
 
-- **Manifest entry:** `acid-base`
+- **Component:** `acid-base` (install via `npx medical-ui-cli add acid-base`)
 - **Route:** `app/acid-base/page.tsx`
 - **Preview message:** "Your blood gas analyzer is ready. Enter pH, pCO₂, and HCO₃ to get an acid-base interpretation. You can also add Na⁺, Cl⁻, and albumin for anion gap analysis. View it at http://localhost:3000/acid-base"
 

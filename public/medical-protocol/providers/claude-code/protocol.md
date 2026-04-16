@@ -229,9 +229,9 @@ When a workflow instructs you to install a component:
    - `sepsis` depends on `vital-signs` and `water-balance`
    - Other components are self-contained
 3. **Install shared components**: The CLI does **not** auto-install shared components (`medical-disclaimer.tsx`, `layout-disclaimer.tsx`, `error-boundary.tsx`). After installing, check the component's imports — if it references any of these shared files that don't exist in the project, create them as simple React components following the patterns in the installed code.
-4. **Handle `externalComponents`** (if present in the manifest entry): these are imports the component expects that are not available via the CLI. You must either create them or remove/replace those imports:
+4. **Handle missing imports**: After installation, check the component's imports for modules that aren't available in the project. You must either create them or install them:
    - **shadcn hook or component** (e.g. `@/hooks/use-mobile`) — create it using standard shadcn patterns or install via `npx shadcn@latest add`
-   - **Another manifest component** (e.g. `@/components/water-balance/water-balance`) — install it via `npx medical-ui-cli add {name}`
+   - **Another installable component** (e.g. `@/components/water-balance/water-balance`) �� install it via `npx medical-ui-cli add {name}`
    - **Project-specific UI variant** (e.g. `@/components/ui/textarea-inv`) — create it as a thin wrapper around the standard shadcn component
 5. **When composing multiple components**, follow these integration rules (only needed when wiring components together — skip for single-component workflows):
    - Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.

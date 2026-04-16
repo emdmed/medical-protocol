@@ -15,7 +15,7 @@ Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/vitals/reference/pediatric-ranges
 
 ## Component
 
-- **Manifest entry:** `vital-signs`
+- **Component:** `vital-signs` (install via `npx medical-ui-cli add vital-signs`)
 - **Route:** `app/vital-signs/page.tsx`
 - **Preview message:** "Your vital signs monitor is ready. It tracks [list signs]. View it at http://localhost:3000/vital-signs"
 

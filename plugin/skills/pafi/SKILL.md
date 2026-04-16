@@ -14,7 +14,7 @@ Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/pafi/reference/ventilation-target
 
 ## Component
 
-- **Manifest entry:** `pafi`
+- **Component:** `pafi` (install via `npx medical-ui-cli add pafi`)
 - **Route:** `app/pafi/page.tsx`
 - **Preview message:** "Your PaFi calculator is ready. Enter PaO2 and FiO2 values to get the PaO2/FiO2 ratio with ARDS classification. You can use the FiO2 presets for common oxygen levels. View it at http://localhost:3000/pafi"
 

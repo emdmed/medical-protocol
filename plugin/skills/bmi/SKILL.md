@@ -12,7 +12,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Component
 
-- **Manifest entry:** `bmi`
+- **Component:** `bmi` (install via `npx medical-ui-cli add bmi`)
 - **Route:** `app/bmi/page.tsx`
 - **Preview message:** "Your BMI calculator is ready. Click to enter weight and height, and it will show the BMI with its category. You can switch between metric and imperial units. View it at http://localhost:3000/bmi"
 

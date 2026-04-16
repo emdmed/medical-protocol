@@ -22,7 +22,7 @@ When a workflow instructs you to install a component:
 3. **Install shared components**: The CLI does **not** auto-install shared components (`medical-disclaimer.tsx`, `layout-disclaimer.tsx`, `error-boundary.tsx`). After installing, check the component's imports — if it references any of these shared files that don't exist in the project, create them as simple React components following the patterns in the installed code.
 4. **Handle external imports**: After installation, check the component's imports for modules that aren't available:
    - **shadcn hook or component** (e.g. `@/hooks/use-mobile`) — create it using standard shadcn patterns or install via `npx shadcn@latest add`
-   - **Another manifest component** (e.g. `@/components/water-balance/water-balance`) — install it via `npx medical-ui-cli add {name}`
+   - **Another installable component** (e.g. `@/components/water-balance/water-balance`) — install it via `npx medical-ui-cli add {name}`
    - **Project-specific UI variant** (e.g. `@/components/ui/textarea-inv`) — create it as a thin wrapper around the standard shadcn component
 5. **When composing multiple components**, refer to the composition context (`context/composition.md` in the plugin) for integration patterns, typed examples, and known gotchas. This is only needed when wiring components together — skip for single-component workflows.
 6. **Post-install review** — after installation, review the installed code and adapt if needed:
