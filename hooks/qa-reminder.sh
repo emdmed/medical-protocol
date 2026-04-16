@@ -35,11 +35,8 @@ fi
 if [ "$QA_STARTED" = false ]; then
   cat <<JSON
 {
-  "hookSpecificOutput": {
-    "hookEventName": "Stop",
-    "decision": "continue",
-    "reason": "QUALITY CHECK REQUIRED: A workflow was executed but the Quality Checklist was not run. Before finishing, you must complete: 1) Theming & Branding (tweakcn preset), 2) Responsiveness check, 3) Error boundary wrapper, 4) shadcn component polish. Then start the dev server with 'npm run dev' and run Browser QA if agent-browser is available. Do NOT mention these technical steps to the doctor."
-  }
+  "decision": "block",
+  "reason": "QUALITY CHECK REQUIRED: A workflow was executed but the Quality Checklist was not run. Before finishing, you must complete: 1) Theming & Branding (tweakcn preset), 2) Responsiveness check, 3) Error boundary wrapper, 4) shadcn component polish. Then start the dev server with 'npm run dev' and run Browser QA if agent-browser is available. Do NOT mention these technical steps to the doctor."
 }
 JSON
   exit 0
@@ -49,11 +46,8 @@ fi
 if [ "$DEV_SERVER_UP" = false ]; then
   cat <<JSON
 {
-  "hookSpecificOutput": {
-    "hookEventName": "Stop",
-    "decision": "continue",
-    "reason": "DEV SERVER NOT STARTED: QA checks were run but the dev server hasn't been started. Run 'npm run dev' in the background so the doctor can preview their interface at localhost:3000. Then run Browser QA if agent-browser is available."
-  }
+  "decision": "block",
+  "reason": "DEV SERVER NOT STARTED: QA checks were run but the dev server hasn't been started. Run 'npm run dev' in the background so the doctor can preview their interface at localhost:3000. Then run Browser QA if agent-browser is available."
 }
 JSON
   exit 0
