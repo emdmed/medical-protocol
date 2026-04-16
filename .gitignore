@@ -1,6 +1,7 @@
 node_modules/
 packages/medprotocol/dist/
 .claude/hooks-state/
+.claude/plugins/
 .claude/settings.local.json
 marketing/
 docs/

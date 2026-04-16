@@ -84,6 +84,28 @@ Check if the current directory already has a `CLAUDE.md` file that references th
 
 ---
 
+## Step 3.5 — Install clinical skills (optional)
+
+Ask the doctor:
+
+"Would you like me to install the clinical skills? These give me specialized knowledge for building things like vital signs monitors, lab calculators, and other medical tools. I recommend it — it only takes a moment."
+
+- **If the doctor says yes** (or anything affirmative):
+  1. Add the medical protocol marketplace silently:
+     ```
+     claude plugin marketplace add emdmed/medical-protocol
+     ```
+  2. Install the plugin into the project:
+     ```
+     claude plugin install medical-protocol --scope project
+     ```
+  3. If the install succeeds: tell the doctor "Clinical skills are installed. Let's continue."
+  4. If the install fails for any reason: tell the doctor "I wasn't able to install the skills automatically, but everything else is set up. You can still describe what you need and I'll build it for you." Then move to step 4.
+
+- **If the doctor says no** (or wants to skip): move to step 4. The system works without skills — they just make the experience better.
+
+---
+
 ## Step 4 — Done
 
 Tell the doctor:

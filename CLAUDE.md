@@ -46,7 +46,7 @@ lib/                               # Shared calculation + validation logic
 ├── vital-signs-validations/       # 5 validation files + types.ts
 ├── bmi.ts cardiology.ts cardiology-types.ts dka.ts pafi.ts sepsis.ts water-balance.ts
 packages/medprotocol/              # CLI calculator tool (9 commands)
-plugin/                            # Claude plugin: settings.json, hooks/, skills/ (14), context/ (10)
+plugin/                            # Claude plugin source: settings.json, hooks/, skills/ (14), context/ (10)
 tests/                             # Vitest — test files, clinical logic only, no UI rendering
 scripts/                           # bump-version.sh
 hooks/                             # Git hooks: privacy-guard, qa-reminder, track-workflow, validate-fetch

@@ -2,13 +2,8 @@
   "name": "medical-protocol",
   "version": "0.4.0",
   "description": "Medical protocol plugin for Claude Code — clinical interface builder with safety hooks for healthcare professionals. Use /medical-protocol:start to begin.",
-  "author": "Medical Protocol Team",
-  "homepage": "https://github.com/emdmed/medical-protocol",
-  "userConfig": {
-    "cdnBaseUrl": {
-      "description": "Base URL for the component CDN. Change this if you self-host the medical protocol components.",
-      "default": "https://medical-protocol.vercel.app/medical-protocol",
-      "required": false
-    }
-  }
+  "author": {
+    "name": "Medical Protocol Team"
+  },
+  "homepage": "https://github.com/emdmed/medical-protocol"
 }
