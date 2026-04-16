@@ -6,7 +6,7 @@ Choose your AI coding provider to get started:
 
 ### Claude Code (Recommended)
 
-The fully supported provider. Claude Code reads the protocol, fetches components from the CDN, and builds clinical interfaces automatically.
+The fully supported provider. Claude Code reads the protocol, installs components via medical-ui-cli, and builds clinical interfaces automatically.
 
 **Install guide:** [providers/claude-code/install.md](https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/install.md)
 

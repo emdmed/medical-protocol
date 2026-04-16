@@ -59,7 +59,7 @@ fi
 
 # ─── Block: curl/wget/httpie with data-sending methods ───
 # Block POST, PUT, PATCH, DELETE (data-sending HTTP methods)
-# Allow GET requests (fetching components from CDN is fine)
+# Allow GET requests (fetching workflows/manifests from CDN is fine)
 if echo "$CMD_LOWER" | grep -qE '\bcurl\b'; then
   # Block explicit data-sending flags
   if echo "$CMD_LOWER" | grep -qE '(\s|^)(-X\s*(POST|PUT|PATCH|DELETE)|--request\s*(POST|PUT|PATCH|DELETE)|-d\s|--data|--data-raw|--data-binary|--data-urlencode|-F\s|--form|--upload-file)'; then

@@ -37,7 +37,7 @@ Silently determine which files need to change:
    - Add `overflow-visible` to any shadcn Card that contains absolutely-positioned popups or overlays.
    - Null-guard all cross-component data.
 
-6. **If the doctor requests a feature that doesn't exist in the CDN** (e.g., a medication tracker, lab results viewer, scheduling system), build it from scratch:
+6. **If the doctor requests a feature that doesn't exist in the component library** (e.g., a medication tracker, lab results viewer, scheduling system), build it from scratch:
    - Follow the patterns established in the existing project code (file structure, naming conventions, hook patterns, shadcn usage)
    - Use the same state management approach (localStorage for persistence if enabled, React state otherwise)
    - Place new components in the appropriate directory (`components/` for reusable widgets, `app/{feature}/` for pages)

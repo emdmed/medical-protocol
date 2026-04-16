@@ -13,7 +13,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 Before anything else, silently check if the current project already has components installed (e.g., `components/vital-signs/`, `components/acid-base/`, etc.):
 
-- If the doctor asks for something that's already installed, route to the **customize** workflow — do not re-fetch or re-install components.
+- If the doctor asks for something that's already installed, route to the **customize** workflow — do not re-install components.
 - If the doctor asks for something new that doesn't exist yet, proceed with classification below.
 - Never re-scaffold the project if it already has a working setup.
 

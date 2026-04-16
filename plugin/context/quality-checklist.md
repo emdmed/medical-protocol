@@ -27,7 +27,7 @@
 ### 3. Error Boundary
 
 - Wrap the top-level page component in `ErrorBoundary` (from `components/error-boundary`) so the app shows a recovery UI instead of a white screen on crash
-- If the project doesn't have the error boundary file yet, create it following the pattern in the vital-signs CDN component
+- If the project doesn't have the error boundary file yet, create it as a simple React error boundary (class component with `getDerivedStateFromError` + `componentDidCatch`, renders a "Something went wrong — try again" recovery UI with a retry button)
 
 ### 4. shadcn Component Polish
 

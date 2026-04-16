@@ -35,7 +35,7 @@ Refer to the composition context for integration patterns and known gotchas (ove
 - Add `overflow-visible` to any shadcn Card that contains absolutely-positioned popups or overlays.
 - When wiring multiple components on a single page, null-guard all cross-component data.
 
-Install all shadcn components from the selected manifests (deduplicated).
+Install all selected components via `npx medical-ui-cli add <name>` (deduplicated — skip any already installed).
 
 ---
 

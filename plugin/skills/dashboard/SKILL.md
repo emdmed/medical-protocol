@@ -13,10 +13,10 @@ Also read ${CLAUDE_PLUGIN_ROOT}/../context/composition.md for component integrat
 
 ## Component
 
-- **Manifest entries:** Multiple — fetch each block the doctor selects from the manifest
+- **Components:** Multiple — install each block the doctor selects via `npx medical-ui-cli add <name>`
 - **Available blocks:** `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`
 - **Route:** `app/dashboard/page.tsx`
-- **Composition guide:** Fetch `COMPOSITION.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards)
+- **Composition guide:** Read `${CLAUDE_PLUGIN_ROOT}/../context/composition.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards)
 - **Preview message:** "Your clinical dashboard is ready with [list selected blocks]. View it at http://localhost:3000/dashboard"
 
 ## Phase 1: Clinical Requirements
@@ -45,7 +45,7 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 
 - Layout: responsive grid `grid-cols-1 lg:grid-cols-2 gap-6`
 - Smaller widgets (acid-base, BMI, water-balance) work well grouped together
-- Check `externalComponents` for each manifest entry — some are available as their own manifest entries
+- After installing each component, check its imports for missing dependencies — some reference other installable components
 - Update home page to redirect to `/dashboard`
 
 ## NEVER

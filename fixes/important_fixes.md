@@ -18,7 +18,7 @@ The same instructions exist in three places:
 
 ### 2. Every workflow repeats Phases 2-4 verbatim
 
-All 8 component workflows (`vital-signs.md`, `acid-base.md`, `bmi.md`, etc.) contain near-identical Phase 2 (fetch manifest, install components), Phase 3 (create page), and Phase 4 (quality + preview). Only Phase 1 (clinical questions) differs meaningfully.
+All 8 component workflows (`vital-signs.md`, `acid-base.md`, `bmi.md`, etc.) contain near-identical Phase 2 (install components via CLI), Phase 3 (create page), and Phase 4 (quality + preview). Only Phase 1 (clinical questions) differs meaningfully.
 
 **Fix:** Extract a shared `workflow-template.md` with Phases 2-4 and have each workflow only define Phase 1 + component-specific overrides. Or better: since `protocol.md` already has the Component Fetching Process, the workflows shouldn't repeat it at all.
 
@@ -30,11 +30,11 @@ All 8 component workflows (`vital-signs.md`, `acid-base.md`, `bmi.md`, etc.) con
 
 Each component that has dependencies handles them differently:
 
-- **dka.md**: Explicitly lists acid-base files to fetch (analyze.ts, popup.tsx, safeFloat.ts)
+- **dka.md**: Previously listed acid-base files to fetch from CDN (now uses `npx medical-ui-cli add acid-base`)
 - **dashboard.md**: Says "for each selected block, follow Component Fetching Process" but doesn't address transitive deps
 - **pafi.md**: Requires creating `lib/pafi` with calculation functions — unique pattern not used elsewhere
 
-**Risk:** Claude may miss dependencies, fetch them in wrong order, or create inconsistent `lib/` structures across projects. A doctor building DKA + dashboard could end up with duplicate acid-base code.
+**Risk:** Claude may miss dependencies, install them in wrong order, or create inconsistent `lib/` structures across projects. A doctor building DKA + dashboard could end up with duplicate acid-base code.
 
 ### 4. CDN URL hardcoded in 3+ locations
 
@@ -82,7 +82,7 @@ These cover the same topic but may drift. The plugin version is 166 lines; the C
 
 ### 10. `customize.md` workflow is underspecified
 
-It says "identify which files need to change" and "if the feature doesn't exist on CDN, build from scratch" — but gives no boundaries on scope. A doctor saying "add lab results" could trigger anything from a small field addition to a full new component. There's no decision tree for when to route to a new component workflow vs. modifying existing code.
+It says "identify which files need to change" and "if the feature doesn't exist in the component library, build from scratch" — but gives no boundaries on scope. A doctor saying "add lab results" could trigger anything from a small field addition to a full new component. There's no decision tree for when to route to a new component workflow vs. modifying existing code.
 
 ---
 

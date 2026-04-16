@@ -41,9 +41,9 @@ Silently determine which files need to change:
 
 4. Read the JSDoc header at the top of the main component file to understand its props, usage, and integration points before making changes.
 
-5. If the doctor requests a component that isn't installed yet, fetch it from the CDN following the Component Fetching Process in the protocol context.
+5. If the doctor requests a component that isn't installed yet, install it via `npx medical-ui-cli add <component-name>` following the Component Installation Process in the protocol context.
 
-6. If the doctor requests a feature that doesn't exist in the CDN (e.g., medication tracker, lab results viewer, scheduling system), build it from scratch:
+6. If the doctor requests a feature that doesn't exist in the component library (e.g., medication tracker, lab results viewer, scheduling system), build it from scratch:
    - Follow the patterns established in the existing project code
    - Use the same state management approach (localStorage for persistence if enabled, React state otherwise)
    - Place new components in the appropriate directory

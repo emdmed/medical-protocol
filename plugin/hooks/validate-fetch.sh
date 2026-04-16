@@ -1,7 +1,8 @@
 #!/bin/bash
 # Medical Protocol Hook: PostToolUse (WebFetch)
-# Validates that components fetched from the CDN are valid and complete.
-# Checks: non-empty response, expected file structure, no error pages.
+# Validates that workflow/manifest files fetched from the CDN are valid.
+# Components must be installed via `npx medical-ui-cli add`, NOT fetched from CDN.
+# Checks: non-empty response, no error pages, workflow structure, manifest JSON.
 # Outputs warnings to stderr (non-blocking) so Claude can retry if needed.
 
 set -uo pipefail
@@ -28,39 +29,28 @@ RESPONSE=$(echo "$INPUT" | jq -r '.tool_result.content // .tool_result // ""' 2>
 # ─── Check 1: Empty or very short response ───
 RESPONSE_LEN=${#RESPONSE}
 if [ "$RESPONSE_LEN" -lt 50 ]; then
-  echo "<medical-protocol-hook>WARNING: CDN fetch returned very short response ($RESPONSE_LEN chars) for $FETCH_URL. The component may not have downloaded correctly. Consider retrying the fetch.</medical-protocol-hook>"
+  echo "<medical-protocol-hook>WARNING: CDN fetch returned very short response ($RESPONSE_LEN chars) for $FETCH_URL. The file may not have downloaded correctly. Consider retrying the fetch.</medical-protocol-hook>"
   exit 0
 fi
 
 # ─── Check 2: Error page indicators ───
 RESPONSE_LOWER=$(echo "$RESPONSE" | head -c 2000 | tr '[:upper:]' '[:lower:]')
 if echo "$RESPONSE_LOWER" | grep -qE '(404|not found|page not found|<!doctype html>.*<title>.*error|403 forbidden|500 internal server error)'; then
-  echo "<medical-protocol-hook>WARNING: CDN fetch for $FETCH_URL returned what appears to be an error page, not a component file. Check the URL and retry. If this persists, the component may have been moved or removed.</medical-protocol-hook>"
+  echo "<medical-protocol-hook>WARNING: CDN fetch for $FETCH_URL returned what appears to be an error page. Check the URL and retry. If this persists, the file may have been moved or removed.</medical-protocol-hook>"
   exit 0
 fi
 
-# ─── Check 3: Component file validation (for .tsx/.ts files) ───
+# ─── Check 3: Block component file fetches from CDN ───
+# Components must be installed via `npx medical-ui-cli add <name>`, not fetched from CDN.
 if echo "$FETCH_URL" | grep -qE '\.(tsx?|js|jsx)$'; then
-  HAS_IMPORT=false
-  HAS_EXPORT=false
-
-  if echo "$RESPONSE" | head -c 5000 | grep -qE '(import\s|from\s)'; then
-    HAS_IMPORT=true
-  fi
-  if echo "$RESPONSE" | grep -qE '(export\s+(default\s+)?function|export\s+(default\s+)?const|export\s+\{|export\s+type|export\s+interface)'; then
-    HAS_EXPORT=true
-  fi
-
-  if [ "$HAS_IMPORT" = false ] && [ "$HAS_EXPORT" = false ]; then
-    echo "<medical-protocol-hook>WARNING: Fetched file from $FETCH_URL doesn't appear to be a valid TypeScript/React component (no imports or exports found). Verify the URL points to the correct component file.</medical-protocol-hook>"
-    exit 0
-  fi
+  echo "<medical-protocol-hook>WARNING: Attempted to fetch a code file from CDN ($FETCH_URL). Components must NOT be fetched from the CDN. Use \`npx medical-ui-cli add <component-name>\` to install components. Shared components (error-boundary, layout-disclaimer, medical-disclaimer) should be created directly in the project.</medical-protocol-hook>"
+  exit 0
 fi
 
 # ─── Check 4: Manifest validation (for manifest.json) ───
 if echo "$FETCH_URL" | grep -qE 'manifest\.json$'; then
   if ! echo "$RESPONSE" | jq empty 2>/dev/null; then
-    echo "<medical-protocol-hook>WARNING: manifest.json from CDN is not valid JSON. Component installation may fail. Retry the fetch.</medical-protocol-hook>"
+    echo "<medical-protocol-hook>WARNING: manifest.json from CDN is not valid JSON. Retry the fetch.</medical-protocol-hook>"
     exit 0
   fi
 

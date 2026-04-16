@@ -26,8 +26,8 @@
 
 ## 3. Error Boundary
 
-- Wrap the top-level page component in `ErrorBoundary` (from the `error-boundary` shared component in the manifest) so the app shows a recovery UI instead of a white screen on crash
-- Fetch the `error-boundary` component from the manifest's `shared` section and write it to `{project}/components/error-boundary.tsx`
+- Wrap the top-level page component in `ErrorBoundary` so the app shows a recovery UI instead of a white screen on crash
+- If `{project}/components/error-boundary.tsx` does not exist, create it as a simple React error boundary component (class component with `getDerivedStateFromError` + `componentDidCatch`, renders a "Something went wrong — try again" recovery UI with a retry button)
 
 ## 4. shadcn Component Polish
 
@@ -53,7 +53,7 @@ Apply these additional checks based on what was built:
 
 ## 5. Layout Disclaimer
 
-- Fetch the `layout-disclaimer` component from the manifest's `shared` section
+- If `{project}/components/layout-disclaimer.tsx` does not exist, create it as a collapsible disclaimer banner (use shadcn Collapsible) with text: "For educational and clinical decision-support purposes only. Not a substitute for professional medical judgment."
 - Install the `collapsible` shadcn component: `npx shadcn@latest add collapsible`
 - Write the component to `{project}/components/layout-disclaimer.tsx`
 - Add `<LayoutDisclaimer />` to `app/layout.tsx` inside `<body>`, above `{children}`

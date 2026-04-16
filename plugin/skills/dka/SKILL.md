@@ -17,7 +17,7 @@ Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/dka/reference/potassium-managemen
 
 - **Manifest entry:** `dka`
 - **Route:** `app/dka/page.tsx`
-- **Dependencies:** Also fetch `acid-base` from the manifest (DKA uses it for blood gas analysis on every reading)
+- **Dependencies:** Also install `acid-base` via `npx medical-ui-cli add acid-base` (DKA uses it for blood gas analysis on every reading)
 - **Preview message:** "Your DKA monitoring tool is ready. You can set the patient's weight, choose glucose units, and add hourly readings. It tracks glucose reduction rates, resolution criteria, potassium levels, and alerts you to GCS changes. View it at http://localhost:3000/dka"
 
 ## Phase 1: Clinical Requirements
