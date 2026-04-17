@@ -13,12 +13,6 @@ export interface ASCVDInputs {
   smoker: boolean;
 }
 
-export interface ASCVDResult {
-  risk: string; // percentage string e.g. "7.2"
-  category: string;
-  severity: string;
-}
-
 // ── HEART Score ────────────────────────────────────────
 export interface HEARTInputs {
   history: 0 | 1 | 2;
@@ -26,13 +20,6 @@ export interface HEARTInputs {
   age: 0 | 1 | 2;
   riskFactors: 0 | 1 | 2;
   troponin: 0 | 1 | 2;
-}
-
-export interface HEARTResult {
-  score: number;
-  category: string;
-  action: string;
-  severity: string;
 }
 
 // ── CHA₂DS₂-VASc ──────────────────────────────────────
@@ -47,9 +34,3 @@ export interface CHADSVAScInputs {
   sexFemale: boolean;
 }
 
-export interface CHADSVAScResult {
-  score: number;
-  category: string;
-  action: string;
-  severity: string;
-}
