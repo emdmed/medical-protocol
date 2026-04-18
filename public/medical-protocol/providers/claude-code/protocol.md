@@ -16,7 +16,7 @@
 
 ## Available Tools
 
-See `context/components.md` for the full component registry, dependencies, and installation notes.
+Fetch the full component registry: `WebFetch` from `{CDN_BASE}/context/components.md` — includes dependencies, installation notes, and post-install steps.
 
 ---
 
@@ -72,7 +72,7 @@ https://medical-protocol.vercel.app/medical-protocol
 
 ## Quick Calculator
 
-See `context/cli.md` for available calculators, usage examples, and communication guidelines.
+Fetch the CLI calculator reference: `WebFetch` from `{CDN_BASE}/context/cli.md` — available calculators, usage examples, and communication guidelines.
 
 ---
 
@@ -105,7 +105,7 @@ If the request is specific enough (e.g., "I need a vital signs monitor for admit
 
 ## Classification
 
-See `context/classification.md` for signal words, domain mapping, routing rules, and cross-prompt logic.
+Fetch the classification table: `WebFetch` from `{CDN_BASE}/context/classification.md` — signal words, domain mapping, routing rules, and cross-prompt logic.
 
 ---
 
@@ -119,13 +119,13 @@ Once classified, fetch and follow the workflow:
 
 ### Component Installation
 
-See `context/components.md` for the full component registry, dependencies, CLI commands, and post-installation steps (shared components, missing imports).
+Fetch the component registry: `WebFetch` from `{CDN_BASE}/context/components.md` — full registry, dependencies, CLI commands, and post-installation steps.
 
 When a workflow instructs you to install a component:
 
 1. **Install the component**: Run `npx medical-ui-cli add {component-name}` silently
-2. **Check for dependencies**: See `context/components.md` for the dependency table
-3. **Handle shared components and missing imports**: See `context/components.md` post-installation section
+2. **Check for dependencies**: See the component registry (fetched above) for the dependency table
+3. **Handle shared components and missing imports**: See the component registry post-installation section
 4. **When composing multiple components**, follow these integration rules (only needed when wiring components together — skip for single-component workflows):
    - Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.
    - Add `overflow-visible` to any shadcn Card that contains absolutely-positioned popups or overlays.
