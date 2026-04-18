@@ -4,13 +4,20 @@
 
 CKDEvaluator — eGFR calculation (CKD-EPI 2021), CGA staging (GFR + Albuminuria + Risk), KFRE kidney failure risk prediction, treatment eligibility (RASi, SGLT2i, finerenone), eGFR progression monitoring.
 
-**Nephrology sub-components** (installed as part of `ckd`):
+Install: `npx medical-ui-cli add ckd`
+Files installed: `ckd-evaluator.tsx`, `lib.ts`, `types/ckd.ts`
+shadcn deps: card, input, button, badge, label, separator, select
+
+**Companion component — Nephrology** (separate install):
 - **Anemia** — sex-specific Hb classification (KDIGO 2012), iron status, ESA eligibility, iron supplementation indicator
 - **PhosphoCalcic** — Ca/P/PTH/Vitamin D monitoring, Ca×P product, recommendations for abnormal values, CKD-MBD monitoring frequency by GFR category
+- **CardioMetabolic** — LDL, HbA1c, BP in CKD, triglycerides
 
-Install: `npx medical-ui-cli add ckd`
-Files installed: `ckd-evaluator.tsx`, `nephrology/anemia.tsx`, `nephrology/phospho-calcic.tsx`, `nephrology/lib.ts`, `nephrology/ui-helpers.tsx`, `nephrology/types/interfaces.ts`, `lib.ts`, `types/ckd.ts`
-shadcn deps: card, input, button, badge, label, separator, select
+Install: `npx medical-ui-cli add nephrology`
+Files installed: `anemia.tsx`, `phospho-calcic.tsx`, `cardio-metabolic.tsx`, `lib.ts`, `ui-helpers.tsx`, `types/interfaces.ts`
+shadcn deps: card, input, button, badge, label
+
+**IMPORTANT:** Nephrology is a **separate** component — do NOT modify `ckd-evaluator.tsx` to add anemia or MBD logic. Install nephrology alongside ckd and compose them on the page.
 
 ---
 
@@ -50,7 +57,9 @@ interface CKDPatientData {
 
 ---
 
-## Nephrology Sub-Components
+## Nephrology Component (`npx medical-ui-cli add nephrology`)
+
+Installed **separately** from CKD. Provides anemia, phospho-calcic, and cardio-metabolic panels for nephrology workflows.
 
 ### Anemia
 
@@ -177,6 +186,8 @@ Sepsis renal SOFA uses creatinine; CKD uses creatinine for eGFR. No programmatic
 ## Composition Patterns
 
 ### Nephrology Dashboard (with Anemia + CKD-MBD)
+
+Requires both: `npx medical-ui-cli add ckd` AND `npx medical-ui-cli add nephrology`
 
 ```tsx
 import CKDEvaluator from "@/components/ckd/ckd-evaluator";

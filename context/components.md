@@ -11,7 +11,8 @@
 | pafi | PaO2/FiO2 ratio with ARDS classification |
 | dka | DKA monitoring (glucose, ketones, K+, GCS) |
 | cardiology | ASCVD, HEART Score, CHA2DS2-VASc |
-| ckd | eGFR, KDIGO staging, KFRE, CKD anemia, CKD-MBD |
+| ckd | eGFR, KDIGO staging, KFRE risk prediction |
+| nephrology | CKD anemia, CKD-MBD, cardio-metabolic panels |
 | sepsis | SOFA, qSOFA, septic shock, hour-1 bundle |
 | dashboard | Combined overview of multiple tools |
 | customize | Modify layout, add/remove fields |
@@ -37,7 +38,8 @@ Components are delivered via `npx medical-ui-cli add <name>`.
 | `dka` | critical-care | `acid-base` | DKA monitoring |
 | `cardiology` | calculator | none | ASCVD, HEART, CHA2DS2-VASc |
 | `sepsis` | critical-care | `vital-signs`, `water-balance` | SOFA, qSOFA, lactate clearance |
-| `ckd` | calculator | none | eGFR, KDIGO staging, KFRE, anemia (sex-specific), CKD-MBD |
+| `ckd` | calculator | none | eGFR, KDIGO staging, KFRE |
+| `nephrology` | monitoring | none | CKD anemia (sex-specific Hb, ESA), CKD-MBD (Ca/P/PTH/VitD), cardio-metabolic |
 
 Each installed component folder contains a JSDoc header in its main TSX file documenting props, usage, data flow, and behavior -- read this before modifying.
 
@@ -49,6 +51,7 @@ The CLI does **not** auto-install dependent components -- you must install them 
 
 - `dka` depends on `acid-base` -- install acid-base first
 - `sepsis` depends on `vital-signs` and `water-balance`
+- `nephrology` is a companion to `ckd` -- install both for full nephrology workflows. Wire `sex` from CKD to Anemia, `gfrCategory` from CKD to PhosphoCalcic.
 - Other components are self-contained
 
 ---

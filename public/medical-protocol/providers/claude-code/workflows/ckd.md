@@ -22,7 +22,12 @@ Do NOT ask about eGFR formula choice, KDIGO staging thresholds, KFRE coefficient
 
 ## Phase 2: Fetch & Install
 
-Follow the **Component Installation Process** from the main protocol for the `ckd` component.
+Follow the **Component Installation Process** from the main protocol.
+
+**Install CKD:** `npx medical-ui-cli add ckd`
+**Install Nephrology** (if anemia or CKD-MBD requested): `npx medical-ui-cli add nephrology`
+
+These are **separate** components. Do NOT add anemia or MBD logic into `ckd-evaluator.tsx` — use the nephrology component's `anemia.tsx` and `phospho-calcic.tsx` instead.
 
 **Clinical logic library:** The CKD component imports calculation functions from `lib/ckd`. Create in the project:
 - `calculateEGFR(creatinine, age, sex)` — CKD-EPI 2021 race-free eGFR
@@ -43,9 +48,9 @@ Follow the **Component Installation Process** from the main protocol for the `ck
 - `hasACRDoubling(previous, current)` — true if ≥2× increase
 - `getCKDSeverity(gfrCategory)` — normal/warning/critical for UI styling
 
-**Nephrology sub-components** (installed as part of `ckd`):
+**Nephrology component** (installed separately via `npx medical-ui-cli add nephrology`):
 
-The `nephrology/` folder contains `anemia.tsx`, `phospho-calcic.tsx`, `lib.ts`, `ui-helpers.tsx`, and `types/interfaces.ts`.
+The `nephrology/` folder contains `anemia.tsx`, `phospho-calcic.tsx`, `cardio-metabolic.tsx`, `lib.ts`, `ui-helpers.tsx`, and `types/interfaces.ts`.
 
 Nephrology lib functions (in `nephrology/lib.ts`):
 - `classifyAnemiaBySex(hb, sex)` — sex-specific Hb classification (male <13, female <12 g/dL); returns `{label, severity, anemic}`
