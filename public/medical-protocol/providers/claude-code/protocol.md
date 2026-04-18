@@ -111,9 +111,9 @@ Fetch the classification table: `WebFetch` from `{CDN_BASE}/context/classificati
 
 ## Workflow Execution
 
-Once classified, fetch and follow the workflow:
+Once classified, fetch and follow the workflow URL from the **Workflow column** in the classification table. Do NOT construct URLs from section headers — use the exact URL listed in the table (e.g., nephrology maps to `ckd.md`, not `nephrology.md`).
 
-1. **Fetch the workflow**: `WebFetch` the workflow markdown from `{CDN_BASE}/providers/claude-code/workflows/{domain}.md`
+1. **Fetch the workflow**: `WebFetch` the exact URL from the classification table's Workflow column
 2. **Follow all phases** in the workflow exactly as written
 3. **Install components** as instructed by the workflow using `npx medical-ui-cli add <component>`
 
