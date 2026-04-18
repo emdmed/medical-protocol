@@ -182,3 +182,80 @@ describe('medprotocol ckd treatment', () => {
     expect(process.exitCode).toBe(1);
   });
 });
+
+// ── Anemia ────────────────────────────────────────────
+
+describe('medprotocol ckd anemia', () => {
+  it('shows anemia assessment for valid inputs', () => {
+    run(['anemia', '--hb', '9.5', '--sex', 'male', '--ferritin', '80', '--tsat', '15']);
+    expect(stdout).toContain('Anemia Assessment');
+    expect(stdout).toContain('Anemic');
+  });
+
+  it('outputs JSON with --json flag', () => {
+    run(['anemia', '--hb', '9.5', '--sex', 'male', '--ferritin', '80', '--tsat', '15', '--json']);
+    const result = JSON.parse(stdout);
+    expect(result.anemia.anemic).toBe(true);
+    expect(result.anemia.severity).toBe('moderate');
+    expect(result.iron.ironDeficient).toBe(true);
+    expect(result.esa).toBeDefined();
+  });
+
+  it('works without ferritin/tsat (anemia-only)', () => {
+    run(['anemia', '--hb', '11', '--sex', 'female', '--json']);
+    const result = JSON.parse(stdout);
+    expect(result.anemia.anemic).toBe(true);
+    expect(result.anemia.severity).toBe('mild');
+    expect(result.iron).toBeNull();
+    expect(result.esa).toBeNull();
+  });
+
+  it('errors when --hb is missing', () => {
+    run(['anemia', '--sex', 'male']);
+    expect(stderr).toContain('--hb');
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('errors when --sex is missing', () => {
+    run(['anemia', '--hb', '10']);
+    expect(stderr).toContain('--sex');
+    expect(process.exitCode).toBe(1);
+  });
+});
+
+// ── MBD ───────────────────────────────────────────────
+
+describe('medprotocol ckd mbd', () => {
+  it('shows MBD assessment for valid inputs', () => {
+    run(['mbd', '--phosphate', '5.2', '--calcium', '8.5', '--albumin', '3.2',
+      '--pth', '250', '--vitamin-d', '18', '--gfr-category', 'G4']);
+    expect(stdout).toContain('CKD-MBD Assessment');
+    expect(stdout).toContain('Phosphate');
+  });
+
+  it('outputs JSON with --json flag', () => {
+    run(['mbd', '--phosphate', '5.2', '--calcium', '8.5', '--albumin', '3.2',
+      '--pth', '250', '--vitamin-d', '18', '--gfr-category', 'G4', '--json']);
+    const result = JSON.parse(stdout);
+    expect(result.gfrCategory).toBe('G4');
+    expect(result.phosphate.status).toBe('high');
+    expect(result.correctedCalcium).toBeGreaterThan(0);
+    expect(result.pth.status).toBe('acceptable');
+    expect(result.vitaminD.status).toBe('deficient');
+    expect(result.monitoring).toBeDefined();
+  });
+
+  it('works with only gfr-category (partial labs)', () => {
+    run(['mbd', '--gfr-category', 'G5', '--json']);
+    const result = JSON.parse(stdout);
+    expect(result.gfrCategory).toBe('G5');
+    expect(result.phosphate).toBeNull();
+    expect(result.monitoring.phosphate).toContain('1–3 months');
+  });
+
+  it('errors when --gfr-category is missing', () => {
+    run(['mbd', '--phosphate', '4.0']);
+    expect(stderr).toContain('--gfr-category');
+    expect(process.exitCode).toBe(1);
+  });
+});

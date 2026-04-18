@@ -337,6 +337,206 @@ export const hasACRDoubling = (
   return curr >= 2 * prev;
 };
 
+// ─── Anemia of CKD (KDIGO 2012 Anemia) ─────────────────────────────
+
+/**
+ * Classify anemia by hemoglobin level and sex.
+ * KDIGO: Hb <13 g/dL (male), <12 g/dL (female) → anemia.
+ * Severity: ≥threshold = none; <threshold & ≥10 = mild; <10 & ≥7 = moderate; <7 = severe.
+ */
+export const classifyAnemia = (
+  hemoglobin: string,
+  sex: string,
+): { anemic: boolean; severity: string } => {
+  const hb = safeParseFloat(hemoglobin);
+  if (hb <= 0) return { anemic: false, severity: "unknown" };
+
+  const isFemale = sex.toLowerCase() === "female" || sex.toLowerCase() === "f";
+  const threshold = isFemale ? 12 : 13;
+
+  if (hb >= threshold) return { anemic: false, severity: "none" };
+  if (hb >= 10) return { anemic: true, severity: "mild" };
+  if (hb >= 7) return { anemic: true, severity: "moderate" };
+  return { anemic: true, severity: "severe" };
+};
+
+/**
+ * Assess iron status for CKD anemia workup.
+ * KDIGO Anemia 2012: ferritin <100 ng/mL OR TSAT <20% in non-dialysis CKD → iron deficient.
+ */
+export const assessIronStatus = (
+  ferritin: string,
+  tsat: string,
+): { ironDeficient: boolean; recommendation: string } => {
+  const ferritinVal = safeParseFloat(ferritin);
+  const tsatVal = safeParseFloat(tsat);
+  if (ferritinVal <= 0 || tsatVal <= 0) {
+    return { ironDeficient: false, recommendation: "Insufficient data for iron assessment" };
+  }
+
+  if (ferritinVal < 100 || tsatVal < 20) {
+    return {
+      ironDeficient: true,
+      recommendation: "Iron supplementation recommended before considering ESA therapy",
+    };
+  }
+  return {
+    ironDeficient: false,
+    recommendation: "Iron stores adequate; reassess periodically",
+  };
+};
+
+/**
+ * Check ESA eligibility: Hb <10 g/dL AND iron replete (ferritin ≥100, TSAT ≥20%).
+ */
+export const checkESAEligibility = (
+  hemoglobin: string,
+  ferritin: string,
+  tsat: string,
+  sex: string,
+): { eligible: boolean; reason: string } => {
+  const hb = safeParseFloat(hemoglobin);
+  const ferritinVal = safeParseFloat(ferritin);
+  const tsatVal = safeParseFloat(tsat);
+  if (hb <= 0) return { eligible: false, reason: "Invalid hemoglobin value" };
+
+  const isFemale = sex.toLowerCase() === "female" || sex.toLowerCase() === "f";
+  const threshold = isFemale ? 12 : 13;
+
+  if (hb >= threshold) return { eligible: false, reason: "Not anemic; ESA not indicated" };
+  if (hb >= 10) return { eligible: false, reason: "Hb ≥10 g/dL; ESA not yet indicated" };
+  if (ferritinVal < 100 || tsatVal < 20) {
+    return { eligible: false, reason: "Iron deficient; replete iron before ESA" };
+  }
+  return { eligible: true, reason: "Hb <10 g/dL with adequate iron stores; ESA may be considered" };
+};
+
+// ─── CKD-MBD (KDIGO 2017 CKD-MBD) ─────────────────────────────────
+
+/**
+ * Assess phosphate level relative to GFR category.
+ * KDIGO CKD-MBD 2017: maintain toward normal range; G3a-G5 target 2.5–4.5 mg/dL.
+ */
+export const assessPhosphate = (
+  phosphate: string,
+  gfrCategory: string,
+): { status: string; recommendation: string } => {
+  const phos = safeParseFloat(phosphate);
+  if (phos <= 0) return { status: "unknown", recommendation: "Invalid phosphate value" };
+
+  const advanced = ["G3a", "G3b", "G4", "G5"].includes(gfrCategory);
+
+  if (!advanced) {
+    if (phos >= 2.5 && phos <= 4.5) {
+      return { status: "normal", recommendation: "Phosphate within normal range" };
+    }
+    return {
+      status: phos < 2.5 ? "low" : "high",
+      recommendation: phos < 2.5
+        ? "Phosphate below normal range; evaluate cause"
+        : "Phosphate above normal range; evaluate cause",
+    };
+  }
+
+  if (phos < 2.5) return { status: "low", recommendation: "Phosphate below target; evaluate cause" };
+  if (phos <= 4.5) return { status: "normal", recommendation: "Phosphate within target range (2.5–4.5 mg/dL)" };
+  return { status: "high", recommendation: "Phosphate elevated; consider dietary restriction and phosphate binders" };
+};
+
+/**
+ * Corrected calcium = measured Ca + 0.8 × (4.0 − albumin).
+ */
+export const correctCalcium = (
+  calcium: string,
+  albumin: string,
+): number => {
+  const ca = safeParseFloat(calcium);
+  const alb = safeParseFloat(albumin);
+  if (ca <= 0 || alb <= 0) return 0;
+  const corrected = ca + 0.8 * (4.0 - alb);
+  return Math.round(corrected * 10) / 10;
+};
+
+/**
+ * Assess PTH relative to GFR category.
+ * KDIGO CKD-MBD 2017: G3a-G3b keep within normal range (10–65 pg/mL);
+ * G4-G5 accept 2–9× upper normal limit (~130–585 pg/mL for UNL 65).
+ */
+export const assessPTH = (
+  pth: string,
+  gfrCategory: string,
+): { status: string; recommendation: string } => {
+  const pthVal = safeParseFloat(pth);
+  if (pthVal <= 0) return { status: "unknown", recommendation: "Invalid PTH value" };
+
+  const UNL = 65;
+
+  if (gfrCategory === "G4" || gfrCategory === "G5") {
+    const lower = 2 * UNL;  // 130
+    const upper = 9 * UNL;  // 585
+    if (pthVal < lower) return { status: "low", recommendation: "PTH below 2× UNL; avoid over-suppression" };
+    if (pthVal <= upper) return { status: "acceptable", recommendation: `PTH within acceptable range for ${gfrCategory} (2–9× UNL)` };
+    return { status: "high", recommendation: "PTH exceeds 9× UNL; consider active vitamin D or calcimimetics" };
+  }
+
+  // G1-G3b: normal range
+  if (pthVal <= UNL) return { status: "normal", recommendation: "PTH within normal range" };
+  return { status: "high", recommendation: "PTH elevated; evaluate for secondary hyperparathyroidism" };
+};
+
+/**
+ * Assess 25-OH vitamin D status.
+ * KDIGO CKD-MBD 2017: <20 ng/mL → deficient, 20–29 → insufficient, ≥30 → sufficient.
+ */
+export const assessVitaminD = (
+  vitaminD25OH: string,
+): { status: string; recommendation: string } => {
+  const vd = safeParseFloat(vitaminD25OH);
+  if (vd <= 0) return { status: "unknown", recommendation: "Invalid vitamin D value" };
+
+  if (vd < 20) return { status: "deficient", recommendation: "Vitamin D deficient; supplement with cholecalciferol" };
+  if (vd < 30) return { status: "insufficient", recommendation: "Vitamin D insufficient; consider supplementation" };
+  return { status: "sufficient", recommendation: "Vitamin D sufficient; maintain current intake" };
+};
+
+/**
+ * CKD-MBD monitoring frequency by GFR category (KDIGO CKD-MBD 2017).
+ */
+export const getCKDMBDMonitoring = (
+  gfrCategory: string,
+): { phosphate: string; calcium: string; pth: string; vitaminD: string } => {
+  if (gfrCategory === "G5") {
+    return {
+      phosphate: "Every 1–3 months",
+      calcium: "Every 1–3 months",
+      pth: "Every 3–6 months",
+      vitaminD: "Baseline, then per clinical indication",
+    };
+  }
+  if (gfrCategory === "G4") {
+    return {
+      phosphate: "Every 6–12 months",
+      calcium: "Every 6–12 months",
+      pth: "Every 6–12 months",
+      vitaminD: "Baseline, then per clinical indication",
+    };
+  }
+  if (gfrCategory === "G3a" || gfrCategory === "G3b") {
+    return {
+      phosphate: "Baseline, then per clinical indication",
+      calcium: "Baseline, then per clinical indication",
+      pth: "Baseline, then per clinical indication",
+      vitaminD: "Baseline, then per clinical indication",
+    };
+  }
+  return {
+    phosphate: "Not routinely monitored",
+    calcium: "Not routinely monitored",
+    pth: "Not routinely monitored",
+    vitaminD: "Per clinical indication",
+  };
+};
+
 // ─── Utilities ──────────────────────────────────────────────────────
 
 /**

@@ -17,6 +17,14 @@ import {
   getCKDSeverity,
   getGFRCategoryLabel,
   getAlbuminuriaCategoryLabel,
+  classifyAnemia,
+  assessIronStatus,
+  checkESAEligibility,
+  assessPhosphate,
+  correctCalcium,
+  assessPTH,
+  assessVitaminD,
+  getCKDMBDMonitoring,
 } from '../../lib/ckd';
 
 // ─── calculateEGFR ──────────────────────────────────────────────────
@@ -578,5 +586,253 @@ describe('getAlbuminuriaCategoryLabel', () => {
 
   it('returns Unknown for invalid category', () => {
     expect(getAlbuminuriaCategoryLabel('A99')).toBe('Unknown');
+  });
+});
+
+// ─── classifyAnemia ──────────────────────────────────────────────────
+
+describe('classifyAnemia', () => {
+  it('returns not anemic for male with Hb >= 13', () => {
+    expect(classifyAnemia('13', 'male')).toEqual({ anemic: false, severity: 'none' });
+    expect(classifyAnemia('15', 'm')).toEqual({ anemic: false, severity: 'none' });
+  });
+
+  it('returns not anemic for female with Hb >= 12', () => {
+    expect(classifyAnemia('12', 'female')).toEqual({ anemic: false, severity: 'none' });
+    expect(classifyAnemia('14', 'f')).toEqual({ anemic: false, severity: 'none' });
+  });
+
+  it('returns mild anemia for Hb between 10 and threshold', () => {
+    expect(classifyAnemia('11', 'male')).toEqual({ anemic: true, severity: 'mild' });
+    expect(classifyAnemia('10', 'female')).toEqual({ anemic: true, severity: 'mild' });
+    expect(classifyAnemia('12.9', 'male')).toEqual({ anemic: true, severity: 'mild' });
+  });
+
+  it('returns moderate anemia for Hb between 7 and 10', () => {
+    expect(classifyAnemia('9.5', 'male')).toEqual({ anemic: true, severity: 'moderate' });
+    expect(classifyAnemia('7', 'female')).toEqual({ anemic: true, severity: 'moderate' });
+  });
+
+  it('returns severe anemia for Hb < 7', () => {
+    expect(classifyAnemia('6.9', 'male')).toEqual({ anemic: true, severity: 'severe' });
+    expect(classifyAnemia('5', 'f')).toEqual({ anemic: true, severity: 'severe' });
+  });
+
+  it('returns unknown for invalid input', () => {
+    expect(classifyAnemia('', 'male')).toEqual({ anemic: false, severity: 'unknown' });
+    expect(classifyAnemia('0', 'male')).toEqual({ anemic: false, severity: 'unknown' });
+  });
+});
+
+// ─── assessIronStatus ────────────────────────────────────────────────
+
+describe('assessIronStatus', () => {
+  it('returns iron deficient when ferritin < 100', () => {
+    const result = assessIronStatus('80', '25');
+    expect(result.ironDeficient).toBe(true);
+  });
+
+  it('returns iron deficient when TSAT < 20%', () => {
+    const result = assessIronStatus('150', '15');
+    expect(result.ironDeficient).toBe(true);
+  });
+
+  it('returns iron deficient when both low', () => {
+    const result = assessIronStatus('50', '10');
+    expect(result.ironDeficient).toBe(true);
+  });
+
+  it('returns adequate when ferritin >= 100 and TSAT >= 20%', () => {
+    const result = assessIronStatus('100', '20');
+    expect(result.ironDeficient).toBe(false);
+  });
+
+  it('handles invalid inputs', () => {
+    const result = assessIronStatus('', '20');
+    expect(result.ironDeficient).toBe(false);
+    expect(result.recommendation).toContain('Insufficient');
+  });
+});
+
+// ─── checkESAEligibility ────────────────────────────────────────────
+
+describe('checkESAEligibility', () => {
+  it('returns eligible when Hb < 10 and iron replete', () => {
+    const result = checkESAEligibility('9', '150', '25', 'male');
+    expect(result.eligible).toBe(true);
+  });
+
+  it('returns not eligible when not anemic', () => {
+    const result = checkESAEligibility('14', '150', '25', 'male');
+    expect(result.eligible).toBe(false);
+    expect(result.reason).toContain('Not anemic');
+  });
+
+  it('returns not eligible when Hb >= 10 (mild anemia)', () => {
+    const result = checkESAEligibility('11', '150', '25', 'male');
+    expect(result.eligible).toBe(false);
+    expect(result.reason).toContain('10');
+  });
+
+  it('returns not eligible when iron deficient', () => {
+    const result = checkESAEligibility('8', '50', '15', 'male');
+    expect(result.eligible).toBe(false);
+    expect(result.reason).toContain('iron');
+  });
+
+  it('respects sex-specific thresholds', () => {
+    // Female threshold is 12, so Hb 12.5 is not anemic
+    expect(checkESAEligibility('12.5', '150', '25', 'female').eligible).toBe(false);
+    // Male threshold is 13, so Hb 12.5 is anemic but mild (>=10)
+    expect(checkESAEligibility('12.5', '150', '25', 'male').eligible).toBe(false);
+  });
+
+  it('handles invalid hemoglobin', () => {
+    expect(checkESAEligibility('', '150', '25', 'male').eligible).toBe(false);
+  });
+});
+
+// ─── assessPhosphate ────────────────────────────────────────────────
+
+describe('assessPhosphate', () => {
+  it('returns normal for phosphate in range with advanced CKD', () => {
+    expect(assessPhosphate('3.5', 'G4').status).toBe('normal');
+    expect(assessPhosphate('2.5', 'G3a').status).toBe('normal');
+    expect(assessPhosphate('4.5', 'G5').status).toBe('normal');
+  });
+
+  it('returns high for phosphate > 4.5 with advanced CKD', () => {
+    const result = assessPhosphate('5.0', 'G4');
+    expect(result.status).toBe('high');
+    expect(result.recommendation).toContain('binder');
+  });
+
+  it('returns low for phosphate < 2.5 with advanced CKD', () => {
+    expect(assessPhosphate('2.0', 'G3b').status).toBe('low');
+  });
+
+  it('returns normal for phosphate in range with early CKD', () => {
+    expect(assessPhosphate('3.5', 'G1').status).toBe('normal');
+    expect(assessPhosphate('3.5', 'G2').status).toBe('normal');
+  });
+
+  it('returns high for phosphate > 4.5 with early CKD', () => {
+    expect(assessPhosphate('5.0', 'G1').status).toBe('high');
+  });
+
+  it('handles invalid input', () => {
+    expect(assessPhosphate('', 'G4').status).toBe('unknown');
+  });
+});
+
+// ─── correctCalcium ─────────────────────────────────────────────────
+
+describe('correctCalcium', () => {
+  it('corrects calcium for low albumin', () => {
+    // Ca 8.0 + 0.8*(4.0-3.0) = 8.8
+    expect(correctCalcium('8.0', '3.0')).toBe(8.8);
+  });
+
+  it('returns same calcium when albumin is 4.0', () => {
+    expect(correctCalcium('9.0', '4.0')).toBe(9.0);
+  });
+
+  it('adjusts downward for high albumin', () => {
+    // Ca 10.0 + 0.8*(4.0-5.0) = 10.0 - 0.8 = 9.2
+    expect(correctCalcium('10.0', '5.0')).toBe(9.2);
+  });
+
+  it('returns 0 for invalid inputs', () => {
+    expect(correctCalcium('', '3.5')).toBe(0);
+    expect(correctCalcium('8.5', '')).toBe(0);
+    expect(correctCalcium('0', '3.5')).toBe(0);
+  });
+});
+
+// ─── assessPTH ──────────────────────────────────────────────────────
+
+describe('assessPTH', () => {
+  it('returns normal for PTH within normal range in early CKD', () => {
+    expect(assessPTH('40', 'G3a').status).toBe('normal');
+    expect(assessPTH('65', 'G3b').status).toBe('normal');
+  });
+
+  it('returns high for elevated PTH in early CKD', () => {
+    expect(assessPTH('80', 'G3a').status).toBe('high');
+  });
+
+  it('returns acceptable for PTH 2-9x UNL in G4-G5', () => {
+    expect(assessPTH('200', 'G4').status).toBe('acceptable');
+    expect(assessPTH('500', 'G5').status).toBe('acceptable');
+    expect(assessPTH('130', 'G4').status).toBe('acceptable');
+    expect(assessPTH('585', 'G5').status).toBe('acceptable');
+  });
+
+  it('returns low for PTH below 2x UNL in G4-G5', () => {
+    expect(assessPTH('100', 'G4').status).toBe('low');
+  });
+
+  it('returns high for PTH above 9x UNL in G4-G5', () => {
+    const result = assessPTH('600', 'G5');
+    expect(result.status).toBe('high');
+    expect(result.recommendation).toContain('calcimimetics');
+  });
+
+  it('handles invalid input', () => {
+    expect(assessPTH('', 'G4').status).toBe('unknown');
+  });
+});
+
+// ─── assessVitaminD ─────────────────────────────────────────────────
+
+describe('assessVitaminD', () => {
+  it('returns deficient for 25-OH-D < 20', () => {
+    expect(assessVitaminD('15').status).toBe('deficient');
+    expect(assessVitaminD('10').recommendation).toContain('cholecalciferol');
+  });
+
+  it('returns insufficient for 25-OH-D 20-29', () => {
+    expect(assessVitaminD('20').status).toBe('insufficient');
+    expect(assessVitaminD('29').status).toBe('insufficient');
+  });
+
+  it('returns sufficient for 25-OH-D >= 30', () => {
+    expect(assessVitaminD('30').status).toBe('sufficient');
+    expect(assessVitaminD('50').status).toBe('sufficient');
+  });
+
+  it('handles invalid input', () => {
+    expect(assessVitaminD('').status).toBe('unknown');
+    expect(assessVitaminD('0').status).toBe('unknown');
+  });
+});
+
+// ─── getCKDMBDMonitoring ────────────────────────────────────────────
+
+describe('getCKDMBDMonitoring', () => {
+  it('returns frequent monitoring for G5', () => {
+    const m = getCKDMBDMonitoring('G5');
+    expect(m.phosphate).toContain('1–3 months');
+    expect(m.pth).toContain('3–6 months');
+  });
+
+  it('returns moderate monitoring for G4', () => {
+    const m = getCKDMBDMonitoring('G4');
+    expect(m.phosphate).toContain('6–12 months');
+    expect(m.pth).toContain('6–12 months');
+  });
+
+  it('returns baseline monitoring for G3a/G3b', () => {
+    const m = getCKDMBDMonitoring('G3a');
+    expect(m.phosphate).toContain('Baseline');
+    const m2 = getCKDMBDMonitoring('G3b');
+    expect(m2.calcium).toContain('Baseline');
+  });
+
+  it('returns not routinely monitored for G1/G2', () => {
+    const m = getCKDMBDMonitoring('G1');
+    expect(m.phosphate).toContain('Not routinely');
+    const m2 = getCKDMBDMonitoring('G2');
+    expect(m2.pth).toContain('Not routinely');
   });
 });

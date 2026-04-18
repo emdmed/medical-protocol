@@ -13,6 +13,14 @@ import {
   checkSGLT2iEligibility,
   checkFinerenoneEligibility,
   getCKDSeverity,
+  classifyAnemia,
+  assessIronStatus,
+  checkESAEligibility,
+  assessPhosphate,
+  correctCalcium,
+  assessPTH,
+  assessVitaminD,
+  getCKDMBDMonitoring,
 } from "../../../../lib/ckd";
 import { formatHeader, formatTable, printResult, formatError } from "../format";
 
@@ -23,6 +31,8 @@ Sub-commands:
   stage        Full CGA staging (eGFR + albuminuria + risk)
   kfre         Kidney Failure Risk Equation (4-variable)
   treatment    Treatment eligibility (RASi, SGLT2i, finerenone)
+  anemia       CKD anemia assessment (Hb, iron, ESA eligibility)
+  mbd          CKD-MBD assessment (phosphate, calcium, PTH, vitamin D)
 
 eGFR options:
   --creatinine <number>    Serum creatinine mg/dL (required)
@@ -46,6 +56,20 @@ Treatment options:
   --on-rasi                On maximum tolerated RASi
   --potassium-normal       Serum potassium is normal
 
+Anemia options:
+  --hb <number>            Hemoglobin g/dL (required)
+  --sex <male|female>      Sex (required)
+  --ferritin <number>      Serum ferritin ng/mL
+  --tsat <number>          Transferrin saturation %
+
+MBD options:
+  --phosphate <number>     Serum phosphate mg/dL
+  --calcium <number>       Serum calcium mg/dL
+  --albumin <number>       Serum albumin g/dL
+  --pth <number>           Intact PTH pg/mL
+  --vitamin-d <number>     25-OH vitamin D ng/mL
+  --gfr-category <G1-G5>  GFR category (required)
+
 Global options:
   --json                   Output as JSON
   --help                   Show this help
@@ -54,7 +78,9 @@ Examples:
   medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male
   medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 45
   medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300
-  medprotocol ckd treatment --egfr 35 --acr 300 --diabetes`;
+  medprotocol ckd treatment --egfr 35 --acr 300 --diabetes
+  medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
+  medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4`;
 
 const runEGFR = (argv: string[], json: boolean): void => {
   const { values } = parseArgs({
@@ -289,6 +315,141 @@ const runTreatment = (argv: string[], json: boolean): void => {
   });
 };
 
+const runAnemia = (argv: string[], json: boolean): void => {
+  const { values } = parseArgs({
+    args: argv,
+    options: {
+      hb: { type: "string" },
+      sex: { type: "string" },
+      ferritin: { type: "string" },
+      tsat: { type: "string" },
+      json: { type: "boolean", default: false },
+      help: { type: "boolean", default: false },
+    },
+    strict: true,
+  });
+
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
+
+  const missing: string[] = [];
+  if (!values.hb) missing.push("--hb");
+  if (!values.sex) missing.push("--sex");
+
+  if (missing.length > 0) {
+    process.stderr.write(
+      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const anemia = classifyAnemia(values.hb!, values.sex!);
+  const iron = values.ferritin && values.tsat
+    ? assessIronStatus(values.ferritin, values.tsat)
+    : null;
+  const esa = values.ferritin && values.tsat
+    ? checkESAEligibility(values.hb!, values.ferritin, values.tsat, values.sex!)
+    : null;
+
+  const data = { anemia, iron, esa };
+
+  printResult(data, json, () => {
+    const rows: [string, string][] = [
+      ["Anemic", anemia.anemic ? "Yes" : "No"],
+      ["Severity", anemia.severity],
+    ];
+    if (iron) {
+      rows.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
+      rows.push(["Iron Recommendation", iron.recommendation]);
+    }
+    if (esa) {
+      rows.push(["ESA Eligible", esa.eligible ? "Yes" : "No"]);
+      rows.push(["ESA Reason", esa.reason]);
+    }
+    return [
+      formatHeader("CKD Anemia Assessment"),
+      formatTable(rows),
+    ].join("\n");
+  });
+};
+
+const runMBD = (argv: string[], json: boolean): void => {
+  const { values } = parseArgs({
+    args: argv,
+    options: {
+      phosphate: { type: "string" },
+      calcium: { type: "string" },
+      albumin: { type: "string" },
+      pth: { type: "string" },
+      "vitamin-d": { type: "string" },
+      "gfr-category": { type: "string" },
+      json: { type: "boolean", default: false },
+      help: { type: "boolean", default: false },
+    },
+    strict: true,
+  });
+
+  if (values.help) {
+    process.stdout.write(USAGE + "\n");
+    return;
+  }
+
+  if (!values["gfr-category"]) {
+    process.stderr.write(
+      formatError("Missing required flag: --gfr-category") + "\n\n" + USAGE + "\n",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const gfrCat = values["gfr-category"]!;
+  const phosphateResult = values.phosphate ? assessPhosphate(values.phosphate, gfrCat) : null;
+  const correctedCa = values.calcium && values.albumin
+    ? correctCalcium(values.calcium, values.albumin)
+    : null;
+  const pthResult = values.pth ? assessPTH(values.pth, gfrCat) : null;
+  const vitDResult = values["vitamin-d"] ? assessVitaminD(values["vitamin-d"]) : null;
+  const monitoring = getCKDMBDMonitoring(gfrCat);
+
+  const data = {
+    gfrCategory: gfrCat,
+    phosphate: phosphateResult,
+    correctedCalcium: correctedCa,
+    pth: pthResult,
+    vitaminD: vitDResult,
+    monitoring,
+  };
+
+  printResult(data, json, () => {
+    const rows: [string, string][] = [
+      ["GFR Category", gfrCat],
+    ];
+    if (phosphateResult) {
+      rows.push(["Phosphate", `${phosphateResult.status} — ${phosphateResult.recommendation}`]);
+    }
+    if (correctedCa !== null) {
+      rows.push(["Corrected Ca", `${correctedCa} mg/dL`]);
+    }
+    if (pthResult) {
+      rows.push(["PTH", `${pthResult.status} — ${pthResult.recommendation}`]);
+    }
+    if (vitDResult) {
+      rows.push(["Vitamin D", `${vitDResult.status} — ${vitDResult.recommendation}`]);
+    }
+    rows.push(["Monitor PO₄", monitoring.phosphate]);
+    rows.push(["Monitor Ca", monitoring.calcium]);
+    rows.push(["Monitor PTH", monitoring.pth]);
+    rows.push(["Monitor Vit D", monitoring.vitaminD]);
+    return [
+      formatHeader("CKD-MBD Assessment"),
+      formatTable(rows),
+    ].join("\n");
+  });
+};
+
 export const run = (argv: string[]): void => {
   const subcommand = argv[0];
   const subArgs = argv.slice(1);
@@ -313,10 +474,16 @@ export const run = (argv: string[]): void => {
     case "treatment":
       runTreatment(subArgs, json);
       break;
+    case "anemia":
+      runAnemia(subArgs, json);
+      break;
+    case "mbd":
+      runMBD(subArgs, json);
+      break;
     default:
       process.stderr.write(
         formatError(`Unknown sub-command: ${subcommand}`) +
-          "\n\nAvailable: egfr, stage, kfre, treatment\n",
+          "\n\nAvailable: egfr, stage, kfre, treatment, anemia, mbd\n",
       );
       process.exitCode = 1;
   }

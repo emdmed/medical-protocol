@@ -11,7 +11,7 @@
 | pafi | PaO2/FiO2 ratio with ARDS classification |
 | dka | DKA monitoring (glucose, ketones, K+, GCS) |
 | cardiology | ASCVD, HEART Score, CHA2DS2-VASc |
-| ckd | eGFR, KDIGO staging, KFRE risk prediction |
+| ckd | eGFR, KDIGO staging, KFRE, CKD anemia, CKD-MBD |
 | sepsis | SOFA, qSOFA, septic shock, hour-1 bundle |
 | dashboard | Combined overview of multiple tools |
 | customize | Modify layout, add/remove fields |
@@ -37,7 +37,7 @@ Components are delivered via `npx medical-ui-cli add <name>`.
 | `dka` | critical-care | `acid-base` | DKA monitoring |
 | `cardiology` | calculator | none | ASCVD, HEART, CHA2DS2-VASc |
 | `sepsis` | critical-care | `vital-signs`, `water-balance` | SOFA, qSOFA, lactate clearance |
-| `ckd` | calculator | none | eGFR, KDIGO staging, KFRE |
+| `ckd` | calculator | none | eGFR, KDIGO staging, KFRE, anemia (sex-specific), CKD-MBD |
 
 Each installed component folder contains a JSDoc header in its main TSX file documenting props, usage, data flow, and behavior -- read this before modifying.
 

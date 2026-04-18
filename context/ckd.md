@@ -4,8 +4,12 @@
 
 CKDEvaluator — eGFR calculation (CKD-EPI 2021), CGA staging (GFR + Albuminuria + Risk), KFRE kidney failure risk prediction, treatment eligibility (RASi, SGLT2i, finerenone), eGFR progression monitoring.
 
+**Nephrology sub-components** (installed as part of `ckd`):
+- **Anemia** — sex-specific Hb classification (KDIGO 2012), iron status, ESA eligibility, iron supplementation indicator
+- **PhosphoCalcic** — Ca/P/PTH/Vitamin D monitoring, Ca×P product, recommendations for abnormal values, CKD-MBD monitoring frequency by GFR category
+
 Install: `npx medical-ui-cli add ckd`
-Files installed: `ckd-evaluator.tsx`, `lib.ts`, `types/ckd.ts`
+Files installed: `ckd-evaluator.tsx`, `nephrology/anemia.tsx`, `nephrology/phospho-calcic.tsx`, `nephrology/lib.ts`, `nephrology/ui-helpers.tsx`, `nephrology/types/interfaces.ts`, `lib.ts`, `types/ckd.ts`
 shadcn deps: card, input, button, badge, label, separator, select
 
 ---
@@ -46,6 +50,67 @@ interface CKDPatientData {
 
 ---
 
+## Nephrology Sub-Components
+
+### Anemia
+
+```typescript
+interface AnemiaProps {
+  data?: AnemiaReading[];
+  onData?: (data: AnemiaReading[]) => void;
+  sex?: string;  // patient sex — enables sex-specific Hb thresholds + ESA eligibility
+}
+
+interface AnemiaReading {
+  id: string;
+  date: string;
+  hemoglobin: string;  // g/dL
+  ferritin: string;    // ng/mL
+  tsat: string;        // % (transferrin saturation)
+  iron: string;        // µg/dL
+  reticulocytes: string; // %
+  sex?: string;        // per-reading override (male/female)
+}
+```
+
+**Key behaviors:**
+- When `sex` prop or per-reading `sex` is available, uses sex-specific thresholds (male <13, female <12 g/dL) instead of generic classification
+- Shows ESA eligibility indicator when sex + ferritin + TSAT are present (Hb <10 + iron replete)
+- When `sex` prop is NOT provided, a sex select appears in the add-reading form
+- Iron supplementation indicator always shown (ferritin <100 or TSAT <20%)
+
+### PhosphoCalcic
+
+```typescript
+interface PhosphoCalcicProps {
+  data?: PhosphoCalcicReading[];
+  onData?: (data: PhosphoCalcicReading[]) => void;
+  gfrCategory?: string;  // G1-G5 — enables stage-specific PTH targets + monitoring frequency
+}
+```
+
+**Key behaviors:**
+- Recommendations section appears below values when phosphate, PTH, or vitamin D are abnormal
+- Monitoring frequency footer appears when `gfrCategory` prop is provided (KDIGO CKD-MBD 2017 intervals)
+- Pass `gfrCategory` from the CKD evaluator to enable stage-aware PTH interpretation (2-9× UNL for G4-G5)
+
+---
+
+## Nephrology lib functions (nephrology/lib.ts)
+
+| Function | Inputs | Output |
+|---|---|---|
+| `classifyAnemiaBySex` | hb, sex | {label, severity, anemic} — sex-specific thresholds |
+| `checkESAEligibility` | hb, ferritin, tsat, sex | {eligible, reason} |
+| `getPhosphateRecommendation` | phosphorus, gfrCategory? | {status, recommendation} |
+| `getPTHRecommendation` | pth, gfrCategory? | {status, recommendation} |
+| `getVitaminDRecommendation` | vitaminD | {status, recommendation} |
+| `getCKDMBDMonitoring` | gfrCategory | {phosphate, calcium, pth, vitaminD} intervals |
+
+These mirror the corresponding `lib/ckd.ts` functions but use the `sf()` parser from nephrology/lib.ts.
+
+---
+
 ## lib/ckd.ts — Function Signatures
 
 | Function | Inputs | Output |
@@ -67,6 +132,14 @@ interface CKDPatientData {
 | `hasSignificantEGFRChange` | previous, current | boolean (>20% drop) |
 | `hasACRDoubling` | previous, current | boolean (≥2×) |
 | `getCKDSeverity` | gfrCategory | normal/warning/critical |
+| `classifyAnemia` | hemoglobin, sex | {anemic, severity} |
+| `assessIronStatus` | ferritin, tsat | {ironDeficient, recommendation} |
+| `checkESAEligibility` | hemoglobin, ferritin, tsat, sex | {eligible, reason} |
+| `assessPhosphate` | phosphate, gfrCategory | {status, recommendation} |
+| `correctCalcium` | calcium, albumin | number (corrected Ca) |
+| `assessPTH` | pth, gfrCategory | {status, recommendation} |
+| `assessVitaminD` | vitaminD25OH | {status, recommendation} |
+| `getCKDMBDMonitoring` | gfrCategory | {phosphate, calcium, pth, vitaminD} monitoring intervals |
 
 All inputs are `string` (parsed internally via `safeParseFloat`).
 
@@ -103,18 +176,26 @@ Sepsis renal SOFA uses creatinine; CKD uses creatinine for eGFR. No programmatic
 
 ## Composition Patterns
 
-### Nephrology Dashboard
+### Nephrology Dashboard (with Anemia + CKD-MBD)
 
 ```tsx
 import CKDEvaluator from "@/components/ckd/ckd-evaluator";
+import Anemia from "@/components/nephrology/anemia";
+import PhosphoCalcic from "@/components/nephrology/phospho-calcic";
 import VitalSigns from "@/components/vital-signs/vital-signs";
 
 function NephrologyDashboard() {
   const [ckdData, setCkdData] = useState<CKDPatientData | null>(null);
 
+  // Derive gfrCategory from latest CKD reading for stage-aware sub-components
+  const latestReading = ckdData?.readings[ckdData.readings.length - 1];
+  const gfrCategory = latestReading?.gfrCategory;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <CKDEvaluator data={ckdData ?? undefined} onData={setCkdData} />
+      <Anemia sex={ckdData?.sex} />
+      <PhosphoCalcic gfrCategory={gfrCategory} />
       <VitalSigns onData={handleVitals} editable />
     </div>
   );
@@ -126,6 +207,8 @@ function NephrologyDashboard() {
 ```tsx
 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
   <CKDEvaluator data={ckdData} onData={setCkdData} />
+  <Anemia sex={ckdData?.sex} />
+  <PhosphoCalcic gfrCategory={gfrCategory} />
   <VitalSigns onData={handleVitals} editable />
   <AcidBase onData={handleABG} />
   <WaterBalanceCalculator data={{ weight: 70 }} />
@@ -139,6 +222,8 @@ function NephrologyDashboard() {
 - **KFRE requires eGFR, not creatinine.** Calculate eGFR first, then pass to KFRE.
 - **Risk heatmap colors** map to: green=low, yellow=moderate, orange=high, red=very high, deep-red=highest risk.
 - **Treatment eligibility** is informational — always confirm with clinical context before prescribing.
+- **Wire `sex` to Anemia.** Pass `sex` from CKDPatientData to enable sex-specific Hb thresholds. Without it, the component falls back to generic classification and shows a sex select in the form.
+- **Wire `gfrCategory` to PhosphoCalcic.** Derive from latest CKD reading. Without it, PTH uses generic ranges and monitoring frequency is hidden.
 
 ---
 
@@ -156,6 +241,12 @@ npx medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300
 
 # Treatment eligibility
 npx medprotocol ckd treatment --egfr 35 --acr 300 --diabetes
+
+# Anemia assessment
+npx medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
+
+# CKD-MBD assessment
+npx medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4
 ```
 
 Always use `--json` internally, translate output to clinical language.
@@ -171,3 +262,5 @@ Based on KDIGO 2024 Clinical Practice Guideline for CKD Evaluation and Managemen
 - 4-variable KFRE (Tangri et al.)
 - Treatment eligibility: RASi (ACEi/ARB), SGLT2i, Finerenone (MRA)
 - Progression monitoring: eGFR slope, rapid decline (≥5 mL/min/year), significant change (>20%)
+- Anemia of CKD (KDIGO 2012 Anemia): Hb thresholds, iron status, ESA eligibility
+- CKD-MBD (KDIGO 2017 CKD-MBD): phosphate, corrected calcium, PTH, vitamin D, monitoring frequency
