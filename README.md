@@ -77,8 +77,9 @@ lib/                               Pure calculation + validation logic (shared b
 ├── ckd.ts                         eGFR (CKD-EPI 2021), KDIGO staging, KFRE risk
 ├── bmi.ts cardiology.ts dka.ts pafi.ts sepsis.ts water-balance.ts
 packages/medprotocol/              CLI tool (9 commands)
+context/                           Shared medical context (13 files): registry, classification, CLI ref, per-module docs
 public/medical-protocol/providers/ Protocol files, workflows, install guides
-plugin/                            Claude Code plugin: 14 skills, 4 hooks, 10 context files
+plugin/                            Claude Code plugin: 14 skills, 4 hooks, 10 plugin context files
 tests/                             Vitest — 23 test files, 751 tests
 ```
 
@@ -134,7 +135,7 @@ No production dependencies. TypeScript strict mode. No linter.
 New clinical modules need three things:
 1. Pure logic in `lib/`
 2. Workflow file in `public/medical-protocol/providers/claude-code/workflows/`
-3. Classification row in `protocol.md`
+3. Classification row in `context/classification.md`
 
 ## License
 
