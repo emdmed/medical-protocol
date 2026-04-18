@@ -23,30 +23,30 @@ describe('validateTemperatureInput', () => {
     expect(validateTemperatureInput('37', false)).toBe(true);
   });
 
-  it('returns true at Fahrenheit boundaries (95-107)', () => {
-    expect(validateTemperatureInput('95', true)).toBe(true);
-    expect(validateTemperatureInput('107', true)).toBe(true);
+  it('returns true at Fahrenheit INPUT boundaries (86-113)', () => {
+    expect(validateTemperatureInput('86', true)).toBe(true);
+    expect(validateTemperatureInput('113', true)).toBe(true);
   });
 
-  it('returns true at Celsius boundaries (35-42)', () => {
-    expect(validateTemperatureInput('35', false)).toBe(true);
-    expect(validateTemperatureInput('42', false)).toBe(true);
+  it('returns true at Celsius INPUT boundaries (30-45)', () => {
+    expect(validateTemperatureInput('30', false)).toBe(true);
+    expect(validateTemperatureInput('45', false)).toBe(true);
   });
 
-  it('returns false for Fahrenheit below MIN', () => {
-    expect(validateTemperatureInput('94', true)).toBe(false);
+  it('returns false for Fahrenheit below INPUT_MIN', () => {
+    expect(validateTemperatureInput('85', true)).toBe(false);
   });
 
-  it('returns false for Fahrenheit above MAX', () => {
-    expect(validateTemperatureInput('108', true)).toBe(false);
+  it('returns false for Fahrenheit above INPUT_MAX', () => {
+    expect(validateTemperatureInput('114', true)).toBe(false);
   });
 
-  it('returns false for Celsius below MIN', () => {
-    expect(validateTemperatureInput('34', false)).toBe(false);
+  it('returns false for Celsius below INPUT_MIN', () => {
+    expect(validateTemperatureInput('29', false)).toBe(false);
   });
 
-  it('returns false for Celsius above MAX', () => {
-    expect(validateTemperatureInput('43', false)).toBe(false);
+  it('returns false for Celsius above INPUT_MAX', () => {
+    expect(validateTemperatureInput('46', false)).toBe(false);
   });
 
   it('returns false for NaN', () => {

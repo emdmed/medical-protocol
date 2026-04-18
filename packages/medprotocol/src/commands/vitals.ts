@@ -2,21 +2,21 @@ import { parseArgs } from "node:util";
 import {
   getBloodPressureCategory,
   BLOOD_PRESSURE_LIMITS,
-} from "../../lib/vitals/blood-pressure";
+} from "../../../../lib/vital-signs-validations/blood-pressure-validations";
 import {
   getHeartRateCategory,
   HEART_RATE_LIMITS,
-} from "../../lib/vitals/heart-rate";
+} from "../../../../lib/vital-signs-validations/heart-rate-validations";
 import {
   getRespiratoryRateCategory,
   RESPIRATORY_RATE_LIMITS,
-} from "../../lib/vitals/respiratory-rate";
+} from "../../../../lib/vital-signs-validations/respiratory-rate-validations";
 import {
   getTemperatureStatusCli,
   TEMPERATURE_LIMITS,
   validateTemperatureInput,
-} from "../../lib/vitals/temperature";
-import { bloodOxygenValidations } from "../../lib/vitals/blood-oxygen";
+} from "../../../../lib/vital-signs-validations/temperature-validations";
+import { bloodOxygenValidations } from "../../../../lib/vital-signs-validations/blood-oxygen-validations";
 import { formatHeader, formatTable, printResult, formatError } from "../format";
 
 const USAGE = `Usage: medprotocol vitals [options]
@@ -154,7 +154,7 @@ export const run = (argv: string[]): void => {
     if (!isValid) {
       const limits = useFahrenheit ? TEMPERATURE_LIMITS.FAHRENHEIT : TEMPERATURE_LIMITS.CELSIUS;
       const unit = useFahrenheit ? "°F" : "°C";
-      errors.push(`Temperature must be ${limits.MIN}–${limits.MAX}${unit}`);
+      errors.push(`Temperature must be ${limits.INPUT_MIN}–${limits.INPUT_MAX}${unit}`);
     } else {
       const temp = parseFloat(values.temp);
       const status = getTemperatureStatusCli(temp, useFahrenheit);

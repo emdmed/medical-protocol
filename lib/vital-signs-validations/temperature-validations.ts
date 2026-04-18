@@ -33,7 +33,7 @@ export const validateTemperatureInput = (
   const num = parseFloat(value.toString());
   const limits = useFahrenheit ? TEMPERATURE_LIMITS.FAHRENHEIT : TEMPERATURE_LIMITS.CELSIUS;
 
-  return !isNaN(num) && num >= limits.MIN && num <= limits.MAX;
+  return !isNaN(num) && num >= limits.INPUT_MIN && num <= limits.INPUT_MAX;
 };
 
 export const isElevatedTemperature = (
@@ -97,4 +97,22 @@ export const parseTemperatureValue = (value: string | number): number | null => 
 
 export const getTemperatureLimits = (useFahrenheit: boolean = true) => {
   return useFahrenheit ? TEMPERATURE_LIMITS.FAHRENHEIT : TEMPERATURE_LIMITS.CELSIUS;
+};
+
+export interface TemperatureStatusCli {
+  type: "fever" | "hypothermia" | "normal";
+  label: string;
+}
+
+export const getTemperatureStatusCli = (
+  temperature: string | number,
+  useFahrenheit: boolean = true,
+): TemperatureStatusCli | null => {
+  if (isElevatedTemperature(temperature, useFahrenheit)) {
+    return { type: "fever", label: "Fever" };
+  }
+  if (isLowTemperature(temperature, useFahrenheit)) {
+    return { type: "hypothermia", label: "Low" };
+  }
+  return null;
 };

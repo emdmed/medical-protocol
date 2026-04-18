@@ -187,6 +187,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | Run the quick calculator directly (see Quick Calculator section above) |
 | **start-protocol** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty | Run the `start-protocol` skill — one-time clinical context onboarding |
 | **protocol-audit** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check | Run the `protocol-audit` skill — score the project against clinical compliance criteria |
+| **medical-audit** | test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors | Route to `medical-audit` skill |
 
 **Cross-prompt:** When the doctor requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.
 

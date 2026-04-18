@@ -193,8 +193,8 @@ describe('fio2.getErrorMessage', () => {
 
 describe('utils.calculateRatio (SpO2/FiO2)', () => {
   it('calculates ratio for normal values', () => {
-    // 98/21 = 4.67
-    expect(utils.calculateRatio('98', '21')).toBe('4.67');
+    // 98 / (21/100) = 467
+    expect(utils.calculateRatio('98', '21')).toBe('467');
   });
 
   it('returns null when FiO2 is 0 (division by zero)', () => {
@@ -210,8 +210,8 @@ describe('utils.calculateRatio (SpO2/FiO2)', () => {
   });
 
   it('calculates ratio with supplemental oxygen', () => {
-    // 95/40 = 2.375 → "2.38"
-    expect(utils.calculateRatio('95', '40')).toBe('2.38');
+    // 95 / (40/100) = 237.5 → "238"
+    expect(utils.calculateRatio('95', '40')).toBe('238');
   });
 });
 

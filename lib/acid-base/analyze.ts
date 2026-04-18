@@ -1,13 +1,13 @@
-import { safeFloat } from "./safeFloat";
+import { safeParseFloatOrNull } from "../utils/safeParseFloat";
 import { Values, ExpectedValues } from "./interfaces";
 
 export const analyze = ({ values, isChronic }: { values: Values; isChronic: boolean }) => {
-  const pH = safeFloat(values.pH);
-  const pCO2 = safeFloat(values.pCO2);
-  const HCO3 = safeFloat(values.HCO3);
-  const Na = safeFloat(values.Na);
-  const Cl = safeFloat(values.Cl);
-  const Alb = safeFloat(values.Albumin);
+  const pH = safeParseFloatOrNull(values.pH);
+  const pCO2 = safeParseFloatOrNull(values.pCO2);
+  const HCO3 = safeParseFloatOrNull(values.HCO3);
+  const Na = safeParseFloatOrNull(values.Na);
+  const Cl = safeParseFloatOrNull(values.Cl);
+  const Alb = safeParseFloatOrNull(values.Albumin);
 
   if (pH === null || pCO2 === null || HCO3 === null) {
     return null;

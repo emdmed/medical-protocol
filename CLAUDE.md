@@ -42,7 +42,7 @@ context/                           # Shared medical context (provider-agnostic)
 ├── composition.md                 # Component wiring patterns, gotchas
 ├── sepsis.md                      # Sepsis types, functions, cross-component data
 lib/                               # Shared calculation + validation logic
-├── acid-base/                     # analyze.ts, safeFloat.ts, interfaces.ts, index.ts
+├── acid-base/                     # analyze.ts, interfaces.ts, index.ts
 ├── vital-signs-validations/       # 5 validation files + types.ts
 ├── bmi.ts cardiology.ts cardiology-types.ts dka.ts pafi.ts sepsis.ts water-balance.ts
 packages/medprotocol/              # CLI calculator tool (9 commands)
