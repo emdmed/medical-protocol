@@ -13,8 +13,15 @@ shadcn deps: card, input, button, badge, label, separator, select
 - **PhosphoCalcic** — Ca/P/PTH/Vitamin D monitoring, Ca×P product, recommendations for abnormal values, CKD-MBD monitoring frequency by GFR category
 - **CardioMetabolic** — LDL, HbA1c, BP in CKD, triglycerides
 
-Install: `npx medical-ui-cli add nephrology`
-Files installed: `anemia.tsx`, `phospho-calcic.tsx`, `cardio-metabolic.tsx`, `lib.ts`, `ui-helpers.tsx`, `types/interfaces.ts`
+Install options (component group architecture):
+```bash
+npx medical-ui-cli add nephrology        # GROUP — installs both ckd/ AND nephrology/ folders
+npx medical-ui-cli add ckd               # Standard — installs ckd/ only
+npx medical-ui-cli add anemia            # ALIAS — installs nephrology/ folder
+npx medical-ui-cli add phospho-calcic    # ALIAS — installs nephrology/ folder
+npx medical-ui-cli add cardio-metabolic  # ALIAS — installs nephrology/ folder
+```
+Files installed (nephrology/): `anemia.tsx`, `phospho-calcic.tsx`, `cardio-metabolic.tsx`, `lib.ts`, `ui-helpers.tsx`, `types/interfaces.ts`
 shadcn deps: card, input, button, badge, label
 
 **IMPORTANT:** Nephrology is a **separate** component — do NOT modify `ckd-evaluator.tsx` to add anemia or MBD logic. Install nephrology alongside ckd and compose them on the page.
@@ -57,7 +64,7 @@ interface CKDPatientData {
 
 ---
 
-## Nephrology Component (`npx medical-ui-cli add nephrology`)
+## Nephrology Component (via group `add nephrology` or alias `add anemia`/`add phospho-calcic`/`add cardio-metabolic`)
 
 Installed **separately** from CKD. Provides anemia, phospho-calcic, and cardio-metabolic panels for nephrology workflows.
 
@@ -187,7 +194,7 @@ Sepsis renal SOFA uses creatinine; CKD uses creatinine for eGFR. No programmatic
 
 ### Nephrology Dashboard (with Anemia + CKD-MBD)
 
-Requires both: `npx medical-ui-cli add ckd` AND `npx medical-ui-cli add nephrology`
+Install via group: `npx medical-ui-cli add nephrology` (installs both `ckd/` and `nephrology/` folders)
 
 ```tsx
 import CKDEvaluator from "@/components/ckd/ckd-evaluator";

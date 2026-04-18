@@ -24,8 +24,9 @@ Do NOT ask about eGFR formula choice, KDIGO staging thresholds, KFRE coefficient
 
 Follow the **Component Installation Process** from the main protocol.
 
-**Install CKD:** `npx medical-ui-cli add ckd`
-**Install Nephrology** (if anemia or CKD-MBD requested): `npx medical-ui-cli add nephrology`
+**Full nephrology suite (group install):** `npx medical-ui-cli add nephrology` — installs both `ckd/` and `nephrology/` folders
+**CKD only:** `npx medical-ui-cli add ckd`
+**Sub-component aliases:** `npx medical-ui-cli add anemia`, `add phospho-calcic`, or `add cardio-metabolic` — each installs the `nephrology/` folder
 
 These are **separate** components. Do NOT add anemia or MBD logic into `ckd-evaluator.tsx` — use the nephrology component's `anemia.tsx` and `phospho-calcic.tsx` instead.
 
@@ -48,7 +49,7 @@ These are **separate** components. Do NOT add anemia or MBD logic into `ckd-eval
 - `hasACRDoubling(previous, current)` — true if ≥2× increase
 - `getCKDSeverity(gfrCategory)` — normal/warning/critical for UI styling
 
-**Nephrology component** (installed separately via `npx medical-ui-cli add nephrology`):
+**Nephrology component** (installed via group `add nephrology` or individually via `add anemia`/`add phospho-calcic`/`add cardio-metabolic`):
 
 The `nephrology/` folder contains `anemia.tsx`, `phospho-calcic.tsx`, `cardio-metabolic.tsx`, `lib.ts`, `ui-helpers.tsx`, and `types/interfaces.ts`.
 

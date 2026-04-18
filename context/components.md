@@ -26,20 +26,7 @@
 
 ## Component Reference
 
-Components are delivered via `npx medical-ui-cli add <name>`.
-
-| Component | Category | Dependencies | Description |
-|---|---|---|---|
-| `vital-signs` | monitoring | none | BP, HR, RR, Temp, SpO2 monitor |
-| `acid-base` | calculator | none | Blood gas / acid-base analyzer |
-| `bmi` | calculator | none | BMI calculator |
-| `water-balance` | monitoring | none | Fluid balance tracker |
-| `pafi` | calculator | none | PaO2/FiO2 with ARDS classification |
-| `dka` | critical-care | `acid-base` | DKA monitoring |
-| `cardiology` | calculator | none | ASCVD, HEART, CHA2DS2-VASc |
-| `sepsis` | critical-care | `vital-signs`, `water-balance` | SOFA, qSOFA, lactate clearance |
-| `ckd` | calculator | none | eGFR, KDIGO staging, KFRE |
-| `nephrology` | monitoring | none | CKD anemia (sex-specific Hb, ESA), CKD-MBD (Ca/P/PTH/VitD), cardio-metabolic |
+Run `npx medical-ui-cli list` for the canonical list of available components, groups, and sub-component aliases. The CLI resolves names in order: group → alias → standard folder.
 
 Each installed component folder contains a JSDoc header in its main TSX file documenting props, usage, data flow, and behavior -- read this before modifying.
 
@@ -51,7 +38,7 @@ The CLI does **not** auto-install dependent components -- you must install them 
 
 - `dka` depends on `acid-base` -- install acid-base first
 - `sepsis` depends on `vital-signs` and `water-balance`
-- `nephrology` is a companion to `ckd` -- install both for full nephrology workflows. Wire `sex` from CKD to Anemia, `gfrCategory` from CKD to PhosphoCalcic.
+- `nephrology` is a companion to `ckd` -- the `nephrology` group installs both. Wire `sex` from CKD to Anemia, `gfrCategory` from CKD to PhosphoCalcic.
 - Other components are self-contained
 
 ---
