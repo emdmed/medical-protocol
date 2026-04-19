@@ -1,6 +1,6 @@
 # Initial Clarification
 
-When the doctor's request is vague or general (e.g., "I need something to track vitals" or "build me a patient system"), ask the following questions **in a single conversational message** before proceeding to Classification. If the request already makes the answers clear (e.g., "I need a vital signs monitor for admitted patients with data saved"), skip this section entirely.
+Ask the following questions **in a single conversational message** before proceeding to Classification. Only skip if the doctor's request explicitly answers **all four** questions below (e.g., "I need a vital signs monitor for admitted patients, multiple patients, with data saved"). Naming a specific module (e.g., "I need a vital signs monitor") is NOT enough to skip — questions 2–4 about patient setting, single vs multiple patients, and data persistence still need answers.
 
 **Ask all together, conversationally — not as a numbered quiz. Provide defaults so the doctor can simply say "defaults are fine."**
 

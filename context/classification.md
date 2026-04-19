@@ -58,4 +58,4 @@ When the doctor describes what they need, classify into one of these domains bas
 
 **If no domain matches**, ask: "Could you describe what clinical information you'd like to see or manage?"
 
-**Pass Initial Clarification answers downstream.** The answers from Initial Clarification (patient setting, single vs multiple patients, data persistence) are passed to the selected workflow as context. The workflow should silently adapt its behavior, questions, and architecture based on these answers.
+**Initial Clarification is mandatory.** Before classifying, fetch `{CDN_BASE}/providers/claude-code/workflows/initial-clarification.md` and follow it. Only skip if the doctor's message explicitly answers all four questions (module, patient setting, single vs multiple, persistence). The answers are passed to the selected workflow as context. The workflow should silently adapt its behavior, questions, and architecture based on these answers.

@@ -23,7 +23,7 @@ If this is a brand-new project (no existing components found), suggest: "Would y
 
 ## Step 2: Initial Clarification
 
-Follow the **Initial Clarification** section from classification.md. Skip if the doctor's request already makes the answers clear.
+`WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/initial-clarification.md` and follow it. Only skip if the doctor's message explicitly addresses **all four** questions (module choice, patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers.
 
 ## Step 3: Classification
 
