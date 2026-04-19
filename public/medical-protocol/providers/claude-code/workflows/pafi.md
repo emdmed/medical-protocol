@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Silently check for `.clinical-context.md` in the project root.
+Check for `.clinical-context.md` in the project root.
 - **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
 - **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /medical-protocol:start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 

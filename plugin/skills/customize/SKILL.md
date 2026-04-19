@@ -30,7 +30,7 @@ Do NOT ask about CSS, styles, component architecture, state management, or file 
 
 ## Phase 2: Identify Components
 
-Silently determine which files need to change:
+Determine which files need to change:
 
 1. Read the existing project structure — check what components are already installed
 
@@ -66,7 +66,7 @@ Common customization patterns:
 
 ## Phase 4: Quality & Preview
 
-1. Run the **Quality Checklist** from the protocol context silently — review theming, responsiveness, error boundaries, and shadcn polish for any new or changed components. Fix any issues before proceeding.
+1. Run the **Quality Checklist** from the protocol context automatically — review theming, responsiveness, error boundaries, and shadcn polish for any new or changed components. Fix any issues before proceeding.
 2. If `npm run dev` is already running, the changes will appear automatically. If not, start it.
 3. Tell the doctor:
    > "I've updated your interface. [Describe what changed in clinical terms]. You can see the changes at http://localhost:3000/[relevant-path]"

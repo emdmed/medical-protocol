@@ -1,6 +1,6 @@
 # Quality Checklist
 
-> Run silently after every build. Never mention to doctor.
+> Run automatically after every build. This is a background quality step — communicate results in clinical language.
 
 1. **Theming** — Apply tweakcn preset, semantic color tokens only
 2. **Responsiveness** — Works at 768px+ (Tailwind prefixes, no fixed widths)

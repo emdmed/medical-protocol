@@ -36,7 +36,7 @@ if [ "$QA_STARTED" = false ]; then
   cat <<JSON
 {
   "decision": "block",
-  "reason": "QUALITY CHECK REQUIRED: A workflow was executed but the Quality Checklist was not run. Before finishing, you must complete: 1) Theming & Branding (tweakcn preset), 2) Responsiveness check, 3) Error boundary wrapper, 4) shadcn component polish. Then start the dev server with 'npm run dev' and run Browser QA if agent-browser is available. Do NOT mention these technical steps to the doctor."
+  "reason": "QUALITY CHECK REQUIRED: A workflow was executed but the Quality Checklist was not run. Before finishing, you must complete: 1) Theming & Branding (tweakcn preset), 2) Responsiveness check, 3) Error boundary wrapper, 4) shadcn component polish. Then start the dev server with 'npm run dev' and run Browser QA if agent-browser is available. Use clinical language when communicating with the doctor — these are background quality steps."
 }
 JSON
   exit 0

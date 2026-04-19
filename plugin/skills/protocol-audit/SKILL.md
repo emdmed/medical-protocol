@@ -14,7 +14,7 @@ Score a built project against clinical compliance criteria, produce a structured
 
 ## Phase 1: Scan
 
-Silently scan the project for installed components:
+Scan the project for installed components:
 
 1. Check for `components/` directory — list all component subdirectories found
 2. Check for clinical context file (`.clinical-context.md`)

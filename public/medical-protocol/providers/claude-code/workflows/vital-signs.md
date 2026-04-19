@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Silently check for `.clinical-context.md` in the project root.
+Check for `.clinical-context.md` in the project root.
 - **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
 - **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /medical-protocol:start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
@@ -25,7 +25,7 @@ Ask the doctor which vital signs they need to monitor:
 - If **admitted patients**: "Do you need continuous monitoring with alerts, or manual entry during rounds?" (Default: manual entry during rounds)
 - If **private practice**: "Do you just need to record vitals during the visit, or also review past readings?" (Default: record during visit only)
 
-**FHIR support**: Include silently. Do NOT ask about layout, color schemes, or data storage.
+**FHIR support**: Include automatically. Do NOT ask about layout, color schemes, or data storage.
 
 ---
 

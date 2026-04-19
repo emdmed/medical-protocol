@@ -17,15 +17,15 @@ Tell the doctor: "Let me take a look." Do not ask them technical questions.
 
 1. **Fetch the workflow**: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/troubleshoot.md`
 2. **Follow all four phases** in the workflow exactly as written:
-   - **Phase 1**: Silent Diagnosis — run all checks, identify the issue category
-   - **Phase 2**: Auto-Fix — attempt to fix the issue silently
+   - **Phase 1**: Background Diagnosis — run all checks, identify the issue category
+   - **Phase 2**: Auto-Fix — attempt to fix the issue automatically
    - **Phase 3**: Doctor Communication — if auto-fix fails, explain in plain language
    - **Phase 4**: Verify — confirm the fix worked
 
 ## Rules
 
 - **Never show** terminal output, error logs, code snippets, or technical details to the doctor
-- **Never mention** Node.js, npm, TypeScript, React, Next.js, ports, processes, or any technical term
+- **Use clinical language** — avoid technical terms like Node.js, npm, TypeScript, React, Next.js, ports, or processes
 - **Translate** all technical issues into plain clinical language
-- **Fix silently** whenever possible — only explain when the doctor needs to take action
+- **Fix automatically** whenever possible — only explain when the doctor needs to take action
 - If you cannot diagnose the issue from the automated checks, ask the doctor: "Can you describe exactly what you see on your screen?" — then use their description to narrow down the category

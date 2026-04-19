@@ -13,7 +13,7 @@ One-time onboarding that gathers clinical context and writes `.clinical-context.
 
 ## Step 1: Check for Existing Context
 
-Silently scan the project root for `.clinical-context.md`.
+Scan the project root for `.clinical-context.md`.
 
 - **If found:** Show the current preferences and ask: "Would you like to update your clinical preferences, or are these still correct?"
   - If update → proceed to Step 2, pre-filling known answers

@@ -1,12 +1,12 @@
 # Troubleshoot Workflow
 
-Triggered when the doctor reports a problem. Diagnose silently, fix automatically, explain in plain language.
+Triggered when the doctor reports a problem. Diagnose automatically, fix automatically, explain in plain language.
 
 **Rule: Never show terminal output or technical details to the doctor.**
 
 ---
 
-## Phase 1: Silent Diagnosis
+## Phase 1: Background Diagnosis
 
 Say "Let me take a look." Run all checks, collect failures before fixing.
 
@@ -30,7 +30,7 @@ Say "Let me take a look." Run all checks, collect failures before fixing.
 
 ## Phase 2: Auto-Fix
 
-Fix silently without explaining to the doctor.
+Fix automatically. Use clinical language if you need to explain anything.
 
 | Category | Fix |
 |---|---|

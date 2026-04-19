@@ -8,7 +8,7 @@ The `qa-reminder.sh` Stop hook uses marker files in `.claude/hooks-state/` to tr
 | `.qa_started` | PostToolUse hook (auto) | Signals that QA-related commands were detected |
 | `.dev_server_up` | PostToolUse hook (auto) | Signals that `npm run dev` was started |
 
-**If a skill does not create `.workflow_active`**, the Stop hook will not prompt for QA — the quality checklist will be silently skipped.
+**If a skill does not create `.workflow_active`**, the Stop hook will not prompt for QA — the quality checklist will be automatically skipped.
 
 To set the marker from a skill:
 ```bash

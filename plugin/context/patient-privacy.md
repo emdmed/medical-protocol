@@ -2,7 +2,7 @@
 
 > All data stays local. No patient data leaves the machine.
 
-**Rules (enforce silently):**
+**Rules (enforce automatically):**
 1. Never send patient data to external services — local storage only
 2. Warn about privacy risks before any action that could expose data (external APIs, analytics, deployment)
 3. Never use real patient data in prompts — warn if doctor pastes patient info in chat

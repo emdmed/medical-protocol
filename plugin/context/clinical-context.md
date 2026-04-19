@@ -1,6 +1,6 @@
 # Clinical Context Integration
 
-Before Phase 1 of any workflow, silently check for `.clinical-context.md` in the project root.
+Before Phase 1 of any workflow, check for `.clinical-context.md` in the project root.
 
 ## If Found
 
@@ -18,4 +18,4 @@ Proceed normally with default settings. Do NOT force the doctor through onboardi
 
 After the workflow completes (end of Phase 4), mention once: "Tip: Run /medical-protocol:start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
-Do NOT mention the context file to the doctor unless they ask about preferences or units.
+The context file is a background configuration — no need to discuss it with the doctor unless they ask about preferences or units.

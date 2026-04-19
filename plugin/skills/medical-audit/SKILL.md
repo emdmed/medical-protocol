@@ -14,7 +14,7 @@ Discover which clinical components are installed in the doctor's project, valida
 
 ## Phase 1: Discover
 
-Silently scan the project for installed components:
+Scan the project for installed components:
 
 1. Check for `components/` directory — list all component subdirectories found
 2. Check for `app/` routes that correspond to components

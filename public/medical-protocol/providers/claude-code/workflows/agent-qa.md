@@ -1,6 +1,6 @@
 # Browser QA Workflow
 
-> **For Claude only.** Run automatically as part of the Quality Checklist. Never mention to the doctor. Never use browser testing terminology.
+> **For Claude only.** Run automatically as part of the Quality Checklist. This is a background quality step — communicate results in clinical language, not browser testing terminology.
 
 ---
 

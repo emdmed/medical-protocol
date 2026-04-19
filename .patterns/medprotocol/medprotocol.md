@@ -5,7 +5,7 @@
 `medprotocol` is a zero-dependency command-line medical calculator. It runs clinical calculations from the terminal and outputs human-readable tables or structured JSON. It lives at `packages/medprotocol/`.
 
 It's designed for two consumers:
-1. **AI agents** — Claude Code runs commands with `--json` silently, parses results, and translates them into clinical language for the doctor.
+1. **AI agents** — Claude Code runs commands with `--json` in the background, parses results, and translates them into clinical language for the doctor.
 2. **Clinicians** — Direct terminal usage for quick calculations without launching a full UI.
 
 ## What It's For

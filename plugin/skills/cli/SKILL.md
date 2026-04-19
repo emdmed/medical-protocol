@@ -65,7 +65,7 @@ If the doctor has already provided all needed values in their initial message, s
 
 ## Phase 3: Run the Calculation
 
-Build and execute the command silently. Always append `--json` for structured output.
+Build and execute the command automatically. Always append `--json` for structured output.
 
 ```bash
 npm run medprotocol -- <command> <flags> --json

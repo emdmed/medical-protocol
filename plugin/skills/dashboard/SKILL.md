@@ -53,6 +53,6 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 ## NEVER
 - **Fetch workflow files from the CDN for individual blocks** — blocks are installed via `npx medical-ui-cli add <name>`, not by fetching workflows. There are no per-block workflow files to download.
 - Combine components without testing that their data flows don't conflict
-- Hide component errors silently — always show which block has an issue
+- Hide component errors — always show which block has an issue
 - Use different unit systems across blocks in the same dashboard
 - Remove a block without confirming with the doctor first

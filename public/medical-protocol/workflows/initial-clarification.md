@@ -28,7 +28,7 @@ Ask the following questions **in a single conversational message** before procee
 - **Always ask Q2 and Q3 explicitly.** Words like "track", "monitor", "manage", or plural "patients" in the doctor's request do NOT count as answering these questions. The doctor must explicitly state "multiple patients" or "save data between sessions" (or equivalent) for you to skip them.
 - The answers feed into Classification and influence how each workflow is executed
 - Components and component groups are chosen later during Classification — do not ask about them here
-- Silently adapt the architecture based on the answers:
+- Automatically adapt the architecture based on the answers:
   - **Admitted patients + persistence** → local storage with patient identifiers, richer vital signs with alerts
   - **Private practice + single patient + no persistence** → simple session-based state, minimal UI
   - **Multiple patients** → patient list component, sidebar navigation

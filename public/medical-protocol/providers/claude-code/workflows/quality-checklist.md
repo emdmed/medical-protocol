@@ -1,6 +1,6 @@
 # Quality Checklist
 
-> **This checklist is for Claude only.** Run it silently after every workflow build. Items 1–5 run before `npm run dev`; item 6 (Browser QA) runs after the dev server is ready. Never mention it to the doctor. Fix any issues you find without discussing the technical details.
+> **For Claude only.** Run automatically after every workflow build. Items 1–5 run before `npm run dev`; item 6 (Browser QA) runs after the dev server is ready. This is a background quality step — fix any issues found and communicate results in clinical language, not technical details.
 
 ## 1. Theming & Branding (via tweakcn)
 
@@ -74,7 +74,7 @@ Run the full browser QA workflow defined in `workflows/agent-qa.md`. It covers:
 - **Keyboard navigation:** Tab, Enter, and Escape work on interactive elements
 
 **Rules:**
-- Auto-fix any issues you find silently (e.g., add `overflow-visible`, fix responsive classes)
+- Auto-fix any issues you find (e.g., add `overflow-visible`, fix responsive classes)
 - If an issue can't be auto-fixed, translate it to clinical language for the doctor (e.g., "The edit popup gets cut off" not "overflow-hidden clips the absolutely-positioned element")
 - After 2 failed fix attempts on the same issue, or 3 total browser crashes: skip browser QA and proceed
-- Never mention agent-browser, snapshots, accessibility trees, or any browser testing terminology to the doctor
+- Use clinical language when reporting results — avoid technical terms like agent-browser, snapshots, or accessibility trees

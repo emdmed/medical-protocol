@@ -36,7 +36,7 @@ Ask which vital signs to monitor:
 - **Admitted patients**: "Continuous monitoring with alerts, or manual entry during rounds?" (Default: manual)
 - **Private practice**: "Record vitals during the visit, or also review past readings?" (Default: record only)
 
-**FHIR support**: Include silently. Do NOT ask about layout, colors, or storage.
+**FHIR support**: Include automatically. Do NOT ask about layout, colors, or storage.
 
 ## NEVER
 - Display vital sign values without units (always show mmHg, bpm, °F/°C, %, breaths/min)

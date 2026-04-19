@@ -10,7 +10,7 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Step 1: Returning Project Check
 
-Before anything else, silently check if the current project already has components installed (e.g., `components/vital-signs/`, `components/acid-base/`, etc.):
+Before anything else, check if the current project already has components installed (e.g., `components/vital-signs/`, `components/acid-base/`, etc.):
 
 - If the doctor asks for something that's already installed, route to the **customize** workflow — do not re-install components.
 - If the doctor asks for something new that doesn't exist yet, proceed below.
