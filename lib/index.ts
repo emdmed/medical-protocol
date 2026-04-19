@@ -94,5 +94,13 @@ export {
   isRapidDecline,
   hasSignificantEGFRChange,
   hasACRDoubling,
+  classifyAnemia,
+  assessIronStatus,
+  checkESAEligibility,
+  assessPhosphate,
+  correctCalcium,
+  assessPTH,
+  assessVitaminD,
+  getCKDMBDMonitoring,
   getCKDSeverity,
 } from "./ckd";
