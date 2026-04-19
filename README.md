@@ -1,6 +1,6 @@
 # Medical Protocol
 
-AI-agent-driven clinical tools — validated calculation logic, a terminal CLI, and workflows for Claude Code. Open source, privacy-first, 751 tests.
+AI-agent-driven clinical tools — validated calculation logic, a terminal CLI, and workflows for Claude Code. Open source, privacy-first, 801 tests.
 
 ## Quick Start
 
@@ -74,13 +74,13 @@ lib/                               Pure calculation + validation logic (shared b
 ├── acid-base/                     ABG analysis — Winter's, Henderson-Hasselbalch, anion gap, delta ratio
 ├── vital-signs-validations/       Range validation, alerts, FHIR R4 output
 ├── cardiology-types.ts            ASCVD, HEART score, CHA₂DS₂-VASc interfaces
-├── ckd.ts                         eGFR (CKD-EPI 2021), KDIGO staging, KFRE risk
+├── ckd.ts                         eGFR (CKD-EPI 2021), KDIGO staging, KFRE risk, nephrology context
 ├── bmi.ts cardiology.ts dka.ts pafi.ts sepsis.ts water-balance.ts
 packages/medprotocol/              CLI tool (9 commands)
 context/                           Shared medical context (13 files): registry, classification, CLI ref, per-module docs
 public/medical-protocol/providers/ Protocol files, workflows, install guides
-plugin/                            Claude Code plugin: 14 skills, 4 hooks, 10 plugin context files
-tests/                             Vitest — 23 test files, 751 tests
+plugin/                            Claude Code plugin: 14 skills, 4 hooks, 9 plugin context files
+tests/                             Vitest — 23 test files, 801 tests
 ```
 
 ### The `lib/` layer
@@ -106,7 +106,7 @@ Pure TypeScript — no framework dependencies. This is the shared bridge between
 ## Tests
 
 ```bash
-npm test                              # Run all 751 tests (23 files)
+npm test                              # Run all 801 tests (23 files)
 npx vitest run tests/acid-base/       # Run a single test directory
 npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
 npm run test:watch                    # Watch mode
@@ -129,7 +129,7 @@ No production dependencies. TypeScript strict mode. No linter.
 1. Fork the repo
 2. Create a feature branch
 3. Add tests for any new clinical logic in `tests/`
-4. Run `npm test` — all 751 tests must pass
+4. Run `npm test` — all 801 tests must pass
 5. Submit a PR
 
 New clinical modules need three things:

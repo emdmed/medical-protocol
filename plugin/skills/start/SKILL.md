@@ -56,7 +56,7 @@ These domains don't have a local SKILL.md. Fetch the workflow and follow it dire
 
 | Domain | Fetch |
 |---|---|
-| **ckd** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/ckd.md` |
+| **nephrology** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/nephrology.md` |
 | **cardiology** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/cardiology.md` |
 | **sepsis** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/sepsis.md` |
 

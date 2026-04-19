@@ -1,4 +1,4 @@
-# CKD Component Context
+# Nephrology Component Context
 
 ## Component Summary
 

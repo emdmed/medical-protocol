@@ -26,7 +26,7 @@ npx vitest run tests/vital-signs/     # Run a single test directory
 npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
 npm run version:bump 0.4.0            # Bump version across 5 files
 npm run build                         # Build medprotocol CLI
-npx medprotocol <cmd> [opts]          # CLI calculators (bmi, abg, vitals, pafi, dka, water-balance, cardiology, sepsis)
+npx medprotocol <cmd> [opts]          # CLI calculators (bmi, abg, vitals, pafi, dka, water-balance, cardiology, sepsis, ckd)
 ```
 
 No linter. TypeScript strict mode (`tsconfig.json`).
@@ -43,13 +43,13 @@ context/                           # Shared medical context (provider-agnostic, 
 ├── classification.md              # Signal words → domain routing
 ├── cli.md                         # CLI calculator reference
 ├── composition.md                 # Component wiring patterns, gotchas
-├── {module}.md                    # Per-module context (9): acid-base, bmi, cardiology, ckd, dka, pafi, sepsis, vital-signs, water-balance
+├── {module}.md                    # Per-module context (9): acid-base, bmi, cardiology, nephrology, dka, pafi, sepsis, vital-signs, water-balance
 lib/                               # Shared calculation + validation logic
 ├── acid-base/                     # analyze.ts, interfaces.ts, index.ts
 ├── vital-signs-validations/       # 5 validation files + types.ts
-├── bmi.ts cardiology.ts cardiology-types.ts dka.ts pafi.ts sepsis.ts water-balance.ts
+├── bmi.ts cardiology.ts cardiology-types.ts ckd.ts dka.ts pafi.ts sepsis.ts water-balance.ts
 packages/medprotocol/              # CLI calculator tool (9 commands)
-plugin/                            # Claude plugin source: settings.json, hooks/, skills/ (14), context/ (10)
+plugin/                            # Claude plugin source: settings.json, hooks/, skills/ (14), context/ (9)
 tests/                             # Vitest — test files, clinical logic only, no UI rendering
 scripts/                           # bump-version.sh
 hooks/                             # Git hooks: privacy-guard, qa-reminder, track-workflow, validate-fetch
@@ -62,9 +62,9 @@ hooks/                             # Git hooks: privacy-guard, qa-reminder, trac
 - **No production deps** — devDependencies only (typescript, vitest). Do not add runtime packages.
 - **Testing:** Logic-only via Vitest; UI QA via agent-browser (workflows/agent-qa.md)
 - **CDN serves strings only** — markdown and JSON, no HTML
-- **Plugin:** 14 skills with SKILL.md + reference docs, 4 hooks (privacy, QA, workflow tracking, fetch validation), 10 plugin context files
+- **Plugin:** 14 skills with SKILL.md + reference docs, 4 hooks (privacy, QA, workflow tracking, fetch validation), 9 plugin context files
 - **Shared context:** 13 files in `context/` — component registry, classification, CLI ref, composition patterns, and 9 per-module docs
-- **Version:** 0.4.0 (synced across package.json, provider manifest, medprotocol/package.json, plugin.json)
+- **Version:** 0.4.0 (synced across package.json, provider manifest, medprotocol/package.json, plugin/.claude-plugin/plugin.json)
 
 ## Patterns
 
