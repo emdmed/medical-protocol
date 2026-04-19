@@ -18,6 +18,8 @@ Do NOT ask about calculation formulas, display preferences, or technical prefere
 
 Follow the **Component Installation Process** from the main protocol for the `water-balance` component.
 
+**Patient demographics:** This component uses weight. Ask: "Would you like a Patient demographics card above the fluid balance tracker?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient weight into the water balance component following the patient data wiring pattern in the composition context.
+
 ---
 
 ## Phase 3: Build Page

@@ -40,6 +40,8 @@ Follow the **Component Installation Process** from the main protocol for the `se
 - `isLactateClearanceAdequate(clearance)` — adequate if ≥10%
 - `getSOFASeverityLevel(score)` — Low / Moderate / High / Very High
 
+**Patient demographics:** This component uses weight. Ask: "Would you like a Patient demographics card above the sepsis monitor?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient weight into the sepsis component following the patient data wiring pattern in the composition context.
+
 ---
 
 ## Phase 3: Build Page

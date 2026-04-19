@@ -17,6 +17,8 @@ Do NOT ask about scoring formula details, display preferences, or technical pref
 
 Follow the **Component Installation Process** from the main protocol for the `cardiology` component.
 
+**Patient demographics:** This component uses age and sex. Ask: "Would you like a Patient demographics card above the cardiology calculators?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient age and sex into the cardiology component following the patient data wiring pattern in the composition context.
+
 ---
 
 ## Phase 3: Build Page

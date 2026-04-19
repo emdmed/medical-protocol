@@ -30,6 +30,8 @@ Follow the **Component Installation Process** from the main protocol.
 
 These are **separate** components. Do NOT add anemia or MBD logic into `ckd-evaluator.tsx` — use the nephrology component's `anemia.tsx` and `phospho-calcic.tsx` instead.
 
+**Patient demographics:** This component uses age and sex. Ask: "Would you like a Patient demographics card above the CKD evaluator to manage patient info in one place?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient age and sex into the CKD component following the patient data wiring pattern in the composition context.
+
 **Clinical logic library:** The CKD component imports calculation functions from `lib/ckd`. Create in the project:
 - `calculateEGFR(creatinine, age, sex)` — CKD-EPI 2021 race-free eGFR
 - `classifyGFRCategory(egfr)` — G1–G5 staging

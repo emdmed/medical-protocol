@@ -31,6 +31,8 @@ npx medical-ui-cli add dka
 npx medical-ui-cli add acid-base
 ```
 
+**Patient demographics:** This component uses weight. Ask: "Would you like a Patient demographics card above the DKA monitor?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient weight into the DKA component following the patient data wiring pattern in the composition context.
+
 **Clinical logic library:** The DKA component imports calculation functions from `lib/dka`. Create in the project:
 - `calculateGlucoseReductionRate(current, previous, hours)` — rate of glucose drop per hour
 - `isGlucoseOnTarget(rate, unit)` — target: 50–70 mg/dL/hr or 3–4 mmol/L/hr

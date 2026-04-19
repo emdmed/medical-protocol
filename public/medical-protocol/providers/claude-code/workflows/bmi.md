@@ -17,6 +17,8 @@ Do NOT ask about BMI formula details, display preferences, or technical preferen
 
 Follow the **Component Installation Process** from the main protocol for the `bmi` component.
 
+**Patient demographics:** This component uses weight and height. Ask: "Would you like a Patient demographics card above the BMI calculator?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient weight and height into the BMI component following the patient data wiring pattern in the composition context.
+
 ---
 
 ## Phase 3: Build Page
