@@ -62,7 +62,11 @@ These domains don't have a local SKILL.md. Fetch the workflow and follow it dire
 
 ## Step 4: Execute
 
-Once classified, read the matched SKILL.md file and follow its phases exactly. Pass the Initial Clarification answers (patient setting, single vs multiple, persistence) as context to the workflow.
+Once classified, route to the matched destination from the tables above:
+- **Local skills:** Read the matched SKILL.md file and follow its phases exactly.
+- **CDN workflows (nephrology, cardiology, sepsis):** `WebFetch` the exact URL from the routing table above — do NOT construct URLs yourself.
+
+Pass the Initial Clarification answers (patient setting, single vs multiple, persistence) as context to the workflow.
 
 ## Interface Language
 

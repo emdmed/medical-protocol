@@ -113,7 +113,7 @@ Use the **Domain** column to identify which domain matches the doctor's request.
 
 ## Workflow Execution
 
-Once classified, use the provider's routing table (in the `start` skill) to find the correct workflow or skill for the matched domain. Most domains route to local skills — only `ckd`, `cardiology`, and `sepsis` are fetched from the CDN. **Do NOT guess or construct CDN URLs by pattern** — always use the exact URLs from the routing table.
+Once classified, use the provider's routing table (in the `start` skill) to find the correct workflow or skill for the matched domain. Most domains route to local skills — only `nephrology`, `cardiology`, and `sepsis` are fetched from the CDN. **Do NOT guess or construct CDN URLs by pattern** — always use the exact URLs from the routing table. Note: CKD (chronic kidney disease) maps to the **nephrology** domain, not a separate `ckd` domain.
 
 1. **Route to the matched skill or workflow** using the provider's routing table
 2. **Follow all phases** in the matched skill/workflow exactly as written
