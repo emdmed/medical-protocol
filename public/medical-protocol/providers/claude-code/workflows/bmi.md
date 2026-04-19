@@ -1,5 +1,13 @@
 # BMI Workflow
 
+## Prerequisites
+
+Silently check for `.clinical-context.md` in the project root.
+- **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
+- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
+
+---
+
 ## Phase 1: Clinical Requirements
 
 - "Do you prefer metric (kg/m) or imperial (lbs/ft-in) units?" (Default: imperial, with a toggle to switch)
@@ -34,3 +42,13 @@ Update `app/page.tsx` with a link to `/bmi`.
 Follow **After Any Workflow Completes** from the main protocol.
 Tell the doctor: "Your BMI calculator is ready. Click to enter weight and height, and it will show the BMI with its category. You can switch between metric and imperial units. View it at http://localhost:3000/bmi"
 Ask: "Would you like to adjust anything?"
+
+---
+
+## Related Tools
+
+Based on clinical context, the doctor may also benefit from:
+- **/vitals** — Complete vital signs assessment alongside anthropometrics
+- **/cardiology** — Cardiovascular risk scoring where BMI is a contributing factor
+
+Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.

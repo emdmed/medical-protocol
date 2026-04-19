@@ -1,5 +1,13 @@
 # Water Balance Workflow
 
+## Prerequisites
+
+Silently check for `.clinical-context.md` in the project root.
+- **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
+- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
+
+---
+
 ## Phase 1: Clinical Requirements
 
 - "Do you need to track oral and IV intake separately?" (Default: yes)
@@ -35,3 +43,14 @@ Update `app/page.tsx` with a link to `/water-balance`.
 Follow **After Any Workflow Completes** from the main protocol.
 Tell the doctor: "Your fluid balance tracker is ready. Enter the patient's weight, fluid intake (oral and IV), urine output, and stool count — it calculates the net balance including insensible losses. View it at http://localhost:3000/water-balance"
 Ask: "Would you like to adjust how the fluid balance is tracked?"
+
+---
+
+## Related Tools
+
+Based on clinical context, the doctor may also benefit from:
+- **/dka** — DKA fluid management with glucose and electrolyte tracking
+- **/sepsis** — Fluid resuscitation tracking with sepsis bundle compliance
+- **/vitals** — Hemodynamic response monitoring during fluid therapy
+
+Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.

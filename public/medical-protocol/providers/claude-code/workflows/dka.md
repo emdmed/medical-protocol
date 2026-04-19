@@ -1,5 +1,13 @@
 # DKA Monitoring Workflow
 
+## Prerequisites
+
+Silently check for `.clinical-context.md` in the project root.
+- **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
+- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
+
+---
+
 ## Phase 1: Clinical Requirements
 
 Ask the doctor about their DKA monitoring needs:
@@ -64,3 +72,14 @@ Update `app/page.tsx` with a link to `/dka`.
 Follow **After Any Workflow Completes** from the main protocol.
 Tell the doctor: "Your DKA monitoring dashboard is ready. Enter the patient's weight, then add hourly readings with glucose, ketones, bicarbonate, pH, pCO2, Na+, Cl-, albumin, potassium, insulin rate, GCS, and urine output. It tracks reduction rates against targets, checks DKA resolution criteria, and runs full blood gas analysis on every reading. View it at http://localhost:3000/dka"
 Ask: "Would you like to adjust anything about the monitoring parameters?"
+
+---
+
+## Related Tools
+
+Based on clinical context, the doctor may also benefit from:
+- **/water-balance** — Fluid management and intake/output tracking during DKA resuscitation
+- **/vitals** — Hemodynamic and respiratory monitoring alongside DKA parameters
+- **/nephrology** — AKI risk assessment in the setting of dehydration and ketoacidosis
+
+Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.

@@ -1,5 +1,13 @@
 # Acid-Base Workflow
 
+## Prerequisites
+
+Silently check for `.clinical-context.md` in the project root.
+- **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
+- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
+
+---
+
 ## Phase 1: Clinical Requirements
 
 Ask the doctor about their blood gas analysis needs:
@@ -35,3 +43,14 @@ Update `app/page.tsx` with a link to `/acid-base`.
 Follow **After Any Workflow Completes** from the main protocol.
 Tell the doctor: "Your blood gas analyzer is ready. Enter pH, pCO₂, and HCO₃ to get an acid-base interpretation. You can also add Na⁺, Cl⁻, and albumin for anion gap analysis. View it at http://localhost:3000/acid-base"
 Ask: "Would you like to adjust anything about the analysis display?"
+
+---
+
+## Related Tools
+
+Based on clinical context, the doctor may also benefit from:
+- **/dka** — If metabolic acidosis with elevated anion gap suggests diabetic ketoacidosis
+- **/sepsis** — If lactic acidosis or sepsis-related gas derangements are suspected
+- **/pafi** — If respiratory component needs PaO2/FiO2 ratio and ARDS classification
+
+Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.

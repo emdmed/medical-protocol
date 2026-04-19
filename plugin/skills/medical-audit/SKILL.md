@@ -51,12 +51,40 @@ If agent-browser is not available, note: "Browser validation skipped — agent-b
 
 ## Phase 4: Report
 
+### Scoring Rubric
+
+Score each component on 4 dimensions (0–4 each, total /16):
+
+| Score | Meaning |
+|-------|---------|
+| 4 | Excellent — no issues found |
+| 3 | Good — minor issues, clinically safe |
+| 2 | Fair — some issues that should be fixed |
+| 1 | Poor — significant issues affecting reliability |
+| 0 | Failing — critical errors or missing entirely |
+
+| Dimension | What to Check |
+|-----------|--------------|
+| **Calculation Accuracy** | All lib functions produce correct results for test vectors |
+| **Input Validation** | Rejects out-of-range values, handles edge cases (zero, negative, missing) |
+| **Unit Consistency** | Functions use and return correct units, conversions match canonical lib |
+| **Coverage** | All expected lib functions are imported and used by the component |
+
+### Report Format
+
 Output a structured report:
 
 ```
 ## Component Test Report
 
-### {Component Name}: {PASS | FAIL}
+### {Component Name}: {PASS | FAIL} — Score: {n}/16
+
+| Dimension | Score | Notes |
+|-----------|-------|-------|
+| Calculation Accuracy | {0-4} | {findings} |
+| Input Validation | {0-4} | {findings} |
+| Unit Consistency | {0-4} | {findings} |
+| Coverage | {0-4} | {findings} |
 
 **CLI Validation:** {pass/fail}
 {per-field results or "All calculations match canonical library"}
@@ -67,8 +95,9 @@ Output a structured report:
 {If FAIL: specific mismatch details and recommended fix}
 
 ---
-### Summary: {passed}/{total} components passing
+### Summary: {passed}/{total} components passing — Overall: {sum}/{ total×16}
 
+{If any component scores ≤8: "⚠ Component {name} needs attention — score below 50%."}
 {If any failures: "Run /customize to update {component} calculation logic."}
 Re-run /medical-audit after fixes to verify.
 ```

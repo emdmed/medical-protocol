@@ -1,5 +1,13 @@
 # CKD (Chronic Kidney Disease) Evaluation Workflow
 
+## Prerequisites
+
+Silently check for `.clinical-context.md` in the project root.
+- **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
+- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
+
+---
+
 ## Phase 1: Clinical Requirements
 
 Ask the doctor about their CKD evaluation needs:
@@ -105,3 +113,14 @@ If anemia monitoring was included: "The anemia panel uses sex-specific hemoglobi
 If CKD-MBD was included: "The phospho-calcic panel monitors calcium, phosphorus, PTH, and vitamin D with stage-specific recommendations. It shows corrected calcium, Ca×P product, and the recommended monitoring frequency for the patient's GFR category."
 
 Ask: "Would you like to adjust anything about the evaluation parameters?"
+
+---
+
+## Related Tools
+
+Based on clinical context, the doctor may also benefit from:
+- **/cardiology** — Cardiovascular risk assessment for cardio-renal syndrome management
+- **/acid-base** — Metabolic acidosis evaluation common in advanced CKD
+- **/bmi** — Nutritional status monitoring relevant to CKD progression
+
+Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.
