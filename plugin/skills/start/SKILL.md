@@ -6,7 +6,6 @@ allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/project-setup.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/classification.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 ## Step 1: Returning Project Check
@@ -14,20 +13,24 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 Before anything else, silently check if the current project already has components installed (e.g., `components/vital-signs/`, `components/acid-base/`, etc.):
 
 - If the doctor asks for something that's already installed, route to the **customize** workflow — do not re-install components.
-- If the doctor asks for something new that doesn't exist yet, proceed with classification below.
+- If the doctor asks for something new that doesn't exist yet, proceed below.
 - Never re-scaffold the project if it already has a working setup.
 
 ### New Project Suggestion
 
 If this is a brand-new project (no existing components found), suggest: "Would you like me to learn about your practice first so I can tailor everything to your workflow? Just say 'teach me' or we can jump straight into building."
 
-## Step 2: Initial Clarification
+## Step 2: Initial Clarification (BLOCKING — must complete before Step 3)
 
-`WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/initial-clarification.md` and follow it. Only skip if the doctor's message explicitly addresses **all four** questions (module choice, patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers.
+`WebFetch` from `{CDN_BASE}/workflows/initial-clarification.md` and follow it. **Ask the questions and wait for the doctor's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all four questions.
 
-## Step 3: Classification
+Only skip if the doctor's message explicitly addresses **all four** questions (module choice, patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers. Words like "track", "monitor", or plural "patients" do NOT satisfy Q3/Q4 — the doctor must explicitly say "multiple patients" or "save data between sessions" (or equivalent).
 
-Follow the **Classification** section from classification.md to match the doctor's request to a domain, then route to the corresponding skill or workflow:
+## Step 3: Classification (only after Step 2 is complete)
+
+`WebFetch` from `{CDN_BASE}/context/classification.md` to get the signal words and routing rules.
+
+Use the classification table to match the doctor's request to a domain, then route to the corresponding skill or workflow:
 
 ### Domains with local skills
 

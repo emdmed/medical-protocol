@@ -95,25 +95,27 @@ If it's unclear (e.g., the doctor mixes languages), ask once: "Would you prefer 
 
 ---
 
-## Initial Clarification
+## Initial Clarification (mandatory)
 
-When the doctor's request is vague, fetch and follow: `{CDN_BASE}/providers/claude-code/workflows/initial-clarification.md`
+Fetch and follow: `{CDN_BASE}/workflows/initial-clarification.md`
 
-If the request is specific enough (e.g., "I need a vital signs monitor for admitted patients"), skip directly to Classification.
+Ask all four questions and **wait for the doctor's answers** before proceeding to Classification. Only skip if the doctor's message explicitly answers all four questions (module, patient setting, single vs multiple, persistence).
 
 ---
 
 ## Classification
 
-Fetch the classification table: `WebFetch` from `{CDN_BASE}/context/classification.md` — signal words, domain mapping, routing rules, and cross-prompt logic.
+Fetch the classification table: `WebFetch` from `{CDN_BASE}/context/classification.md` — signal words, domain mapping, and routing rules.
+
+Use the **Domain** column to identify which domain matches the doctor's request. Then use the provider's routing table (in the start skill) to map the domain to the correct workflow or skill.
 
 ---
 
 ## Workflow Execution
 
-Once classified, fetch and follow the workflow URL from the **Workflow column** in the classification table. Do NOT construct URLs from section headers — use the exact URL listed in the table (e.g., nephrology maps to `ckd.md`, not `nephrology.md`).
+Once classified, fetch and follow the workflow for the matched domain.
 
-1. **Fetch the workflow**: `WebFetch` the exact URL from the classification table's Workflow column
+1. **Fetch the workflow** for the matched domain using the provider's routing table
 2. **Follow all phases** in the workflow exactly as written
 3. **Install components** as instructed by the workflow using `npx medical-ui-cli add <component>`
 

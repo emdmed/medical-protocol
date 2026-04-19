@@ -41,6 +41,7 @@ Ask the following questions **in a single conversational message** before procee
 
 **Rules:**
 - Never ask more than these four questions — keep it brief
+- **Always ask Q3 and Q4 explicitly.** Words like "track", "monitor", "manage", or plural "patients" in the doctor's request do NOT count as answering these questions. The doctor must explicitly state "multiple patients" or "save data between sessions" (or equivalent) for you to skip them.
 - The answers feed into Classification and influence how each workflow is executed
 - Silently adapt the architecture based on the answers:
   - **Admitted patients + persistence** → local storage with patient identifiers, richer vital signs with alerts
