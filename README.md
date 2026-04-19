@@ -59,33 +59,7 @@ BMI Calculator
 
 ## Architecture
 
-This project is one piece of a three-part system:
-
-| Part | What it does | Where |
-|------|-------------|-------|
-| **Workflows & Plugin** (this repo) | Markdown protocols, workflows, hooks, skills, and `lib/` with pure calculation logic | Here |
-| **medprotocol CLI** (this repo) | Terminal calculator — 9 commands, imports logic from `lib/` | `packages/medprotocol/` |
-| **medical-ui-cli** (separate repo) | shadcn-style React component delivery via `npx medical-ui-cli add <component>` | Separate repo |
-
-### Key directories
-
-```
-lib/                               Pure calculation + validation logic (shared by CLI and UI)
-├── acid-base/                     ABG analysis — Winter's, Henderson-Hasselbalch, anion gap, delta ratio
-├── vital-signs-validations/       Range validation, alerts, FHIR R4 output
-├── cardiology-types.ts            ASCVD, HEART score, CHA₂DS₂-VASc interfaces
-├── ckd.ts                         eGFR (CKD-EPI 2021), KDIGO staging, KFRE risk, nephrology context
-├── bmi.ts cardiology.ts dka.ts pafi.ts sepsis.ts water-balance.ts
-packages/medprotocol/              CLI tool (9 commands)
-context/                           Shared medical context (13 files): registry, classification, CLI ref, per-module docs
-public/medical-protocol/providers/ Protocol files, workflows, install guides
-plugin/                            Claude Code plugin: 14 skills, 4 hooks, 9 plugin context files
-tests/                             Vitest — 23 test files, 801 tests
-```
-
-### The `lib/` layer
-
-Pure TypeScript — no framework dependencies. This is the shared bridge between the CLI and the UI components. If you want to use the clinical logic in your own project, start here.
+Three parts: **this repo** (workflows, plugin, `lib/` logic, CLI), **medical-ui-cli** (separate repo — shadcn-style component delivery), and the **doctor's project** (Next.js app built by the agent). Pure calculation logic lives in `lib/` — no framework deps, shared by CLI and UI. See `CLAUDE.md` for full directory structure.
 
 ## Clinical Components
 
@@ -114,16 +88,6 @@ npm run test:watch                    # Watch mode
 
 Covers: extreme values, negative inputs, triple acid-base disorders, zero divisors, mixed disorder detection, boundary conditions for every classification tier.
 
-## Development
-
-```bash
-npm install          # Install dev dependencies (TypeScript, Vitest only)
-npm test             # Run tests
-npm run build        # Build medprotocol CLI
-```
-
-No production dependencies. TypeScript strict mode. No linter.
-
 ## Contributing
 
 1. Fork the repo
@@ -135,7 +99,7 @@ No production dependencies. TypeScript strict mode. No linter.
 New clinical modules need three things:
 1. Pure logic in `lib/`
 2. Workflow file in `public/medical-protocol/providers/claude-code/workflows/`
-3. Classification row in `context/classification.md`
+3. Classification row in `public/medical-protocol/context/classification.md`
 
 ## License
 

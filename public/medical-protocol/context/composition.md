@@ -110,6 +110,8 @@ function ICUDashboard() {
 
 ## Gotchas
 
+- **Group installs**: For nephrology dashboards, use `npx medical-ui-cli add nephrology` (group) to install both `ckd/` and `nephrology/` folders at once. Sub-component aliases (`anemia`, `phospho-calcic`, `cardio-metabolic`) install just the `nephrology/` folder.
+
 - **overflow-hidden clipping**: shadcn `Card` uses `overflow-hidden` by default. Add `overflow-visible` to any Card wrapping VitalSigns — its edit popups use absolute positioning. AcidBase result badges now render inline below inputs (no overflow fix needed).
 
 - **Result overlap prevention**: Calculator result badges/output must always render **below** the input fields using inline flow — never above them using `absolute bottom-*`. Absolute positioning above inputs causes results to overlap the component title.

@@ -38,7 +38,7 @@ public/medical-protocol/
 ├── providers/                     # Provider protocols + install guides
 │   ├── manifest.json              # Provider registry
 │   └── claude-code/               # protocol.md, install.md, 15 workflows/
-context/                           # Shared medical context (provider-agnostic, 13 files)
+public/medical-protocol/context/   # Shared medical context (CDN-served, 13 files)
 ├── components.md                  # Component registry, dependencies, installation
 ├── classification.md              # Signal words → domain routing
 ├── cli.md                         # CLI calculator reference
@@ -63,7 +63,7 @@ hooks/                             # Git hooks: privacy-guard, qa-reminder, trac
 - **Testing:** Logic-only via Vitest; UI QA via agent-browser (workflows/agent-qa.md)
 - **CDN serves strings only** — markdown and JSON, no HTML
 - **Plugin:** 14 skills with SKILL.md + reference docs, 4 hooks (privacy, QA, workflow tracking, fetch validation), 9 plugin context files
-- **Shared context:** 13 files in `context/` — component registry, classification, CLI ref, composition patterns, and 9 per-module docs
+- **Shared context:** 13 files in `public/medical-protocol/context/` — component registry, classification, CLI ref, composition patterns, and 9 per-module docs (CDN-served, single source of truth)
 - **Version:** 0.4.0 (synced across package.json, provider manifest, medprotocol/package.json, plugin/.claude-plugin/plugin.json)
 
 ## Patterns

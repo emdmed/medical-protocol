@@ -2,98 +2,48 @@
 
 ## Component Summary
 
-BMICalculator -- Body Mass Index calculator with metric/imperial toggle, WHO category classification, and visual BMI scale.
+BMICalculator — Body Mass Index with metric/imperial toggle, WHO classification, visual BMI scale.
 
 Install: `npx medical-ui-cli add bmi`
-Files installed: `bmi-calculator.tsx`
-shadcn deps: card, input, button, label
+Files: `bmi-calculator.tsx` — shadcn: card, input, button, label
 
 ---
 
-## Props & Data Flow
+## Props
 
-```typescript
-interface BMIProps {
-  // No props -- standalone calculator
-}
-// dataFlow: none (self-contained)
-```
+Self-contained — no props, no data flow.
 
 ---
 
-## lib/bmi.ts -- Function Signatures
+## Lib Functions
 
-| Function | Inputs | Output |
-|---|---|---|
-| `calculateBMI` | w (weight), hFt (feet), hIn (inches), hM (meters), metric (boolean) | string (BMI value) or `null` |
-| `getBMICategory` | bmi (string \| null) | string (WHO category) |
+See `lib/bmi.ts`. Two functions: `calculateBMI(w, hFt, hIn, hM, metric)` → BMI or null, `getBMICategory(bmi)` → Underweight/<18.5, Normal/18.5-24.9, Overweight/25-29.9, Obese I/30-34.9, Obese II/35-39.9, Obese III/≥40.
 
-### BMI Categories
-
-| Category | BMI Range |
-|---|---|
-| Underweight | < 18.5 |
-| Normal | 18.5 -- 24.9 |
-| Overweight | 25.0 -- 29.9 |
-| Obese (Class I) | 30.0 -- 34.9 |
-| Obese (Class II) | 35.0 -- 39.9 |
-| Obese (Class III) | >= 40.0 |
-
-All inputs are `string` (parsed internally via `safeParseFloat`).
+All inputs `string` (parsed via `safeParseFloat`).
 
 ---
 
-## Cross-Component Data Sharing
+## Cross-Component Data
 
-BMI is self-contained. It does not share data with other components. Weight from BMI could inform water-balance or sepsis (which also take weight), but there is no programmatic data link -- the doctor enters weight separately in each tool.
-
----
-
-## Composition Patterns
-
-### Standalone
-
-```tsx
-import BMICalculator from "@/components/bmi/bmi-calculator";
-
-function BMIPage() {
-  return <BMICalculator />;
-}
-```
-
-### Dashboard
-
-```tsx
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-  <BMICalculator />
-  <VitalSigns onData={handleVitals} editable />
-</div>
-```
-
-### Gotchas
-
-- **No data prop, no onData callback.** BMI is purely self-contained -- it cannot receive or emit data.
-- **Metric/imperial toggle** is internal to the component. No external control.
+Self-contained. Weight could inform water-balance/sepsis but no programmatic link.
 
 ---
 
-## CLI Calculator
+## Gotchas
+
+- **No data prop, no onData.** Self-contained
+- **Metric/imperial toggle** is internal, no external control
+
+---
+
+## CLI
 
 ```bash
-# Metric
 npx medprotocol bmi --weight 70 --height-m 1.75 --metric
-
-# Imperial
-npx medprotocol bmi --weight 154 --height-ft 5 --height-in 9
 ```
-
-Always use `--json` internally, translate output to clinical language.
 
 ---
 
 ## Guideline Reference
 
-Based on WHO BMI classification (2000):
-- International BMI categories for adults
-- Metric formula: weight(kg) / height(m)^2
-- Imperial formula: (weight(lb) / height(in)^2) * 703
+WHO BMI classification (2000). Metric: kg/m². Imperial: (lb/in²)×703.
