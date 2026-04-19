@@ -4,6 +4,7 @@
 
 | Tool | What it does |
 |---|---|
+| patient | Patient demographics — name, DOB, age, sex, weight, height |
 | vital-signs | Monitor BP, HR, RR, Temp, SpO2, FiO2 |
 | acid-base | Arterial blood gas analysis with anion gap |
 | water-balance | Fluid intake/output tracking |
@@ -28,6 +29,8 @@
 
 Run `npx medical-ui-cli list` for the canonical list of available components, groups, and sub-component aliases. The CLI resolves names in order: group → alias → standard folder.
 
+**Base group:** `npx medical-ui-cli add base` (or alias `patient`) installs the patient demographics component.
+
 Each installed component folder contains a JSDoc header in its main TSX file documenting props, usage, data flow, and behavior -- read this before modifying.
 
 ---
@@ -36,6 +39,7 @@ Each installed component folder contains a JSDoc header in its main TSX file doc
 
 The CLI does **not** auto-install dependent components -- you must install them separately:
 
+- `patient` provides age, sex, weight, height to other components. When both `patient` and a dependent component (ckd, dka, sepsis, water-balance, cardiology, bmi) are on the same dashboard, wire patient data into them instead of duplicating inline fields.
 - `dka` depends on `acid-base` -- install acid-base first
 - `sepsis` depends on `vital-signs` and `water-balance`
 - `nephrology` is a companion to `ckd` -- the `nephrology` group installs both. Wire `sex` from CKD to Anemia, `gfrCategory` from CKD to PhosphoCalcic.

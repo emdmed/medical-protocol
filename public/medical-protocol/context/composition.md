@@ -108,6 +108,62 @@ function ICUDashboard() {
 }
 ```
 
+## Patient data wiring
+
+When `patient` and dependent components share a dashboard, use Patient as the single source of truth for demographics. Pass its fields down to dependents instead of letting each component collect age/sex/weight inline.
+
+```tsx
+import Patient from "@/components/patient/patient";
+import CKDCalculator from "@/components/ckd/ckd-calculator";
+import DKAMonitor from "@/components/dka/dka-monitor";
+import BMICalculator from "@/components/bmi/bmi-calculator";
+import type { PatientData } from "@/components/patient/types/patient";
+
+function Dashboard() {
+  const [patient, setPatient] = useState<PatientData | null>(null);
+
+  return (
+    <div className="space-y-6">
+      {/* Patient card: full-width, above the grid */}
+      <Patient onData={(data) => setPatient(data)} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <CKDCalculator
+          data={{
+            age: patient?.age,
+            sex: patient?.sex,
+          }}
+        />
+        <DKAMonitor
+          data={{
+            weight: patient?.weight,
+          }}
+        />
+        <BMICalculator
+          data={{
+            weight: patient?.weight,
+            height: patient?.height,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+**Which fields each component consumes from Patient:**
+
+| Component | Fields |
+|---|---|
+| ckd / nephrology | age, sex |
+| dka | weight |
+| sepsis | weight |
+| water-balance | weight |
+| cardiology | age, sex |
+| bmi | weight, height |
+
+---
+
 ## Gotchas
 
 - **Group installs**: For nephrology dashboards, use `npx medical-ui-cli add nephrology` (group) to install both `ckd/` and `nephrology/` folders at once. Sub-component aliases (`anemia`, `phospho-calcic`, `cardio-metabolic`) install just the `nephrology/` folder.
@@ -123,3 +179,5 @@ function ICUDashboard() {
 - **Temperature units**: VitalSigns stores temperature in the unit set by `useFahrenheit`. Normalize before passing cross-source data.
 
 - **FHIR bundle**: The second argument to VitalSigns' `onData` is a FHIR R4 Bundle with LOINC codes. Always available (VitalSignsFhir renders internally).
+
+- **Patient data cascading**: When patient data changes, dependent components auto-update via props. Use the ref-based dedup pattern (see VitalSigns circular updates above) to prevent re-render cascades in components that both receive `data` and emit `onData`.

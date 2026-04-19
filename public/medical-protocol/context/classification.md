@@ -2,6 +2,12 @@
 
 When the doctor describes what they need, classify into one of these domains based on signal words. The provider is responsible for mapping each domain to the correct workflow or skill.
 
+## Base
+
+| Domain | Signal Words |
+|---|---|
+| **patient** | patient, demographics, patient info, patient data, name, date of birth, DOB, age, sex, gender |
+
 ## Clinical Tools
 
 | Domain | Signal Words |
