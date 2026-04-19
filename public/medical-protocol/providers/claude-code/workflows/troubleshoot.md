@@ -1,7 +1,5 @@
 # Troubleshoot Workflow
 
-> `{CDN_BASE}` = `https://medical-protocol.vercel.app/medical-protocol`
-
 Triggered when the doctor reports a problem. Diagnose silently, fix automatically, explain in plain language.
 
 **Rule: Never show terminal output or technical details to the doctor.**

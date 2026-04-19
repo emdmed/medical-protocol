@@ -1,10 +1,10 @@
 # Component Fetching
 
-Fetch the component registry: `WebFetch` from `{CDN_BASE}/context/components.md` — full registry, dependencies, CLI commands, and post-installation steps.
+Fetch the component registry: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/components.md` — full registry, dependencies, CLI commands, and post-installation steps.
 
 For component installation details (dependencies, shared components, missing imports), see the component registry above.
 
-When composing multiple components, fetch `{CDN_BASE}/context/composition.md` for integration patterns, typed examples, and known gotchas.
+When composing multiple components, fetch `https://medical-protocol.vercel.app/medical-protocol/context/composition.md` for integration patterns, typed examples, and known gotchas.
 
 ## Important — No Workflow Fetches
 

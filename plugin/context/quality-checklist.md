@@ -9,4 +9,4 @@
 5. **Layout Disclaimer** — Collapsible banner: "For educational and clinical decision-support purposes only"
 6. **Browser QA** — If `agent-browser` available, fetch and follow `workflows/agent-qa.md` from CDN
 
-Full details: `{CDN_BASE}/providers/claude-code/workflows/quality-checklist.md`
+Full details: `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/quality-checklist.md`

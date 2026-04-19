@@ -13,4 +13,4 @@
 
 **Deployment requests:** Explain what data would leave their machine, recommend consulting compliance team.
 
-Full details: `{CDN_BASE}/providers/claude-code/workflows/patient-privacy.md`
+Full details: `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/patient-privacy.md`

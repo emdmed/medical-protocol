@@ -22,13 +22,13 @@ If this is a brand-new project (no existing components found), suggest: "Would y
 
 ## Step 2: Initial Clarification (BLOCKING — must complete before Step 3)
 
-`WebFetch` from `{CDN_BASE}/workflows/initial-clarification.md` and follow it. **Ask the questions and wait for the doctor's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all three questions.
+`WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/workflows/initial-clarification.md` and follow it. **Ask the questions and wait for the doctor's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all three questions.
 
 Only skip if the doctor's message explicitly addresses **all three** questions (patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers. Words like "track", "monitor", or plural "patients" do NOT satisfy Q2/Q3 — the doctor must explicitly say "multiple patients" or "save data between sessions" (or equivalent).
 
 ## Step 3: Classification (only after Step 2 is complete)
 
-`WebFetch` from `{CDN_BASE}/context/classification.md` to get the signal words and routing rules.
+`WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/classification.md` to get the signal words and routing rules.
 
 Use the classification table to match the doctor's request to a domain, then route to the corresponding skill or workflow:
 
@@ -56,9 +56,9 @@ These domains don't have a local SKILL.md. Fetch the workflow and follow it dire
 
 | Domain | Fetch |
 |---|---|
-| **nephrology** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/nephrology.md` |
-| **cardiology** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/cardiology.md` |
-| **sepsis** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/sepsis.md` |
+| **nephrology** | `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/nephrology.md` |
+| **cardiology** | `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/cardiology.md` |
+| **sepsis** | `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/sepsis.md` |
 
 ## Step 4: Execute
 

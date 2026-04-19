@@ -16,7 +16,7 @@
 
 ## Available Tools
 
-Fetch the full component registry: `WebFetch` from `{CDN_BASE}/context/components.md` — includes dependencies, installation notes, and post-install steps.
+Fetch the full component registry: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/components.md` — includes dependencies, installation notes, and post-install steps.
 
 ---
 
@@ -61,18 +61,9 @@ If `CLAUDE.md` already exists, verify it contains the Testing section. If not, a
 
 ---
 
-## CDN Base URL
-
-All workflows and components are fetched from:
-```
-https://medical-protocol.vercel.app/medical-protocol
-```
-
----
-
 ## Quick Calculator
 
-Fetch the CLI calculator reference: `WebFetch` from `{CDN_BASE}/context/cli.md` — available calculators, usage examples, and communication guidelines.
+Fetch the CLI calculator reference: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/cli.md` — available calculators, usage examples, and communication guidelines.
 
 ---
 
@@ -97,7 +88,7 @@ If it's unclear (e.g., the doctor mixes languages), ask once: "Would you prefer 
 
 ## Initial Clarification (mandatory)
 
-Fetch and follow: `{CDN_BASE}/workflows/initial-clarification.md`
+Fetch and follow: `https://medical-protocol.vercel.app/medical-protocol/workflows/initial-clarification.md`
 
 Ask all three questions and **wait for the doctor's answers** before proceeding to Classification. Only skip if the doctor's message explicitly answers all three questions (patient setting, single vs multiple, persistence). Components and component groups are chosen later during Classification.
 
@@ -105,7 +96,7 @@ Ask all three questions and **wait for the doctor's answers** before proceeding 
 
 ## Classification
 
-Fetch the classification table: `WebFetch` from `{CDN_BASE}/context/classification.md` — signal words, domain mapping, and routing rules.
+Fetch the classification table: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/classification.md` — signal words, domain mapping, and routing rules.
 
 Use the **Domain** column to identify which domain matches the doctor's request. Then use the provider's routing table (in the start skill) to map the domain to the correct workflow or skill.
 
@@ -121,7 +112,7 @@ Once classified, use the provider's routing table (in the `start` skill) to find
 
 ### Component Installation
 
-Fetch the component registry: `WebFetch` from `{CDN_BASE}/context/components.md` — full registry, dependencies, CLI commands, and post-installation steps.
+Fetch the component registry: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/components.md` — full registry, dependencies, CLI commands, and post-installation steps.
 
 When a workflow instructs you to install a component:
 
@@ -144,7 +135,7 @@ When a workflow instructs you to install a component:
 
 > **For Claude only.** Run silently after every workflow build. Never mention it to the doctor.
 
-Fetch and follow the full checklist: `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/quality-checklist.md`
+Fetch and follow the full checklist: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/quality-checklist.md`
 
 Summary: theming (tweakcn), responsiveness, error boundary, shadcn polish, layout disclaimer, browser QA.
 
@@ -152,7 +143,7 @@ Summary: theming (tweakcn), responsiveness, error boundary, shadcn polish, layou
 
 ## Patient Privacy & Data Protection
 
-> All data stays on the doctor's computer. Fetch the full privacy rules when needed: `{CDN_BASE}/providers/claude-code/workflows/patient-privacy.md`
+> All data stays on the doctor's computer. Fetch the full privacy rules when needed: `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/patient-privacy.md`
 
 **Essential rules (always active):**
 1. Never send patient data to external services — all storage must be local

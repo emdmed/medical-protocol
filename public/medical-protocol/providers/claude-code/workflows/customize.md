@@ -1,7 +1,5 @@
 # Customize Workflow
 
-> `{CDN_BASE}` refers to `https://medical-protocol.vercel.app/medical-protocol` (defined in the main protocol).
-
 ## Phase 1: Clinical Requirements
 
 The doctor wants to modify an existing interface. Understand what they want to change:
