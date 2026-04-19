@@ -6,6 +6,9 @@ For component installation details (dependencies, shared components, missing imp
 
 When composing multiple components, fetch `{CDN_BASE}/context/composition.md` for integration patterns, typed examples, and known gotchas.
 
-## Important
+## Important — No Workflow Fetches
 
-Do NOT fetch workflow files from the CDN when you are already inside a skill. The skill's own SKILL.md contains all the phases you need. Workflow fetching only applies during the classification routing step in the `start` skill — see the routing table there for correct URLs.
+- **Do NOT fetch workflow `.md` files from the CDN.** Skills contain all their phases locally in SKILL.md — there is nothing extra to fetch.
+- **Components are installed via CLI only** (`npx medical-ui-cli add <name>`). There is no per-component workflow to download.
+- **Not every component has a CDN workflow.** Only `ckd`, `cardiology`, and `sepsis` have CDN workflows, and those are fetched exclusively by the `start` skill's routing table. No other skill should fetch them.
+- **`nephrology` has no workflow file.** It is a component group installed via `npx medical-ui-cli add nephrology`. Do not attempt to fetch a nephrology workflow.
