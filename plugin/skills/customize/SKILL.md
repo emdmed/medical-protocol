@@ -6,7 +6,9 @@ allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 Also fetch `{CDN_BASE}/context/composition.md` for component integration patterns and gotchas.
 
 You are customizing an existing clinical interface for a healthcare professional. Follow the phases below exactly.

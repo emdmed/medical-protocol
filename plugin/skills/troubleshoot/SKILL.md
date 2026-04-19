@@ -5,6 +5,7 @@ allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
 ---
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
+Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
 
 You are diagnosing and fixing a problem for a healthcare professional who reported an issue. They may have said something like "it's not working", "I see an error", "blank screen", or similar. Follow the phases below exactly.
 

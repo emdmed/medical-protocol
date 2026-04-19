@@ -38,17 +38,16 @@ When the doctor describes what they need, classify into one of these domains bas
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/dashboard.md` |
 | **customize** | change, modify, add field, remove, adjust, different layout, customize | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/customize.md` |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/troubleshoot.md` |
-| **test** | test, verify, check calculations, are the numbers correct, validate results, QA, make sure it works | Run the QA workflow (see Testing / Verification section) |
 | **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number | `WebFetch` from `{CDN_BASE}/context/cli.md` |
-| **start-protocol** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty | Run the `start-protocol` skill |
-| **protocol-audit** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check | Run the `protocol-audit` skill |
-| **medical-audit** | test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors | Route to `medical-audit` skill |
+| **start-protocol** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty | Provider skill (requires plugin) |
+| **protocol-audit** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check | Provider skill (requires plugin) |
+| **medical-audit** | test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors | Provider skill (requires plugin) |
 
 ---
 
 ## Routing Rules
 
-**IMPORTANT:** Always use the **Domain** column to determine the workflow filename. The section headers (e.g., "Nephrology") are category labels only — the actual workflow file is specified in the Workflow column. For example, "nephrology" routes to `ckd.md`, not `nephrology.md`.
+**IMPORTANT:** Always use the **Domain** column to determine routing. The section headers (e.g., "Nephrology") are category labels only — the actual workflow is specified in the Workflow column. For example, "nephrology" routes to `ckd.md`, not a separate `nephrology` workflow.
 
 **Cross-prompt:** When the doctor requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.
 

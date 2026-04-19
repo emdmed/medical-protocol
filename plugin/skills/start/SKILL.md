@@ -27,7 +27,9 @@ If this is a brand-new project (no existing components found), suggest: "Would y
 
 ## Step 3: Classification
 
-Follow the **Classification** section from classification.md to match the doctor's request to a domain, then read and execute the corresponding SKILL.md:
+Follow the **Classification** section from classification.md to match the doctor's request to a domain, then route to the corresponding skill or workflow:
+
+### Domains with local skills
 
 | Domain | Route to |
 |---|---|
@@ -43,6 +45,17 @@ Follow the **Classification** section from classification.md to match the doctor
 | **cli** | `${CLAUDE_PLUGIN_ROOT}/skills/cli/SKILL.md` |
 | **start-protocol** | `${CLAUDE_PLUGIN_ROOT}/skills/start-protocol/SKILL.md` |
 | **protocol-audit** | `${CLAUDE_PLUGIN_ROOT}/skills/protocol-audit/SKILL.md` |
+| **medical-audit** | `${CLAUDE_PLUGIN_ROOT}/skills/medical-audit/SKILL.md` |
+
+### Domains routed via CDN workflow
+
+These domains don't have a local SKILL.md. Fetch the workflow and follow it directly:
+
+| Domain | Fetch |
+|---|---|
+| **ckd** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/ckd.md` |
+| **cardiology** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/cardiology.md` |
+| **sepsis** | `WebFetch` from `{CDN_BASE}/providers/claude-code/workflows/sepsis.md` |
 
 ## Step 4: Execute
 

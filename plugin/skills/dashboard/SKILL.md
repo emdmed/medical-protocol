@@ -14,7 +14,7 @@ Also fetch `{CDN_BASE}/context/composition.md` for component integration pattern
 ## Component
 
 - **Components:** Multiple — install each block the doctor selects via `npx medical-ui-cli add <name>`
-- **Available blocks:** `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`
+- **Available blocks:** `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`, `ckd`, `nephrology`
 - **Route:** `app/dashboard/page.tsx`
 - **Composition guide:** Fetch `{CDN_BASE}/context/composition.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards)
 - **Preview message:** "Your clinical dashboard is ready with [list selected blocks]. View it at http://localhost:3000/dashboard"
@@ -28,6 +28,8 @@ Present the available building blocks by category:
   **Monitoring** — Vital signs (BP, HR, RR, Temp, SpO2)
 
   **Calculators** — Blood gas / acid-base analyzer · BMI calculator · Fluid balance (water balance / I&O) · PaFi calculator (PaO2/FiO2 ratio with ARDS classification) · Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
+
+  **Nephrology** — CKD evaluator (eGFR, KDIGO staging, KFRE, progression) · Nephrology companion (anemia, CKD-MBD, cardio-metabolic)
 
   **Critical Care** — DKA monitoring (hourly glucose, ketones, potassium, insulin, GCS tracking) · Sepsis assessment (SOFA, qSOFA, lactate clearance)
 
