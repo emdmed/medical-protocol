@@ -4,7 +4,7 @@
 
 Silently check for `.clinical-context.md` in the project root.
 - **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
-- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
+- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /medical-protocol:start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
 ---
 
@@ -49,8 +49,8 @@ Ask: "Would you like to adjust anything about the analysis display?"
 ## Related Tools
 
 Based on clinical context, the doctor may also benefit from:
-- **/dka** — If metabolic acidosis with elevated anion gap suggests diabetic ketoacidosis
-- **/sepsis** — If lactic acidosis or sepsis-related gas derangements are suspected
-- **/pafi** — If respiratory component needs PaO2/FiO2 ratio and ARDS classification
+- **/medical-protocol:dka** — If metabolic acidosis with elevated anion gap suggests diabetic ketoacidosis
+- **/medical-protocol:sepsis** — If lactic acidosis or sepsis-related gas derangements are suspected
+- **/medical-protocol:pafi** — If respiratory component needs PaO2/FiO2 ratio and ARDS classification
 
 Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.

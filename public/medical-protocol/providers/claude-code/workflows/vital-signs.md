@@ -4,7 +4,7 @@
 
 Silently check for `.clinical-context.md` in the project root.
 - **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
-- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
+- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /medical-protocol:start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
 ---
 
@@ -54,8 +54,8 @@ Ask: "Would you like to adjust which vital signs are shown, or change how any of
 ## Related Tools
 
 Based on clinical context, the doctor may also benefit from:
-- **/sepsis** — If abnormal vitals suggest infection, screen with qSOFA and full SOFA scoring
-- **/pafi** — If SpO2 is low, calculate PaO2/FiO2 ratio for ARDS classification
-- **/cardiology** — If BP or heart rate abnormalities warrant cardiovascular risk assessment
+- **/medical-protocol:sepsis** — If abnormal vitals suggest infection, screen with qSOFA and full SOFA scoring
+- **/medical-protocol:pafi** — If SpO2 is low, calculate PaO2/FiO2 ratio for ARDS classification
+- **/medical-protocol:cardiology** — If BP or heart rate abnormalities warrant cardiovascular risk assessment
 
 Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.

@@ -21,7 +21,7 @@ Silently scan the project for installed components:
 3. Check for `app/` routes that correspond to components
 4. Build a component inventory: which components are installed, which routes exist
 
-If no components are found, tell the doctor: "I don't see any clinical components installed yet. Run /start to build your first component, then come back for an audit."
+If no components are found, tell the doctor: "I don't see any clinical components installed yet. Run /medical-protocol:start to build your first component, then come back for an audit."
 
 ## Phase 2: Score
 
@@ -75,7 +75,7 @@ Output a structured report in clinical language:
 {findings with severity and recommendations}
 
 ---
-Re-run /protocol-audit after fixes to see your score improve.
+Re-run /medical-protocol:protocol-audit after fixes to see your score improve.
 ```
 
 ## Phase 4: Recommend
@@ -84,9 +84,9 @@ For each finding, map to the skill that can fix it:
 
 | Finding Type | Recommendation |
 |-------------|---------------|
-| Missing component feature | "Run /customize to add {feature}" |
-| Component not installed | "Run /{skill-name} to add {component}" |
-| Accessibility issue | "Run /customize to fix {issue}" |
+| Missing component feature | "Run /medical-protocol:customize to add {feature}" |
+| Component not installed | "Run /medical-protocol:{skill-name} to add {component}" |
+| Accessibility issue | "Run /medical-protocol:customize to fix {issue}" |
 | Clinical logic error | "Update {component} {specific file}" |
 
 ## NEVER

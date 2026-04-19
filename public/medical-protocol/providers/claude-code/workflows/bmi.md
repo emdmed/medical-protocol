@@ -4,7 +4,7 @@
 
 Silently check for `.clinical-context.md` in the project root.
 - **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
-- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
+- **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /medical-protocol:start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
 ---
 
@@ -48,7 +48,7 @@ Ask: "Would you like to adjust anything?"
 ## Related Tools
 
 Based on clinical context, the doctor may also benefit from:
-- **/vitals** — Complete vital signs assessment alongside anthropometrics
-- **/cardiology** — Cardiovascular risk scoring where BMI is a contributing factor
+- **/medical-protocol:vitals** — Complete vital signs assessment alongside anthropometrics
+- **/medical-protocol:cardiology** — Cardiovascular risk scoring where BMI is a contributing factor
 
 Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.

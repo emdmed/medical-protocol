@@ -21,7 +21,7 @@ Silently scan the project for installed components:
 3. For each found component, grep the source for calculation function calls (e.g., `calculateBMI`, `analyzeABG`, `calculatePaFi`, `calculateTotalSOFA`, `calculateQSOFA`, `calculateEGFR`, `analyzeDKA`, `calculateWaterBalance`) to confirm which lib functions are in use
 4. Build a component inventory mapping each installed module to its calculation functions
 
-If no components are found, tell the doctor: "I don't see any clinical components installed yet. Run /start to build your first component, then come back to test."
+If no components are found, tell the doctor: "I don't see any clinical components installed yet. Run /medical-protocol:start to build your first component, then come back to test."
 
 ## Phase 2: CLI Validation
 
@@ -98,8 +98,8 @@ Output a structured report:
 ### Summary: {passed}/{total} components passing — Overall: {sum}/{ total×16}
 
 {If any component scores ≤8: "⚠ Component {name} needs attention — score below 50%."}
-{If any failures: "Run /customize to update {component} calculation logic."}
-Re-run /medical-audit after fixes to verify.
+{If any failures: "Run /medical-protocol:customize to update {component} calculation logic."}
+Re-run /medical-protocol:medical-audit after fixes to verify.
 ```
 
 ## NEVER
