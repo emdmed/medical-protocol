@@ -99,7 +99,7 @@ If it's unclear (e.g., the doctor mixes languages), ask once: "Would you prefer 
 
 Fetch and follow: `{CDN_BASE}/workflows/initial-clarification.md`
 
-Ask all four questions and **wait for the doctor's answers** before proceeding to Classification. Only skip if the doctor's message explicitly answers all four questions (module, patient setting, single vs multiple, persistence).
+Ask all three questions and **wait for the doctor's answers** before proceeding to Classification. Only skip if the doctor's message explicitly answers all three questions (patient setting, single vs multiple, persistence). Components and component groups are chosen later during Classification.
 
 ---
 

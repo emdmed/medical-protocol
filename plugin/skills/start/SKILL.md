@@ -22,9 +22,9 @@ If this is a brand-new project (no existing components found), suggest: "Would y
 
 ## Step 2: Initial Clarification (BLOCKING — must complete before Step 3)
 
-`WebFetch` from `{CDN_BASE}/workflows/initial-clarification.md` and follow it. **Ask the questions and wait for the doctor's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all four questions.
+`WebFetch` from `{CDN_BASE}/workflows/initial-clarification.md` and follow it. **Ask the questions and wait for the doctor's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all three questions.
 
-Only skip if the doctor's message explicitly addresses **all four** questions (module choice, patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers. Words like "track", "monitor", or plural "patients" do NOT satisfy Q3/Q4 — the doctor must explicitly say "multiple patients" or "save data between sessions" (or equivalent).
+Only skip if the doctor's message explicitly addresses **all three** questions (patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers. Words like "track", "monitor", or plural "patients" do NOT satisfy Q2/Q3 — the doctor must explicitly say "multiple patients" or "save data between sessions" (or equivalent).
 
 ## Step 3: Classification (only after Step 2 is complete)
 
