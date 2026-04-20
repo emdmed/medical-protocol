@@ -1,6 +1,6 @@
 import { parseArgs } from "util";
 import { version as VERSION } from "../../package.json";
-import { getBundledPluginDir, getSkillsDir, getHooksDir, getSettingsPath, listFiles, copyFile } from "../files";
+import { getBundledPluginDir, getSkillsDir, getHooksDir, getSettingsPath, listFiles, copyFile, getGlobalPluginCacheDir, getInstalledPluginsPath } from "../files";
 import { hashFile, writeManifest, type FileManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
 import * as fs from "fs";
@@ -95,12 +95,18 @@ export function run(argv: string[]): void {
   };
   writeManifest(skillsDir, manifest);
 
+  // Sync global plugin cache
+  const cacheDir = getGlobalPluginCacheDir(VERSION);
+  syncGlobalCache(bundledDir, cacheDir, VERSION);
+  updateInstalledPlugins(path.resolve(baseDir), VERSION, cacheDir);
+
   const data = {
     status: "installed",
     version: VERSION,
     filesInstalled: totalFiles,
     skillsDir,
     hooksDir,
+    globalCache: cacheDir,
   };
 
   printResult(data, values.json!, () =>
@@ -111,10 +117,76 @@ export function run(argv: string[]): void {
         ["Files", `${totalFiles}`],
         ["Skills", skillsDir],
         ["Hooks", hooksDir],
+        ["Global cache", cacheDir],
       ]),
       "",
     ].join("\n"),
   );
+}
+
+function syncGlobalCache(bundledDir: string, cacheDir: string, version: string): void {
+  // Copy plugin contents (skills, hooks, context, reference, settings.json) to global cache
+  const dirsToSync = ["skills", "hooks", "context", "reference"];
+  for (const dir of dirsToSync) {
+    const srcDir = path.join(bundledDir, dir);
+    if (!fs.existsSync(srcDir)) continue;
+    const files = listFiles(srcDir);
+    for (const relPath of files) {
+      copyFile(path.join(srcDir, relPath), path.join(cacheDir, dir, relPath));
+    }
+  }
+
+  // Copy settings.json
+  const settingsSrc = path.join(bundledDir, "settings.json");
+  if (fs.existsSync(settingsSrc)) {
+    copyFile(settingsSrc, path.join(cacheDir, "settings.json"));
+  }
+
+  // Write .claude-plugin/plugin.json
+  const pluginJsonDir = path.join(cacheDir, ".claude-plugin");
+  fs.mkdirSync(pluginJsonDir, { recursive: true });
+  const pluginJson = {
+    name: "medical-protocol",
+    version,
+    description: "Medical protocol plugin for Claude Code — clinical interface builder with safety hooks for healthcare professionals. Use /medical-protocol:start to begin.",
+    author: { name: "Medical Protocol Team" },
+    homepage: "https://github.com/emdmed/medical-protocol",
+    skills: "./skills",
+  };
+  fs.writeFileSync(path.join(pluginJsonDir, "plugin.json"), JSON.stringify(pluginJson, null, 2) + "\n");
+}
+
+function updateInstalledPlugins(projectPath: string, version: string, installPath: string): void {
+  const pluginsPath = getInstalledPluginsPath();
+  let data: { version: number; plugins: Record<string, Array<Record<string, unknown>>> } = { version: 2, plugins: {} };
+  if (fs.existsSync(pluginsPath)) {
+    try {
+      data = JSON.parse(fs.readFileSync(pluginsPath, "utf-8"));
+    } catch {
+      data = { version: 2, plugins: {} };
+    }
+  }
+
+  const key = "medical-protocol@medical-protocol";
+  const entries = (data.plugins[key] ?? []) as Array<Record<string, unknown>>;
+  const now = new Date().toISOString();
+
+  const idx = entries.findIndex(e => e.projectPath === projectPath);
+  const entry = {
+    scope: "project",
+    projectPath,
+    installPath,
+    version,
+    installedAt: idx >= 0 ? entries[idx].installedAt : now,
+    lastUpdated: now,
+  };
+
+  if (idx >= 0) entries[idx] = entry;
+  else entries.push(entry);
+
+  data.plugins[key] = entries;
+  fs.mkdirSync(path.dirname(pluginsPath), { recursive: true });
+  fs.writeFileSync(pluginsPath, JSON.stringify(data, null, 2) + "\n");
 }
 
 function mergeSettings(targetPath: string, bundledPath: string): void {

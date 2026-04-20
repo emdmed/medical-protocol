@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { homedir } from "os";
 
 export function getBundledPluginDir(): string {
   // dist/index.js → dist/ → package root → plugin/
@@ -44,4 +45,12 @@ export function copyFile(src: string, dest: string): void {
   if (dest.endsWith(".sh")) {
     fs.chmodSync(dest, 0o755);
   }
+}
+
+export function getGlobalPluginCacheDir(version: string): string {
+  return path.join(homedir(), ".claude", "plugins", "cache", "medical-protocol", "medical-protocol", version);
+}
+
+export function getInstalledPluginsPath(): string {
+  return path.join(homedir(), ".claude", "plugins", "installed_plugins.json");
 }
