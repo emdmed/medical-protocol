@@ -18,11 +18,8 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || TOOL_NAME="
 if [ "$TOOL_NAME" = "WebFetch" ]; then
   FETCH_URL=$(echo "$INPUT" | jq -r '.tool_input.url // ""' 2>/dev/null) || FETCH_URL=""
 
-  # Workflow file fetched from CDN → mark workflow as active
-  if echo "$FETCH_URL" | grep -qE 'medical-protocol\.vercel\.app.*providers/.*/workflows/.*\.md'; then
-    mkdir -p "$STATE_DIR"
-    touch "$STATE_DIR/.workflow_active"
-  fi
+  # CDN decommissioned — no URL-based workflow detection needed.
+  # The plugin sets .workflow_active explicitly in each skill's Phase 2.
   exit 0
 fi
 

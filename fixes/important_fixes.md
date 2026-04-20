@@ -36,16 +36,9 @@ Each component that has dependencies handles them differently:
 
 **Risk:** Claude may miss dependencies, install them in wrong order, or create inconsistent `lib/` structures across projects. A doctor building DKA + dashboard could end up with duplicate acid-base code.
 
-### 4. CDN URL hardcoded in 3+ locations
+### 4. ~~CDN URL hardcoded in 3+ locations~~ (RESOLVED)
 
-The CDN base URL `https://medical-protocol.vercel.app/medical-protocol` appears in:
-- `protocol.md` line 38
-- `plugin/context/protocol-context.md`
-- `plugin/.claude-plugin/plugin.json` (as `userConfig.cdnBaseUrl`)
-- `plugin/settings.json` (WebFetch allow-list)
-- `install.md` line 83 (curl command)
-
-`plugin.json` defines it as configurable via `userConfig.cdnBaseUrl`, but the other files hardcode it. If the CDN moves, 4 files need manual updating.
+The CDN (`medical-protocol.vercel.app`) has been decommissioned. All content is now served locally via the plugin using `${CLAUDE_PLUGIN_ROOT}/reference/` paths. The `validate-fetch.sh` and `track-workflow.sh` hooks have been updated to remove CDN URL detection.
 
 ### 5. `wait-on` as an unlisted dependency
 
