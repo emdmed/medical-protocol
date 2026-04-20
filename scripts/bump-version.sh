@@ -67,6 +67,9 @@ update_json "$ROOT/packages/medprotocol/package.json" "obj.version = '$VERSION';
 # --- 5. plugin.json ---
 update_json "$ROOT/plugin/.claude-plugin/plugin.json" "obj.version = '$VERSION';"
 
+# --- 6. packages/medical-protocol/package.json ---
+update_json "$ROOT/packages/medical-protocol/package.json" "obj.version = '$VERSION';"
+
 echo ""
 if [ "$CHANGED" -gt 0 ]; then
   echo "Done. $CHANGED file(s) updated to $VERSION."

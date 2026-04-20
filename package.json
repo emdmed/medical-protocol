@@ -3,11 +3,12 @@
   "version": "0.4.0",
   "private": true,
   "description": "Medical protocol workflows, calculation logic, and CLI for Claude Code",
-  "workspaces": ["packages/medprotocol"],
+  "workspaces": ["packages/medprotocol", "packages/medical-protocol"],
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "npm run build -w packages/medprotocol",
+    "build:installer": "npm run build -w packages/medical-protocol",
     "medprotocol": "node packages/medprotocol/dist/index.js",
     "version:bump": "bash scripts/bump-version.sh"
   },
