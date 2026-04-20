@@ -1,6 +1,6 @@
 import { parseArgs } from "util";
 import { version as VERSION } from "../../package.json";
-import { getBundledPluginDir, getTargetDir, listFiles } from "../files";
+import { getBundledPluginDir, getSkillsDir, getHooksDir, listFiles } from "../files";
 import { hashFile, readManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
 import * as fs from "fs";
@@ -20,7 +20,7 @@ export function run(argv: string[]): void {
   if (values.help) {
     process.stdout.write(
       `Usage: medical-protocol check [--dir <path>] [--json]\n\n` +
-        `Check if the installed plugin is up-to-date.\n\n` +
+        `Check if the installed skills are up-to-date.\n\n` +
         `Options:\n` +
         `  --dir <path>   Target project directory (default: cwd)\n` +
         `  --json         Output as JSON\n`,
@@ -28,49 +28,62 @@ export function run(argv: string[]): void {
     return;
   }
 
-  const targetDir = getTargetDir(values.dir!);
+  const baseDir = values.dir!;
+  const skillsDir = getSkillsDir(baseDir);
   const bundledDir = getBundledPluginDir();
 
-  const manifest = readManifest(targetDir);
+  const manifest = readManifest(skillsDir);
   if (!manifest) {
-    process.stderr.write(formatError("Plugin not installed. Run 'medical-protocol install' first.") + "\n");
+    process.stderr.write(formatError("Not installed. Run 'medical-protocol install' first.") + "\n");
     process.exitCode = 1;
     return;
   }
 
-  const bundledFiles = listFiles(bundledDir);
+  const bundledSkillsDir = path.join(bundledDir, "skills");
+  const bundledHooksDir = path.join(bundledDir, "hooks");
+
   const stale: string[] = [];
   const added: string[] = [];
   const removed: string[] = [];
   const modified: string[] = [];
 
   // Check bundled files against manifest
-  for (const relPath of bundledFiles) {
-    const bundledHash = hashFile(path.join(bundledDir, relPath));
-    const manifestHash = manifest.files[relPath];
+  const allBundledKeys = new Set<string>();
 
-    if (!manifestHash) {
-      added.push(relPath);
-    } else if (bundledHash !== manifestHash) {
-      stale.push(relPath);
+  for (const [prefix, bundledBase, installedBase] of [
+    ["skills", bundledSkillsDir, skillsDir],
+    ["hooks", bundledHooksDir, getHooksDir(baseDir)],
+  ] as const) {
+    if (!fs.existsSync(bundledBase)) continue;
+    const files = listFiles(bundledBase);
+    for (const relPath of files) {
+      const key = `${prefix}/${relPath}`;
+      allBundledKeys.add(key);
+      const bundledHash = hashFile(path.join(bundledBase, relPath));
+      const manifestHash = manifest.files[key];
+
+      if (!manifestHash) {
+        added.push(key);
+      } else if (bundledHash !== manifestHash) {
+        stale.push(key);
+      }
     }
   }
 
-  // Check for removed files (in manifest but not in bundled)
-  const bundledSet = new Set(bundledFiles);
-  for (const relPath of Object.keys(manifest.files)) {
-    if (!bundledSet.has(relPath)) {
-      removed.push(relPath);
+  // Check for removed files
+  for (const key of Object.keys(manifest.files)) {
+    if (!allBundledKeys.has(key)) {
+      removed.push(key);
     }
   }
 
   // Check installed files for local modifications
-  for (const relPath of Object.keys(manifest.files)) {
-    const installedPath = path.join(targetDir, relPath);
-    if (!fs.existsSync(installedPath)) continue;
+  for (const key of Object.keys(manifest.files)) {
+    const installedPath = resolveInstalledPath(baseDir, key);
+    if (!installedPath || !fs.existsSync(installedPath)) continue;
     const installedHash = hashFile(installedPath);
-    if (installedHash !== manifest.files[relPath]) {
-      modified.push(relPath);
+    if (installedHash !== manifest.files[key]) {
+      modified.push(key);
     }
   }
 
@@ -86,7 +99,7 @@ export function run(argv: string[]): void {
   };
 
   printResult(data, values.json!, () => {
-    const lines = [formatHeader("medical-protocol plugin status")];
+    const lines = [formatHeader("medical-protocol status")];
     lines.push(
       formatTable([
         ["Installed version", `v${manifest.version}`],
@@ -119,4 +132,14 @@ export function run(argv: string[]): void {
   if (!upToDate) {
     process.exitCode = 1;
   }
+}
+
+function resolveInstalledPath(baseDir: string, key: string): string | null {
+  if (key.startsWith("skills/")) {
+    return path.join(getSkillsDir(baseDir), key.slice("skills/".length));
+  }
+  if (key.startsWith("hooks/")) {
+    return path.join(getHooksDir(baseDir), key.slice("hooks/".length));
+  }
+  return null;
 }

@@ -2,10 +2,11 @@
 name: troubleshoot
 description: "[Internal] Diagnose and fix issues when the doctor reports something isn't working"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
+Read and follow: reference/core.md
+Read and follow: reference/clinical-context.md
 
 You are diagnosing and fixing a problem for a healthcare professional who reported an issue. They may have said something like "it's not working", "I see an error", "blank screen", or similar. Follow the phases below exactly.
 
@@ -15,7 +16,7 @@ Tell the doctor: "Let me take a look." Do not ask them technical questions.
 
 ## Step 2: Fetch and Follow the Troubleshoot Workflow
 
-1. **Read the workflow**: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/workflows/troubleshoot.md`
+1. **Read the workflow**: `Read` from `reference/troubleshoot.md`
 2. **Follow all four phases** in the workflow exactly as written:
    - **Phase 1**: Background Diagnosis — run all checks, identify the issue category
    - **Phase 2**: Auto-Fix — attempt to fix the issue automatically

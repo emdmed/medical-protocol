@@ -2,11 +2,12 @@
 name: start
 description: Start the medical protocol — describe what you need in clinical terms and the system handles everything
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/project-setup.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
+Read and follow: reference/core.md
+Read and follow: reference/project-setup.md
+Read and follow: reference/clinical-context.md
 
 ## Step 1: Returning Project Check
 
@@ -22,13 +23,13 @@ If this is a brand-new project (no existing components found), suggest: "Would y
 
 ## Step 2: Initial Clarification (BLOCKING — must complete before Step 3)
 
-`Read` from `${CLAUDE_PLUGIN_ROOT}/reference/workflows/initial-clarification.md` and follow it. **Ask the questions and wait for the doctor's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all three questions.
+`Read` from `reference/initial-clarification.md` and follow it. **Ask the questions and wait for the doctor's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all three questions.
 
 Only skip if the doctor's message explicitly addresses **all three** questions (patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers. Words like "track", "monitor", or plural "patients" do NOT satisfy Q2/Q3 — the doctor must explicitly say "multiple patients" or "save data between sessions" (or equivalent).
 
 ## Step 3: Classification (only after Step 2 is complete)
 
-`Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/classification.md` to get the signal words and routing rules.
+`Read` from `reference/classification.md` to get the signal words and routing rules.
 
 Use the classification table to match the doctor's request to a domain, then route to the corresponding skill or workflow:
 
@@ -36,19 +37,19 @@ Use the classification table to match the doctor's request to a domain, then rou
 
 | Domain | Route to |
 |---|---|
-| **vital-signs** | `${CLAUDE_PLUGIN_ROOT}/skills/vitals/SKILL.md` |
-| **acid-base** | `${CLAUDE_PLUGIN_ROOT}/skills/acid-base/SKILL.md` |
-| **bmi** | `${CLAUDE_PLUGIN_ROOT}/skills/bmi/SKILL.md` |
-| **water-balance** | `${CLAUDE_PLUGIN_ROOT}/skills/water-balance/SKILL.md` |
-| **pafi** | `${CLAUDE_PLUGIN_ROOT}/skills/pafi/SKILL.md` |
-| **dka** | `${CLAUDE_PLUGIN_ROOT}/skills/dka/SKILL.md` |
-| **dashboard** | `${CLAUDE_PLUGIN_ROOT}/skills/dashboard/SKILL.md` |
-| **customize** | `${CLAUDE_PLUGIN_ROOT}/skills/customize/SKILL.md` |
-| **troubleshoot** | `${CLAUDE_PLUGIN_ROOT}/skills/troubleshoot/SKILL.md` |
-| **cli** | `${CLAUDE_PLUGIN_ROOT}/skills/cli/SKILL.md` |
-| **start-protocol** | `${CLAUDE_PLUGIN_ROOT}/skills/start-protocol/SKILL.md` |
-| **protocol-audit** | `${CLAUDE_PLUGIN_ROOT}/skills/protocol-audit/SKILL.md` |
-| **medical-audit** | `${CLAUDE_PLUGIN_ROOT}/skills/medical-audit/SKILL.md` |
+| **vital-signs** | `../vitals/SKILL.md` |
+| **acid-base** | `../acid-base/SKILL.md` |
+| **bmi** | `../bmi/SKILL.md` |
+| **water-balance** | `../water-balance/SKILL.md` |
+| **pafi** | `../pafi/SKILL.md` |
+| **dka** | `../dka/SKILL.md` |
+| **dashboard** | `../dashboard/SKILL.md` |
+| **customize** | `../customize/SKILL.md` |
+| **troubleshoot** | `../troubleshoot/SKILL.md` |
+| **cli** | `../cli/SKILL.md` |
+| **start-protocol** | `../start-protocol/SKILL.md` |
+| **protocol-audit** | `../protocol-audit/SKILL.md` |
+| **medical-audit** | `../medical-audit/SKILL.md` |
 
 ### Domains routed via workflow file
 
@@ -56,9 +57,9 @@ These domains don't have a local SKILL.md. Read the workflow file and follow it 
 
 | Domain | Fetch |
 |---|---|
-| **nephrology** | `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/workflows/nephrology.md` |
-| **cardiology** | `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/workflows/cardiology.md` |
-| **sepsis** | `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/workflows/sepsis.md` |
+| **nephrology** | `Read` from `reference/nephrology.md` |
+| **cardiology** | `Read` from `reference/cardiology.md` |
+| **sepsis** | `Read` from `reference/sepsis.md` |
 
 ## Step 4: Execute
 

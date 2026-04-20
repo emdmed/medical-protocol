@@ -1,6 +1,6 @@
 import { parseArgs } from "util";
 import { version as VERSION } from "../../package.json";
-import { getBundledPluginDir, getTargetDir, listFiles, copyFile } from "../files";
+import { getBundledPluginDir, getSkillsDir, getHooksDir, getSettingsPath, listFiles, copyFile } from "../files";
 import { hashFile, writeManifest, type FileManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
 import * as fs from "fs";
@@ -21,7 +21,7 @@ export function run(argv: string[]): void {
   if (values.help) {
     process.stdout.write(
       `Usage: medical-protocol install [--dir <path>] [--force] [--json]\n\n` +
-        `Install the medical-protocol plugin into your project.\n\n` +
+        `Install the medical-protocol skills into your project.\n\n` +
         `Options:\n` +
         `  --dir <path>   Target project directory (default: cwd)\n` +
         `  --force        Overwrite existing installation\n` +
@@ -30,7 +30,9 @@ export function run(argv: string[]): void {
     return;
   }
 
-  const targetDir = getTargetDir(values.dir!);
+  const baseDir = values.dir!;
+  const skillsDir = getSkillsDir(baseDir);
+  const hooksDir = getHooksDir(baseDir);
   const bundledDir = getBundledPluginDir();
 
   if (!fs.existsSync(bundledDir)) {
@@ -39,22 +41,51 @@ export function run(argv: string[]): void {
     return;
   }
 
-  if (fs.existsSync(targetDir) && !values.force) {
+  const manifestPath = path.join(skillsDir, ".manifest.json");
+  if (fs.existsSync(manifestPath) && !values.force) {
     process.stderr.write(
-      formatError(`Plugin already installed at ${targetDir}\nUse --force to overwrite, or use 'update' to update changed files.`) + "\n",
+      formatError(`Skills already installed at ${skillsDir}\nUse --force to overwrite, or use 'update' to update changed files.`) + "\n",
     );
     process.exitCode = 1;
     return;
   }
 
-  const files = listFiles(bundledDir);
-  const fileHashes: Record<string, string> = {};
+  const bundledSkillsDir = path.join(bundledDir, "skills");
+  const bundledHooksDir = path.join(bundledDir, "hooks");
+  const bundledSettingsPath = path.join(bundledDir, "settings.json");
 
-  for (const relPath of files) {
-    const src = path.join(bundledDir, relPath);
-    const dest = path.join(targetDir, relPath);
-    copyFile(src, dest);
-    fileHashes[relPath] = hashFile(src);
+  const fileHashes: Record<string, string> = {};
+  let totalFiles = 0;
+
+  // Copy skills
+  if (fs.existsSync(bundledSkillsDir)) {
+    const skillFiles = listFiles(bundledSkillsDir);
+    for (const relPath of skillFiles) {
+      const src = path.join(bundledSkillsDir, relPath);
+      const dest = path.join(skillsDir, relPath);
+      copyFile(src, dest);
+      const key = `skills/${relPath}`;
+      fileHashes[key] = hashFile(src);
+      totalFiles++;
+    }
+  }
+
+  // Copy hooks
+  if (fs.existsSync(bundledHooksDir)) {
+    const hookFiles = listFiles(bundledHooksDir);
+    for (const relPath of hookFiles) {
+      const src = path.join(bundledHooksDir, relPath);
+      const dest = path.join(hooksDir, relPath);
+      copyFile(src, dest);
+      const key = `hooks/${relPath}`;
+      fileHashes[key] = hashFile(src);
+      totalFiles++;
+    }
+  }
+
+  // Merge permissions into settings.json (don't overwrite existing settings)
+  if (fs.existsSync(bundledSettingsPath)) {
+    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
   }
 
   const manifest: FileManifest = {
@@ -62,52 +93,63 @@ export function run(argv: string[]): void {
     installedAt: new Date().toISOString(),
     files: fileHashes,
   };
-  writeManifest(targetDir, manifest);
-
-  // Register plugin in .claude/settings.json so Claude Code discovers it
-  const settingsPath = path.join(values.dir!, ".claude", "settings.json");
-  registerPlugin(settingsPath);
+  writeManifest(skillsDir, manifest);
 
   const data = {
     status: "installed",
     version: VERSION,
-    filesInstalled: files.length,
-    targetDir,
+    filesInstalled: totalFiles,
+    skillsDir,
+    hooksDir,
   };
 
   printResult(data, values.json!, () =>
     [
-      formatHeader("medical-protocol plugin installed"),
+      formatHeader("medical-protocol installed"),
       formatTable([
         ["Version", `v${VERSION}`],
-        ["Files", `${files.length}`],
-        ["Location", targetDir],
+        ["Files", `${totalFiles}`],
+        ["Skills", skillsDir],
+        ["Hooks", hooksDir],
       ]),
       "",
     ].join("\n"),
   );
 }
 
-const PLUGIN_KEY = "medical-protocol@medical-protocol";
-
-function registerPlugin(settingsPath: string): void {
-  let settings: Record<string, unknown> = {};
-
-  if (fs.existsSync(settingsPath)) {
+function mergeSettings(targetPath: string, bundledPath: string): void {
+  let existing: Record<string, unknown> = {};
+  if (fs.existsSync(targetPath)) {
     try {
-      settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+      existing = JSON.parse(fs.readFileSync(targetPath, "utf-8"));
     } catch {
-      // If settings.json is malformed, start fresh
-      settings = {};
+      existing = {};
     }
   }
 
-  const enabled = (settings.enabledPlugins ?? {}) as Record<string, boolean>;
-  if (enabled[PLUGIN_KEY]) return; // Already registered
+  const bundled: Record<string, unknown> = JSON.parse(fs.readFileSync(bundledPath, "utf-8"));
+  const bundledPerms = (bundled.permissions ?? {}) as Record<string, string[]>;
+  const existingPerms = (existing.permissions ?? {}) as Record<string, string[]>;
 
-  enabled[PLUGIN_KEY] = true;
-  settings.enabledPlugins = enabled;
+  // Merge allow/deny lists (add bundled entries that aren't already present)
+  for (const key of ["allow", "deny"] as const) {
+    const bundledList = bundledPerms[key] ?? [];
+    const existingList = existingPerms[key] ?? [];
+    const existingSet = new Set(existingList);
+    const merged = [...existingList];
+    for (const entry of bundledList) {
+      if (!existingSet.has(entry)) {
+        merged.push(entry);
+      }
+    }
+    if (merged.length > 0) {
+      if (!existingPerms[key]) existingPerms[key] = [];
+      existingPerms[key] = merged;
+    }
+  }
 
-  fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
-  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+  existing.permissions = existingPerms;
+
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  fs.writeFileSync(targetPath, JSON.stringify(existing, null, 2) + "\n");
 }

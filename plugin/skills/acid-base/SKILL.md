@@ -2,16 +2,17 @@
 name: acid-base
 description: "[Internal] Build a blood gas analyzer — pH, pCO2, HCO3, anion gap, acid-base interpretation"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/acid-base/reference/compensation-formulas.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/acid-base/reference/anion-gap-interpretation.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/acid-base/reference/mixed-disorders.md
+Read and follow: reference/core.md
+Read and follow: reference/component-fetching.md
+Read and follow: reference/hook-markers.md
+Read and follow: reference/after-workflow.md
+Read and follow: reference/clinical-context.md
+Read when needed: reference/compensation-formulas.md
+Read when needed: reference/anion-gap-interpretation.md
+Read when needed: reference/mixed-disorders.md
 
 ## Component
 
@@ -21,7 +22,7 @@ Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/acid-base/reference/mixed-disorde
 
 ## Cross-Prompt: DKA Monitoring
 
-Before proceeding, ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, after completing this workflow, also read and execute `${CLAUDE_PLUGIN_ROOT}/skills/dka/SKILL.md`.
+Before proceeding, ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, after completing this workflow, also read and execute `../dka/SKILL.md`.
 
 ## Phase 1: Clinical Requirements
 

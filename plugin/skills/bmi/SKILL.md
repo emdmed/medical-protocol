@@ -2,13 +2,14 @@
 name: bmi
 description: "[Internal] Build a BMI calculator — weight, height, category classification with metric/imperial toggle"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
+Read and follow: reference/core.md
+Read and follow: reference/component-fetching.md
+Read and follow: reference/hook-markers.md
+Read and follow: reference/after-workflow.md
+Read and follow: reference/clinical-context.md
 
 ## Component
 

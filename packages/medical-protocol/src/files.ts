@@ -1,15 +1,21 @@
 import * as fs from "fs";
 import * as path from "path";
 
-export const PLUGIN_DIR_NAME = ".claude/plugins/medical-protocol";
-
 export function getBundledPluginDir(): string {
   // dist/index.js → dist/ → package root → plugin/
   return path.resolve(__dirname, "..", "plugin");
 }
 
-export function getTargetDir(baseDir: string): string {
-  return path.join(baseDir, PLUGIN_DIR_NAME);
+export function getSkillsDir(baseDir: string): string {
+  return path.join(baseDir, ".claude", "skills");
+}
+
+export function getHooksDir(baseDir: string): string {
+  return path.join(baseDir, ".claude", "hooks");
+}
+
+export function getSettingsPath(baseDir: string): string {
+  return path.join(baseDir, ".claude", "settings.json");
 }
 
 export function listFiles(dir: string): string[] {

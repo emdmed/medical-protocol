@@ -2,16 +2,17 @@
 name: vitals
 description: "[Internal] Build a vital signs monitor — blood pressure, heart rate, SpO2, temperature, respiratory rate"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/vitals/reference/normal-ranges.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/vitals/reference/critical-values.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/vitals/reference/pediatric-ranges.md
+Read and follow: reference/core.md
+Read and follow: reference/component-fetching.md
+Read and follow: reference/hook-markers.md
+Read and follow: reference/after-workflow.md
+Read and follow: reference/clinical-context.md
+Read when needed: reference/normal-ranges.md
+Read when needed: reference/critical-values.md
+Read when needed: reference/pediatric-ranges.md
 
 ## Component
 

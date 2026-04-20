@@ -2,16 +2,17 @@
 name: dka
 description: "[Internal] Build a DKA monitoring module — hourly tracking of glucose, ketones, potassium, insulin, GCS, urine output with resolution criteria"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/dka/reference/resolution-criteria.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/dka/reference/insulin-protocol.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/dka/reference/potassium-management.md
+Read and follow: reference/core.md
+Read and follow: reference/component-fetching.md
+Read and follow: reference/hook-markers.md
+Read and follow: reference/after-workflow.md
+Read and follow: reference/clinical-context.md
+Read when needed: reference/resolution-criteria.md
+Read when needed: reference/insulin-protocol.md
+Read when needed: reference/potassium-management.md
 
 ## Component
 

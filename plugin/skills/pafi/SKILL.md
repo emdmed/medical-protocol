@@ -2,15 +2,16 @@
 name: pafi
 description: "[Internal] Build a PaFi calculator — PaO2/FiO2 ratio with ARDS classification and FiO2 presets"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/pafi/reference/ards-berlin-criteria.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/pafi/reference/ventilation-targets.md
+Read and follow: reference/core.md
+Read and follow: reference/component-fetching.md
+Read and follow: reference/hook-markers.md
+Read and follow: reference/after-workflow.md
+Read and follow: reference/clinical-context.md
+Read when needed: reference/ards-berlin-criteria.md
+Read when needed: reference/ventilation-targets.md
 
 ## Component
 

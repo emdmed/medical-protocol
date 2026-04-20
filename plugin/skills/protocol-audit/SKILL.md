@@ -5,8 +5,8 @@ allowed-tools: Read, Grep, Glob, Bash
 user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read when needed: ${CLAUDE_PLUGIN_ROOT}/skills/protocol-audit/reference/scoring-criteria.md
+Read and follow: reference/core.md
+Read when needed: reference/scoring-criteria.md
 
 ## Purpose
 

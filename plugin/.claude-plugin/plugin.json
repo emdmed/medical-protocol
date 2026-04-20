@@ -1,9 +1,0 @@
-{
-  "name": "medical-protocol",
-  "version": "0.5.1",
-  "description": "Medical protocol plugin for Claude Code — clinical interface builder with safety hooks for healthcare professionals. Use /medical-protocol:start to begin.",
-  "author": {
-    "name": "Medical Protocol Team"
-  },
-  "homepage": "https://github.com/emdmed/medical-protocol"
-}

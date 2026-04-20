@@ -5,7 +5,7 @@ allowed-tools: Read, Grep, Glob, Write, Edit
 user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
+Read and follow: reference/core.md
 
 ## Purpose
 

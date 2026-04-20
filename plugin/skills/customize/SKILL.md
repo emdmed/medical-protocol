@@ -2,14 +2,15 @@
 name: customize
 description: "[Internal] Modify an existing clinical interface — add fields, change layout, adjust alerts, add new sections"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
-Also `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/composition.md` for component integration patterns and gotchas.
+Read and follow: reference/core.md
+Read and follow: reference/component-fetching.md
+Read and follow: reference/hook-markers.md
+Read and follow: reference/after-workflow.md
+Read and follow: reference/clinical-context.md
+Also `Read` from `reference/composition.md` for component integration patterns and gotchas.
 
 You are customizing an existing clinical interface for a healthcare professional. Follow the phases below exactly.
 

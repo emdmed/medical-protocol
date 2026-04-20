@@ -2,10 +2,11 @@
 name: cli
 description: "[Internal] Run quick clinical calculations from the terminal — BMI, blood gas analysis, fluid balance, vital signs"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+user-invocable: true
 ---
 
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
-Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/cli-calculator.md
+Read and follow: reference/core.md
+Read and follow: reference/cli-calculator.md
 
 You are running quick clinical calculations for a healthcare professional using the command-line calculator. Follow the phases below exactly.
 
