@@ -1,15 +1,22 @@
 {
   "name": "medical-protocol",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Install and manage the medical-protocol plugin for Claude Code",
   "license": "MIT",
-  "bin": { "medical-protocol": "./dist/index.js" },
-  "files": ["dist/", "plugin/"],
+  "bin": {
+    "medical-protocol": "./dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "plugin/"
+  ],
   "scripts": {
     "build": "bash build.sh",
     "prepublishOnly": "npm run build"
   },
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
     "tsup": "^8.0.0",
     "typescript": "^6.0.2"

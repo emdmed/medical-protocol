@@ -1,9 +1,12 @@
 {
   "name": "medical-protocol-workflows",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "Medical protocol workflows, calculation logic, and CLI for Claude Code",
-  "workspaces": ["packages/medprotocol", "packages/medical-protocol"],
+  "workspaces": [
+    "packages/medprotocol",
+    "packages/medical-protocol"
+  ],
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
