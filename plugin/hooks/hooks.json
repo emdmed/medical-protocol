@@ -14,21 +14,6 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "WebFetch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/validate-fetch.sh\"",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/track-workflow.sh\"",
-            "timeout": 3
-          }
-        ]
-      },
-      {
         "matcher": "Bash",
         "hooks": [
           {

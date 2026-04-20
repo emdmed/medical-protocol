@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 import { calculatePaFi, getPaFiClassification, getPaFiSeverity } from "../../../../lib/pafi";
-import { formatHeader, formatTable, printResult, formatError } from "../format";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
 
 const USAGE = `Usage: medprotocol pafi [options]
 

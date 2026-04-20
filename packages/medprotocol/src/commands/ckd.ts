@@ -22,7 +22,7 @@ import {
   assessVitaminD,
   getCKDMBDMonitoring,
 } from "../../../../lib/ckd";
-import { formatHeader, formatTable, printResult, formatError } from "../format";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
 
 const USAGE = `Usage: medprotocol ckd <sub-command> [options]
 

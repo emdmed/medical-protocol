@@ -1,7 +1,7 @@
 ---
 name: water-balance
 description: "[Internal] Build a fluid balance tracker — intake, output, insensible losses, net balance calculation"
-allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 ---
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md

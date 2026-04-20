@@ -1,5 +1,5 @@
 {
-  "version": "0.4.1",
+  "version": "0.4.2",
   "providers": {
     "claude-code": {
       "name": "Claude Code",
@@ -8,7 +8,7 @@
       "description": "The fully supported provider. Claude Code reads the protocol, installs components via medical-ui-cli, and builds clinical interfaces automatically.",
       "install": "providers/claude-code/install.md",
       "protocol": "providers/claude-code/protocol.md",
-      "quickStart": "curl -fsSL https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/install.md | claude"
+      "quickStart": "npx medical-protocol install"
     }
   }
 }

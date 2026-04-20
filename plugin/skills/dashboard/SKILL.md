@@ -1,7 +1,7 @@
 ---
 name: dashboard
 description: "[Internal] Build a combined clinical dashboard — pick building blocks and compose them into one view"
-allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 ---
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
@@ -9,14 +9,14 @@ Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/component-fetching.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/hook-markers.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/after-workflow.md
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/clinical-context.md
-Also fetch `https://medical-protocol.vercel.app/medical-protocol/context/composition.md` for component integration patterns and gotchas.
+Also `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/composition.md` for component integration patterns and gotchas.
 
 ## Component
 
 - **Components:** Multiple — install each block the doctor selects via `npx medical-ui-cli add <name>`
 - **Available blocks:** `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`, `ckd`, `nephrology`
 - **Route:** `app/dashboard/page.tsx`
-- **Composition guide:** Fetch `https://medical-protocol.vercel.app/medical-protocol/context/composition.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards)
+- **Composition guide:** `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/composition.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards)
 - **Preview message:** "Your clinical dashboard is ready with [list selected blocks]. View it at http://localhost:3000/dashboard"
 
 ## Phase 1: Clinical Requirements

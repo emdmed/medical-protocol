@@ -76,10 +76,9 @@ Run `npx medprotocol --version` in the background.
 Check if the current directory already has a `CLAUDE.md` file that references the medical protocol.
 
 - **If it exists**: tell the doctor "Everything is already set up. You can describe what you need — for example, 'I need a vital signs monitor for my clinic.'"
-- **If it doesn't exist**: download the protocol and set it as the project instructions:
+- **If it doesn't exist**: install the protocol using the installer:
   ```
-  mkdir -p .claude
-  curl -fsSL https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/protocol.md -o .claude/CLAUDE.md
+  npx medical-protocol install
   ```
 
 ---

@@ -1,7 +1,7 @@
 ---
 name: vitals
 description: "[Internal] Build a vital signs monitor — blood pressure, heart rate, SpO2, temperature, respiratory rate"
-allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 ---
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md

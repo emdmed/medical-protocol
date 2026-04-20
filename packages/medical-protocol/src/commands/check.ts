@@ -2,7 +2,7 @@ import { parseArgs } from "util";
 import { version as VERSION } from "../../package.json";
 import { getBundledPluginDir, getTargetDir, listFiles } from "../files";
 import { hashFile, readManifest } from "../manifest";
-import { formatError, printResult, formatHeader, formatTable } from "../format";
+import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
 import * as fs from "fs";
 import * as path from "path";
 

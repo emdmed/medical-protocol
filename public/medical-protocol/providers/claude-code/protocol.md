@@ -16,7 +16,7 @@
 
 ## Available Tools
 
-Fetch the full component registry: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/components.md` — includes dependencies, installation notes, and post-install steps.
+Read the full component registry: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/components.md` — includes dependencies, installation notes, and post-install steps.
 
 ---
 
@@ -63,7 +63,7 @@ If `CLAUDE.md` already exists, verify it contains the Testing section. If not, a
 
 ## Quick Calculator
 
-Fetch the CLI calculator reference: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/cli.md` — available calculators, usage examples, and communication guidelines.
+Read the CLI calculator reference: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/cli.md` — available calculators, usage examples, and communication guidelines.
 
 ---
 
@@ -88,7 +88,7 @@ If it's unclear (e.g., the doctor mixes languages), ask once: "Would you prefer 
 
 ## Initial Clarification (mandatory)
 
-Fetch and follow: `https://medical-protocol.vercel.app/medical-protocol/workflows/initial-clarification.md`
+Read and follow: `${CLAUDE_PLUGIN_ROOT}/reference/workflows/initial-clarification.md`
 
 Ask all three questions and **wait for the doctor's answers** before proceeding to Classification. Only skip if the doctor's message explicitly answers all three questions (patient setting, single vs multiple, persistence). Components and component groups are chosen later during Classification.
 
@@ -96,7 +96,7 @@ Ask all three questions and **wait for the doctor's answers** before proceeding 
 
 ## Classification
 
-Fetch the classification table: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/classification.md` — signal words, domain mapping, and routing rules.
+Read the classification table: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/classification.md` — signal words, domain mapping, and routing rules.
 
 Use the **Domain** column to identify which domain matches the doctor's request. Then use the provider's routing table (in the start skill) to map the domain to the correct workflow or skill.
 
@@ -104,7 +104,7 @@ Use the **Domain** column to identify which domain matches the doctor's request.
 
 ## Workflow Execution
 
-Once classified, use the provider's routing table (in the `start` skill) to find the correct workflow or skill for the matched domain. Most domains route to local skills — only `nephrology`, `cardiology`, and `sepsis` are fetched from the CDN. **Do NOT guess or construct CDN URLs by pattern** — always use the exact URLs from the routing table. Note: CKD (chronic kidney disease) maps to the **nephrology** domain, not a separate `ckd` domain.
+Once classified, use the provider's routing table (in the `start` skill) to find the correct workflow or skill for the matched domain. Most domains route to local skills — `nephrology`, `cardiology`, and `sepsis` use workflow files bundled in the plugin. **Do NOT guess or construct URLs by pattern** — always use the exact paths from the routing table. Note: CKD (chronic kidney disease) maps to the **nephrology** domain, not a separate `ckd` domain.
 
 1. **Route to the matched skill or workflow** using the provider's routing table
 2. **Follow all phases** in the matched skill/workflow exactly as written
@@ -112,7 +112,7 @@ Once classified, use the provider's routing table (in the `start` skill) to find
 
 ### Component Installation
 
-Fetch the component registry: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/context/components.md` — full registry, dependencies, CLI commands, and post-installation steps.
+Read the component registry: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/components.md` — full registry, dependencies, CLI commands, and post-installation steps.
 
 When a workflow instructs you to install a component:
 
@@ -135,7 +135,7 @@ When a workflow instructs you to install a component:
 
 > **For Claude only.** Run automatically after every workflow build. This is a background quality step — communicate results in clinical language.
 
-Fetch and follow the full checklist: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/quality-checklist.md`
+Read and follow the full checklist: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/workflows/quality-checklist.md`
 
 Summary: theming (tweakcn), responsiveness, error boundary, shadcn polish, layout disclaimer, browser QA.
 
@@ -143,7 +143,7 @@ Summary: theming (tweakcn), responsiveness, error boundary, shadcn polish, layou
 
 ## Patient Privacy & Data Protection
 
-> All data stays on the doctor's computer. Fetch the full privacy rules when needed: `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/patient-privacy.md`
+> All data stays on the doctor's computer. Read the full privacy rules when needed: `${CLAUDE_PLUGIN_ROOT}/reference/workflows/patient-privacy.md`
 
 **Essential rules (always active):**
 1. Never send patient data to external services — all storage must be local
@@ -172,7 +172,7 @@ When the doctor asks to "test", "verify", or "check" that things work correctly:
 2. Run `npm run dev` in the background
 3. **Wait for the dev server** to be ready: `npx wait-on http://localhost:3000 -t 30000`
    - If `wait-on` times out: skip browser QA, proceed to step 5
-4. **Run Browser QA** (Quality Checklist item 6) — only if agent-browser is installed and the server is ready. Follow `providers/claude-code/workflows/agent-qa.md`. Fix any issues automatically.
+4. **Run Browser QA** (Quality Checklist item 6) — only if agent-browser is installed and the server is ready. Follow `${CLAUDE_PLUGIN_ROOT}/reference/workflows/agent-qa.md`. Fix any issues automatically.
 5. Tell the doctor: "Your [description] is ready. You can view it at http://localhost:3000"
 6. **On first workflow completion only**, mention: "All patient data you enter stays on your computer. I'll let you know if anything could affect privacy." Do not repeat this on subsequent workflows.
 7. Ask if they'd like to adjust anything — in clinical terms only

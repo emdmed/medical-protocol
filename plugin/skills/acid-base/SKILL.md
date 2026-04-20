@@ -1,7 +1,7 @@
 ---
 name: acid-base
 description: "[Internal] Build a blood gas analyzer — pH, pCO2, HCO3, anion gap, acid-base interpretation"
-allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 ---
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md

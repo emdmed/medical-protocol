@@ -1,12 +1,7 @@
 # Quality Checklist
 
-> Run automatically after every build. This is a background quality step — communicate results in clinical language.
+> Run automatically after every build. Background quality step — communicate results in clinical language.
 
-1. **Theming** — Apply tweakcn preset, semantic color tokens only
-2. **Responsiveness** — Works at 768px+ (Tailwind prefixes, no fixed widths)
-3. **Error Boundary** — Wrap top-level page, create if missing
-4. **shadcn Polish** — Proper components, consistent spacing, labels, focus states, empty states
-5. **Layout Disclaimer** — Collapsible banner: "For educational and clinical decision-support purposes only"
-6. **Browser QA** — If `agent-browser` available, fetch and follow `workflows/agent-qa.md` from CDN
+Read full checklist: `${CLAUDE_PLUGIN_ROOT}/reference/workflows/quality-checklist.md`
 
-Full details: `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/quality-checklist.md`
+**Quick summary:** theming (tweakcn), responsiveness (768px+), error boundary, shadcn polish, layout disclaimer, browser QA (if agent-browser available).

@@ -1,7 +1,7 @@
 ---
 name: dka
 description: "[Internal] Build a DKA monitoring module — hourly tracking of glucose, ketones, potassium, insulin, GCS, urine output with resolution criteria"
-allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 ---
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md

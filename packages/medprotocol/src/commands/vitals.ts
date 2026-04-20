@@ -17,7 +17,7 @@ import {
   validateTemperatureInput,
 } from "../../../../lib/vital-signs-validations/temperature-validations";
 import { bloodOxygenValidations } from "../../../../lib/vital-signs-validations/blood-oxygen-validations";
-import { formatHeader, formatTable, printResult, formatError } from "../format";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
 
 const USAGE = `Usage: medprotocol vitals [options]
 

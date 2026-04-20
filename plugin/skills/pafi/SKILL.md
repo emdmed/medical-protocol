@@ -1,7 +1,7 @@
 ---
 name: pafi
 description: "[Internal] Build a PaFi calculator — PaO2/FiO2 ratio with ARDS classification and FiO2 presets"
-allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 ---
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md

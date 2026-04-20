@@ -7,7 +7,7 @@ AI-agent-driven clinical tools — validated calculation logic, a terminal CLI, 
 ### Install the Claude Code plugin
 
 ```bash
-claude plugin add --url https://medical-protocol-workflows.vercel.app/plugin/plugin.json
+npx medical-protocol install
 ```
 
 Then describe what you need: *"I need a vital signs monitor with fluid balance tracking"* — the agent handles the rest.

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Medical Protocol Hook: PostToolUse (WebFetch, Bash)
+# Medical Protocol Hook: PostToolUse (Bash)
 # Tracks workflow state for the QA reminder hook.
 # Sets marker files when:
 #   - QA-related actions are detected (.qa_started)

@@ -12,7 +12,7 @@ import {
   calculateLactateClearance,
   isLactateClearanceAdequate,
 } from "../../../../lib/sepsis";
-import { formatHeader, formatTable, printResult, formatError } from "../format";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
 
 const USAGE = `Usage: medprotocol sepsis <sub-command> [options]
 

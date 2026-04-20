@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 import { analyze } from "../../../../lib/acid-base";
-import { formatHeader, formatTable, printResult, formatError } from "../format";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
 
 const USAGE = `Usage: medprotocol abg [options]
 

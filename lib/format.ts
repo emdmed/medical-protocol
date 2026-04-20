@@ -1,5 +1,5 @@
 /**
- * Output formatters for medprotocol CLI — human-readable and JSON.
+ * Output formatters for CLI tools — human-readable and JSON.
  */
 
 export const formatJson = (data: Record<string, unknown>): string => {

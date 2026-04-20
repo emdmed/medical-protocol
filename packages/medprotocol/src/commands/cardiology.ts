@@ -17,7 +17,7 @@ import type {
   HEARTInputs,
   CHADSVAScInputs,
 } from "../../../../lib/cardiology-types";
-import { formatHeader, formatTable, printResult, formatError } from "../format";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
 
 const USAGE = `Usage: medprotocol cardiology <sub-command> [options]
 

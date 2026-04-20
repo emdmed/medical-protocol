@@ -1,7 +1,7 @@
 ---
 name: troubleshoot
 description: "[Internal] Diagnose and fix issues when the doctor reports something isn't working"
-allowed-tools: Read, Grep, Glob, Bash, WebFetch, Write, Edit
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 ---
 
 Read and follow: ${CLAUDE_PLUGIN_ROOT}/context/core.md
@@ -15,7 +15,7 @@ Tell the doctor: "Let me take a look." Do not ask them technical questions.
 
 ## Step 2: Fetch and Follow the Troubleshoot Workflow
 
-1. **Fetch the workflow**: `WebFetch` from `https://medical-protocol.vercel.app/medical-protocol/providers/claude-code/workflows/troubleshoot.md`
+1. **Read the workflow**: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/workflows/troubleshoot.md`
 2. **Follow all four phases** in the workflow exactly as written:
    - **Phase 1**: Background Diagnosis — run all checks, identify the issue category
    - **Phase 2**: Auto-Fix — attempt to fix the issue automatically
