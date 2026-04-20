@@ -1,6 +1,6 @@
 {
   "name": "medical-protocol",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Install and manage the medical-protocol plugin for Claude Code",
   "license": "MIT",
   "bin": {
