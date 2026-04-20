@@ -64,6 +64,10 @@ export function run(argv: string[]): void {
   };
   writeManifest(targetDir, manifest);
 
+  // Register plugin in .claude/settings.json so Claude Code discovers it
+  const settingsPath = path.join(values.dir!, ".claude", "settings.json");
+  registerPlugin(settingsPath);
+
   const data = {
     status: "installed",
     version: VERSION,
@@ -82,4 +86,28 @@ export function run(argv: string[]): void {
       "",
     ].join("\n"),
   );
+}
+
+const PLUGIN_KEY = "medical-protocol@medical-protocol";
+
+function registerPlugin(settingsPath: string): void {
+  let settings: Record<string, unknown> = {};
+
+  if (fs.existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    } catch {
+      // If settings.json is malformed, start fresh
+      settings = {};
+    }
+  }
+
+  const enabled = (settings.enabledPlugins ?? {}) as Record<string, boolean>;
+  if (enabled[PLUGIN_KEY]) return; // Already registered
+
+  enabled[PLUGIN_KEY] = true;
+  settings.enabledPlugins = enabled;
+
+  fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
 }

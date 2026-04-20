@@ -102,6 +102,10 @@ export function run(argv: string[]): void {
   };
   writeManifest(targetDir, newManifest);
 
+  // Ensure plugin is registered in .claude/settings.json
+  const settingsPath = path.join(values.dir!, ".claude", "settings.json");
+  registerPlugin(settingsPath);
+
   const totalChanged = updated.length + added.length + removed.length;
   const data = {
     status: totalChanged === 0 && skipped.length === 0 ? "up-to-date" : "updated",
@@ -132,4 +136,27 @@ export function run(argv: string[]): void {
     lines.push("");
     return lines.join("\n");
   });
+}
+
+const PLUGIN_KEY = "medical-protocol@medical-protocol";
+
+function registerPlugin(settingsPath: string): void {
+  let settings: Record<string, unknown> = {};
+
+  if (fs.existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    } catch {
+      settings = {};
+    }
+  }
+
+  const enabled = (settings.enabledPlugins ?? {}) as Record<string, boolean>;
+  if (enabled[PLUGIN_KEY]) return;
+
+  enabled[PLUGIN_KEY] = true;
+  settings.enabledPlugins = enabled;
+
+  fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
 }
