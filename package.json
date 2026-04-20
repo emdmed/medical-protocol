@@ -1,6 +1,6 @@
 {
   "name": "medical-protocol-workflows",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "description": "Medical protocol workflows, calculation logic, and CLI for Claude Code",
   "workspaces": [
