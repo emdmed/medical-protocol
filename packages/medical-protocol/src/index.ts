@@ -8,7 +8,8 @@ const program = new Command();
 program
   .name("medical-protocol")
   .description("Install and manage the medical-protocol plugin for Claude Code")
-  .version(`v${VERSION}`, "-v, --version");
+  .version(`v${VERSION}`, "-v, --version")
+  .option("-y, --yes", "Skip prompts, use defaults");
 
 program
   .command("install")
@@ -18,8 +19,10 @@ program
   .option("--link", "Use symlinks to a shared repo clone instead of copying")
   .option("--source <path>", "Path to repo clone (default: ~/.medical-protocol)")
   .option("--json", "Output as JSON")
-  .action((opts) => {
-    import("./commands/install").then((mod) => mod.run(opts));
+  .action(async (opts) => {
+    const yes = program.opts().yes;
+    const mod = await import("./commands/install");
+    await mod.run({ ...opts, yes });
   });
 
 program
@@ -27,8 +30,10 @@ program
   .description("Check if the plugin is up-to-date")
   .option("--dir <path>", "Target project directory", process.cwd())
   .option("--json", "Output as JSON")
-  .action((opts) => {
-    import("./commands/check").then((mod) => mod.run(opts));
+  .action(async (opts) => {
+    const yes = program.opts().yes;
+    const mod = await import("./commands/check");
+    await mod.run({ ...opts, yes });
   });
 
 program
@@ -37,8 +42,10 @@ program
   .option("--dir <path>", "Target project directory", process.cwd())
   .option("--force", "Overwrite locally modified files")
   .option("--json", "Output as JSON")
-  .action((opts) => {
-    import("./commands/update").then((mod) => mod.run(opts));
+  .action(async (opts) => {
+    const yes = program.opts().yes;
+    const mod = await import("./commands/update");
+    await mod.run({ ...opts, yes });
   });
 
 program.action(() => {

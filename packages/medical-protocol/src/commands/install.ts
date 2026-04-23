@@ -1,3 +1,5 @@
+import * as p from "@clack/prompts";
+import pc from "picocolors";
 import { version as VERSION } from "../../package.json";
 import {
   getBundledPluginDir,
@@ -13,8 +15,9 @@ import {
   symlinkFile,
   cloneOrPullRepo,
 } from "../files";
-import { hashFile, writeManifest, type FileManifest } from "../manifest";
+import { hashFile, writeManifest, readManifest, type FileManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
+import { isInteractive, selectInstallMode, confirmAlreadyInstalled, promptSourcePath } from "../prompts";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -24,9 +27,83 @@ interface InstallOptions {
   link?: boolean;
   source?: string;
   json?: boolean;
+  yes?: boolean;
 }
 
-export function run(opts: InstallOptions): void {
+export async function run(opts: InstallOptions): Promise<void> {
+  if (isInteractive(opts) && !opts.force && !opts.link && !opts.source) {
+    await runInteractive(opts);
+  } else {
+    runNonInteractive(opts);
+  }
+}
+
+async function runInteractive(opts: InstallOptions): Promise<void> {
+  p.intro(pc.bgCyan(pc.black(" medical-protocol ")));
+
+  const baseDir = opts.dir;
+  const skillsDir = getSkillsDir(baseDir);
+  const manifestPath = path.join(skillsDir, ".manifest.json");
+  const linkManifest = readManifest(path.join(baseDir, ".claude"));
+  const alreadyInstalled = fs.existsSync(manifestPath) || linkManifest?.mode === "link";
+
+  if (alreadyInstalled) {
+    const action = await confirmAlreadyInstalled();
+    if (action === "cancel") {
+      p.cancel("Installation cancelled.");
+      return;
+    }
+    if (action === "update") {
+      // Delegate to update command
+      const updateMod = await import("./update");
+      p.outro("Switching to update...");
+      await updateMod.run({ dir: baseDir, yes: true });
+      return;
+    }
+    // "reinstall" — continue with force
+    opts.force = true;
+  }
+
+  const mode = await selectInstallMode();
+  if (mode === "cancel") {
+    p.cancel("Installation cancelled.");
+    return;
+  }
+
+  if (mode === "link") {
+    let sourcePath = opts.source;
+    if (!sourcePath) {
+      sourcePath = (await promptSourcePath()) ?? undefined;
+    }
+    const s = p.spinner();
+    s.start("Cloning/updating source repo...");
+    try {
+      installLinked(baseDir, sourcePath, !!opts.force, false);
+      s.stop(pc.green("Plugin installed (symlink mode)"));
+    } catch (e) {
+      s.error(pc.red("Installation failed"));
+      p.log.error((e as Error).message);
+      process.exitCode = 1;
+      return;
+    }
+  } else {
+    const s = p.spinner();
+    s.start("Installing plugin...");
+    try {
+      installCopy(baseDir, !!opts.force, false);
+      s.stop(pc.green("Plugin installed"));
+    } catch (e) {
+      s.error(pc.red("Installation failed"));
+      p.log.error((e as Error).message);
+      process.exitCode = 1;
+      return;
+    }
+  }
+
+  p.outro(`Done! Plugin v${VERSION} installed`);
+}
+
+function runNonInteractive(opts: InstallOptions): void {
   const useLink = opts.link || !!opts.source;
   const baseDir = opts.dir;
   const skillsDir = getSkillsDir(baseDir);
