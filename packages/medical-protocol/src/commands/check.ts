@@ -1,4 +1,3 @@
-import { parseArgs } from "util";
 import { version as VERSION } from "../../package.json";
 import { getBundledPluginDir, getSkillsDir, getHooksDir, listFiles, isSymlink, getRepoStatus } from "../files";
 import { hashFile, readManifest } from "../manifest";
@@ -6,35 +5,19 @@ import { formatError, printResult, formatHeader, formatTable } from "../../../..
 import * as fs from "fs";
 import * as path from "path";
 
-export function run(argv: string[]): void {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      dir: { type: "string", default: process.cwd() },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
+interface CheckOptions {
+  dir: string;
+  json?: boolean;
+}
 
-  if (values.help) {
-    process.stdout.write(
-      `Usage: medical-protocol check [--dir <path>] [--json]\n\n` +
-        `Check if the installed skills are up-to-date.\n\n` +
-        `Options:\n` +
-        `  --dir <path>   Target project directory (default: cwd)\n` +
-        `  --json         Output as JSON\n`,
-    );
-    return;
-  }
-
-  const baseDir = values.dir!;
+export function run(opts: CheckOptions): void {
+  const baseDir = opts.dir;
   const skillsDir = getSkillsDir(baseDir);
 
   // Check for link-mode manifest in .claude/ dir
   const linkManifest = readManifest(path.join(baseDir, ".claude"));
   if (linkManifest?.mode === "link") {
-    checkLinked(baseDir, linkManifest, values.json!);
+    checkLinked(baseDir, linkManifest, !!opts.json);
     return;
   }
 
@@ -46,7 +29,7 @@ export function run(argv: string[]): void {
     return;
   }
 
-  checkCopy(baseDir, manifest, values.json!);
+  checkCopy(baseDir, manifest, !!opts.json);
 }
 
 function checkLinked(baseDir: string, manifest: import("../manifest").FileManifest, json: boolean): void {

@@ -1,62 +1,48 @@
 #!/usr/bin/env node
 
+import { Command } from "commander";
 import { version as VERSION } from "../package.json";
 
-const USAGE = `medical-protocol — Install and manage the medical-protocol plugin for Claude Code
+const program = new Command();
 
-Usage: medical-protocol <command> [options]
+program
+  .name("medical-protocol")
+  .description("Install and manage the medical-protocol plugin for Claude Code")
+  .version(`v${VERSION}`, "-v, --version");
 
-Commands:
-  install          Install the plugin into your project
-  check            Check if the plugin is up-to-date
-  update           Update the plugin to the latest version
+program
+  .command("install")
+  .description("Install the plugin into your project")
+  .option("--dir <path>", "Target project directory", process.cwd())
+  .option("--force", "Overwrite existing installation")
+  .option("--link", "Use symlinks to a shared repo clone instead of copying")
+  .option("--source <path>", "Path to repo clone (default: ~/.medical-protocol)")
+  .option("--json", "Output as JSON")
+  .action((opts) => {
+    import("./commands/install").then((mod) => mod.run(opts));
+  });
 
-Global options:
-  --dir <path>     Target project directory (default: current directory)
-  --force          Overwrite existing installation or locally modified files
-  --json           Output as JSON
-  --help           Show help
-  --version        Show version
+program
+  .command("check")
+  .description("Check if the plugin is up-to-date")
+  .option("--dir <path>", "Target project directory", process.cwd())
+  .option("--json", "Output as JSON")
+  .action((opts) => {
+    import("./commands/check").then((mod) => mod.run(opts));
+  });
 
-Install options:
-  --link           Use symlinks to a shared repo clone instead of copying
-  --source <path>  Path to repo clone (default: ~/.medical-protocol)
+program
+  .command("update")
+  .description("Update the plugin to the latest version")
+  .option("--dir <path>", "Target project directory", process.cwd())
+  .option("--force", "Overwrite locally modified files")
+  .option("--json", "Output as JSON")
+  .action((opts) => {
+    import("./commands/update").then((mod) => mod.run(opts));
+  });
 
-Examples:
-  npx medical-protocol install
-  npx medical-protocol install --link
-  npx medical-protocol install --link --source ~/my-clone
-  npx medical-protocol check
-  npx medical-protocol update
-  npx medical-protocol install --dir /path/to/project
-  npx medical-protocol check --json`;
+program.action(() => {
+  program.help();
+});
 
-const command = process.argv[2];
-const commandArgs = process.argv.slice(3);
-
-if (command === "--version" || command === "-v") {
-  process.stdout.write(`medical-protocol v${VERSION}\n`);
-  process.exit(0);
-}
-
-if (!command || command === "--help" || command === "-h") {
-  process.stdout.write(USAGE + "\n");
-  process.exit(0);
-}
-
-const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>> = {
-  install: () => import("./commands/install"),
-  check: () => import("./commands/check"),
-  update: () => import("./commands/update"),
-};
-
-const loader = commands[command];
-
-if (!loader) {
-  process.stderr.write(
-    `Unknown command: ${command}\n\nAvailable commands: ${Object.keys(commands).join(", ")}\n`,
-  );
-  process.exitCode = 1;
-} else {
-  loader().then((mod) => mod.run(commandArgs));
-}
+program.parse();

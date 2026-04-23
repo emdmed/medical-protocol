@@ -1,4 +1,3 @@
-import { parseArgs } from "util";
 import { version as VERSION } from "../../package.json";
 import {
   getBundledPluginDir,
@@ -19,40 +18,21 @@ import { formatError, printResult, formatHeader, formatTable } from "../../../..
 import * as fs from "fs";
 import * as path from "path";
 
-export function run(argv: string[]): void {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      dir: { type: "string", default: process.cwd() },
-      force: { type: "boolean", default: false },
-      link: { type: "boolean", default: false },
-      source: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
+interface InstallOptions {
+  dir: string;
+  force?: boolean;
+  link?: boolean;
+  source?: string;
+  json?: boolean;
+}
 
-  if (values.help) {
-    process.stdout.write(
-      `Usage: medical-protocol install [--dir <path>] [--force] [--link] [--source <path>] [--json]\n\n` +
-        `Install the medical-protocol skills into your project.\n\n` +
-        `Options:\n` +
-        `  --dir <path>      Target project directory (default: cwd)\n` +
-        `  --force           Overwrite existing installation\n` +
-        `  --link            Use symlinks to a shared repo clone instead of copying files\n` +
-        `  --source <path>   Path to repo clone (default: ~/.medical-protocol). Implies --link\n` +
-        `  --json            Output as JSON\n`,
-    );
-    return;
-  }
-
-  const useLink = values.link! || !!values.source;
-  const baseDir = values.dir!;
+export function run(opts: InstallOptions): void {
+  const useLink = opts.link || !!opts.source;
+  const baseDir = opts.dir;
   const skillsDir = getSkillsDir(baseDir);
 
   const manifestPath = path.join(skillsDir, ".manifest.json");
-  if (fs.existsSync(manifestPath) && !values.force) {
+  if (fs.existsSync(manifestPath) && !opts.force) {
     process.stderr.write(
       formatError(`Skills already installed at ${skillsDir}\nUse --force to overwrite, or use 'update' to update changed files.`) + "\n",
     );
@@ -61,9 +41,9 @@ export function run(argv: string[]): void {
   }
 
   if (useLink) {
-    installLinked(baseDir, values.source, values.force!, values.json!);
+    installLinked(baseDir, opts.source, !!opts.force, !!opts.json);
   } else {
-    installCopy(baseDir, values.force!, values.json!);
+    installCopy(baseDir, !!opts.force, !!opts.json);
   }
 }
 
