@@ -190,6 +190,19 @@ export const assessReferralNeed = (
   return "none";
 };
 
+/**
+ * Referral label for display.
+ */
+export const getReferralLabel = (referral: string): string => {
+  const labels: Record<string, string> = {
+    none: "No referral needed",
+    nephrology: "Refer to nephrology",
+    multidisciplinary: "Multidisciplinary care",
+    "krt-planning": "KRT planning required",
+  };
+  return labels[referral] ?? "Unknown";
+};
+
 // ─── Treatment Eligibility ──────────────────────────────────────────
 
 /**

@@ -35,7 +35,7 @@ When the doctor describes what they need, classify into one of these domains bas
 
 | Domain | Signal Words |
 |---|---|
-| **nephrology** | CKD, chronic kidney disease, eGFR, creatinine clearance, kidney function, KDIGO, nephrology, proteinuria, albuminuria, UACR, ACR, renal, kidney failure, KFRE, dialysis referral, anemia, hemoglobin, ferritin, TSAT, ESA, erythropoietin, iron deficiency, phosphate, PTH, parathyroid, vitamin D, mineral bone disease, MBD, CKD-MBD, secondary hyperparathyroidism, calcium phosphorus |
+| **nephrology** | CKD, chronic kidney disease, eGFR, creatinine clearance, kidney function, KDIGO, nephrology, proteinuria, albuminuria, UACR, ACR, renal, kidney failure, KFRE, dialysis referral, anemia, hemoglobin, ferritin, TSAT, ESA, erythropoietin, iron deficiency, phosphate, PTH, parathyroid, vitamin D, mineral bone disease, MBD, CKD-MBD, secondary hyperparathyroidism, calcium phosphorus, LDL, cholesterol, lipids, statin, Lp(a), lipoprotein a, ApoB, apolipoprotein B, non-HDL, triglycerides, cardio-metabolic, cardiovascular metabolic |
 
 ## Utilities
 
