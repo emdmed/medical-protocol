@@ -1,6 +1,19 @@
 import { parseArgs } from "util";
 import { version as VERSION } from "../../package.json";
-import { getBundledPluginDir, getSkillsDir, getHooksDir, getSettingsPath, listFiles, copyFile, getGlobalPluginCacheDir, getInstalledPluginsPath } from "../files";
+import {
+  getBundledPluginDir,
+  getSkillsDir,
+  getHooksDir,
+  getSettingsPath,
+  listFiles,
+  copyFile,
+  getGlobalPluginCacheDir,
+  getInstalledPluginsPath,
+  getDefaultSourceDir,
+  symlinkDir,
+  symlinkFile,
+  cloneOrPullRepo,
+} from "../files";
 import { hashFile, writeManifest, type FileManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
 import * as fs from "fs";
@@ -12,6 +25,8 @@ export function run(argv: string[]): void {
     options: {
       dir: { type: "string", default: process.cwd() },
       force: { type: "boolean", default: false },
+      link: { type: "boolean", default: false },
+      source: { type: "string" },
       json: { type: "boolean", default: false },
       help: { type: "boolean", default: false },
     },
@@ -20,26 +35,21 @@ export function run(argv: string[]): void {
 
   if (values.help) {
     process.stdout.write(
-      `Usage: medical-protocol install [--dir <path>] [--force] [--json]\n\n` +
+      `Usage: medical-protocol install [--dir <path>] [--force] [--link] [--source <path>] [--json]\n\n` +
         `Install the medical-protocol skills into your project.\n\n` +
         `Options:\n` +
-        `  --dir <path>   Target project directory (default: cwd)\n` +
-        `  --force        Overwrite existing installation\n` +
-        `  --json         Output as JSON\n`,
+        `  --dir <path>      Target project directory (default: cwd)\n` +
+        `  --force           Overwrite existing installation\n` +
+        `  --link            Use symlinks to a shared repo clone instead of copying files\n` +
+        `  --source <path>   Path to repo clone (default: ~/.medical-protocol). Implies --link\n` +
+        `  --json            Output as JSON\n`,
     );
     return;
   }
 
+  const useLink = values.link! || !!values.source;
   const baseDir = values.dir!;
   const skillsDir = getSkillsDir(baseDir);
-  const hooksDir = getHooksDir(baseDir);
-  const bundledDir = getBundledPluginDir();
-
-  if (!fs.existsSync(bundledDir)) {
-    process.stderr.write(formatError("Bundled plugin directory not found. Package may be corrupted.") + "\n");
-    process.exitCode = 1;
-    return;
-  }
 
   const manifestPath = path.join(skillsDir, ".manifest.json");
   if (fs.existsSync(manifestPath) && !values.force) {
@@ -50,12 +60,149 @@ export function run(argv: string[]): void {
     return;
   }
 
+  if (useLink) {
+    installLinked(baseDir, values.source, values.force!, values.json!);
+  } else {
+    installCopy(baseDir, values.force!, values.json!);
+  }
+}
+
+function installLinked(baseDir: string, sourcePath: string | undefined, force: boolean, json: boolean): void {
+  const sourceDir = sourcePath ?? getDefaultSourceDir();
+  const skillsDir = getSkillsDir(baseDir);
+  const hooksDir = getHooksDir(baseDir);
+
+  // Clone or pull the source repo
+  let repoAction: string;
+  try {
+    const result = cloneOrPullRepo(sourceDir);
+    repoAction = result.cloned ? "cloned" : "updated";
+  } catch (e) {
+    process.stderr.write(formatError((e as Error).message) + "\n");
+    process.exitCode = 1;
+    return;
+  }
+
+  const pluginDir = path.join(sourceDir, "plugin");
+  if (!fs.existsSync(pluginDir)) {
+    process.stderr.write(formatError(`Plugin directory not found at ${pluginDir}. Is this the right repo?`) + "\n");
+    process.exitCode = 1;
+    return;
+  }
+
+  const sourceSkillsDir = path.join(pluginDir, "skills");
+  const sourceHooksDir = path.join(pluginDir, "hooks");
+  const bundledSettingsPath = path.join(pluginDir, "settings.json");
+
+  // Remove existing skills dir if force
+  if (fs.existsSync(skillsDir) && force) {
+    const stat = fs.lstatSync(skillsDir);
+    if (stat.isSymbolicLink()) {
+      fs.unlinkSync(skillsDir);
+    } else {
+      fs.rmSync(skillsDir, { recursive: true });
+    }
+  }
+
+  // Symlink skills directory
+  if (fs.existsSync(sourceSkillsDir)) {
+    symlinkDir(sourceSkillsDir, skillsDir);
+  }
+
+  // Symlink individual hook files (not the whole dir, so doctors can add their own)
+  let hookCount = 0;
+  if (fs.existsSync(sourceHooksDir)) {
+    fs.mkdirSync(hooksDir, { recursive: true });
+    const hookFiles = listFiles(sourceHooksDir);
+    for (const relPath of hookFiles) {
+      // Skip hooks.json — we merge it instead
+      if (relPath === "hooks.json") continue;
+      const target = path.join(sourceHooksDir, relPath);
+      const linkPath = path.join(hooksDir, relPath);
+      symlinkFile(target, linkPath);
+      hookCount++;
+    }
+
+    // Merge hooks.json
+    const sourceHooksJson = path.join(sourceHooksDir, "hooks.json");
+    if (fs.existsSync(sourceHooksJson)) {
+      mergeHooksJson(path.join(hooksDir, "hooks.json"), sourceHooksJson);
+    }
+  }
+
+  // Merge settings.json
+  if (fs.existsSync(bundledSettingsPath)) {
+    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
+  }
+
+  // Write manifest with link mode (into the project, not the symlinked dir)
+  const manifestDir = path.join(baseDir, ".claude");
+  fs.mkdirSync(manifestDir, { recursive: true });
+  const manifest: FileManifest = {
+    version: VERSION,
+    installedAt: new Date().toISOString(),
+    files: {},
+    mode: "link",
+    sourcePath: sourceDir,
+  };
+  writeManifest(manifestDir, manifest);
+
+  // Sync global cache + installed_plugins.json
+  const cacheDir = getGlobalPluginCacheDir(VERSION);
+  syncGlobalCache(pluginDir, cacheDir, VERSION);
+  updateInstalledPlugins(path.resolve(baseDir), VERSION, pluginDir);
+
+  const data = {
+    status: "installed",
+    mode: "link",
+    version: VERSION,
+    repoAction,
+    sourcePath: sourceDir,
+    skillsDir,
+    hooksDir,
+    hookFiles: hookCount,
+    globalCache: cacheDir,
+  };
+
+  printResult(data, json, () =>
+    [
+      formatHeader("medical-protocol installed (linked)"),
+      formatTable([
+        ["Version", `v${VERSION}`],
+        ["Mode", "symlink"],
+        ["Source", sourceDir],
+        ["Repo", repoAction],
+        ["Skills", `${skillsDir} -> ${sourceSkillsDir}`],
+        ["Hooks", `${hookCount} files symlinked`],
+        ["Global cache", cacheDir],
+      ]),
+      "",
+    ].join("\n"),
+  );
+}
+
+function installCopy(baseDir: string, force: boolean, json: boolean): void {
+  const skillsDir = getSkillsDir(baseDir);
+  const hooksDir = getHooksDir(baseDir);
+  const bundledDir = getBundledPluginDir();
+
+  if (!fs.existsSync(bundledDir)) {
+    process.stderr.write(formatError("Bundled plugin directory not found. Package may be corrupted.") + "\n");
+    process.exitCode = 1;
+    return;
+  }
+
   const bundledSkillsDir = path.join(bundledDir, "skills");
   const bundledHooksDir = path.join(bundledDir, "hooks");
   const bundledSettingsPath = path.join(bundledDir, "settings.json");
 
   const fileHashes: Record<string, string> = {};
   let totalFiles = 0;
+
+  // Remove symlink if switching from link to copy mode
+  if (fs.existsSync(skillsDir) && fs.lstatSync(skillsDir).isSymbolicLink()) {
+    fs.unlinkSync(skillsDir);
+  }
 
   // Copy skills
   if (fs.existsSync(bundledSkillsDir)) {
@@ -83,7 +230,7 @@ export function run(argv: string[]): void {
     }
   }
 
-  // Merge permissions into settings.json (don't overwrite existing settings)
+  // Merge permissions into settings.json
   if (fs.existsSync(bundledSettingsPath)) {
     mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
   }
@@ -92,6 +239,7 @@ export function run(argv: string[]): void {
     version: VERSION,
     installedAt: new Date().toISOString(),
     files: fileHashes,
+    mode: "copy",
   };
   writeManifest(skillsDir, manifest);
 
@@ -102,6 +250,7 @@ export function run(argv: string[]): void {
 
   const data = {
     status: "installed",
+    mode: "copy",
     version: VERSION,
     filesInstalled: totalFiles,
     skillsDir,
@@ -109,7 +258,7 @@ export function run(argv: string[]): void {
     globalCache: cacheDir,
   };
 
-  printResult(data, values.json!, () =>
+  printResult(data, json, () =>
     [
       formatHeader("medical-protocol installed"),
       formatTable([
@@ -125,7 +274,6 @@ export function run(argv: string[]): void {
 }
 
 function syncGlobalCache(bundledDir: string, cacheDir: string, version: string): void {
-  // Copy plugin contents (skills, hooks, context, reference, settings.json) to global cache
   const dirsToSync = ["skills", "hooks", "context", "reference"];
   for (const dir of dirsToSync) {
     const srcDir = path.join(bundledDir, dir);
@@ -136,13 +284,11 @@ function syncGlobalCache(bundledDir: string, cacheDir: string, version: string):
     }
   }
 
-  // Copy settings.json
   const settingsSrc = path.join(bundledDir, "settings.json");
   if (fs.existsSync(settingsSrc)) {
     copyFile(settingsSrc, path.join(cacheDir, "settings.json"));
   }
 
-  // Write .claude-plugin/plugin.json
   const pluginJsonDir = path.join(cacheDir, ".claude-plugin");
   fs.mkdirSync(pluginJsonDir, { recursive: true });
   const pluginJson = {
@@ -203,7 +349,6 @@ function mergeSettings(targetPath: string, bundledPath: string): void {
   const bundledPerms = (bundled.permissions ?? {}) as Record<string, string[]>;
   const existingPerms = (existing.permissions ?? {}) as Record<string, string[]>;
 
-  // Merge allow/deny lists (add bundled entries that aren't already present)
   for (const key of ["allow", "deny"] as const) {
     const bundledList = bundledPerms[key] ?? [];
     const existingList = existingPerms[key] ?? [];
@@ -221,6 +366,39 @@ function mergeSettings(targetPath: string, bundledPath: string): void {
   }
 
   existing.permissions = existingPerms;
+
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  fs.writeFileSync(targetPath, JSON.stringify(existing, null, 2) + "\n");
+}
+
+function mergeHooksJson(targetPath: string, sourcePath: string): void {
+  let existing: Record<string, unknown> = {};
+  if (fs.existsSync(targetPath)) {
+    try {
+      existing = JSON.parse(fs.readFileSync(targetPath, "utf-8"));
+    } catch {
+      existing = {};
+    }
+  }
+
+  const source: Record<string, unknown> = JSON.parse(fs.readFileSync(sourcePath, "utf-8"));
+
+  // Merge each hook event (PreToolUse, PostToolUse, etc.)
+  for (const [event, hooks] of Object.entries(source)) {
+    if (!Array.isArray(hooks)) continue;
+    const existingHooks = (existing[event] ?? []) as Array<Record<string, unknown>>;
+    for (const hook of hooks) {
+      const hookObj = hook as Record<string, unknown>;
+      // Check if a hook with the same command already exists
+      const exists = existingHooks.some(
+        (h) => h.command === hookObj.command,
+      );
+      if (!exists) {
+        existingHooks.push(hookObj);
+      }
+    }
+    existing[event] = existingHooks;
+  }
 
   fs.mkdirSync(path.dirname(targetPath), { recursive: true });
   fs.writeFileSync(targetPath, JSON.stringify(existing, null, 2) + "\n");

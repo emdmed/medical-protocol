@@ -12,6 +12,25 @@ npx medical-protocol install
 
 Then describe what you need: *"I need a vital signs monitor with fluid balance tracking"* — the agent handles the rest.
 
+#### Symlink mode (for multi-project or dev setups)
+
+```bash
+npx medical-protocol install --link
+```
+
+This clones the repo to `~/.medical-protocol` and creates symlinks instead of copying files. All linked projects update instantly when you `git pull` in the clone — no need to re-run install per project.
+
+```bash
+# Use an existing local clone
+npx medical-protocol install --link --source ~/my-clone
+
+# Check symlink health and repo status
+npx medical-protocol check
+
+# Pull latest changes
+npx medical-protocol update
+```
+
 ### Run the CLI
 
 ```bash

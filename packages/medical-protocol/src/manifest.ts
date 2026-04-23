@@ -6,6 +6,8 @@ export interface FileManifest {
   version: string;
   installedAt: string;
   files: Record<string, string>;
+  mode?: "copy" | "link";
+  sourcePath?: string;
 }
 
 const MANIFEST_NAME = ".manifest.json";

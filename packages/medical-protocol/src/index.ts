@@ -9,7 +9,7 @@ Usage: medical-protocol <command> [options]
 Commands:
   install          Install the plugin into your project
   check            Check if the plugin is up-to-date
-  update           Update the plugin to the latest bundled version
+  update           Update the plugin to the latest version
 
 Global options:
   --dir <path>     Target project directory (default: current directory)
@@ -18,8 +18,14 @@ Global options:
   --help           Show help
   --version        Show version
 
+Install options:
+  --link           Use symlinks to a shared repo clone instead of copying
+  --source <path>  Path to repo clone (default: ~/.medical-protocol)
+
 Examples:
   npx medical-protocol install
+  npx medical-protocol install --link
+  npx medical-protocol install --link --source ~/my-clone
   npx medical-protocol check
   npx medical-protocol update
   npx medical-protocol install --dir /path/to/project
