@@ -181,3 +181,7 @@ function Dashboard() {
 - **FHIR bundle**: The second argument to VitalSigns' `onData` is a FHIR R4 Bundle with LOINC codes. Always available (VitalSignsFhir renders internally).
 
 - **Patient data cascading**: When patient data changes, dependent components auto-update via props. Use the ref-based dedup pattern (see VitalSigns circular updates above) to prevent re-render cascades in components that both receive `data` and emit `onData`.
+
+- **Inbound data sync required**: Components that accept a `data` prop must have a `useEffect` that syncs prop changes into local state — not just read the prop on initial mount. Without this, parent updates (e.g. age/sex changed in the Patient card) never reach the child. Pattern: compare `JSON.stringify(data)` against a `prevDataRef` and call `setState` only when changed.
+
+- **Multi-patient dashboards — use `key={activeId}`**: When a dashboard supports switching between patients, add `key={activeId}` to every component (and its ErrorBoundary). This forces a clean remount on patient switch, preventing stale state from one patient bleeding into another.

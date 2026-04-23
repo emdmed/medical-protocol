@@ -9,4 +9,5 @@ marketing/
 docs/
 .patterns/advisor-research-template/
 sync_check.md
+.orchestration/
 .orchestration

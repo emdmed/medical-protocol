@@ -65,6 +65,7 @@ Wire `sex` from CKDPatientData → Anemia (enables sex-specific Hb thresholds). 
 
 - **CKD uses strings everywhere.** Convert from other components: `String(value ?? "")`
 - **No circular loops.** Guard `onData` → `data` flows with `useRef` + serialized comparison
+- **Inbound sync required.** CKD evaluator (and all nephrology sub-components) must have a `useEffect` that syncs the `data` prop into local state after mount — otherwise parent updates (age/sex from Patient card) are ignored after initial render
 - **KFRE requires eGFR, not creatinine.** Calculate eGFR first
 - **Wire `sex` to Anemia** — without it, falls back to generic classification
 - **Wire `gfrCategory` to PhosphoCalcic** — without it, PTH uses generic ranges
