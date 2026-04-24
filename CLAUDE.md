@@ -52,7 +52,7 @@ packages/medprotocol/              # CLI calculator tool (9 commands)
 plugin/                            # Claude plugin source: settings.json, hooks/, skills/ (14), context/ (9)
 tests/                             # Vitest — test files, clinical logic only, no UI rendering
 scripts/                           # bump-version.sh
-hooks/                             # Git hooks: privacy-guard, qa-reminder, track-workflow, validate-fetch
+hooks/                             # Git hooks (symlinks or legacy — canonical hooks live in plugin/hooks/)
 .patterns/                         # Reusable guides: new-module checklist, medprotocol CLI
 ```
 
@@ -62,7 +62,7 @@ hooks/                             # Git hooks: privacy-guard, qa-reminder, trac
 - **No production deps** — devDependencies only (typescript, vitest). Do not add runtime packages.
 - **Testing:** Logic-only via Vitest; UI QA via agent-browser (workflows/agent-qa.md)
 - **CDN serves strings only** — markdown and JSON, no HTML
-- **Plugin:** 14 skills with SKILL.md + reference docs, 4 hooks (privacy, QA, workflow tracking, fetch validation), 9 plugin context files
+- **Plugin:** 14 skills with SKILL.md + reference docs, 3 hooks in `plugin/hooks/` (privacy-guard, qa-reminder, track-workflow), 9 plugin context files
 - **Shared context:** 13 files in `public/medical-protocol/context/` — component registry, classification, CLI ref, composition patterns, and 9 per-module docs (CDN-served, single source of truth)
 - **Version:** 0.4.0 (synced across package.json, provider manifest, medprotocol/package.json, plugin/.claude-plugin/plugin.json)
 
