@@ -6,14 +6,14 @@ This project is one piece of a three-part medical protocol system. Know which pa
 
 | Part | What it does | Where it lives |
 |------|-------------|----------------|
-| **1. Workflows & Plugin** (this repo) | Markdown protocols, workflows, context, skills, and hooks that agents like Claude Code consume. Served as static strings via Vercel CDN. Also contains `lib/` with pure calculation logic and `packages/medprotocol/` CLI. | `/home/enrique/projects/medical-protocol-workflows` |
+| **1. Workflows & Plugin** (this repo) | Markdown protocols, workflows, context, skills, and hooks that agents like Claude Code consume. Served as static strings via Vercel CDN. Also contains `lib/` with pure calculation logic and `packages/medprotocol/` CLI. | `/home/enrique/projects/medprotocol-core` |
 | **2. medprotocol CLI** (this repo) | Terminal calculator tool (9 commands). Imports logic from `lib/`. No UI. | `packages/medprotocol/` in this repo |
-| **3. medical-ui-cli** (separate repo) | shadcn-style React component delivery. `npx medical-ui-cli add <component>` copies components into doctor projects. | `/home/enrique/projects/medicalui-cli` |
+| **3. medprotocol-ui** (separate repo) | shadcn-style React component delivery. `npx medical-ui-cli add <component>` copies components into doctor projects. | `/home/enrique/projects/medprotocol-ui` |
 
 ### Boundaries — read this
 
 - **This repo has NO React, no Next.js, no UI code.** The target stack (React 19, Next.js, shadcn/ui v4+, Tailwind) describes what doctors end up with in their projects, not this repo.
-- **Never create component files here.** Components live in the medical-ui-cli repo.
+- **Never create component files here.** Components live in the medprotocol-ui repo.
 - **`lib/` is the shared bridge.** Pure TypeScript calculation/validation logic consumed by both the CLI (`packages/medprotocol/`) and the UI components (in the other repo). No framework deps.
 - **No production deps.** Only devDependencies (typescript, vitest). Do not `npm install` runtime packages.
 

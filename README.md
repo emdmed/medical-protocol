@@ -78,7 +78,7 @@ BMI Calculator
 
 ## Architecture
 
-Three parts: **this repo** (workflows, plugin, `lib/` logic, CLI), **medical-ui-cli** (separate repo — shadcn-style component delivery), and the **doctor's project** (Next.js app built by the agent). Pure calculation logic lives in `lib/` — no framework deps, shared by CLI and UI. See `CLAUDE.md` for full directory structure.
+Three parts: **this repo** (workflows, plugin, `lib/` logic, CLI), **medprotocol-ui** (separate repo — shadcn-style component delivery), and the **doctor's project** (Next.js app built by the agent). Pure calculation logic lives in `lib/` — no framework deps, shared by CLI and UI. See `CLAUDE.md` for full directory structure.
 
 ## Clinical Components
 
