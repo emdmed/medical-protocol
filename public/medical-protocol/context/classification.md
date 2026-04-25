@@ -25,6 +25,12 @@ When the doctor describes what they need, classify into one of these domains bas
 | **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking |
 | **sepsis** | sepsis, SOFA, qSOFA, septic shock, organ failure, lactate, vasopressors, hour-1 bundle, resuscitation |
 
+## Endocrinology / Diabetes
+
+| Domain | Signal Words |
+|---|---|
+| **diabetes** | diabetes, diabetes diagnosis, A1C, HbA1c, fasting glucose, FPG, oral glucose tolerance, OGTT, 2-hour glucose, prediabetes, IFG, IGT, type 1 diabetes, type 2 diabetes, T1D, T2D, autoantibodies, GAD65, IA-2, ZnT8, C-peptide, AABBCC, gestational diabetes, GDM, IADPSG, Carpenter-Coustan, diabetes screening, diabetes classification, diabetes staging |
+
 ## Cardiology
 
 | Domain | Signal Words |
