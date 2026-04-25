@@ -60,6 +60,8 @@ npx medical-ui-cli add <component>   # Install a component + shadcn deps
 npx medical-ui-cli debug             # Diagnostic info
 ```
 
+**IMPORTANT:** Always run `npx medical-ui-cli list` before `npx medical-ui-cli add` to confirm the exact component name exists and is available. Do not guess component names.
+
 **Prerequisite:** The doctor's project must have `components.json` (shadcn config) in the root.
 
 ### Post-Installation
