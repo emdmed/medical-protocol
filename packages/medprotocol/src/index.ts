@@ -16,6 +16,7 @@ Commands:
   cardiology       Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
   sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
+  diabetes         Diabetes diagnosis and classification (ADA 2026)
 
 Global options:
   --json           Output as JSON (available on all commands)
@@ -38,7 +39,12 @@ Examples:
   medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male
   medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 45
   medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300
-  medprotocol ckd treatment --egfr 35 --acr 300 --diabetes`;
+  medprotocol ckd treatment --egfr 35 --acr 300 --diabetes
+  medprotocol diabetes diagnose --a1c 6.8 --fpg 130
+  medprotocol diabetes t1d-stage --autoantibodies 3 --a1c 5.9
+  medprotocol diabetes t1-vs-t2 --age 25 --bmi 22 --autoantibodies --c-peptide 150
+  medprotocol diabetes t2d-screen --age 40 --bmi 28 --hypertension
+  medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160`;
 
 const command = process.argv[2];
 const commandArgs = process.argv.slice(3);
@@ -63,6 +69,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   cardiology: () => import("./commands/cardiology"),
   sepsis: () => import("./commands/sepsis"),
   ckd: () => import("./commands/ckd"),
+  diabetes: () => import("./commands/diabetes"),
 };
 
 const loader = commands[command];

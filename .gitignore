@@ -2,9 +2,7 @@ node_modules/
 packages/medprotocol/dist/
 packages/medical-protocol/dist/
 packages/medical-protocol/plugin/
-.claude/hooks-state/
-.claude/plugins/
-.claude/settings.local.json
+.claude/
 marketing/
 docs/
 .patterns/advisor-research-template/
