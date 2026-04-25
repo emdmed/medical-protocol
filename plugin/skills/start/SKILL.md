@@ -60,6 +60,7 @@ These domains don't have a local SKILL.md. Read the workflow file and follow it 
 | **nephrology** | `Read` from `reference/nephrology.md` |
 | **cardiology** | `Read` from `reference/cardiology.md` |
 | **sepsis** | `Read` from `reference/sepsis.md` |
+| **diabetes** | `Read` from `reference/diabetes.md` |
 
 ## Step 4: Execute
 
