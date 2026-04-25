@@ -2,6 +2,20 @@
 
 Based on ADA Standards of Care in Diabetes — 2026, Sections 2 and 4.
 
+## UI Installation
+
+**CLI component name:** `diabetes-dx` (not `diabetes`)
+
+```bash
+npx medical-ui-cli add diabetes-dx        # Installs diabetes-dx/ + endocrine/ folders
+npx medical-ui-cli add t1d-staging         # Installs endocrine/ folder only
+npx medical-ui-cli add t2d-screening       # Installs endocrine/ folder only
+npx medical-ui-cli add gdm-screening       # Installs endocrine/ folder only
+npx medical-ui-cli add t1-vs-t2            # Installs endocrine/ folder only
+```
+
+Categories: `endocrine`, `internal-medicine`
+
 ## Components
 
 | Component | What it does | Key reference |

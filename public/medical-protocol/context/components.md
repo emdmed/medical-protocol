@@ -15,6 +15,7 @@
 | ckd | eGFR, KDIGO staging, KFRE risk prediction |
 | nephrology | CKD anemia, CKD-MBD, cardio-metabolic panels |
 | sepsis | SOFA, qSOFA, septic shock, hour-1 bundle |
+| diabetes-dx | ADA diabetes diagnosis, T1D staging, T1 vs T2, T2D/GDM screening |
 | dashboard | Combined overview of multiple tools |
 | customize | Modify layout, add/remove fields |
 | troubleshoot | Fix errors, blank screens, broken UI |
@@ -43,6 +44,7 @@ The CLI does **not** auto-install dependent components -- you must install them 
 - `dka` depends on `acid-base` -- install acid-base first
 - `sepsis` depends on `vital-signs` and `water-balance`
 - `nephrology` is a companion to `ckd` -- the `nephrology` group installs both. Wire `sex` from CKD to Anemia, `gfrCategory` from CKD to PhosphoCalcic.
+- `diabetes-dx` installs both `diabetes-dx/` and `endocrine/` folders. Sub-components (`t1d-staging`, `t1-vs-t2`, `t2d-screening`, `gdm-screening`) install the `endocrine/` folder only. **Important:** The CLI component name is `diabetes-dx`, not `diabetes`.
 - Other components are self-contained
 
 ---
