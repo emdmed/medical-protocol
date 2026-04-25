@@ -66,7 +66,7 @@ These domains don't have a local SKILL.md. Read the workflow file and follow it 
 
 Once classified, route to the matched destination from the tables above:
 - **Local skills:** Read the matched SKILL.md file and follow its phases exactly.
-- **CDN workflows (nephrology, cardiology, sepsis):** `Read` the file at the exact path from the routing table above.
+- **Workflow files (nephrology, cardiology, sepsis, diabetes):** `Read` the file at the exact path from the routing table above.
 
 Pass the Initial Clarification answers (patient setting, single vs multiple, persistence) as context to the workflow.
 

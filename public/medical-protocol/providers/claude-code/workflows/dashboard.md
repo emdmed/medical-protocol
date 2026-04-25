@@ -30,7 +30,7 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 
 ## Phase 2: Fetch & Install
 
-For each block the doctor selected, install via CLI — do NOT fetch any workflow files from the CDN. Install each component with `npx medical-ui-cli add <component>`. Available components: `base` (patient), `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`, `ckd`. For nephrology, use the group install `npx medical-ui-cli add nephrology` to install both `ckd/` and `nephrology/` folders at once.
+For each block the doctor selected, install via CLI. Install each component with `npx medical-ui-cli add <component>`. Available components: `base` (patient), `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`, `ckd`. For nephrology, use the group install `npx medical-ui-cli add nephrology` to install both `ckd/` and `nephrology/` folders at once.
 
 If Patient was included (explicitly or auto-included), install it first: `npx medical-ui-cli add base`. Then wire patient data into dependent components following the patient data wiring pattern in the composition context.
 

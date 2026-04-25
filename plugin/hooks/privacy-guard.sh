@@ -1,7 +1,7 @@
 #!/bin/bash
 # Medical Protocol Hook: PreToolUse (Bash)
 # Enforces patient data privacy by blocking commands that could exfiltrate data.
-# Allows safe operations: npm install/dev, curl GET from CDN, git add/commit, tsc.
+# Allows safe operations: npm install/dev, curl GET, git add/commit, tsc.
 # Blocks: git push, curl POST, scp, nc, npm publish, and other outbound data commands.
 #
 # Plugin version: no CLAUDE.md activation guard — plugin enabled = hooks active.
@@ -59,11 +59,11 @@ fi
 
 # ─── Block: curl/wget/httpie with data-sending methods ───
 # Block POST, PUT, PATCH, DELETE (data-sending HTTP methods)
-# Allow GET requests (fetching workflows/manifests from CDN is fine)
+# Allow GET requests (fetching workflows/manifests is fine)
 if echo "$CMD_LOWER" | grep -qE '\bcurl\b'; then
   # Block explicit data-sending flags
   if echo "$CMD_LOWER" | grep -qE '(\s|^)(-X\s*(POST|PUT|PATCH|DELETE)|--request\s*(POST|PUT|PATCH|DELETE)|-d\s|--data|--data-raw|--data-binary|--data-urlencode|-F\s|--form|--upload-file)'; then
-    deny "Blocked curl with outbound data. Use curl only for fetching (GET) from the CDN."
+    deny "Blocked curl with outbound data. Use curl only for fetching (GET)."
   fi
 fi
 if echo "$CMD_LOWER" | grep -qE '\bwget\s.*--post'; then
@@ -99,5 +99,5 @@ fi
 
 # ─── Everything else: allow ───
 # Safe by default: npm install, npm run dev, npx, tsc, git add, git commit,
-# curl GET (CDN fetches), node, next dev, etc.
+# curl GET, node, next dev, etc.
 exit 0

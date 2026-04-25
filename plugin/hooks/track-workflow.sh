@@ -6,7 +6,7 @@
 #   - Dev server is started (.dev_server_up)
 #
 # Plugin version: the .workflow_active marker is set explicitly by each skill
-# in Phase 2, not by CDN URL detection.
+# in Phase 2, not by URL detection.
 
 set -uo pipefail
 
