@@ -48,12 +48,12 @@ When the doctor describes what they need, classify into one of these domains bas
 | Domain | Signal Words |
 |---|---|
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined |
-| **customize** | change, modify, add field, remove, adjust, different layout, customize |
+| **modify** | change, modify, add field, remove, adjust, different layout |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix |
-| **cli** | calculate, quick calculation, from the terminal, command line, batch, just the number |
-| **start-protocol** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty |
+| **calc** | calculate, quick calculation, from the terminal, command line, batch, just the number |
+| **preferences** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty |
 | **protocol-audit** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check |
-| **medical-audit** | test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors |
+| **calc-audit** | test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors |
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: customize
+name: modify
 description: "[Internal] Modify an existing clinical interface — add fields, change layout, adjust alerts, add new sections"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 user-invocable: true

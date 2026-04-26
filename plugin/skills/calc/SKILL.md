@@ -1,5 +1,5 @@
 ---
-name: cli
+name: calc
 description: "[Internal] Run quick clinical calculations from the terminal — BMI, blood gas analysis, fluid balance, vital signs"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 user-invocable: true

@@ -1,5 +1,5 @@
 ---
-name: vitals
+name: vital-signs
 description: "[Internal] Build a vital signs monitor — blood pressure, heart rate, SpO2, temperature, respiratory rate"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 user-invocable: true

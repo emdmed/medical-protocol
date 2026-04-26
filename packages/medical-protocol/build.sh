@@ -26,15 +26,15 @@ rm -rf "$DIR/plugin/context" "$DIR/plugin/reference" "$DIR/plugin/.claude-plugin
 cp "$PUBLIC/context/classification.md" "$DIR/plugin/skills/start/reference/"
 
 # cli.md → cli
-cp "$PUBLIC/context/cli.md" "$DIR/plugin/skills/cli/reference/"
+cp "$PUBLIC/context/cli.md" "$DIR/plugin/skills/calc/reference/"
 
 # components.md → skills that need it
-for skill in start bmi pafi acid-base dka vitals water-balance dashboard customize; do
+for skill in start bmi pafi acid-base dka vital-signs water-balance dashboard modify; do
   cp "$PUBLIC/context/components.md" "$DIR/plugin/skills/$skill/reference/"
 done
 
 # composition.md → skills that need it
-for skill in start bmi pafi acid-base dka vitals water-balance dashboard customize; do
+for skill in start bmi pafi acid-base dka vital-signs water-balance dashboard modify; do
   cp "$PUBLIC/context/composition.md" "$DIR/plugin/skills/$skill/reference/"
 done
 

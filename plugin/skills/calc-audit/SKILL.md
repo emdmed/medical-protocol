@@ -1,5 +1,5 @@
 ---
-name: medical-audit
+name: calc-audit
 description: Scan installed components for calculation logic and test them against the canonical library via CLI and browser
 allowed-tools: Read, Grep, Glob, Bash
 user-invocable: true
@@ -98,8 +98,8 @@ Output a structured report:
 ### Summary: {passed}/{total} components passing — Overall: {sum}/{ total×16}
 
 {If any component scores ≤8: "⚠ Component {name} needs attention — score below 50%."}
-{If any failures: "Run /medical-protocol:customize to update {component} calculation logic."}
-Re-run /medical-protocol:medical-audit after fixes to verify.
+{If any failures: "Run /medical-protocol:modify to update {component} calculation logic."}
+Re-run /medical-protocol:calc-audit after fixes to verify.
 ```
 
 ## NEVER

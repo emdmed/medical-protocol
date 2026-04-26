@@ -16,11 +16,11 @@
 | nephrology | CKD anemia, CKD-MBD, cardio-metabolic panels |
 | sepsis | SOFA, qSOFA, septic shock, hour-1 bundle |
 | dashboard | Combined overview of multiple tools |
-| customize | Modify layout, add/remove fields |
+| modify | Modify layout, add/remove fields |
 | troubleshoot | Fix errors, blank screens, broken UI |
 | test | Verify calculations and run QA |
-| cli | Quick terminal-based calculations |
-| start-protocol | Configure doctor preferences and specialty |
+| calc | Quick terminal-based calculations |
+| preferences | Configure doctor preferences and specialty |
 | protocol-audit | Audit protocol quality and compliance |
 
 ---

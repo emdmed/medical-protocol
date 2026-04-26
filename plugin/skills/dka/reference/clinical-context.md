@@ -16,6 +16,6 @@ Read the file and adapt:
 
 Proceed normally with default settings. Do NOT force the doctor through onboarding — it's optional and non-blocking.
 
-After the workflow completes (end of Phase 4), mention once: "Tip: Run /medical-protocol:start-protocol to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
+After the workflow completes (end of Phase 4), mention once: "Tip: Run /medical-protocol:preferences to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
 The context file is a background configuration — no need to discuss it with the doctor unless they ask about preferences or units.

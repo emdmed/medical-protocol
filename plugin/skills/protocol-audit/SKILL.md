@@ -84,9 +84,9 @@ For each finding, map to the skill that can fix it:
 
 | Finding Type | Recommendation |
 |-------------|---------------|
-| Missing component feature | "Run /medical-protocol:customize to add {feature}" |
+| Missing component feature | "Run /medical-protocol:modify to add {feature}" |
 | Component not installed | "Run /medical-protocol:{skill-name} to add {component}" |
-| Accessibility issue | "Run /medical-protocol:customize to fix {issue}" |
+| Accessibility issue | "Run /medical-protocol:modify to fix {issue}" |
 | Clinical logic error | "Update {component} {specific file}" |
 
 ## NEVER

@@ -13,7 +13,7 @@ Read and follow: reference/clinical-context.md
 
 Before anything else, check if the current project already has components installed (e.g., `components/vital-signs/`, `components/acid-base/`, etc.):
 
-- If the doctor asks for something that's already installed, route to the **customize** workflow — do not re-install components.
+- If the doctor asks for something that's already installed, route to the **modify** workflow — do not re-install components.
 - If the doctor asks for something new that doesn't exist yet, proceed below.
 - Never re-scaffold the project if it already has a working setup.
 
@@ -37,19 +37,19 @@ Use the classification table to match the doctor's request to a domain, then rou
 
 | Domain | Route to |
 |---|---|
-| **vital-signs** | `../vitals/SKILL.md` |
+| **vital-signs** | `../vital-signs/SKILL.md` |
 | **acid-base** | `../acid-base/SKILL.md` |
 | **bmi** | `../bmi/SKILL.md` |
 | **water-balance** | `../water-balance/SKILL.md` |
 | **pafi** | `../pafi/SKILL.md` |
 | **dka** | `../dka/SKILL.md` |
 | **dashboard** | `../dashboard/SKILL.md` |
-| **customize** | `../customize/SKILL.md` |
+| **modify** | `../modify/SKILL.md` |
 | **troubleshoot** | `../troubleshoot/SKILL.md` |
-| **cli** | `../cli/SKILL.md` |
-| **start-protocol** | `../start-protocol/SKILL.md` |
+| **calc** | `../calc/SKILL.md` |
+| **preferences** | `../preferences/SKILL.md` |
 | **protocol-audit** | `../protocol-audit/SKILL.md` |
-| **medical-audit** | `../medical-audit/SKILL.md` |
+| **calc-audit** | `../calc-audit/SKILL.md` |
 
 ### Domains routed via workflow file
 
