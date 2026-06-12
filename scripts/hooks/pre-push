@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Pre-push gate: block pushes that introduce core lib/ ↔ medprotocol-ui drift.
+#
+# Activated via a committed hooks path (see scripts/hooks/install.sh), so it
+# travels with the repo. Skips automatically when the medprotocol-ui sibling
+# repo isn't checked out. Bypass in a pinch with: git push --no-verify
+#
+# Point at a non-default UI location with:  MEDPROTOCOL_UI_DIR=/path git push
+
+if ! node scripts/drift-check.js; then
+  echo ""
+  echo "✗ pre-push blocked: core lib/ and the medprotocol-ui copies have drifted."
+  echo "  Reconcile or acknowledge the flagged functions, then push again."
+  echo "  (bypass: git push --no-verify)"
+  exit 1
+fi

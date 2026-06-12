@@ -1,6 +1,6 @@
 # Medical Protocol
 
-AI-agent-driven clinical tools — validated calculation logic, a terminal CLI, and workflows for Claude Code. Open source, privacy-first, 801 tests.
+AI-agent-driven clinical tools — validated calculation logic, a terminal CLI, and workflows for Claude Code. Open source, privacy-first, 907 tests.
 
 ## Quick Start
 
@@ -99,7 +99,7 @@ Three parts: **this repo** (workflows, plugin, `lib/` logic, CLI), **medprotocol
 ## Tests
 
 ```bash
-npm test                              # Run all 801 tests (23 files)
+npm test                              # Run all 907 tests (26 files)
 npx vitest run tests/acid-base/       # Run a single test directory
 npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
 npm run test:watch                    # Watch mode
@@ -112,7 +112,7 @@ Covers: extreme values, negative inputs, triple acid-base disorders, zero diviso
 1. Fork the repo
 2. Create a feature branch
 3. Add tests for any new clinical logic in `tests/`
-4. Run `npm test` — all 801 tests must pass
+4. Run `npm test` — all 907 tests must pass
 5. Submit a PR
 
 New clinical modules need three things:
