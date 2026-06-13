@@ -43,7 +43,8 @@ export function copyFile(src: string, dest: string): void {
   const destDir = path.dirname(dest);
   fs.mkdirSync(destDir, { recursive: true });
   fs.copyFileSync(src, dest);
-  if (dest.endsWith(".sh")) {
+  // Executable bit only matters on Unix; chmod is a harmless no-op on Windows.
+  if (dest.endsWith(".sh") || dest.endsWith(".mjs")) {
     fs.chmodSync(dest, 0o755);
   }
 }
@@ -66,14 +67,14 @@ export function symlinkDir(target: string, linkPath: string): void {
   const parent = path.dirname(linkPath);
   fs.mkdirSync(parent, { recursive: true });
   if (fs.existsSync(linkPath)) {
-    const stat = fs.lstatSync(linkPath);
-    if (stat.isSymbolicLink()) {
-      fs.unlinkSync(linkPath);
+    if (isLink(linkPath)) {
+      removeLink(linkPath);
     } else {
       throw new Error(`${linkPath} already exists and is not a symlink. Remove it first or use --force.`);
     }
   }
-  fs.symlinkSync(target, linkPath, "dir");
+  // On Windows, directory symlinks require admin/Developer Mode, but junctions do not.
+  fs.symlinkSync(target, linkPath, process.platform === "win32" ? "junction" : "dir");
 }
 
 export function symlinkFile(target: string, linkPath: string): void {
@@ -86,7 +87,16 @@ export function symlinkFile(target: string, linkPath: string): void {
   } catch {
     // doesn't exist, fine
   }
-  fs.symlinkSync(target, linkPath, "file");
+  // File symlinks need privilege on Windows; fall back to a plain copy when blocked.
+  try {
+    fs.symlinkSync(target, linkPath, "file");
+  } catch (e) {
+    if (process.platform === "win32" && (e as NodeJS.ErrnoException).code === "EPERM") {
+      fs.copyFileSync(target, linkPath);
+    } else {
+      throw e;
+    }
+  }
 }
 
 export function cloneOrPullRepo(sourceDir: string): { cloned: boolean } {
@@ -116,11 +126,27 @@ export function cloneOrPullRepo(sourceDir: string): { cloned: boolean } {
   return { cloned: true };
 }
 
-export function isSymlink(filePath: string): boolean {
+// Treats both POSIX symlinks and Windows junctions as links. lstat().isSymbolicLink()
+// returns false for junctions, so we probe with readlink (throws on real files/dirs).
+export function isLink(filePath: string): boolean {
   try {
-    return fs.lstatSync(filePath).isSymbolicLink();
+    fs.readlinkSync(filePath);
+    return true;
   } catch {
     return false;
+  }
+}
+
+// Back-compat alias used by check/update commands.
+export const isSymlink = isLink;
+
+// Removes a symlink or junction. unlink handles symlinks (and junctions on modern
+// Node/Windows); rmdir is the fallback for junctions on older runtimes.
+export function removeLink(linkPath: string): void {
+  try {
+    fs.unlinkSync(linkPath);
+  } catch {
+    fs.rmdirSync(linkPath);
   }
 }
 

@@ -1,6 +1,6 @@
 # Hook State Markers
 
-The `qa-reminder.sh` Stop hook uses marker files in `.claude/hooks-state/` to track session progress. Skills **must** create these markers for QA reminders to work:
+The `qa-reminder.mjs` Stop hook uses marker files in `.claude/hooks-state/` to track session progress. Skills **must** create these markers for QA reminders to work:
 
 | Marker file | Set by | Purpose |
 |---|---|---|
