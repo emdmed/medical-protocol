@@ -14,6 +14,8 @@ import {
   symlinkDir,
   symlinkFile,
   cloneOrPullRepo,
+  isLink,
+  removeLink,
 } from "../files";
 import { hashFile, writeManifest, readManifest, type FileManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
@@ -153,9 +155,8 @@ function installLinked(baseDir: string, sourcePath: string | undefined, force: b
 
   // Remove existing skills dir if force
   if (fs.existsSync(skillsDir) && force) {
-    const stat = fs.lstatSync(skillsDir);
-    if (stat.isSymbolicLink()) {
-      fs.unlinkSync(skillsDir);
+    if (isLink(skillsDir)) {
+      removeLink(skillsDir);
     } else {
       fs.rmSync(skillsDir, { recursive: true });
     }
@@ -257,8 +258,8 @@ function installCopy(baseDir: string, force: boolean, json: boolean): void {
   let totalFiles = 0;
 
   // Remove symlink if switching from link to copy mode
-  if (fs.existsSync(skillsDir) && fs.lstatSync(skillsDir).isSymbolicLink()) {
-    fs.unlinkSync(skillsDir);
+  if (fs.existsSync(skillsDir) && isLink(skillsDir)) {
+    removeLink(skillsDir);
   }
 
   // Copy skills

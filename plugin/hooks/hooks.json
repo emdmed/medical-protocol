@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/privacy-guard.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/privacy-guard.mjs\"",
             "timeout": 5
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/track-workflow.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/track-workflow.mjs\"",
             "timeout": 3
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/qa-reminder.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/qa-reminder.mjs\"",
             "timeout": 5
           }
         ]

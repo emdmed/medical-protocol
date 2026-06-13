@@ -249,11 +249,11 @@ skill.)
 
 | Hook | Event | Behavior |
 |------|-------|----------|
-| `privacy-guard.sh` | PreToolUse (Bash) | **Denies** outbound-data commands: `git push`, `npm/yarn/pnpm publish`, `scp/sftp/ftp`, `nc/netcat`, `rsync` to remote, `curl`/`wget`/`httpie` with data-sending methods, `docker push`, non-local `ssh`, base64/env piped to network. Allows GET, local dev, git add/commit, tsc. |
-| `track-workflow.sh` | PostToolUse (Bash) | When a workflow is active, sets marker files in `.claude/hooks-state/`: `.qa_started` (on tweakcn/shadcn/tsc/eslint), `.dev_server_up` (on `npm run dev`). |
-| `qa-reminder.sh` | Stop | If a workflow ran but QA/dev-server markers are missing, **blocks** stop and instructs the agent to finish the Quality Checklist + start dev server. On success, clears the state dir. |
+| `privacy-guard.mjs` | PreToolUse (Bash) | **Denies** outbound-data commands: `git push`, `npm/yarn/pnpm publish`, `scp/sftp/ftp`, `nc/netcat`, `rsync` to remote, `curl`/`wget`/`httpie` with data-sending methods, `docker push`, non-local `ssh`, base64/env piped to network. Allows GET, local dev, git add/commit, tsc. |
+| `track-workflow.mjs` | PostToolUse (Bash) | When a workflow is active, sets marker files in `.claude/hooks-state/`: `.qa_started` (on tweakcn/shadcn/tsc/eslint), `.dev_server_up` (on `npm run dev`). |
+| `qa-reminder.mjs` | Stop | If a workflow ran but QA/dev-server markers are missing, **blocks** stop and instructs the agent to finish the Quality Checklist + start dev server. On success, clears the state dir. |
 
-`hooks.json` wires the three matchers; `settings.json` carries plugin settings.
+The hooks are dependency-free Node (`.mjs`) scripts — no bash/jq/grep — so they run identically on Windows, macOS, and Linux. `hooks.json` invokes each via `node "$CLAUDE_PROJECT_DIR/.claude/hooks/<name>.mjs"`; `settings.json` carries plugin settings.
 
 ---
 
@@ -331,7 +331,7 @@ Then: `version:bump` (all files) → lockfile sync → per-target `build` →
 
 - **All patient data stays local.** No production deps, no telemetry, local
   storage only in doctor projects.
-- **Enforced at the tool layer**, not by convention: `privacy-guard.sh` denies
+- **Enforced at the tool layer**, not by convention: `privacy-guard.mjs` denies
   any Bash command that could exfiltrate data (see §7.4). This is why
   `npm publish` and `git push` are blocked inside doctor projects — release from
   this repo uses the gated scripts in §9 instead.
