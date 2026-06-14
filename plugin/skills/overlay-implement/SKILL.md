@@ -22,6 +22,10 @@ lands until the doctor approves.
 1. Run `npx medprotocol overlay --drain --json` to claim pending work orders.
 2. Keep only orders with `"action": "implement"`. If none, tell the doctor to select a region in
    their app and choose Implement, then stop.
+3. **Apply fast-path:** if a drained order has `"approved": true` **and** a staged shadow already
+   exists under `.medprotocol/staged/` (the doctor clicked **Apply** in the overlay), skip Phases 2–4
+   — go straight to Phase 5: land that staged diff into source, remove the shadow, mark `done`, and
+   update `result` to say it was applied. Do **not** re-classify or re-stage.
 
 ## Phase 2: Classify the selection (infer, then confirm in chat)
 

@@ -8,7 +8,7 @@ not a registry id — the overlay works on any app, including ones built without
 
 ```jsonc
 {
-  "action": "audit",                    // "audit" | "implement"
+  "action": "audit",                    // "audit" | "implement" | "add"
   "selector": "main > section:nth-of-type(2) > div:nth-of-type(1)", // CSS path to the selected node
   "tag": "div",                         // tagName of the selection
   "classes": "rounded border p-4",      // class attribute (may be null)

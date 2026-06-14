@@ -2,13 +2,14 @@
 
 The dev overlay exists to **retrofit medical protocol into apps built without it**. It is a thin
 selector: the doctor hovers **any** element on **any** page, selects it, and chooses to **Audit** that
-region or **Implement** it with medical protocol. The overlay captures the selection as DOM
-descriptors — a CSS selector + `outerHTML` + text — and records the doctor's intent. It **never runs
-clinical logic**. Intent lands as one JSON file per selection in the project's queue directory; the
-CLI bridge drains the queue and plugin skills act on each work order.
+region, **Implement** it with medical protocol, or **Add** a brand-new component there from a
+free-text brief they type into the overlay. The overlay captures the selection as DOM descriptors — a
+CSS selector + `outerHTML` + text — and records the doctor's intent. It **never runs clinical logic**.
+Intent lands as one JSON file per selection in the project's queue directory; the CLI bridge drains
+the queue and plugin skills act on each work order.
 
 ```
-overlay selection → POST /queue → .medprotocol/queue/<ts>-<slug>.json → `npx medprotocol overlay --drain` → /medical-protocol:overlay-audit | overlay-implement
+overlay selection → POST /queue → .medprotocol/queue/<ts>-<slug>.json → `npx medprotocol overlay --drain` → /medical-protocol:overlay-audit | overlay-implement | overlay-add
 ```
 
 The overlay does **not** require the target app to use medical protocol. The `data-medprotocol-*`
@@ -40,13 +41,20 @@ tag idempotently (marked with `data-medprotocol-overlay`). Hand-paste is the doc
 
 The `--serve` process exposes:
 - `GET /overlay.js` — the selector client: hover any element → highlight (press ↑ to widen to the
-  parent) → action menu (Audit / Implement / Copy selector).
+  parent) → action menu (Audit / Implement / Add a component… / Copy selector). "Add" opens a textarea
+  where the doctor types what to build; the brief rides along as the work order's `prompt`.
 - `POST /queue` — accepts a work order from the browser and writes it to `.medprotocol/queue/`.
-- `GET /status` — returns each work order's `{ file, action, selector, status }`. The client polls
-  this and pins a **live progress marker** over the selected element: a spinner ("queued…" →
-  "auditing…/implementing…" as the order moves `pending → processing`) that turns into a green "✓"
-  when the order reaches `done`, then fades. This is the doctor's feedback that the agent is working
-  — so the Audit/Implement skills should set `status: done` promptly when they finish.
+- `GET /status` — returns each work order's `{ file, action, selector, status, hasResult }`. The client
+  polls this and pins a **live progress marker** over the selected element: a spinner ("queued…" →
+  "auditing…/implementing…/adding…" as the order moves `pending → processing`) that turns into a green
+  "✓" when the order reaches `done`. If the order has a result it becomes a clickable "✓ — view" pill;
+  otherwise it fades. So the skills should set `status: done` promptly when they finish.
+- `GET /result?file=…` — the full `result` for one order, plus its `action` and `approved` flag — fetched
+  when the doctor opens the result panel.
+- `POST /approve` `{ file }` — the result panel's **Apply** button. For a staged `add`/`implement` order
+  it sets `approved: true` and re-queues it (`status → pending`) so the matching skill **lands the staged
+  diff** (re-applies, does not re-stage). With `--auto` this also kicks the dispatcher to apply
+  immediately; otherwise the doctor runs the overlay skill in Claude Code to land it.
 
 The script POSTs back to the origin it was loaded from, so the browser→filesystem write seam lives
 entirely in the one CLI process that already owns the queue. Nothing else needs to be installed in
@@ -61,7 +69,7 @@ By default the overlay only **records** intent — a human still runs `/medical-
 drains the order, runs the matching skill, and writes the result back — so the overlay's spinner
 turns into a viewable report with no terminal step. It is **opt-in** (runs Claude unattended, needs
 the `claude` CLI, costs tokens). Runs are debounced: one run drains all pending orders; selections
-that arrive mid-run trigger exactly one follow-up. Implement still only **stages** a diff — the
+that arrive mid-run trigger exactly one follow-up. Implement and Add still only **stage** a diff — the
 approval gate is never bypassed.
 
 ## Queue location
@@ -74,7 +82,8 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 
 ```jsonc
 {
-  "action": "implement",                // REQUIRED — "audit" | "implement"
+  "action": "implement",                // REQUIRED — "audit" | "implement" | "add"
+  "prompt": null,                       // add only — free-text brief: what component to build
   "selector": "main > section:nth-of-type(2) > div:nth-of-type(1)", // CSS path to the node
   "tag": "div",                         // tagName of the selection
   "classes": "rounded border p-4",      // class attribute (may be null)
@@ -86,13 +95,14 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
   "url": "http://localhost:3000/",      // page the selection was made on
   "ts": "2026-06-14T07:46:52.611Z",     // ISO timestamp
   "status": "pending",                  // "pending" | "processing" | "done"
-  "approved": false                     // implement only — approval to apply the staged diff
+  "approved": false                     // implement/add only — approval to apply the staged diff
 }
 ```
 
 | Field | Required | Notes |
 |---|---|---|
-| `action` | yes | `audit` (static, read-only) or `implement` (lease/apply diff). |
+| `action` | yes | `audit` (static, read-only), `implement` (retrofit existing markup, lease/apply diff), or `add` (build a new component from `prompt`, lease/apply diff). |
+| `prompt` | add only | Free-text brief of the component to build. Required when `action: "add"`; ignored otherwise. The selection acts as the placement anchor. |
 | `selector` | yes* | CSS path to the selected node. *POST requires `selector` **or** `html`. |
 | `tag` / `classes` / `text` / `html` | no | Descriptors the skills use to classify the region and locate it in source. `html` is the primary identifier. |
 | `rect` | no | Bounding box at selection time — context only. |
@@ -101,7 +111,7 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 | `url` | no | Where the selection happened — context for the report. |
 | `ts` | yes | ISO timestamp; basis for the filename. |
 | `status` | yes | Lifecycle: `pending` → `processing` (claimed by `--drain`) → `done`. |
-| `approved` | no | Implement only. The overlay's "Apply" action sets `true` to authorize landing the diff. |
+| `approved` | no | Implement/add only. The overlay's "Apply" action sets `true` to authorize landing the diff. |
 
 ## Lifecycle
 
@@ -111,6 +121,7 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 3. **Act** — the matching skill processes the order:
    - **Audit** → classify the selection, locate it in source, **report findings** (read-only), mark `done`.
    - **Implement** → classify, locate, stage a diff (lease/apply); land it only on approval, then mark `done`.
+   - **Add** → classify the `prompt`, locate the anchor, build a new component, stage a diff (lease/apply); land only on approval, then mark `done`.
 4. **Clear** — `npx medprotocol overlay --clear` removes `done` orders.
 
 ## Action semantics
@@ -126,6 +137,15 @@ Classify the selection and **confirm the inferred component in chat**, locate th
 then **stage a diff** that replaces it with the medprotocol component — nothing is written until the
 doctor approves (`approved: true` from the overlay's "Apply", or in-session sign-off). Same lease →
 apply trust model Impeccable uses for live edits. Skill: `/medical-protocol:overlay-implement`.
+
+### Add (lease / apply diff)
+The doctor selects a region and types a **free-text brief** (`prompt`) of a component to build — e.g.
+*"a chronic kidney disease anemia tracker"*. The selection is the **placement anchor**, not the thing
+being replaced. Classify the brief against `classification.md` → registry component(s), **confirm the
+plan in chat**, locate the anchor in source, then **stage a diff** that inserts the newly composed
+component there. Same approval gate as Implement. With `--auto`, a headless Claude run builds it
+unattended (still staging-only). Skill: `/medical-protocol:overlay-add`. **Add builds new capability;
+Implement retrofits existing markup.**
 
 ## Why a queue (not a direct call)
 The overlay runs in the browser; the skills run in Claude Code. The flat-file queue is the decoupling

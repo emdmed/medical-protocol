@@ -10,7 +10,8 @@ const USAGE = `Usage: medprotocol overlay [options]
 The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
 (.medprotocol/queue/) into a dispatch plan naming the skill to run for each
-selection — /medical-protocol:overlay-audit or overlay-implement.
+selection — /medical-protocol:overlay-audit, overlay-implement, or overlay-add
+(the doctor selects a region, types a brief, and Add builds a new component there).
 
 Options:
   --serve                Serve the overlay client (GET /overlay.js) and accept
@@ -37,11 +38,12 @@ Examples:
   medprotocol overlay --watch
   medprotocol overlay --clear`;
 
-type Action = "audit" | "implement";
+type Action = "audit" | "implement" | "add";
 type Status = "pending" | "processing" | "done";
 
 interface WorkOrder {
   action: Action;
+  prompt?: string | null; // free-text brief — required for "add" (what component to build), null otherwise
   selector?: string | null;
   tag?: string | null;
   classes?: string | null;
@@ -65,6 +67,7 @@ interface QueueEntry {
 const SKILL_BY_ACTION: Record<Action, string> = {
   audit: "/medical-protocol:overlay-audit",
   implement: "/medical-protocol:overlay-implement",
+  add: "/medical-protocol:overlay-add",
 };
 
 const readQueue = (dir: string): QueueEntry[] => {
@@ -85,10 +88,14 @@ const readQueue = (dir: string): QueueEntry[] => {
 
 const statusOf = (o: WorkOrder): Status => o.status ?? "pending";
 
+const truncate = (s: string, n: number): string => (s.length > n ? `${s.slice(0, n)}…` : s);
+
 const targetLabel = (o: WorkOrder): string => {
+  // "add" is described by the doctor's free-text brief, not the selected markup.
+  if (o.action === "add" && o.prompt) return `"${truncate(o.prompt.trim(), 56)}"`;
   if (o.suggestedId) return o.suggestedId; // app already uses medprotocol
   const tag = o.tag ? `<${o.tag}>` : "selection";
-  const text = o.text ? ` "${o.text.slice(0, 40)}${o.text.length > 40 ? "…" : ""}"` : "";
+  const text = o.text ? ` "${truncate(o.text, 40)}"` : "";
   return `${tag}${text}`;
 };
 
@@ -120,9 +127,14 @@ const AUTO_PROMPT =
   "A medical-protocol overlay selection was just queued in .medprotocol/queue/. " +
   "Process all pending overlay work orders now, without asking for confirmation: run " +
   "`npx medprotocol overlay --drain --json` to claim them, then for each order run the matching " +
-  "skill — overlay-audit for action \"audit\", overlay-implement for action \"implement\". Write the " +
-  "findings into the work order's `result` field and set `status: done` so the overlay can display " +
-  "them. For implement, stage the diff only — never apply without approval.";
+  "skill — overlay-audit for action \"audit\", overlay-implement for action \"implement\", " +
+  "overlay-add for action \"add\" (build the component described in the order's `prompt` field and " +
+  "stage it into the selected region). Write the findings into the work order's `result` field and " +
+  "set `status: done` so the overlay can display them. For implement and add, stage the diff only — " +
+  "never apply without approval. EXCEPTION: if a drained order already has `approved: true` and a " +
+  "staged diff under .medprotocol/staged/ (the doctor clicked Apply in the overlay), do NOT re-stage — " +
+  "land that staged diff into source, remove the shadow file, then set `status: done` and update " +
+  "`result` to note it was applied.";
 
 // Spawn a headless Claude Code run to process the queue. Debounced: one run drains all pending
 // orders; selections that arrive mid-run trigger exactly one follow-up run.
@@ -212,11 +224,73 @@ const serve = (dir: string, port: number, auto: boolean): void => {
       try {
         const order = JSON.parse(readFileSync(resolved, "utf8")) as WorkOrder & { result?: unknown };
         res.writeHead(200, JSON_HEADER);
-        res.end(JSON.stringify({ result: order.result ?? null, status: statusOf(order as WorkOrder) }));
+        res.end(
+          JSON.stringify({
+            result: order.result ?? null,
+            status: statusOf(order as WorkOrder),
+            action: order.action,
+            approved: !!order.approved,
+          }),
+        );
       } catch {
         res.writeHead(500, JSON_HEADER);
         res.end(JSON.stringify({ error: "could not read result" }));
       }
+      return;
+    }
+
+    // Approve a staged add/implement order from the overlay's "Apply" button. Marks the order
+    // approved and re-queues it (status → pending) so the matching skill lands the staged diff.
+    // With --auto, this also kicks the dispatcher to apply it immediately.
+    if (req.method === "POST" && path === "/approve") {
+      let body = "";
+      req.on("data", (chunk) => {
+        body += chunk;
+        if (body.length > 100_000) req.destroy();
+      });
+      req.on("end", () => {
+        let fileParam = "";
+        try {
+          fileParam = (JSON.parse(body) as { file?: string }).file ?? "";
+        } catch {
+          res.writeHead(400, JSON_HEADER);
+          res.end(JSON.stringify({ error: "invalid JSON" }));
+          return;
+        }
+        const resolved = resolve(fileParam);
+        if (!resolved.startsWith(dir) || !existsSync(resolved)) {
+          res.writeHead(404, JSON_HEADER);
+          res.end(JSON.stringify({ error: "not found" }));
+          return;
+        }
+        let order: WorkOrder;
+        try {
+          order = JSON.parse(readFileSync(resolved, "utf8")) as WorkOrder;
+        } catch {
+          res.writeHead(500, JSON_HEADER);
+          res.end(JSON.stringify({ error: "could not read work order" }));
+          return;
+        }
+        if (order.action !== "implement" && order.action !== "add") {
+          res.writeHead(400, JSON_HEADER);
+          res.end(JSON.stringify({ error: "only implement/add orders can be applied" }));
+          return;
+        }
+        // Approve and re-queue so the skill lands the staged diff (it re-applies rather than re-stages).
+        const record: WorkOrder = { ...order, approved: true, status: "pending" };
+        try {
+          writeFileSync(resolved, JSON.stringify(record, null, 2) + "\n");
+        } catch (err) {
+          res.writeHead(500, JSON_HEADER);
+          res.end(JSON.stringify({ error: `could not approve: ${(err as Error).message}` }));
+          return;
+        }
+        process.stdout.write(`approved (apply) ${dispatchLine(record)}\n`);
+        res.writeHead(200, JSON_HEADER);
+        res.end(JSON.stringify({ ok: true, auto: !!dispatch }));
+        if (dispatch) dispatch();
+        return;
+      });
       return;
     }
 
@@ -235,14 +309,27 @@ const serve = (dir: string, port: number, auto: boolean): void => {
           res.end(JSON.stringify({ error: "invalid JSON" }));
           return;
         }
-        if ((order.action !== "audit" && order.action !== "implement") || (!order.selector && !order.html)) {
+        if (order.action !== "audit" && order.action !== "implement" && order.action !== "add") {
           res.writeHead(400, JSON_HEADER);
-          res.end(JSON.stringify({ error: 'work order needs "action" ("audit"|"implement") and a "selector" or "html"' }));
+          res.end(JSON.stringify({ error: 'work order needs "action" ("audit"|"implement"|"add")' }));
+          return;
+        }
+        if (!order.selector && !order.html) {
+          res.writeHead(400, JSON_HEADER);
+          res.end(JSON.stringify({ error: 'work order needs a "selector" or "html" anchor' }));
+          return;
+        }
+        if (order.action === "add" && !order.prompt?.trim()) {
+          res.writeHead(400, JSON_HEADER);
+          res.end(JSON.stringify({ error: '"add" work order needs a non-empty "prompt" describing the component to build' }));
           return;
         }
         const ts = order.ts || new Date().toISOString();
         const record: WorkOrder = { ...order, ts, status: "pending" };
-        const slug = (order.suggestedId || order.tag || "selection").replace(/[^a-z0-9-]/gi, "").slice(0, 24) || "selection";
+        const slug =
+          order.action === "add"
+            ? "add"
+            : (order.suggestedId || order.tag || "selection").replace(/[^a-z0-9-]/gi, "").slice(0, 24) || "selection";
         const file = join(dir, `${ts.replace(/[:.]/g, "-")}-${slug}.json`);
         try {
           mkdirSync(dir, { recursive: true }); // dir may have been cleared/removed since startup
