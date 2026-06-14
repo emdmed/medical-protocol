@@ -19,7 +19,8 @@ import {
 } from "../files";
 import { hashFile, writeManifest, readManifest, type FileManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
-import { isInteractive, selectInstallMode, confirmAlreadyInstalled, promptSourcePath } from "../prompts";
+import { isInteractive, selectInstallMode, confirmAlreadyInstalled, promptSourcePath, confirmInstallAgentBrowser } from "../prompts";
+import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -30,6 +31,7 @@ interface InstallOptions {
   source?: string;
   json?: boolean;
   yes?: boolean;
+  agentBrowser?: boolean;
 }
 
 export async function run(opts: InstallOptions): Promise<void> {
@@ -102,7 +104,45 @@ async function runInteractive(opts: InstallOptions): Promise<void> {
     }
   }
 
+  await promptAndInstallAgentBrowser();
+
   p.outro(`Done! Plugin v${VERSION} installed`);
+}
+
+// agent-browser is an external CLI used by the browser-QA workflow. It's optional —
+// the plugin works without it, so install failures are non-fatal.
+function isAgentBrowserInstalled(): boolean {
+  try {
+    execSync("agent-browser --version", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function installAgentBrowser(silent: boolean): void {
+  const stdio = silent ? "ignore" : "inherit";
+  execSync("npm install -g agent-browser", { stdio });
+  // First run downloads the bundled Chrome.
+  execSync("agent-browser install", { stdio });
+}
+
+async function promptAndInstallAgentBrowser(): Promise<void> {
+  if (isAgentBrowserInstalled()) {
+    p.log.info("agent-browser already installed — browser QA enabled.");
+    return;
+  }
+  const wants = await confirmInstallAgentBrowser();
+  if (!wants) return;
+  const s = p.spinner();
+  s.start("Installing agent-browser (also downloads a browser)...");
+  try {
+    installAgentBrowser(true);
+    s.stop(pc.green("agent-browser installed"));
+  } catch (e) {
+    s.error(pc.yellow("Could not install agent-browser — skipping (the plugin works without it)"));
+    p.log.warn((e as Error).message);
+  }
 }
 
 function runNonInteractive(opts: InstallOptions): void {
@@ -123,6 +163,17 @@ function runNonInteractive(opts: InstallOptions): void {
     installLinked(baseDir, opts.source, !!opts.force, !!opts.json);
   } else {
     installCopy(baseDir, !!opts.force, !!opts.json);
+  }
+
+  // Optional browser-QA tool — only when explicitly requested via --agent-browser.
+  if (opts.agentBrowser && process.exitCode !== 1 && !isAgentBrowserInstalled()) {
+    try {
+      installAgentBrowser(!!opts.json);
+    } catch (e) {
+      if (!opts.json) {
+        process.stderr.write(formatError(`agent-browser install failed (skipped): ${(e as Error).message}`) + "\n");
+      }
+    }
   }
 }
 

@@ -8,7 +8,22 @@
 
 1. `agent-browser --version` — if fails, **skip entire workflow**
 2. Dev server must be responding (main protocol runs `npx wait-on` before this)
-3. `agent-browser open http://localhost:3000` — if fails after 2 retries, skip
+3. Open the app. **Prefer connecting to an already-running Chrome** — the dev usually starts Chrome with remote debugging on port **9222**:
+
+   ```bash
+   agent-browser connect 9222            # connect once; later commands need no flag
+   agent-browser open http://localhost:3000
+   ```
+
+   - If `connect` fails (no Chrome on 9222), fall back to launching a fresh browser:
+     ```bash
+     agent-browser open http://localhost:3000
+     ```
+   - `agent-browser --auto-connect open http://localhost:3000` also works — it probes common ports (9222, 9229) automatically.
+   - To start Chrome with the port yourself: `google-chrome --remote-debugging-port=9222` (use the platform's Chrome binary, e.g. `chrome` / `chromium`).
+   - If neither connect nor launch works after 2 retries, skip.
+
+> **Note:** `--cdp 9222` can prefix any single command (e.g. `agent-browser --cdp 9222 snapshot -i`) instead of `connect`, but `connect` is simpler for a full QA pass.
 
 ---
 
@@ -89,4 +104,5 @@ Run only for built components:
 
 ## Cleanup
 
-Always run: `agent-browser close`
+- **Launched a fresh browser:** run `agent-browser close`.
+- **Connected to an existing Chrome (port 9222):** do **not** run `agent-browser close` — that would close the dev's own browser. Just leave it; close only the QA tab if needed.

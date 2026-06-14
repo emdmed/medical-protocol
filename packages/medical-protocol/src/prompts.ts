@@ -38,6 +38,15 @@ export async function promptSourcePath(): Promise<string | null> {
   return result || null;
 }
 
+export async function confirmInstallAgentBrowser(): Promise<boolean> {
+  const result = await p.confirm({
+    message: "Also install agent-browser? (enables automated browser QA of your clinical UI)",
+    initialValue: true,
+  });
+  if (p.isCancel(result)) return false;
+  return result;
+}
+
 export async function confirmOverwriteModified(files: string[]): Promise<boolean> {
   const list = files.map((f) => `  - ${f}`).join("\n");
   p.log.warn(`Locally modified files:\n${list}`);

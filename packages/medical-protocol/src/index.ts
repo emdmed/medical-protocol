@@ -18,6 +18,7 @@ program
   .option("--force", "Overwrite existing installation")
   .option("--link", "Use symlinks to a shared repo clone instead of copying")
   .option("--source <path>", "Path to repo clone (default: ~/.medical-protocol)")
+  .option("--agent-browser", "Also install agent-browser (browser-QA tool) globally")
   .option("--json", "Output as JSON")
   .action(async (opts) => {
     const yes = program.opts().yes;
