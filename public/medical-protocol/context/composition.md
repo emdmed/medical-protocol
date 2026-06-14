@@ -164,6 +164,41 @@ function Dashboard() {
 
 ---
 
+## Overlay tagging contract (`data-medprotocol-*`) — optional fast-path
+
+> **The overlay does not require these tags.** Its job is to retrofit medical protocol into apps
+> built *without* it, so by default it selects **any** DOM element and captures a CSS selector +
+> `outerHTML` for the agent to classify (see `context/overlay.md`). These attributes are an
+> **optional fast-path**: when an app *is* already medprotocol-based, they let Audit/Implement skip
+> classification and resolve straight to the registry id + source. Emit them when you can; nothing
+> breaks when they're absent.
+
+The dev overlay (served by `npx medprotocol overlay --serve`) lets a doctor hover a rendered element, select it, and queue an **Audit** or **Implement** work order. When present, these attributes are read off the selected node (or its nearest tagged ancestor):
+
+```html
+<div
+  data-medprotocol-id="bmi"                  <!-- optional: registry id (see components.md) -->
+  data-medprotocol-source="bmi/bmi-card.tsx" <!-- optional: source path for Audit/Implement -->
+  data-medprotocol-instance="bmi-1"          <!-- optional: disambiguate multiple instances -->
+>
+```
+
+| Attribute | Meaning |
+|---|---|
+| `data-medprotocol-id` | One of the registry ids in `components.md` (`patient`, `vital-signs`, `acid-base`, `bmi`, `pafi`, `dka`, `cardiology`, `ckd`, `nephrology`, `sepsis`, `diabetes-dx`, `dashboard`, …). Lets the skills skip classification and resolve straight to the module. Surfaces in the work order as `suggestedId`. |
+| `data-medprotocol-source` | Relative source path (under `components/`) so Audit/Implement can open the exact file without searching. Surfaces as `source`. |
+| `data-medprotocol-instance` | Stable id to disambiguate multiple instances of the same component on one page. |
+
+**Rules:**
+- All three are **optional**. Without them the overlay still selects the element and captures a CSS selector + `outerHTML`; the skills classify from that. With them, the skills take the fast-path.
+- When present, put `data-medprotocol-id` on the **outermost** rendered element so the overlay's nearest-ancestor lookup resolves to the whole component.
+- `data-medprotocol-id`, if set, should match a registry id exactly — the core↔UI drift-check (`scripts/drift-check.js`) treats an unknown id as a contract violation.
+- Attributes are inert in production; the overlay only mounts in dev. They add no runtime behavior, just a selection fast-path.
+
+Every selection (tagged or not) writes a work order to `.medprotocol/queue/` — see `context/overlay.md` for the queue schema and the Audit/Implement semantics.
+
+---
+
 ## Gotchas
 
 - **Group installs**: For nephrology dashboards, use `npx medical-ui-cli add nephrology` (group) to install both `ckd/` and `nephrology/` folders at once. Sub-component aliases (`anemia`, `phospho-calcic`, `cardio-metabolic`) install just the `nephrology/` folder.
