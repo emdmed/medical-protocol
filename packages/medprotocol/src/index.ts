@@ -17,6 +17,7 @@ Commands:
   sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
+  overlay          Drain the dev overlay work-order queue (.medprotocol/queue/)
 
 Global options:
   --json           Output as JSON (available on all commands)
@@ -44,7 +45,8 @@ Examples:
   medprotocol diabetes t1d-stage --autoantibodies 3 --a1c 5.9
   medprotocol diabetes t1-vs-t2 --age 25 --bmi 22 --autoantibodies --c-peptide 150
   medprotocol diabetes t2d-screen --age 40 --bmi 28 --hypertension
-  medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160`;
+  medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160
+  medprotocol overlay --drain`;
 
 const command = process.argv[2];
 const commandArgs = process.argv.slice(3);
@@ -70,6 +72,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   sepsis: () => import("./commands/sepsis"),
   ckd: () => import("./commands/ckd"),
   diabetes: () => import("./commands/diabetes"),
+  overlay: () => import("./commands/overlay"),
 };
 
 const loader = commands[command];
