@@ -1,6 +1,6 @@
 {
   "name": "medprotocol-core",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "Medical protocol workflows, calculation logic, and CLI for Claude Code",
   "workspaces": [
     "packages/medprotocol",

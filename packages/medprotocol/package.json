@@ -1,6 +1,6 @@
 {
   "name": "medprotocol",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "Medical calculations from the terminal — for AI agents and clinicians",
   "license": "MIT",
   "bin": {
