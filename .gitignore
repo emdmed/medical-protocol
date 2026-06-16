@@ -9,3 +9,5 @@ docs/
 sync_check.md
 .orchestration/
 .orchestration
+# Dev overlay work-order queue — holds captured page markup/text (potential PHI). Never commit.
+.medprotocol/

@@ -50,7 +50,13 @@ The `--serve` process exposes:
   "✓" when the order reaches `done`. If the order has a result it becomes a clickable "✓ — view" pill;
   otherwise it fades. So the skills should set `status: done` promptly when they finish.
 - `GET /result?file=…` — the full `result` for one order, plus its `action` and `approved` flag — fetched
-  when the doctor opens the result panel.
+  when the doctor opens the result panel. The panel renders the `report` markdown and makes any
+  recommended skill **runnable** (see [Triggering recommended skills](#triggering-recommended-skills-from-the-result-panel)).
+- `POST /run` `{ file, skill, prompt? }` — a **skill trigger** from the result panel. The doctor clicks a
+  skill the report recommended; the server reads the originating order, **inherits its selection anchor**
+  (selector/html/source/url), and mints a new `skill` work order that re-processes that same region with
+  the named skill. `skill` is validated against the `medical-protocol:` namespace. With `--auto` it kicks
+  the dispatcher immediately; otherwise the doctor runs the overlay queue in Claude Code to process it.
 - `POST /approve` `{ file }` — the result panel's **Apply** button. For a staged `add`/`implement` order
   it sets `approved: true` and re-queues it (`status → pending`) so the matching skill **lands the staged
   diff** (re-applies, does not re-stage). With `--auto` this also kicks the dispatcher to apply
@@ -82,7 +88,8 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 
 ```jsonc
 {
-  "action": "implement",                // REQUIRED — "audit" | "implement" | "add"
+  "action": "implement",                // REQUIRED — "audit" | "implement" | "add" | "skill"
+  "skill": null,                        // skill only — slash command to run (minted by POST /run)
   "prompt": null,                       // add only — free-text brief: what component to build
   "selector": "main > section:nth-of-type(2) > div:nth-of-type(1)", // CSS path to the node
   "tag": "div",                         // tagName of the selection
@@ -101,8 +108,9 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 
 | Field | Required | Notes |
 |---|---|---|
-| `action` | yes | `audit` (static, read-only), `implement` (retrofit existing markup, lease/apply diff), or `add` (build a new component from `prompt`, lease/apply diff). |
-| `prompt` | add only | Free-text brief of the component to build. Required when `action: "add"`; ignored otherwise. The selection acts as the placement anchor. |
+| `action` | yes | `audit` (static, read-only), `implement` (retrofit existing markup, lease/apply diff), `add` (build a new component from `prompt`, lease/apply diff), or `skill` (re-run a report-recommended skill on the same selection — minted by `POST /run`, never posted by the browser directly). |
+| `skill` | skill only | Slash command to run, e.g. `/medical-protocol:overlay-implement`. Set by `POST /run`; validated to the `medical-protocol:` namespace. |
+| `prompt` | add only* | Free-text brief of the component to build. Required when `action: "add"`; for `skill` it is an optional extra brief; ignored otherwise. The selection acts as the placement anchor. |
 | `selector` | yes* | CSS path to the selected node. *POST requires `selector` **or** `html`. |
 | `tag` / `classes` / `text` / `html` | no | Descriptors the skills use to classify the region and locate it in source. `html` is the primary identifier. |
 | `rect` | no | Bounding box at selection time — context only. |
@@ -146,6 +154,32 @@ plan in chat**, locate the anchor in source, then **stage a diff** that inserts 
 component there. Same approval gate as Implement. With `--auto`, a headless Claude run builds it
 unattended (still staging-only). Skill: `/medical-protocol:overlay-add`. **Add builds new capability;
 Implement retrofits existing markup.**
+
+## Triggering recommended skills from the result panel
+
+Audit/implement/add reports routinely recommend a next step — *"Run `/medical-protocol:overlay-implement`
+to replace this region"* or *"Run `/medical-protocol:modify` to fix …"*. The result panel makes those
+recommendations **actionable** instead of copy-paste:
+
+- **Inline triggers** — every `/medical-protocol:<skill>` mention in the rendered `report` becomes a
+  clickable chip (code samples inside fenced/inline code are left untouched).
+- **Suggested actions** — a skill may also attach a structured `result.suggestions` array; each entry
+  renders as a "Run" button under the report, and can carry a `label` and a `prompt` (brief):
+
+  ```jsonc
+  "result": {
+    "report": "## Overlay Audit — bmi (14/20)\n…\nRecommended: Run /medical-protocol:overlay-implement …",
+    "suggestions": [
+      { "skill": "/medical-protocol:overlay-implement", "label": "Replace with the bmi component" },
+      { "skill": "/medical-protocol:modify", "label": "Fix the missing validation", "prompt": "add height/weight range guards" }
+    ]
+  }
+  ```
+
+Clicking either kind `POST`s to `/run`, which mints a `skill` work order on the **same selection**. The
+loop is identical to the rest of the overlay: with `--auto` a headless run processes it; otherwise the
+doctor runs the overlay queue in Claude Code. Skills that build/edit files still **stage** a diff behind
+the approval gate — the panel shows an **Apply** button for a staged `skill` result just like `implement`/`add`.
 
 ## Why a queue (not a direct call)
 The overlay runs in the browser; the skills run in Claude Code. The flat-file queue is the decoupling

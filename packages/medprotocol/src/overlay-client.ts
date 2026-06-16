@@ -165,6 +165,15 @@ export const OVERLAY_CLIENT_JS = `(function () {
     '.mpo-panel-body a{color:#22d3ee}',
     '.mpo-score{display:inline-flex;align-items:center;gap:8px;margin:0 0 12px;padding:5px 11px;background:#0d2433;border:1px solid #164e63;border-radius:5px;font:700 12px/1 ' + MONO + ';letter-spacing:.04em;color:#67e8f9}',
     '.mpo-score .mpo-score-k{color:#5b7d8f;font-weight:600}',
+    // Inline skill trigger: a /medical-protocol:x mention in the report, clickable to re-run it here.
+    '.mpo-skill{display:inline;background:#0d2433;color:#7dd3fc;border:1px solid #164e63;border-radius:3px;padding:1px 6px;margin:0 1px;font:600 11.5px/1.4 ' + MONO + ';cursor:pointer}',
+    '.mpo-skill:hover{background:#123246;border-color:#22d3ee;color:#bff0ff}',
+    // Suggested-actions row: structured skill triggers the report attached to its result.
+    '.mpo-suggest{margin-top:16px;padding-top:13px;border-top:1px solid #133243;display:flex;flex-wrap:wrap;gap:8px;align-items:center}',
+    '.mpo-suggest-head{width:100%;color:#67e8f9;font:600 11px/1.4 ' + MONO + ';letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}',
+    '.mpo-suggest-btn{display:inline-flex;align-items:center;gap:6px;background:#0891b2;color:#04181f;border:1px solid #22d3ee;border-radius:5px;padding:6px 11px;cursor:pointer;font:600 12px/1 ' + SANS + '}',
+    '.mpo-suggest-btn:hover{background:#0aa5cb}',
+    '.mpo-suggest-btn .mpo-ic{color:#04181f}',
     // Compose panel: free-text "add a component here" brief the doctor types for the agent.
     '.mpo-compose-body{padding:13px 16px 4px;display:flex;flex-direction:column;gap:9px}',
     '.mpo-compose-target{font:600 10.5px/1.4 ' + MONO + ';letter-spacing:.02em;color:#5b7d8f}',
@@ -204,6 +213,13 @@ export const OVERLAY_CLIENT_JS = `(function () {
     close.addEventListener('click', closePanel);
     head.appendChild(panelTitle); head.appendChild(panelApply); head.appendChild(dismiss); head.appendChild(close);
     panel.appendChild(head); panel.appendChild(panelBody);
+    // Delegate clicks on any skill trigger inside the report (inline chips + the suggested-actions row).
+    panelBody.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest ? e.target.closest('.mpo-skill,.mpo-suggest-btn') : null;
+      if (!b || !panelOrder) return;
+      e.preventDefault();
+      runSkill(panelOrder, b.getAttribute('data-skill'), b.getAttribute('data-prompt'));
+    });
   })();
 
   // Compose panel (singleton) — typing a free-text brief to ADD a new component into the selected area.
@@ -415,6 +431,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
   function verbs(action) {
     if (action === 'audit') return { queued: 'queued audit…', ing: 'auditing…', done: 'audited' };
     if (action === 'add') return { queued: 'queued add…', ing: 'adding…', done: 'added' };
+    if (action === 'skill') return { queued: 'queued…', ing: 'running…', done: 'ran' };
     return { queued: 'queued implement…', ing: 'implementing…', done: 'implemented' };
   }
 
@@ -488,9 +505,44 @@ export const OVERLAY_CLIENT_JS = `(function () {
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 420);
   }
 
+  // Turn every "/medical-protocol:<skill>" mention in one text node into a clickable trigger chip.
+  function skillChips(text) {
+    var rx = new RegExp('/medical-protocol:[a-z][a-z0-9-]*', 'g');
+    var frag = document.createDocumentFragment();
+    var last = 0, m, hit = false;
+    while ((m = rx.exec(text))) {
+      hit = true;
+      if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'mpo-skill';
+      b.setAttribute('data-skill', m[0]);
+      b.title = 'Run ' + m[0] + ' on this selection';
+      b.textContent = m[0];
+      frag.appendChild(b);
+      last = m.index + m[0].length;
+    }
+    if (!hit) return null;
+    if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    return frag;
+  }
+  // Walk the rendered report's text nodes and linkify skill mentions — skipping code, links, and
+  // existing chips so we never rewrite literal code samples or break markup.
+  function linkifySkills(root) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var nodes = [], n;
+    while ((n = walker.nextNode())) {
+      if (n.parentNode && n.parentNode.closest && n.parentNode.closest('code,pre,a,.mpo-skill')) continue;
+      if (n.nodeValue.indexOf('/medical-protocol:') >= 0) nodes.push(n);
+    }
+    for (var i = 0; i < nodes.length; i++) {
+      var frag = skillChips(nodes[i].nodeValue);
+      if (frag && nodes[i].parentNode) nodes[i].parentNode.replaceChild(frag, nodes[i]);
+    }
+  }
+
   function openResultPanel(t) {
     panelOrder = t;
-    var titleVerb = t.action === 'audit' ? 'Audit' : t.action === 'add' ? 'Add' : 'Implement';
+    var titleVerb = t.action === 'audit' ? 'Audit' : t.action === 'add' ? 'Add' : t.action === 'skill' ? 'Run' : 'Implement';
     panelTitle.textContent = titleVerb + ' — ' + (t.selector || t.file);
     panelBody.textContent = 'Loading…';
     panelApply.style.display = 'none';
@@ -502,14 +554,53 @@ export const OVERLAY_CLIENT_JS = `(function () {
       if (res.score) html += '<div class="mpo-score"><span class="mpo-score-k">SCORE</span>' + escapeHtml(String(res.score)) + '</div>';
       html += (res.report != null ? renderMarkdown(res.report) : '<pre><code>' + escapeHtml(JSON.stringify(res, null, 2)) + '</code></pre>');
       panelBody.innerHTML = html;
+      linkifySkills(panelBody);
+      renderSuggestions(res.suggestions);
       panelBody.scrollTop = 0;
-      // add/implement results are STAGED until approved — offer "Apply" to land the diff from here.
-      if ((d.action === 'add' || d.action === 'implement') && d.approved === false) {
+      // add/implement/skill results are STAGED until approved — offer "Apply" to land the diff from here.
+      if ((d.action === 'add' || d.action === 'implement' || d.action === 'skill') && d.approved === false) {
         panelApply.disabled = false;
         panelApply.innerHTML = svgIcon(ICONS.check, 13) + '<span>Apply</span>';
         panelApply.style.display = 'inline-flex';
       }
     }).catch(function (err) { panelBody.textContent = 'Could not load result: ' + err.message; });
+  }
+
+  // Render the report's structured skill suggestions as a row of "Run" buttons under the report.
+  function renderSuggestions(list) {
+    if (!Array.isArray(list) || !list.length) return;
+    var wrap = el('div', 'mpo-suggest');
+    var head = el('div', 'mpo-suggest-head'); head.textContent = 'Suggested actions';
+    wrap.appendChild(head);
+    for (var i = 0; i < list.length; i++) {
+      var s = list[i];
+      if (!s || !s.skill) continue;
+      var b = el('button', 'mpo-suggest-btn'); b.type = 'button';
+      b.setAttribute('data-skill', s.skill);
+      if (s.prompt) b.setAttribute('data-prompt', s.prompt);
+      b.title = 'Run ' + s.skill + ' on this selection';
+      var sp = document.createElement('span'); sp.textContent = s.label || s.skill;
+      b.innerHTML = svgIcon(ICONS.send, 12); b.appendChild(sp);
+      wrap.appendChild(b);
+    }
+    panelBody.appendChild(wrap);
+  }
+
+  // Trigger a recommended skill against this same selection (POST /run). Records intent; with --auto
+  // a headless run processes it. Re-uses the order's anchor server-side, so we only send the file ref.
+  function runSkill(t, skill, prompt) {
+    if (!t || !skill) return;
+    toast('Triggering ' + skill + '…', '#22d3ee');
+    fetch(BASE + '/run', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file: t.file, skill: skill, prompt: prompt || null })
+    }).then(function (r) {
+      if (!r.ok) return r.json().then(function (d) { throw new Error(d && d.error ? d.error : 'HTTP ' + r.status); });
+      return r.json();
+    }).then(function (d) {
+      toast(d.auto ? 'Triggered ' + skill + ' — running headless…' : 'Queued ' + skill + ' — run the overlay queue in Claude Code to process it.', '#10b981');
+      if (d.file) track(d.file, t.selector, 'skill');
+    }).catch(function (err) { toast('Trigger failed: ' + err.message, '#ef4444'); });
   }
 
   // Approve a staged add/implement order → the server re-queues it and (in --auto) the agent lands the diff.

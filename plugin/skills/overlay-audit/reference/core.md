@@ -65,9 +65,16 @@ Edit the order file: set `status: done` **and** write the full report into `resu
 
 ```jsonc
 "status": "done",
-"result": { "score": "14/20", "report": "## Overlay Audit — bmi (14/20)\nSelected at: …\n\n### Clinical Safety: 3/4\n…" }
+"result": {
+  "score": "14/20",
+  "report": "## Overlay Audit — bmi (14/20)\nSelected at: …\n\n### Clinical Safety: 3/4\n…",
+  "suggestions": [ { "skill": "/medical-protocol:overlay-implement", "label": "Replace with the bmi component" } ]
+}
 ```
 
+`suggestions` is optional — any `/medical-protocol:<skill>` you name in the `report` is already
+auto-linked into a clickable trigger. Add `suggestions` for a labeled button or to carry a `prompt`
+(brief). Clicking a trigger re-runs that skill on the **same selection** (reference/queue.md).
 The overlay then shows a clickable "✓ audited — view" pill that opens `report` in its panel. Don't
 suggest `--clear` until the doctor has read it (clearing removes the result). Never delete files
 yourself.

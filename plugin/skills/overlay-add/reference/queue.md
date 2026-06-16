@@ -32,9 +32,17 @@ them:
 
 ```jsonc
 "result": {
-  "report": "## Overlay Add — built <AnemiaTracker/> …"  // the report (markdown) shown in the panel
+  "report": "## Overlay Add — built <AnemiaTracker/> …", // the report (markdown) shown in the panel
+  "suggestions": [                                        // optional — recommended skills as clickable "Run" buttons
+    { "skill": "/medical-protocol:overlay-implement", "label": "Wire up the inputs" }
+    // each: { skill (required), label?, prompt? }. Clicking re-runs that skill on the same selection (POST /run).
+  ]
 }
 ```
+
+Any `/medical-protocol:<skill>` mention in `report` is **also** auto-linked into a clickable trigger,
+so a plain recommendation works without `suggestions`. Use `suggestions` for a labeled button or to
+carry a `prompt` (brief) into the triggered run.
 
 `suggestedId`/`source` are an **optional fast-path** for apps already using medprotocol. When null
 (the common foreign-app case), locate the anchor source by grepping for `html`/`text`/`classes`

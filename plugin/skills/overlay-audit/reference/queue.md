@@ -30,9 +30,17 @@ When you finish an order, write the full findings into `result` so the overlay c
 ```jsonc
 "result": {
   "score": "14/20",                     // optional headline (audit)
-  "report": "## Overlay Audit — bmi …"  // the full report text (markdown) the doctor reads in the panel
+  "report": "## Overlay Audit — bmi …", // the full report text (markdown) the doctor reads in the panel
+  "suggestions": [                       // optional — recommended skills, rendered as clickable "Run" buttons
+    { "skill": "/medical-protocol:overlay-implement", "label": "Replace with the bmi component" }
+    // each: { skill (required), label?, prompt? }. Clicking re-runs that skill on the same selection via POST /run.
+  ]
 }
 ```
+
+Any `/medical-protocol:<skill>` mention in the `report` markdown is **also** auto-linked into a clickable
+trigger in the panel, so a plain recommendation works even without `suggestions`. Use `suggestions` when
+you want a labeled button or to carry a `prompt` (brief) into the triggered run.
 
 `suggestedId`/`source` are an **optional fast-path** for apps already using medprotocol. When null
 (the common foreign-app case), classify the selection from `html`/`text`/`classes` via
