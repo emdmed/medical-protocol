@@ -286,6 +286,8 @@ function installLinked(baseDir: string, sourcePath: string | undefined, force: b
         ["Global cache", cacheDir],
       ]),
       "",
+      "Next: open Claude Code in this project and run  /medical-protocol:start  to build your first interface.",
+      "",
     ].join("\n"),
   );
 }
@@ -377,6 +379,8 @@ function installCopy(baseDir: string, force: boolean, json: boolean): void {
         ["Hooks", hooksDir],
         ["Global cache", cacheDir],
       ]),
+      "",
+      "Next: open Claude Code in this project and run  /medical-protocol:start  to build your first interface.",
       "",
     ].join("\n"),
   );

@@ -43,12 +43,12 @@ If none can be found with confidence, **do not edit** — print the manual snipp
 
 ## Phase 4: Confirm + teardown note
 
-1. Tell the doctor: start the dev server (or reload), then click the "🩺 Protocol select" button
+1. Tell the doctor: start the dev server (or reload), then click the "Protocol select" button
    (bottom-right) and pick a component.
 2. Give the teardown: remove the `data-medprotocol-overlay` block from the mount file, and stop the
    `--serve` process. The tag is dev-gated, but teardown keeps the source clean.
-3. Point them onward: selections drain via `/medical-protocol:overlay-audit` and
-   `/medical-protocol:overlay-redo`.
+3. Point them onward: selections drain via `/medical-protocol:overlay-audit`,
+   `/medical-protocol:overlay-implement`, and `/medical-protocol:overlay-add`.
 
 **Manual fallback** (when Phase 2 finds no mount point): show the snippet the server printed —
 `<script src="http://localhost:<port>/overlay.js" async></script>`, dev-gated — and ask the doctor
