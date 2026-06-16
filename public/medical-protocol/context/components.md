@@ -23,6 +23,9 @@
 | calc | Quick terminal-based calculations |
 | preferences | Configure doctor preferences and specialty |
 | protocol-audit | Audit protocol quality and compliance |
+| overlay-setup | Start the overlay server and wire the dev-only overlay `<script>` tag into any app |
+| overlay-audit | Audit a region selected in the dev overlay against protocol guidance (drains an "audit" work order; works on untagged apps) |
+| overlay-implement | Retrofit a medical-protocol component into a region selected in the dev overlay, staged as an approved diff (drains an "implement" work order) |
 
 ---
 
