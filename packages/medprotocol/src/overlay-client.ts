@@ -44,7 +44,8 @@ export const OVERLAY_CLIENT_JS = `(function () {
     copy: '<rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/>',
     cancel: '<path d="M6 6l12 12M18 6 6 18"/>',
     close: '<path d="M6 6l12 12M18 6 6 18"/>',
-    check: '<path d="M4 12.5 9 17.5 20 6.5"/>'
+    check: '<path d="M4 12.5 9 17.5 20 6.5"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'
   };
 
   function escapeHtml(s) {
@@ -130,6 +131,10 @@ export const OVERLAY_CLIENT_JS = `(function () {
     '@keyframes mpo-pulse{0%,100%{opacity:.5}50%{opacity:1}}',
     '.mpo-track-box{position:fixed;z-index:2147483645;pointer-events:none;border:1px dashed #f59e0b;display:none;animation:mpo-pulse 1.2s ease-in-out infinite}',
     '.mpo-track-box.done{border-style:solid;border-color:#10b981;animation:none}',
+    // Waiting: queued but no processor attached — calm slate, no pulse, so it never reads as a hang.
+    '.mpo-track-box.waiting{border-style:dashed;border-color:#64748b;animation:none}',
+    '.mpo-track-pill.waiting{background:#334155;color:#e2e8f0}',
+    '.mpo-track-pill.waiting .mpo-ic{color:#e2e8f0}',
     '.mpo-track-pill{position:fixed;z-index:2147483647;pointer-events:none;display:none;align-items:center;gap:6px;background:#f59e0b;color:#1a1206;font:600 10.5px/1.4 ' + MONO + ';letter-spacing:.02em;padding:3px 8px;border-radius:3px;box-shadow:0 2px 8px rgba(0,0,0,.4);white-space:nowrap}',
     '.mpo-track-pill.done{background:#10b981;color:#04140d}',
     '.mpo-spin{width:10px;height:10px;border:2px solid rgba(26,18,6,.25);border-top-color:#1a1206;border-radius:50%;display:inline-block;animation:mpo-spin .7s linear infinite}',
@@ -435,6 +440,27 @@ export const OVERLAY_CLIENT_JS = `(function () {
     return { queued: 'queued implement…', ing: 'implementing…', done: 'implemented' };
   }
 
+  // The skill that drains each action, named so the doctor knows exactly what to run.
+  function drainHint(action) {
+    var skill = action === 'audit' ? '/medical-protocol:overlay-audit'
+      : action === 'add' ? '/medical-protocol:overlay-add'
+      : action === 'skill' ? 'the overlay queue'
+      : '/medical-protocol:overlay-implement';
+    return 'Queued, but no processor is attached — nothing will run on its own. Process it in Claude Code ('
+      + skill + '), or restart the server with --auto.';
+  }
+
+  // (Re)build a pill as an active spinner with the given label. Used for queued (auto) and processing.
+  function spinnerPill(t, text) {
+    t.pill.classList.remove('done', 'waiting', 'mpo-clickable');
+    t.pill.onclick = null;
+    t.pill.innerHTML = '';
+    var spin = el('span', 'mpo-spin');
+    var lbl = document.createElement('span'); lbl.textContent = text;
+    t.pill.appendChild(spin); t.pill.appendChild(lbl);
+    t.label = lbl;
+  }
+
   function track(file, selector, action) {
     if (!file) return;
     var b = el('div', 'mpo-track-box mpo-ui');
@@ -444,7 +470,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
     lbl.textContent = verbs(action).queued;
     p.appendChild(spin); p.appendChild(lbl);
     document.body.appendChild(b); document.body.appendChild(p);
-    var t = { file: file, selector: selector, action: action, box: b, pill: p, label: lbl, done: false };
+    var t = { file: file, selector: selector, action: action, box: b, pill: p, label: lbl, done: false, mode: 'init' };
     tracked.push(t); markers.push(t);
     positionMarker(t);
     startPolling();
@@ -474,13 +500,33 @@ export const OVERLAY_CLIENT_JS = `(function () {
     if (!tracked.length) stopPolling();
   }
 
-  function setStatus(t, status, hasResult) {
+  function setStatus(t, status, hasResult, auto) {
     if (t.done) return;
     var v = verbs(t.action);
+    if (status === 'pending') {
+      if (auto) {
+        // A processor is attached — it will pick this up shortly. Keep the live spinner.
+        if (t.mode !== 'queued') { t.mode = 'queued'; t.box.classList.remove('waiting'); spinnerPill(t, v.queued); }
+      } else if (t.mode !== 'waiting') {
+        // No processor — make it unmistakably "waiting on you", not "working". No spinner.
+        t.mode = 'waiting';
+        t.box.classList.add('waiting');
+        t.pill.classList.add('waiting', 'mpo-clickable');
+        t.pill.innerHTML = svgIcon(ICONS.clock, 12);
+        var w = document.createElement('span'); w.textContent = 'queued — needs drain';
+        t.pill.appendChild(w);
+        t.pill.onclick = function () { toast(drainHint(t.action), '#f59e0b'); };
+      }
+      return;
+    }
     if (status === 'processing') {
-      t.label.textContent = v.ing;
+      if (t.mode !== 'processing') { t.mode = 'processing'; t.box.classList.remove('waiting'); spinnerPill(t, v.ing); }
     } else if (status === 'done') {
       t.done = true;
+      t.mode = 'done';
+      t.box.classList.remove('waiting');
+      t.pill.classList.remove('waiting', 'mpo-clickable');
+      t.pill.onclick = null;
       t.box.classList.add('done');
       t.pill.classList.add('done');
       t.pill.innerHTML = svgIcon(ICONS.check, 12);
@@ -624,6 +670,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
   // Re-arm a completed marker so it shows progress again while the approved diff is applied.
   function reTrack(t) {
     t.done = false;
+    t.mode = 'init';
     t.box.classList.remove('done');
     t.pill.classList.remove('done', 'mpo-clickable');
     t.pill.innerHTML = '';
@@ -644,14 +691,17 @@ export const OVERLAY_CLIENT_JS = `(function () {
 
   function poll() {
     if (!tracked.length) { stopPolling(); return; }
-    fetch(BASE + '/status').then(function (r) { return r.json(); }).then(function (list) {
+    fetch(BASE + '/status').then(function (r) { return r.json(); }).then(function (data) {
+      // /status returns { auto, orders }; tolerate the older bare-array shape too.
+      var list = data && data.orders ? data.orders : (Array.isArray(data) ? data : []);
+      var auto = !!(data && data.auto);
       var byFile = {};
       for (var i = 0; i < list.length; i++) byFile[list[i].file] = list[i];
       for (var j = tracked.length - 1; j >= 0; j--) {
         var t = tracked[j];
         var s = byFile[t.file];
         // missing from the queue = cleared after completion → treat as done (no result to show)
-        setStatus(t, s ? s.status : 'done', s ? s.hasResult : false);
+        setStatus(t, s ? s.status : 'done', s ? s.hasResult : false, auto);
         if (t.done) tracked.splice(j, 1);
       }
       repositionAll();

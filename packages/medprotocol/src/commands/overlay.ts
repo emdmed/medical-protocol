@@ -256,8 +256,11 @@ const serve = (dir: string, port: number, auto: boolean): void => {
     }
 
     // Live status of every work order — lets the overlay show progress on each selected element.
+    // `auto` tells the client whether a processor is attached: without it, pending orders sit
+    // until the doctor drains them manually, so the overlay shows a "queued — needs drain" state
+    // instead of an open-ended spinner that reads as a hang.
     if (req.method === "GET" && path === "/status") {
-      const statuses = readQueue(dir).map(({ file, order }) => ({
+      const orders = readQueue(dir).map(({ file, order }) => ({
         file,
         action: order.action,
         selector: order.selector ?? null,
@@ -265,7 +268,7 @@ const serve = (dir: string, port: number, auto: boolean): void => {
         hasResult: !!order.result,
       }));
       res.writeHead(200, JSON_HEADER);
-      res.end(JSON.stringify(statuses));
+      res.end(JSON.stringify({ auto, orders }));
       return;
     }
 
@@ -507,7 +510,9 @@ const serve = (dir: string, port: number, auto: boolean): void => {
     if (auto) {
       process.stdout.write(`Auto mode ON: each selection spawns a headless Claude run (claude -p) to process it. Ctrl-C to stop.\n`);
     } else {
-      process.stdout.write(`Selections appear below as they arrive. Drain them with /medical-protocol:overlay-audit | overlay-implement (or use --auto). Ctrl-C to stop.\n`);
+      process.stdout.write(`Auto mode OFF — selections are only QUEUED, not processed: the overlay will show "queued — needs drain".\n`);
+      process.stdout.write(`Process them in Claude Code with /medical-protocol:overlay-audit | overlay-implement | overlay-add,\n`);
+      process.stdout.write(`or restart with --auto to process every selection automatically. Ctrl-C to stop.\n`);
     }
   });
 };

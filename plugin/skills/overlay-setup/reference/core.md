@@ -5,10 +5,18 @@ Idempotent, dev-gated, reversible. The agent does the edit; the CLI only serves.
 
 ## 1. Start the server
 
+First decide how selections get processed (ask the doctor — see SKILL.md Phase 1):
+
 ```bash
-npx medprotocol overlay --serve            # default port 7331
-npx medprotocol overlay --serve --port 8080  # if 7331 is taken (CLI prints EADDRINUSE)
+npx medprotocol overlay --serve --auto     # AUTONOMOUS: each selection runs end-to-end (needs the `claude` CLI)
+npx medprotocol overlay --serve            # MANUAL: selections only queue; drain them yourself
+npx medprotocol overlay --serve --auto --port 8080  # if 7331 is taken (CLI prints EADDRINUSE)
 ```
+
+**Default to `--auto`** — it closes the loop so results appear in the overlay with no terminal step.
+Without it, the overlay shows each selection as "queued — needs drain" and nothing happens until you
+run an overlay-* skill. `--auto` requires the `claude` CLI on PATH and runs unattended (it can stage
+diffs), so confirm the doctor is comfortable with that before enabling it.
 
 Run it in the background and read the port from the first stdout line:
 `medprotocol overlay server → http://localhost:<port>`. Use `<port>` in the injected tag.

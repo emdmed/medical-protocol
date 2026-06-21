@@ -44,11 +44,16 @@ The `--serve` process exposes:
   parent) → action menu (Audit / Implement / Add a component… / Copy selector). "Add" opens a textarea
   where the doctor types what to build; the brief rides along as the work order's `prompt`.
 - `POST /queue` — accepts a work order from the browser and writes it to `.medprotocol/queue/`.
-- `GET /status` — returns each work order's `{ file, action, selector, status, hasResult }`. The client
-  polls this and pins a **live progress marker** over the selected element: a spinner ("queued…" →
+- `GET /status` — returns `{ auto, orders }`, where `orders` is each work order's
+  `{ file, action, selector, status, hasResult }` and `auto` reports whether a processor is attached
+  (the server was started with `--auto`). The client polls this and pins a **live progress marker** over
+  the selected element. When `auto` is on (or the order is `processing`), it shows a spinner ("queued…" →
   "auditing…/implementing…/adding…" as the order moves `pending → processing`) that turns into a green
   "✓" when the order reaches `done`. If the order has a result it becomes a clickable "✓ — view" pill;
-  otherwise it fades. So the skills should set `status: done` promptly when they finish.
+  otherwise it fades. When `auto` is **off** and the order is still `pending`, the marker shows a calm
+  slate **"queued — needs drain"** state (no spinner) — clicking it explains how to process the order —
+  so an unattended selection never looks like a hang. Skills should set `status: done` promptly when they
+  finish.
 - `GET /result?file=…` — the full `result` for one order, plus its `action` and `approved` flag — fetched
   when the doctor opens the result panel. The panel renders the `report` markdown and makes any
   recommended skill **runnable** (see [Triggering recommended skills](#triggering-recommended-skills-from-the-result-panel)).
@@ -69,7 +74,9 @@ the target app.
 ### Closing the loop: `--auto`
 
 By default the overlay only **records** intent — a human still runs `/medical-protocol:overlay-audit`
-(or `overlay-implement`) in Claude Code to actually process the queue. `npx medprotocol overlay
+(or `overlay-implement`) in Claude Code to actually process the queue, and the marker sits in the
+slate "queued — needs drain" state until they do (the client learns there's no processor from
+`/status`'s `auto: false`). `npx medprotocol overlay
 --serve --auto` closes that loop: on each selection it spawns a **headless Claude Code run**
 (`claude -p "<process the queue>" --permission-mode acceptEdits`) in the project directory, which
 drains the order, runs the matching skill, and writes the result back — so the overlay's spinner

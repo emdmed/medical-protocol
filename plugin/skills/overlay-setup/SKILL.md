@@ -17,9 +17,18 @@ The agent does the React-aware edit; the `medprotocol` CLI stays a framework-agn
 
 ## Phase 1: Start the queue server
 
-1. Run `npx medprotocol overlay --serve` in the background (it serves `GET /overlay.js` and accepts
-   `POST /queue`). Default port `7331` — use `--port` if taken (the CLI reports `EADDRINUSE`).
-2. Capture the port from the server's first line (`medprotocol overlay server → http://localhost:<port>`).
+1. **Ask the doctor how selections should be processed** (this decides whether the loop closes by
+   itself) before starting the server:
+   - **Automatic (`--auto`)** — every selection spawns a headless Claude run (`claude -p`) that
+     processes the order end-to-end, so the result appears in the overlay with no terminal step.
+     Requires the `claude` CLI on PATH and runs unattended (it can stage diffs). **Recommend this** —
+     without it, selections only queue and the overlay shows "queued — needs drain" until you act.
+   - **Manual drain** — `--serve` only captures selections; you process them by running
+     `/medical-protocol:overlay-audit | overlay-implement | overlay-add` in Claude Code.
+2. Run the server in the background. Default port `7331` — use `--port` if taken (`EADDRINUSE`):
+   - Automatic: `npx medprotocol overlay --serve --auto`
+   - Manual: `npx medprotocol overlay --serve`
+3. Capture the port from the server's first line (`medprotocol overlay server → http://localhost:<port>`).
 
 ## Phase 2: Find the mount point
 
