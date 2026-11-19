@@ -7,6 +7,7 @@ user-invocable: true
 
 Read and follow: reference/core.md
 Read and follow: reference/cli-calculator.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 You are running quick clinical calculations for a healthcare professional using the command-line calculator. Follow the phases below exactly.
 
@@ -69,17 +70,17 @@ If the doctor has already provided all needed values in their initial message, s
 Build and execute the command automatically. Always append `--json` for structured output.
 
 ```bash
-npm run medprotocol -- <command> <flags> --json
+medprotocol <command> <flags> --json
 ```
 
 **Command examples:**
 ```bash
-npm run medprotocol -- bmi --weight 70 --height-m 1.75 --metric --json
-npm run medprotocol -- abg --ph 7.25 --pco2 29 --hco3 14 --json
-npm run medprotocol -- water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2 --json
-npm run medprotocol -- vitals --bp 120/80 --hr 72 --temp 37.0 --json
-npm run medprotocol -- pafi --pao2 60 --fio2 40 --json
-npm run medprotocol -- dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl --json
+medprotocol bmi --weight 70 --height-m 1.75 --metric --json
+medprotocol abg --ph 7.25 --pco2 29 --hco3 14 --json
+medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2 --json
+medprotocol vitals --bp 120/80 --hr 72 --temp 37.0 --json
+medprotocol pafi --pao2 60 --fio2 40 --json
+medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl --json
 ```
 
 Do not show the command or raw output to the doctor.

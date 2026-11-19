@@ -7,6 +7,7 @@ user-invocable: true
 
 Read and follow: reference/core.md
 Read when needed: reference/queue.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 ## Purpose
 
@@ -18,7 +19,7 @@ against the relevant protocol guidance. Static and read-only — it never modifi
 
 ## Phase 1: Drain the queue
 
-1. Run `npx medprotocol overlay --drain --json` to claim pending work orders.
+1. Run `medprotocol overlay --drain --json` to claim pending work orders.
 2. Keep only orders with `"action": "audit"`. If none, tell the doctor to select a region in their
    app and choose Audit, then stop.
 

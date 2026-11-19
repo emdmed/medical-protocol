@@ -8,6 +8,7 @@ user-invocable: true
 Read and follow: reference/core.md
 Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/test-vectors.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 ## Purpose
 
@@ -27,13 +28,12 @@ If no screens are found, tell the doctor: "I don't see any clinical tools built 
 
 ## Phase 2: CLI Validation
 
-1. Build the medprotocol CLI: `npm run build -w packages/medprotocol`
-2. Read the test vectors reference file for canonical inputs and expected outputs
-3. For each discovered component, run the matching `npx medprotocol <cmd> --json` command with the reference inputs from test-vectors.md
-4. Parse the JSON output and verify:
+1. Read the test vectors reference file for canonical inputs and expected outputs
+2. For each discovered component, run the matching `medprotocol <cmd> --json` command with the reference inputs from test-vectors.md
+3. Parse the JSON output and verify:
    - All expected fields are present
    - Values fall within the expected ranges documented in test-vectors.md
-5. Record pass/fail per module with specific findings
+4. Record pass/fail per module with specific findings
 
 If a CLI command fails, note the error and continue with remaining modules.
 

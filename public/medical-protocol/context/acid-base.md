@@ -65,8 +65,8 @@ Inputs are parsed internally via `safeParseFloatOrNull`.
 ## CLI
 
 ```bash
-npx medprotocol abg --ph 7.25 --pco2 29 --hco3 14
-npx medprotocol abg --ph 7.30 --pco2 25 --hco3 12 --na 140 --cl 105 --albumin 4.0
+medprotocol abg --ph 7.25 --pco2 29 --hco3 14
+medprotocol abg --ph 7.30 --pco2 25 --hco3 12 --na 140 --cl 105 --albumin 4.0
 ```
 
 ---

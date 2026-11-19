@@ -6,6 +6,7 @@ user-invocable: true
 ---
 
 Read and follow: reference/agent-qa.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 The doctor wants a screen checked ("check it", "is it working?", "test the BMI calculator", "check everything") or wants a patient case added ("also check a 45 kg patient"). Tell them: "Let me check that for you."
 

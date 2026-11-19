@@ -1,46 +1,83 @@
 # Medical Protocol
 
-AI-agent-driven clinical tools — validated calculation logic, a terminal CLI, and workflows for Claude Code. Open source, privacy-first, 907 tests.
+A Claude Code plugin that lets doctors build clinical tools by describing them in clinical language. The agent writes the screens. The math comes from a tested clinical library that ships with the plugin. Open source, privacy-first, 989 tests.
 
-## Quick Start
+> *"I need a vital signs monitor with fluid balance tracking"* — the agent sets up the project, builds the screen and checks it in the browser.
 
-### Install the Claude Code plugin
+## Install
+
+In Claude Code:
+
+```
+/plugin marketplace add emdmed/medical-protocol
+/plugin install medical-protocol@medical-protocol
+```
+
+Then run `/medical-protocol:start` and describe what you need.
+
+### Or install from a clone
+
+The installer is a single Node script in this repo. It needs only Node and git.
 
 ```bash
-npx medical-protocol install
+node scripts/medical-protocol.cjs install --dir ~/my-clinic-app          # copy into the project's .claude/
+node scripts/medical-protocol.cjs install --link --dir ~/my-clinic-app   # symlink to the clone instead
+node scripts/medical-protocol.cjs check --dir ~/my-clinic-app            # is it up to date?
+node scripts/medical-protocol.cjs update --dir ~/my-clinic-app
 ```
 
-Or install it from the Claude Code plugin marketplace (run inside Claude Code):
+## How it works
 
-```
-/plugin install medical-protocol --marketplace emdmed/medical-protocol
-```
+1. **You describe the tool.** The `start` skill routes your request to the right clinical module(s).
+2. **The agent copies the clinical logic** from the plugin into your project at `lib/medprotocol/`. This is pure TypeScript with no dependencies, and you don't edit it.
+3. **The agent generates the UI** with [UI SDK](https://ui-sdk.dev/docs) (React 19, Next.js, Tailwind), styled to match your project.
+4. **The agent checks the screen.** It writes a QA recipe of made-up patient cases (`qa/recipes/<module>.md`), takes the expected values from the `medprotocol` CLI, and a Haiku `qa-runner` agent runs the cases in the browser. You can read and add cases in plain clinical words.
 
-Then describe what you need: *"I need a vital signs monitor with fluid balance tracking"* — the agent handles the rest.
+The calculations in your app are the same code the tests cover. Nothing is recomputed by the model.
 
-#### Symlink mode (for multi-project or dev setups)
+## What's in the plugin
+
+### Skills
+
+| Skill | Use it to |
+|-------|-----------|
+| `start` | Describe what you need. Everything starts here. |
+| `preferences` | Set your specialty, patient population, guidelines and units |
+| `protocol-audit` | Audit the project for safety, completeness, privacy and accessibility |
+| `calc-audit` | Test the clinical calculations in your screens against the library |
+| `overlay-setup` | Turn on the dev overlay: hover over any part of your app to audit it, replace it with a medical-protocol screen, or add a new one |
+
+Internal skills (called by the agent): `vital-signs`, `acid-base`, `bmi`, `pafi`, `dka`, `water-balance`, `dashboard`, `modify`, `calc`, `qa`, `troubleshoot`, `overlay-audit`, `overlay-implement`, `overlay-add`.
+
+### Hooks
+
+| Hook | When | What it does |
+|------|------|--------------|
+| `privacy-guard` | Before every shell command | Blocks commands that could send data off the machine (`git push`, `curl` POST, `scp`, `nc`, `npm publish`…) |
+| `track-workflow` | After every shell command | Records build and QA progress |
+| `qa-reminder` | When the agent stops | Sends it back to finish the quality checks if a screen was built without them |
+
+### Clinical modules
+
+| Module | What it calculates |
+|--------|-------------------|
+| **Vital Signs** | BP, HR, RR, SpO2, temperature: validated ranges, severity alerts, FHIR R4 output |
+| **Acid-Base** | Primary disorder, compensation (Winter's), anion gap, delta ratio |
+| **BMI** | WHO classification |
+| **Water Balance** | Insensible losses, endogenous water, net fluid balance |
+| **PaFi (ARDS)** | PaO2/FiO2 ratio with Berlin severity |
+| **DKA** | Hourly glucose/ketone/HCO3 rates, resolution criteria, cerebral edema warnings |
+| **Cardiology** | ASCVD 10-year risk, HEART score, CHA₂DS₂-VASc |
+| **Sepsis** | qSOFA, SOFA-2 (6 organs), lactate clearance, hour-1 bundle |
+| **CKD** | eGFR (CKD-EPI 2021), KDIGO staging, KFRE 2/5-year risk, treatment |
+| **Diabetes** | ADA 2026 diagnosis, T1D staging, T1 vs T2, T2D screening, gestational diabetes |
+
+## The `medprotocol` CLI
+
+The same clinical library, from the terminal. It ships inside the plugin as one Node script (`plugin/scripts/medprotocol.cjs`), and the skills run it with `node`. The QA step uses it as the source of expected values. Below, `medprotocol` stands for `node plugin/scripts/medprotocol.cjs`.
 
 ```bash
-npx medical-protocol install --link
-```
-
-This clones the repo to `~/.medical-protocol` and creates symlinks instead of copying files. All linked projects update instantly when you `git pull` in the clone — no need to re-run install per project.
-
-```bash
-# Use an existing local clone
-npx medical-protocol install --link --source ~/my-clone
-
-# Check symlink health and repo status
-npx medical-protocol check
-
-# Pull latest changes
-npx medical-protocol update
-```
-
-### Run the CLI
-
-```bash
-npx medprotocol abg --ph 7.25 --pco2 30 --hco3 12
+medprotocol abg --ph 7.25 --pco2 30 --hco3 12
 ```
 
 ```
@@ -48,80 +85,53 @@ ABG Analysis
 ────────────
   Disorder        Metabolic Acidosis
   Compensation    Inadequate compensation
-  Interpretation  Primary Metabolic Acidosis, with Inadequate compensation
-                  by Respiratory Alkalosis.
+  Interpretation  Primary Metabolic Acidosis, with Inadequate compensation by Respiratory Alkalosis.
   Expected range  24.0–28.0
 ```
 
 ```bash
-npx medprotocol vitals --bp 145/95 --hr 88 --rr 18 --spo2 96 --temp 37.2
+medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13
 ```
 
 ```
-Vital Signs
-───────────
-  Blood Pressure    145/95 mmHg (High)
-  Heart Rate        88 bpm (Normal)
-  Respiratory Rate  18 breaths/min (Normal)
-  Temperature       37.2°C (Normal)
-  SpO2              96% — SpO2/FiO2: 457
+Quick SOFA (qSOFA)
+──────────────────
+  Score             3/3
+  Positive          Yes
+  Respiratory Rate  24
+  Systolic BP       90 mmHg
+  GCS               13
 ```
 
-```bash
-npx medprotocol bmi --weight 70 --height-m 1.75 --metric
-```
+Commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `ckd`, `diabetes`, `overlay`. Add `--json` to any command, `--help` for its options.
+
+## Repository layout
 
 ```
-BMI Calculator
-──────────────
-  BMI       22.9
-  Category  Normal
-  Weight    70 kg
-  Height    1.75m
+plugin/                    # The Claude Code plugin
+├── .claude-plugin/        # plugin.json
+├── skills/                # SKILL.md + reference/ per skill
+├── agents/qa-runner.md    # Haiku browser-QA runner
+├── scripts/medprotocol.cjs # Built CLI
+├── hooks/                 # privacy-guard, track-workflow, qa-reminder
+└── lib/                   # Clinical logic (copied into doctor projects)
+public/medical-protocol/   # Shared context docs: build contract, routing, per-module specs
+packages/medprotocol/      # CLI source
+packages/medical-protocol/ # Installer source
+scripts/                   # Built installer, version bump
+tests/                     # Vitest, clinical logic only
 ```
 
-9 commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `ckd`
-
-## Architecture
-
-Two parts: **this repo** (workflows, plugin, `plugin/lib/` logic, CLI) and the **doctor's project** (Next.js app built by the agent). Pure calculation logic lives in `plugin/lib/` — no framework deps. It ships inside the plugin, is copied into the doctor's project at `lib/medprotocol/`, and is shared by the CLI and the generated screens. The UI is generated per project with [UI SDK](https://ui-sdk.dev/docs); see `public/medical-protocol/context/building.md`. See `CLAUDE.md` for full directory structure.
-
-## Clinical Components
-
-9 validated clinical modules:
-
-| Module | What it calculates |
-|--------|-------------------|
-| **Vital Signs** | BP, HR, RR, SpO2, Temp — validated ranges, color-coded alerts, FHIR R4 output |
-| **Acid-Base** | Primary disorder, compensation, anion gap, delta ratio (Winter's, Henderson-Hasselbalch) |
-| **BMI** | WHO classification — underweight, normal, overweight, obese |
-| **Water Balance** | Insensible losses, endogenous water, net fluid balance |
-| **PaFi (ARDS)** | PaO2/FiO2 ratio with Berlin Definition severity classification |
-| **DKA** | Hourly glucose/ketone/HCO3 rates, resolution criteria, cerebral edema warnings |
-| **Cardiology** | ASCVD 10-year risk, HEART score, CHA₂DS₂-VASc |
-| **Sepsis** | qSOFA, full SOFA (6 organs), lactate clearance, hour-1 bundle compliance |
-| **CKD** | eGFR (CKD-EPI 2021), KDIGO staging, KFRE 2/5-year risk, progression tracking |
-
-## Tests
-
-```bash
-npm test                              # Run all 907 tests (26 files)
-npx vitest run tests/acid-base/       # Run a single test directory
-npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
-npm run test:watch                    # Watch mode
-```
-
-Covers: extreme values, negative inputs, triple acid-base disorders, zero divisors, mixed disorder detection, boundary conditions for every classification tier.
+This repo has no UI code. Screens are generated in each doctor's project. See `CLAUDE.md` for details.
 
 ## Contributing
 
-1. Fork the repo
-2. Create a feature branch
-3. Add tests for any new clinical logic in `tests/`
-4. Run `npm test` — all 907 tests must pass
-5. Submit a PR
+1. Fork and create a feature branch
+2. Add tests in `tests/` for any new clinical logic
+3. Make sure all tests pass. If you changed the CLI or installer source, rebuild (`npm run build`, `node packages/medical-protocol/build.mjs`) and commit the `.cjs` files
+4. Open a PR
 
-New clinical modules: see `.patterns/new-module/new-module.md` (pure logic in `plugin/lib/`, tests, context doc, CLI command, skill/workflow, classification row).
+New clinical module: follow `.patterns/new-module/new-module.md` (logic in `plugin/lib/`, tests, context doc, CLI command, skill, classification row).
 
 ## License
 

@@ -9,7 +9,7 @@ Intent lands as one JSON file per selection in the project's queue directory; th
 the queue and plugin skills act on each work order.
 
 ```
-overlay selection → POST /queue → .medprotocol/queue/<ts>-<slug>.json → `npx medprotocol overlay --drain` → /medical-protocol:overlay-audit | overlay-implement | overlay-add
+overlay selection → POST /queue → .medprotocol/queue/<ts>-<slug>.json → `medprotocol overlay --drain` → /medical-protocol:overlay-audit | overlay-implement | overlay-add
 ```
 
 The overlay does **not** require the target app to use medical protocol. The `data-medprotocol-*`
@@ -22,7 +22,7 @@ The overlay ships as a framework-agnostic vanilla script served by the CLI, **no
 React component. The doctor runs one process and adds one dev-only script tag:
 
 ```bash
-npx medprotocol overlay --serve        # default port 7331; --port to change
+medprotocol overlay --serve        # default port 7331; --port to change
 ```
 
 ```tsx
@@ -76,7 +76,7 @@ the target app.
 By default the overlay only **records** intent — a human still runs `/medical-protocol:overlay-audit`
 (or `overlay-implement`) in Claude Code to actually process the queue, and the marker sits in the
 slate "queued — needs drain" state until they do (the client learns there's no processor from
-`/status`'s `auto: false`). `npx medprotocol overlay
+`/status`'s `auto: false`). `medprotocol overlay
 --serve --auto` closes that loop: on each selection it spawns a **headless Claude Code run**
 (`claude -p "<process the queue>" --permission-mode acceptEdits`) in the project directory, which
 drains the order, runs the matching skill, and writes the result back — so the overlay's spinner
@@ -131,13 +131,13 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 ## Lifecycle
 
 1. **Record** — overlay writes a `pending` work order.
-2. **Drain** — `npx medprotocol overlay --drain` claims each `pending` order (sets `processing`) and
+2. **Drain** — `medprotocol overlay --drain` claims each `pending` order (sets `processing`) and
    emits a dispatch plan naming the skill to run. A Claude Code hook or the doctor runs it.
 3. **Act** — the matching skill processes the order:
    - **Audit** → classify the selection, locate it in source, **report findings** (read-only), mark `done`.
    - **Implement** → classify, locate, stage a diff (lease/apply); land it only on approval, then mark `done`.
    - **Add** → classify the `prompt`, locate the anchor, build a new component, stage a diff (lease/apply); land only on approval, then mark `done`.
-4. **Clear** — `npx medprotocol overlay --clear` removes `done` orders.
+4. **Clear** — `medprotocol overlay --clear` removes `done` orders.
 
 ## Action semantics
 

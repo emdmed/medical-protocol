@@ -100,8 +100,8 @@ Category ranges (warning level):
 ## CLI
 
 ```bash
-npx medprotocol vitals --bp 120/80 --hr 72 --temp 37.0
-npx medprotocol vitals --bp 90/60 --hr 110 --rr 24 --temp 38.5 --spo2 92 --fio2 40
+medprotocol vitals --bp 120/80 --hr 72 --temp 37.0
+medprotocol vitals --bp 90/60 --hr 110 --rr 24 --temp 38.5 --spo2 92 --fio2 40
 ```
 
 ---

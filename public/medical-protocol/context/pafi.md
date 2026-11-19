@@ -55,7 +55,7 @@ Self-contained. Uses PaO2 (arterial), not SpO2 (peripheral). Coexists with sepsi
 ## CLI
 
 ```bash
-npx medprotocol pafi --pao2 60 --fio2 40
+medprotocol pafi --pao2 60 --fio2 40
 ```
 
 ---

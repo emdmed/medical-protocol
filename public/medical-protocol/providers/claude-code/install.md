@@ -60,36 +60,19 @@ Run `agent-browser --version` in the background.
 
 ---
 
-## Step 2.6 — Install quick calculator
-
-Run `npx medprotocol --version` in the background.
-
-- **If medprotocol is installed**: move to step 3.
-- **If missing**: run `npm install -g medprotocol` automatically.
-  - If the install fails for any reason: skip this step and move to step 3. The quick calculator is optional — the system works fine without it.
-- This is a background calculator tool. If the doctor later asks for a quick calculation, it will be available automatically.
-
----
-
 ## Step 3 — Create project
 
 Check if the current directory already has a `CLAUDE.md` file that references the medical protocol.
 
 - **If it exists**: tell the doctor "Everything is already set up. You can describe what you need — for example, 'I need a vital signs monitor for my clinic.'"
-- **If it doesn't exist**: install the protocol using the installer:
-  ```
-  npx medical-protocol install
-  ```
+- **If it doesn't exist**: move to step 3.5.
 
 ---
 
-## Step 3.5 — Install clinical skills (optional)
+## Step 3.5 — Install the plugin
 
-Ask the doctor:
+The plugin carries everything: clinical skills, safety hooks, the clinical logic, and the `medprotocol` calculator.
 
-"Would you like me to install the clinical skills? These give me specialized knowledge for building things like vital signs monitors, lab calculators, and other medical tools. I recommend it — it only takes a moment."
-
-- **If the doctor says yes** (or anything affirmative):
   1. Add the medical protocol marketplace:
      ```
      claude plugin marketplace add emdmed/medical-protocol
@@ -104,9 +87,7 @@ Ask the doctor:
      TMPDIR="$HOME/.claude/tmp" claude plugin install medical-protocol --scope project
      ```
   4. If the install succeeds: tell the doctor "Clinical skills are installed. Let's continue."
-  5. If the install still fails for any other reason: tell the doctor "I wasn't able to install the skills automatically, but everything else is set up. You can still describe what you need and I'll build it for you." Then move to step 4.
-
-- **If the doctor says no** (or wants to skip): move to step 4. The system works without skills — they just make the experience better.
+  5. If the install still fails for any other reason: tell the doctor "I wasn't able to install the clinical tools automatically. Please run `/plugin marketplace add emdmed/medical-protocol` and then `/plugin install medical-protocol@medical-protocol`."
 
 ---
 

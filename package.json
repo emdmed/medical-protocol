@@ -11,9 +11,8 @@
     "test:watch": "vitest",
     "build": "npm run build -w packages/medprotocol",
     "build:installer": "npm run build -w packages/medical-protocol",
-    "medprotocol": "node packages/medprotocol/dist/index.js",
-    "version:bump": "bash scripts/bump-version.sh",
-    "release": "bash scripts/npm/release.sh"
+    "medprotocol": "node plugin/scripts/medprotocol.cjs",
+    "version:bump": "bash scripts/bump-version.sh"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

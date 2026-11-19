@@ -103,9 +103,9 @@ All numeric inputs are `string` (parsed internally via `safeParseFloat`).
 ## CLI
 
 ```bash
-npx medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13
-npx medprotocol sepsis sofa --pao2 60 --fio2 40 --vent --platelets 80 --bilirubin 2.5 --map 62 --norepi 0.08 --gcs 14 --creatinine 1.8 --urine-output 400 --weight 70 --hours 24
-npx medprotocol sepsis lactate --initial 4.2 --repeat 2.1
+medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13
+medprotocol sepsis sofa --pao2 60 --fio2 40 --vent --platelets 80 --bilirubin 2.5 --map 62 --norepi 0.08 --gcs 14 --creatinine 1.8 --urine-output 400 --weight 70 --hours 24
+medprotocol sepsis lactate --initial 4.2 --repeat 2.1
 ```
 
 ---

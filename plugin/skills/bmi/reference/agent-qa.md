@@ -23,7 +23,7 @@ A recipe has two parts:
 
 Rules:
 - **Made-up values only.** Never put real patient data in a recipe.
-- **Expected numbers come from the CLI**, never from your own math: run `npx medprotocol <cmd> --json` with the recipe's inputs and copy the result. Note the command next to each expectation.
+- **Expected numbers come from the CLI**, never from your own math: run `medprotocol <cmd> --json` with the recipe's inputs and copy the result. Note the command next to each expectation.
 - Name elements by their **visible label** ("Weight field", "Calculate button"), so the runner can find them in the accessibility tree.
 - One action or one check per step. Keep it to ~15 steps.
 
@@ -34,8 +34,8 @@ Recipe format:
 URL: http://localhost:3000/bmi
 
 ## Cases
-1. Adult, 70 kg, 1.75 m → BMI 22.9, Normal          <!-- npx medprotocol bmi --weight 70 --height-m 1.75 --metric --json -->
-2. Adult, 130 kg, 1.75 m → BMI 42.4, Obese III      <!-- npx medprotocol bmi --weight 130 --height-m 1.75 --metric --json -->
+1. Adult, 70 kg, 1.75 m → BMI 22.9, Normal          <!-- medprotocol bmi --weight 70 --height-m 1.75 --metric --json -->
+2. Adult, 130 kg, 1.75 m → BMI 42.4, Obese III      <!-- medprotocol bmi --weight 130 --height-m 1.75 --metric --json -->
 3. Weight left empty → no result shown, no error message
 4. Screen opens cleanly on a tablet and on a desktop
 5. Usable with the keyboard alone
@@ -57,7 +57,7 @@ Every recipe has the empty-input, tablet/desktop and keyboard cases. Add screen-
 ### Cases the doctor adds
 
 The doctor may ask in their own words: "also check a 45 kg, 1.60 m patient". Add it as a new case:
-- **No expected value given** → get it from `npx medprotocol <cmd> --json` and write it in.
+- **No expected value given** → get it from `medprotocol <cmd> --json` and write it in.
 - **Doctor's expected value matches the CLI** → add it as stated.
 - **Doctor's expected value differs from the CLI** → do not pick one silently. Tell the doctor which guideline the calculation follows (see the module's context doc), e.g. "The calculator uses the WHO cut-offs, which classify a BMI of 17.6 as underweight. Should the screen follow a different guideline?" Never change `lib/medprotocol/` — if the doctor wants a different guideline, say it needs a change to the clinical library.
 

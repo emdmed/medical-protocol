@@ -61,7 +61,7 @@ All return `string` (mL, rounded to integer). Inputs accept `string | number` an
 ## CLI
 
 ```bash
-npx medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2
+medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2
 ```
 
 ---

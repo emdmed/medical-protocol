@@ -52,9 +52,8 @@ Never install testing frameworks (vitest, jest, playwright) or write test files.
 Testing means running the QA workflow:
 
 1. `npm run dev` → `npx wait-on http://localhost:3000 -t 30000`
-2. `npm run build -w packages/medprotocol`
-3. Verify calculations: `npx medprotocol` with `--json`, then compare against browser UI via agent-browser (agent-qa.md Section F)
-4. Verify interface: full browser QA via agent-browser — page load, console errors, responsive layout, empty states, overlap detection, keyboard nav (agent-qa.md Sections A–E, G)
+2. Verify calculations: `medprotocol` with `--json`, then compare against browser UI via agent-browser (agent-qa.md Section F)
+3. Verify interface: full browser QA via agent-browser — page load, console errors, responsive layout, empty states, overlap detection, keyboard nav (agent-qa.md Sections A–E, G)
 
 ## Patterns
 
@@ -127,7 +126,7 @@ When a workflow tells you to build a clinical tool, follow `${CLAUDE_PLUGIN_ROOT
 4. **When composing multiple screens**, follow `composition.md` (only needed when wiring screens together):
    - Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.
    - Null-guard all cross-screen data.
-5. **Verify** — `npx tsc --noEmit` passes, and a few results match `npx medprotocol <cmd>`
+5. **Verify** — `npx tsc --noEmit` passes, and a few results match `medprotocol <cmd>`
 6. **Communicate in clinical terms** — confirm the clinical capability is ready rather than listing technical details like CLI commands or file paths
 
 ---
@@ -157,13 +156,12 @@ Summary: theming, responsiveness, error boundary, UI polish, layout disclaimer, 
 
 When the doctor asks to "test", "verify", or "check" that things work correctly:
 
-**Never install testing frameworks** (vitest, jest, playwright, etc.) or write test files. Testing means running the QA workflow with agent-browser and `npx medprotocol`.
+**Never install testing frameworks** (vitest, jest, playwright, etc.) or write test files. Testing means running the QA workflow with agent-browser and `medprotocol`.
 
 1. Start the dev server: `npm run dev` (background), then `npx wait-on http://localhost:3000 -t 30000`
-2. Build the CLI: `npm run build -w packages/medprotocol`
-3. **Verify calculations** — run `npx medprotocol` with known inputs (`--json`), then enter the same values in the browser UI via agent-browser and confirm the results match (see `agent-qa.md` Section F)
-4. **Verify the interface** — run the full browser QA via agent-browser: page load, console errors, responsive layout, empty states, overlap detection, keyboard navigation (see `agent-qa.md` Sections A–E, G)
-5. **Report in clinical language**: "All calculations are correct" or "The blood gas analysis showed a different result than expected — I've fixed it." Use clinical terms, not technical ones like test frameworks or CLI tools.
+2. **Verify calculations** — run `medprotocol` with known inputs (`--json`), then enter the same values in the browser UI via agent-browser and confirm the results match (see `agent-qa.md` Section F)
+3. **Verify the interface** — run the full browser QA via agent-browser: page load, console errors, responsive layout, empty states, overlap detection, keyboard navigation (see `agent-qa.md` Sections A–E, G)
+4. **Report in clinical language**: "All calculations are correct" or "The blood gas analysis showed a different result than expected — I've fixed it." Use clinical terms, not technical ones like test frameworks or CLI tools.
 
 ---
 

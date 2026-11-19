@@ -6,6 +6,7 @@ user-invocable: true
 ---
 
 Read and follow: reference/core.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 ## Purpose
 
@@ -26,8 +27,8 @@ The agent does the React-aware edit; the `medprotocol` CLI stays a framework-agn
    - **Manual drain** — `--serve` only captures selections; you process them by running
      `/medical-protocol:overlay-audit | overlay-implement | overlay-add` in Claude Code.
 2. Run the server in the background. Default port `7331` — use `--port` if taken (`EADDRINUSE`):
-   - Automatic: `npx medprotocol overlay --serve --auto`
-   - Manual: `npx medprotocol overlay --serve`
+   - Automatic: `medprotocol overlay --serve --auto`
+   - Manual: `medprotocol overlay --serve`
 3. Capture the port from the server's first line (`medprotocol overlay server → http://localhost:<port>`).
 
 ## Phase 2: Find the mount point

@@ -8,9 +8,9 @@ Idempotent, dev-gated, reversible. The agent does the edit; the CLI only serves.
 First decide how selections get processed (ask the doctor — see SKILL.md Phase 1):
 
 ```bash
-npx medprotocol overlay --serve --auto     # AUTONOMOUS: each selection runs end-to-end (needs the `claude` CLI)
-npx medprotocol overlay --serve            # MANUAL: selections only queue; drain them yourself
-npx medprotocol overlay --serve --auto --port 8080  # if 7331 is taken (CLI prints EADDRINUSE)
+medprotocol overlay --serve --auto     # AUTONOMOUS: each selection runs end-to-end (needs the `claude` CLI)
+medprotocol overlay --serve            # MANUAL: selections only queue; drain them yourself
+medprotocol overlay --serve --auto --port 8080  # if 7331 is taken (CLI prints EADDRINUSE)
 ```
 
 **Default to `--auto`** — it closes the loop so results appear in the overlay with no terminal step.

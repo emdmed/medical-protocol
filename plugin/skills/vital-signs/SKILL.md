@@ -14,6 +14,7 @@ Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/normal-ranges.md
 Read when needed: reference/critical-values.md
 Read when needed: reference/pediatric-ranges.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 ## Build
 

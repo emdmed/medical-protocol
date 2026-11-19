@@ -58,5 +58,5 @@ UI SDK components are unstyled. Style them with the project's existing styles (T
 ## 5. Verify
 
 1. Run the project's type check.
-2. Compare a few results with the CLI: `npx medprotocol <cmd> ...` must give the same numbers as the screen.
+2. Compare a few results with the CLI: `medprotocol <cmd> ...` must give the same numbers as the screen.
 3. Run browser QA (see `quality-checklist.md`).

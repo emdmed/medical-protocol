@@ -16,7 +16,7 @@
       "Bash(git log *)",
       "Bash(gh api *)",
       "Bash(agent-browser *)",
-      "Bash(node packages/medprotocol/dist/index.js *)",
+      "Bash(node *medprotocol.cjs *)",
 
       "Read",
       "Write",

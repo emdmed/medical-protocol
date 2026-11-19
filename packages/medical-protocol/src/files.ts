@@ -4,7 +4,7 @@ import { homedir } from "os";
 import { execSync } from "child_process";
 
 export function getBundledPluginDir(): string {
-  // dist/index.js → dist/ → package root → plugin/
+  // scripts/medical-protocol.cjs → repo root → plugin/
   return path.resolve(__dirname, "..", "plugin");
 }
 
@@ -15,6 +15,11 @@ export function getSkillsDir(baseDir: string): string {
 // Clinical logic sits beside skills/ so skills reach it at ${CLAUDE_SKILL_DIR}/../../lib
 export function getLibDir(baseDir: string): string {
   return path.join(baseDir, ".claude", "lib");
+}
+
+// The medprotocol CLI, reached by skills at ${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs
+export function getScriptsDir(baseDir: string): string {
+  return path.join(baseDir, ".claude", "scripts");
 }
 
 export function getAgentsDir(baseDir: string): string {

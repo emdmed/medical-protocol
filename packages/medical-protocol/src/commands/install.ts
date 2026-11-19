@@ -6,6 +6,7 @@ import {
   getSkillsDir,
   getHooksDir,
   getLibDir,
+  getScriptsDir,
   getAgentsDir,
   getSettingsPath,
   listFiles,
@@ -220,6 +221,17 @@ function installLinked(baseDir: string, sourcePath: string | undefined, force: b
     symlinkDir(sourceSkillsDir, skillsDir);
   }
 
+  // Link the clinical logic and CLI beside skills/, where skills reach them
+  for (const [dir, dest] of [["lib", getLibDir(baseDir)], ["scripts", getScriptsDir(baseDir)]]) {
+    const src = path.join(pluginDir, dir);
+    if (!fs.existsSync(src)) continue;
+    if (fs.existsSync(dest) && force) {
+      if (isLink(dest)) removeLink(dest);
+      else fs.rmSync(dest, { recursive: true });
+    }
+    symlinkDir(src, dest);
+  }
+
   // Symlink individual agent files (doctors can add their own agents beside them)
   const sourceAgentsDir = path.join(pluginDir, "agents");
   if (fs.existsSync(sourceAgentsDir)) {
@@ -349,6 +361,17 @@ function installCopy(baseDir: string, force: boolean, json: boolean): void {
     }
   }
 
+  // Copy the medprotocol CLI
+  const bundledScriptsDir = path.join(bundledDir, "scripts");
+  if (fs.existsSync(bundledScriptsDir)) {
+    for (const relPath of listFiles(bundledScriptsDir)) {
+      const src = path.join(bundledScriptsDir, relPath);
+      copyFile(src, path.join(getScriptsDir(baseDir), relPath));
+      fileHashes[`scripts/${relPath}`] = hashFile(src);
+      totalFiles++;
+    }
+  }
+
   // Copy subagents
   const bundledAgentsDir = path.join(bundledDir, "agents");
   if (fs.existsSync(bundledAgentsDir)) {
@@ -419,7 +442,7 @@ function installCopy(baseDir: string, force: boolean, json: boolean): void {
 }
 
 function syncGlobalCache(bundledDir: string, cacheDir: string, version: string): void {
-  const dirsToSync = ["skills", "agents", "hooks", "lib", "context", "reference"];
+  const dirsToSync = ["skills", "agents", "hooks", "lib", "scripts", "context", "reference"];
   for (const dir of dirsToSync) {
     const srcDir = path.join(bundledDir, dir);
     if (!fs.existsSync(srcDir)) continue;

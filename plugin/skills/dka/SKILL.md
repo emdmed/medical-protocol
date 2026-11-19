@@ -14,6 +14,7 @@ Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/resolution-criteria.md
 Read when needed: reference/insulin-protocol.md
 Read when needed: reference/potassium-management.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 ## Build
 

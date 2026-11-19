@@ -93,8 +93,8 @@ Blood gas: `analyze({ values: { pH, pCO2, HCO3: bicarbonate, Na: sodium, Cl: chl
 ## CLI
 
 ```bash
-npx medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl
-npx medprotocol dka --glucose 200 --ketones 0.4 --bicarb 18 --ph 7.35 --unit mgdl
+medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl
+medprotocol dka --glucose 200 --ketones 0.4 --bicarb 18 --ph 7.35 --unit mgdl
 ```
 
 ---

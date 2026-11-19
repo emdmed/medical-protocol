@@ -52,18 +52,18 @@ tests/cli/                    # CLI-specific tests (vitest)
 
 ```bash
 # From repo root (development)
-npm run medprotocol -- <command> [flags]
-npm run medprotocol -- bmi --weight 70 --height-m 1.75 --metric
-npm run medprotocol -- pafi --pao2 60 --fio2 40 --json
+medprotocol <command> [flags]
+medprotocol bmi --weight 70 --height-m 1.75 --metric
+medprotocol pafi --pao2 60 --fio2 40 --json
 
 # Sub-commands (cardiology)
-npm run medprotocol -- cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
-npm run medprotocol -- cardiology heart --history 1 --ecg 0 --age 2 --risk-factors 1 --troponin 0
+medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
+medprotocol cardiology heart --history 1 --ecg 0 --age 2 --risk-factors 1 --troponin 0
 
 # Help
-npm run medprotocol -- --help            # Global
-npm run medprotocol -- bmi --help        # Per-command
-npm run medprotocol -- --version
+medprotocol --help            # Global
+medprotocol bmi --help        # Per-command
+medprotocol --version
 ```
 
 ## Command Anatomy

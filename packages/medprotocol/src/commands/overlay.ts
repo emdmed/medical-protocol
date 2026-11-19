@@ -165,7 +165,7 @@ const JSON_HEADER = { "Content-Type": "application/json" } as const;
 const AUTO_PROMPT =
   "A medical-protocol overlay selection was just queued in .medprotocol/queue/. " +
   "Process all pending overlay work orders now, without asking for confirmation: run " +
-  "`npx medprotocol overlay --drain --json` to claim them, then for each order run the matching " +
+  `\`node "${process.argv[1]}" overlay --drain --json\` to claim them, then for each order run the matching ` +
   "skill — overlay-audit for action \"audit\", overlay-implement for action \"implement\", " +
   "overlay-add for action \"add\" (build the component described in the order's `prompt` field and " +
   "stage it into the selected region). For action \"skill\", run the skill named in the order's `skill` " +

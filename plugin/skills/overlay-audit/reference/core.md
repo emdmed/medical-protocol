@@ -5,7 +5,7 @@ by an `audit` work order whose selection is described by DOM descriptors, not a 
 
 ## Inputs
 
-A drained `audit` work order (`npx medprotocol overlay --drain --json`):
+A drained `audit` work order (`medprotocol overlay --drain --json`):
 
 ```jsonc
 {

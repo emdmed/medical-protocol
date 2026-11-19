@@ -125,11 +125,11 @@ Non-HDL: `classifyNonHDL(calculateNonHDL(tc, hdl) ?? 0)`. Do not subtract in the
 ## CLI
 
 ```bash
-npx medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male
-npx medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 45
-npx medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300
-npx medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
-npx medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4
+medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male
+medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 45
+medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300
+medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
+medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4
 ```
 
 ---

@@ -13,6 +13,7 @@ Read and follow: reference/clinical-context.md
 Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/ards-berlin-criteria.md
 Read when needed: reference/ventilation-targets.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 ## Build
 

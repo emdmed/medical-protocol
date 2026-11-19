@@ -6,7 +6,7 @@ source, stage a diff, apply on approval. Lease → apply, mirroring Impeccable's
 
 ## Inputs
 
-A drained `implement` work order (`npx medprotocol overlay --drain --json`):
+A drained `implement` work order (`medprotocol overlay --drain --json`):
 
 ```jsonc
 {

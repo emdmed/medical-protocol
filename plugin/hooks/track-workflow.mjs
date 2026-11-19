@@ -46,7 +46,7 @@ async function main() {
     }
 
     // QA indicators: tsc check, CLI comparison (not overlay drains), eslint, prettier
-    if (/(npx tsc --noemit|npx medprotocol (?!overlay)|eslint|prettier)/.test(cmd)) {
+    if (/(npx tsc --noemit|medprotocol\.cjs"? (?!overlay)|eslint|prettier)/.test(cmd)) {
       fs.mkdirSync(stateDir, { recursive: true });
       fs.writeFileSync(path.join(stateDir, ".qa_started"), "");
     }

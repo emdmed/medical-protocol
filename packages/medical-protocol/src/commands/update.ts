@@ -2,7 +2,7 @@ import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { execSync } from "child_process";
 import { version as VERSION } from "../../package.json";
-import { getBundledPluginDir, getSkillsDir, getHooksDir, getLibDir, getAgentsDir, getSettingsPath, listFiles, copyFile } from "../files";
+import { getBundledPluginDir, getSkillsDir, getHooksDir, getLibDir, getScriptsDir, getAgentsDir, getSettingsPath, listFiles, copyFile } from "../files";
 import { hashFile, readManifest, writeManifest, type FileManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../plugin/lib/format";
 import { isInteractive, confirmOverwriteModified } from "../prompts";
@@ -134,6 +134,9 @@ async function updateCopyInteractive(baseDir: string, manifest: FileManifest, fo
   }
   if (fs.existsSync(path.join(bundledDir, "lib"))) {
     processDir(path.join(bundledDir, "lib"), getLibDir(baseDir), "lib", manifest, force, newHashes, updated, skipped, added);
+  }
+  if (fs.existsSync(path.join(bundledDir, "scripts"))) {
+    processDir(path.join(bundledDir, "scripts"), getScriptsDir(baseDir), "scripts", manifest, force, newHashes, updated, skipped, added);
   }
   if (fs.existsSync(path.join(bundledDir, "agents"))) {
     processDir(path.join(bundledDir, "agents"), getAgentsDir(baseDir), "agents", manifest, force, newHashes, updated, skipped, added);
@@ -299,6 +302,9 @@ function updateCopy(baseDir: string, manifest: FileManifest, force: boolean, jso
   if (fs.existsSync(path.join(bundledDir, "lib"))) {
     processDir(path.join(bundledDir, "lib"), getLibDir(baseDir), "lib", manifest, force, newHashes, updated, skipped, added);
   }
+  if (fs.existsSync(path.join(bundledDir, "scripts"))) {
+    processDir(path.join(bundledDir, "scripts"), getScriptsDir(baseDir), "scripts", manifest, force, newHashes, updated, skipped, added);
+  }
   if (fs.existsSync(path.join(bundledDir, "agents"))) {
     processDir(path.join(bundledDir, "agents"), getAgentsDir(baseDir), "agents", manifest, force, newHashes, updated, skipped, added);
   }
@@ -414,6 +420,9 @@ function resolveInstalledPath(baseDir: string, key: string): string | null {
   }
   if (key.startsWith("lib/")) {
     return path.join(getLibDir(baseDir), key.slice("lib/".length));
+  }
+  if (key.startsWith("scripts/")) {
+    return path.join(getScriptsDir(baseDir), key.slice("scripts/".length));
   }
   if (key.startsWith("agents/")) {
     return path.join(getAgentsDir(baseDir), key.slice("agents/".length));

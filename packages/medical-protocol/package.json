@@ -3,16 +3,9 @@
   "version": "0.7.10",
   "description": "Install and manage the medical-protocol plugin for Claude Code",
   "license": "MIT",
-  "bin": {
-    "medical-protocol": "./dist/index.js"
-  },
-  "files": [
-    "dist/",
-    "plugin/"
-  ],
+  "private": true,
   "scripts": {
-    "build": "node build.mjs",
-    "prepublishOnly": "npm run build"
+    "build": "node build.mjs"
   },
   "engines": {
     "node": ">=18"

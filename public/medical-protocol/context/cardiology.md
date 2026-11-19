@@ -81,9 +81,9 @@ ASCVD numeric inputs are `string` (parsed via `safeParseFloat`). `race: "other"`
 ## CLI
 
 ```bash
-npx medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
-npx medprotocol cardiology heart --history 1 --ecg 1 --age 2 --risk 1 --troponin 0
-npx medprotocol cardiology chadsvasc --chf --htn --age75 --diabetes --stroke
+medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
+medprotocol cardiology heart --history 1 --ecg 1 --age 2 --risk 1 --troponin 0
+medprotocol cardiology chadsvasc --chf --htn --age75 --diabetes --stroke
 ```
 
 ---

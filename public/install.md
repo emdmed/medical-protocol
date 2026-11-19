@@ -8,7 +8,8 @@ Choose your AI coding provider to get started:
 
 The fully supported provider. Claude Code reads the protocol, copies the clinical logic into your project, and generates clinical interfaces automatically with UI SDK.
 
-**Quick start:**
+**Quick start** (inside Claude Code):
 ```
-npx medical-protocol install
+/plugin marketplace add emdmed/medical-protocol
+/plugin install medical-protocol@medical-protocol
 ```

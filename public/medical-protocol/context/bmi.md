@@ -53,7 +53,7 @@ The lib does not split obesity into classes I–III. Do not derive them in the U
 ## CLI
 
 ```bash
-npx medprotocol bmi --weight 70 --height-m 1.75 --metric
+medprotocol bmi --weight 70 --height-m 1.75 --metric
 ```
 
 ---

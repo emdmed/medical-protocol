@@ -1,7 +1,6 @@
 node_modules/
 packages/medprotocol/dist/
 packages/medical-protocol/dist/
-packages/medical-protocol/plugin/
 .claude/
 marketing/
 docs/

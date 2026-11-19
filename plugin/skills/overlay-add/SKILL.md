@@ -9,6 +9,7 @@ Read and follow: reference/core.md
 Read and follow: reference/building.md
 Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/queue.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 ## Purpose
 
@@ -20,7 +21,7 @@ component there from the `prompt`. Lease/apply: nothing lands until the doctor a
 
 ## Phase 1: Drain the queue
 
-1. Run `npx medprotocol overlay --drain --json` to claim pending work orders.
+1. Run `medprotocol overlay --drain --json` to claim pending work orders.
 2. Keep only orders with `"action": "add"`. If none, tell the doctor to select a region in their app,
    choose "Add a component here…", and type what to build, then stop.
 3. **Apply fast-path:** if a drained order has `"approved": true` **and** a staged shadow already

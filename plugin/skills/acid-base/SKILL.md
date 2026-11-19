@@ -14,6 +14,7 @@ Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/compensation-formulas.md
 Read when needed: reference/anion-gap-interpretation.md
 Read when needed: reference/mixed-disorders.md
+medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 ## Build
 

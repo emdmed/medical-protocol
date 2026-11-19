@@ -8,7 +8,7 @@
       "description": "The fully supported provider. Claude Code reads the protocol, copies the clinical logic into your project, and generates clinical interfaces automatically with UI SDK.",
       "install": "providers/claude-code/install.md",
       "protocol": "providers/claude-code/protocol.md",
-      "quickStart": "npx medical-protocol install"
+      "quickStart": "/plugin marketplace add emdmed/medical-protocol && /plugin install medical-protocol@medical-protocol"
     }
   }
 }

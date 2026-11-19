@@ -203,7 +203,7 @@ const latest = ckd.readings.at(-1);
 > classification and resolve straight to the registry id + source. Emit them when you can; nothing
 > breaks when they're absent.
 
-The dev overlay (served by `npx medprotocol overlay --serve`) lets a doctor hover a rendered element, select it, and queue an **Audit** or **Implement** work order. When present, these attributes are read off the selected node (or its nearest tagged ancestor):
+The dev overlay (served by `medprotocol overlay --serve`) lets a doctor hover a rendered element, select it, and queue an **Audit** or **Implement** work order. When present, these attributes are read off the selected node (or its nearest tagged ancestor):
 
 ```html
 <div

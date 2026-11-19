@@ -10,7 +10,7 @@ component; **add** builds something *new* described by `prompt` and inserts it a
 
 ## Inputs
 
-A drained `add` work order (`npx medprotocol overlay --drain --json`):
+A drained `add` work order (`medprotocol overlay --drain --json`):
 
 ```jsonc
 {

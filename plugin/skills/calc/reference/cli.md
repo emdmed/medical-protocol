@@ -38,12 +38,12 @@ dispatch plan naming the skill to run for each selection (`/medical-protocol:ove
 `overlay-implement`). See `context/overlay.md` for the queue schema and the Audit/Implement semantics.
 
 ```bash
-npx medprotocol overlay --serve    # serve overlay.js + accept browser selections (add the printed <script> tag, dev only)
-npx medprotocol overlay --serve --auto  # …and auto-process each selection via a headless Claude run (opt-in, needs `claude` CLI)
-npx medprotocol overlay --list     # show pending selections
-npx medprotocol overlay --drain    # claim pending selections, print dispatch plan
-npx medprotocol overlay --watch    # live-report new selections
-npx medprotocol overlay --clear    # remove completed work orders
+medprotocol overlay --serve    # serve overlay.js + accept browser selections (add the printed <script> tag, dev only)
+medprotocol overlay --serve --auto  # …and auto-process each selection via a headless Claude run (opt-in, needs `claude` CLI)
+medprotocol overlay --list     # show pending selections
+medprotocol overlay --drain    # claim pending selections, print dispatch plan
+medprotocol overlay --watch    # live-report new selections
+medprotocol overlay --clear    # remove completed work orders
 ```
 
 The overlay itself is the vanilla script served at `GET /overlay.js` by `--serve` — there is no

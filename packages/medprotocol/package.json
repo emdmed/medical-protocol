@@ -3,15 +3,9 @@
   "version": "0.7.10",
   "description": "Medical calculations from the terminal — for AI agents and clinicians",
   "license": "MIT",
-  "bin": {
-    "medprotocol": "./dist/index.js"
-  },
-  "files": [
-    "dist/"
-  ],
+  "private": true,
   "scripts": {
-    "build": "tsup src/index.ts --format cjs --target node18 --out-dir dist",
-    "prepublishOnly": "npm run build"
+    "build": "tsup src/index.ts --format cjs --target node18 --out-dir dist && node -e \"require('fs').copyFileSync('dist/index.js', '../../plugin/scripts/medprotocol.cjs')\""
   },
   "engines": {
     "node": ">=18"
