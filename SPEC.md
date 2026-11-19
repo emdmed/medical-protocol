@@ -48,7 +48,7 @@ Three properties hold the system together:
                         │     ▼                            │
                         │  packages/medprotocol (CLI)      │
                         │                                  │
-                        │  plugin/  ──build.sh──▶ packages/ │
+                        │  plugin/  ──build.mjs─▶ packages/ │
                         │  (skills, hooks,     medical-     │
                         │   settings, lib)     protocol     │
                         │                      (installer)  │
@@ -189,9 +189,9 @@ CLI built with `commander`. Entry: `packages/medical-protocol/src/index.ts`.
 - **Interactivity:** `prompts.ts` (`@clack/prompts`) drives interactive flows;
   `-y`/`--json` force non-interactive.
 
-### 6.3 Build & bundling — `build.sh`
+### 6.3 Build & bundling — `build.mjs`
 
-`packages/medical-protocol/build.sh` is the bridge from source to publishable
+`packages/medical-protocol/build.mjs` is the bridge from source to publishable
 package. It:
 
 1. Builds `src/index.ts` with tsup.
@@ -348,7 +348,7 @@ Then: `version:bump` (all files) → lockfile sync → per-target `build` →
 1. **Author** edits clinical logic in `plugin/lib/` (source of truth) and/or markdown
    context in `public/medical-protocol/`.
 2. **Tests** (`tests/`) pin the logic; CLI commands surface it via `--json`.
-3. **`build.sh`** bundles `plugin/` + canonical context into the installer
+3. **`build.mjs`** bundles `plugin/` + canonical context into the installer
    package; **`release.sh`** gates and publishes `medprotocol` (CLI) and
    `medical-protocol` (installer).
 4. **Doctor** runs `npx medical-protocol install` → skills/hooks/settings land in
@@ -372,6 +372,6 @@ Per `.patterns/new-module/` and the README contributing section:
 5. **Classification row** in `public/.../context/classification.md` and routing
    in the `start` skill.
 6. **Skill** under `plugin/skills/<module>/` (or a workflow file under
-   `providers/claude-code/workflows/`), plus its reference copies in `build.sh`.
+   `providers/claude-code/workflows/`), plus its reference copies in `build.mjs`.
 7. Bump version via `npm run version:bump`.
 ```
