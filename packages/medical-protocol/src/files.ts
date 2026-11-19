@@ -17,6 +17,10 @@ export function getLibDir(baseDir: string): string {
   return path.join(baseDir, ".claude", "lib");
 }
 
+export function getAgentsDir(baseDir: string): string {
+  return path.join(baseDir, ".claude", "agents");
+}
+
 export function getHooksDir(baseDir: string): string {
   return path.join(baseDir, ".claude", "hooks");
 }

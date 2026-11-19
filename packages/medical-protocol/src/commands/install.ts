@@ -6,6 +6,7 @@ import {
   getSkillsDir,
   getHooksDir,
   getLibDir,
+  getAgentsDir,
   getSettingsPath,
   listFiles,
   copyFile,
@@ -219,6 +220,14 @@ function installLinked(baseDir: string, sourcePath: string | undefined, force: b
     symlinkDir(sourceSkillsDir, skillsDir);
   }
 
+  // Symlink individual agent files (doctors can add their own agents beside them)
+  const sourceAgentsDir = path.join(pluginDir, "agents");
+  if (fs.existsSync(sourceAgentsDir)) {
+    for (const relPath of listFiles(sourceAgentsDir)) {
+      symlinkFile(path.join(sourceAgentsDir, relPath), path.join(getAgentsDir(baseDir), relPath));
+    }
+  }
+
   // Symlink individual hook files (not the whole dir, so doctors can add their own)
   let hookCount = 0;
   if (fs.existsSync(sourceHooksDir)) {
@@ -340,6 +349,17 @@ function installCopy(baseDir: string, force: boolean, json: boolean): void {
     }
   }
 
+  // Copy subagents
+  const bundledAgentsDir = path.join(bundledDir, "agents");
+  if (fs.existsSync(bundledAgentsDir)) {
+    for (const relPath of listFiles(bundledAgentsDir)) {
+      const src = path.join(bundledAgentsDir, relPath);
+      copyFile(src, path.join(getAgentsDir(baseDir), relPath));
+      fileHashes[`agents/${relPath}`] = hashFile(src);
+      totalFiles++;
+    }
+  }
+
   // Copy hooks
   if (fs.existsSync(bundledHooksDir)) {
     const hookFiles = listFiles(bundledHooksDir);
@@ -399,7 +419,7 @@ function installCopy(baseDir: string, force: boolean, json: boolean): void {
 }
 
 function syncGlobalCache(bundledDir: string, cacheDir: string, version: string): void {
-  const dirsToSync = ["skills", "hooks", "lib", "context", "reference"];
+  const dirsToSync = ["skills", "agents", "hooks", "lib", "context", "reference"];
   for (const dir of dirsToSync) {
     const srcDir = path.join(bundledDir, dir);
     if (!fs.existsSync(srcDir)) continue;

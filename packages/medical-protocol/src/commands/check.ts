@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { version as VERSION } from "../../package.json";
-import { getBundledPluginDir, getSkillsDir, getHooksDir, getLibDir, listFiles, isSymlink, getRepoStatus } from "../files";
+import { getBundledPluginDir, getSkillsDir, getHooksDir, getLibDir, getAgentsDir, listFiles, isSymlink, getRepoStatus } from "../files";
 import { hashFile, readManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../plugin/lib/format";
 import { isInteractive } from "../prompts";
@@ -174,6 +174,8 @@ function gatherCopyStatus(baseDir: string, manifest: import("../manifest").FileM
   for (const [prefix, bundledBase] of [
     ["skills", bundledSkillsDir],
     ["hooks", bundledHooksDir],
+    ["lib", path.join(bundledDir, "lib")],
+    ["agents", path.join(bundledDir, "agents")],
   ] as const) {
     if (!fs.existsSync(bundledBase)) continue;
     const files = listFiles(bundledBase);
@@ -324,6 +326,9 @@ function resolveInstalledPath(baseDir: string, key: string): string | null {
   }
   if (key.startsWith("lib/")) {
     return path.join(getLibDir(baseDir), key.slice("lib/".length));
+  }
+  if (key.startsWith("agents/")) {
+    return path.join(getAgentsDir(baseDir), key.slice("agents/".length));
   }
   return null;
 }

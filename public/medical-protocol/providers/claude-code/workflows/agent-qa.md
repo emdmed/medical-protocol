@@ -1,108 +1,85 @@
-# Browser QA Workflow
+# Browser QA Workflow (recipes)
 
 > **For Claude only.** Run automatically as part of the Quality Checklist. This is a background quality step — communicate results in clinical language, not browser testing terminology.
+
+You (the main agent) write a **recipe**: a short test script for one screen. The `medical-protocol:qa-runner` agent (Haiku) runs it in the browser and writes a report. You read the report, fix the code, and run it again.
 
 ---
 
 ## Prerequisites
 
-1. `agent-browser --version` — if fails, **skip entire workflow**
-2. Dev server must be responding (main protocol runs `npx wait-on` before this)
-3. Open the app. **Prefer connecting to an already-running Chrome** — the dev usually starts Chrome with remote debugging on port **9222**:
-
-   ```bash
-   agent-browser connect 9222            # connect once; later commands need no flag
-   agent-browser open http://localhost:3000
-   ```
-
-   - If `connect` fails (no Chrome on 9222), fall back to launching a fresh browser:
-     ```bash
-     agent-browser open http://localhost:3000
-     ```
-   - `agent-browser --auto-connect open http://localhost:3000` also works — it probes common ports (9222, 9229) automatically.
-   - To start Chrome with the port yourself: `google-chrome --remote-debugging-port=9222` (use the platform's Chrome binary, e.g. `chrome` / `chromium`).
-   - If neither connect nor launch works after 2 retries, skip.
-
-> **Note:** `--cdp 9222` can prefix any single command (e.g. `agent-browser --cdp 9222 snapshot -i`) instead of `connect`, but `connect` is simpler for a full QA pass.
+1. `agent-browser --version` — if it fails, **skip this workflow**
+2. Dev server is responding (`npx wait-on http://localhost:3000 -t 30000`)
 
 ---
 
-## Universal Checks
+## 1. Write or update the recipe
 
-### A. Page Load & Console
+One recipe per screen: `qa/recipes/<module>.md` (e.g. `qa/recipes/bmi.md`). If it already exists, update it to match the current screen instead of starting over.
 
-```bash
-agent-browser errors
-agent-browser console
+- **Made-up values only.** Never put real patient data in a recipe.
+- **Expected numbers come from the CLI**, never from your own math: run `npx medprotocol <cmd> --json` with the recipe's inputs and copy the result. Note the command next to each expectation.
+- Name elements by their **visible label** ("Weight field", "Calculate button"), so the runner can find them in the accessibility tree.
+- One action or one check per step. Keep it to ~15 steps.
+
+Recipe format:
+
+```markdown
+# Recipe: bmi
+URL: http://localhost:3000/bmi
+
+## Steps
+1. Open the URL. Expect: no JS errors (`agent-browser errors` is empty).
+2. Expect: a Weight field and a Height field are visible.
+3. Switch units to Metric.
+4. Fill Weight with 70.
+5. Fill Height with 1.75.
+6. Expect: BMI shows 22.9 and the category "Normal".          <!-- npx medprotocol bmi --weight 70 --height-m 1.75 --metric --json -->
+7. Fill Weight with 130.
+8. Expect: BMI shows 42.4 and the category "Obese III".        <!-- npx medprotocol bmi --weight 130 --height-m 1.75 --metric --json -->
+9. Clear Weight. Expect: no "NaN", "undefined", "null" or "[object Object]" anywhere on the page.
+
+## Every recipe ends with
+10. Set viewport 768×1024. Expect: no horizontal scroll, results do not overlap labels. Screenshot.
+11. Set viewport 1280×800. Expect: same. Screenshot.
+12. Press Tab through the page. Expect: every input and button gets visible focus, in reading order.
+13. Expect: `agent-browser errors` is empty.
 ```
-JS errors → fix source, reload. Warnings → ignore. Persist after 2 fixes → log and continue.
 
-### B. Accessibility Tree
-
-```bash
-agent-browser snapshot -i
-```
-Verify non-empty (interactive elements present). Blank after 10s → check hydration errors.
-
-### C. Responsive Layout
-
-Test at 768×1024 and 1280×800:
-```bash
-agent-browser set viewport 768 1024
-agent-browser snapshot -i
-agent-browser set viewport 1280 800
-agent-browser snapshot -i
-```
-Check: no horizontal overflow, proper stacking/columns, accessible navigation.
-
-### D. Empty State & Data Integrity
-
-No "undefined", "NaN", "null", "[object Object]", or "Error" in rendered text. Proper placeholders shown.
-
-### E. Element Overlap
-
-Result badges, popups, alerts must not overlap titles/labels. Check at both viewports. Fix: move results below inputs, use inline flow instead of absolute positioning.
-
-### F. Calculation Correctness (medprotocol CLI)
-
-Build CLI: `npm run build -w packages/medprotocol`. Run `npx medprotocol <cmd> --json` with known inputs, compare against UI output. Mismatches → fix component to use canonical lib functions. After 2 failures → skip.
-
-### G. Keyboard Navigation
-
-Tab through elements (logical order, visible focus indicators). Escape closes modals/popups.
+Add screen-specific checks, e.g. vital signs: a dangerous value shows an alert; dashboard: every card renders.
 
 ---
 
-## Component-Specific Checks
+## 2. Run it
 
-Run only for built components:
+Start the runner with the Agent tool, `subagent_type: "medical-protocol:qa-runner"` (or `"qa-runner"` if that is the name your agent list shows), and this prompt:
 
-- **Vital Signs:** Click-to-edit works, dangerous values trigger alerts
-- **Dashboard:** Multiple card/sections render, no overlap at different viewports
-- **Calculators (Acid-Base/BMI/Water Balance):** Inputs work, results appear below inputs (not overlapping title)
+> Run the recipe `qa/recipes/<module>.md` against `<URL>`. Write the report to `qa/reports/<module>.md`.
 
 ---
 
-## Error Handling
+## 3. Read the report and fix
 
-**Screenshot on failure:** `agent-browser screenshot .qa-screenshots/failure-$(date +%s).png`
+Read `qa/reports/<module>.md`.
 
-**Auto-fix patterns:**
+- **PASS** → done.
+- **SKIPPED** → browser unavailable; continue without browser QA.
+- **FAIL** → fix the cause in the screen's code, then run the runner again.
 
 | Symptom | Fix |
 |---|---|
+| Number differs from the CLI | Use the canonical `@/lib/medprotocol/...` function; never re-implement the math |
+| "undefined"/"NaN" | Null checks / defaults for empty inputs |
 | Popup clipped | `overflow-visible` on the clipping container |
 | Results overlap title | Move below inputs, avoid `absolute bottom-*` |
 | Overflow at 768px | Responsive Tailwind classes |
-| "undefined"/"NaN" | Add null checks / defaults |
 
-**Clinical translation** (for unfixable issues): describe in plain language, never technical terms.
+If a failure is in the recipe itself (wrong label, wrong expectation), fix the recipe, not the code.
 
-**Bail-out:** 2 failed fixes per issue, 3 total browser crashes, or dev server down → skip and proceed.
+**Bail-out:** 2 fix-and-rerun rounds per screen. Still failing → describe the remaining problem to the doctor in plain clinical language and move on.
 
 ---
 
-## Cleanup
+## Re-running later
 
-- **Launched a fresh browser:** run `agent-browser close`.
-- **Connected to an existing Chrome (port 9222):** do **not** run `agent-browser close` — that would close the dev's own browser. Just leave it; close only the QA tab if needed.
+Recipes stay in the project. After any change to a screen, run its recipe again (step 2). The doctor can ask for this with `/medical-protocol:qa`.

@@ -1,7 +1,7 @@
 ---
 name: dashboard
 description: "[Internal] Build a combined clinical dashboard — pick building blocks and compose them into one view"
-allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
 user-invocable: true
 ---
 

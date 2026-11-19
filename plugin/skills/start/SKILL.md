@@ -1,7 +1,7 @@
 ---
 name: start
 description: Start the medical protocol — describe what you need in clinical terms and the system handles everything
-allowed-tools: Read, Grep, Glob, Bash, Write, Edit
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
 user-invocable: true
 ---
 

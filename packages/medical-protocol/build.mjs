@@ -37,13 +37,14 @@ for (const wf of ["nephrology", "cardiology", "sepsis"]) {
   copyTo(join(PUBLIC, `providers/claude-code/workflows/${wf}.md`), ["start"]);
 }
 copyTo(join(PUBLIC, "providers/claude-code/workflows/troubleshoot.md"), ["troubleshoot"]);
+copyTo(join(PUBLIC, "providers/claude-code/workflows/agent-qa.md"), ["qa", ...UI_SKILLS]);
 
 // Bundle plugin files into the package (skills are self-contained with reference/ dirs)
 // .claude-plugin/ and old context/reference dirs are intentionally not bundled
 const OUT = join(DIR, "plugin");
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
-for (const entry of ["skills", "hooks", "lib", "settings.json"]) {
+for (const entry of ["skills", "agents", "hooks", "lib", "settings.json"]) {
   cpSync(join(PLUGIN, entry), join(OUT, entry), { recursive: true });
 }
 

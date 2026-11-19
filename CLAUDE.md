@@ -7,7 +7,7 @@ This project is one piece of a four-part medical protocol system. Know which par
 | Part | What it does | Where it lives |
 |------|-------------|----------------|
 | **1. Workflows & Plugin** (this repo) | Markdown protocols, workflows, context, skills, and hooks that agents like Claude Code consume. Also contains `plugin/lib/` with pure calculation logic, shipped inside the plugin. | `/home/enrique/projects/medprotocol-core` |
-| **2. medical-protocol** (this repo) | Plugin installer package. `npx medical-protocol install` installs skills, hooks, settings, and lib from `plugin/` into a doctor's project `.claude/`. `build.sh` copies plugin source into the package before publish. Also installable from the marketplace (`plugin/.claude-plugin/plugin.json`). | `packages/medical-protocol/` in this repo |
+| **2. medical-protocol** (this repo) | Plugin installer package. `npx medical-protocol install` installs skills, hooks, settings, and lib from `plugin/` into a doctor's project `.claude/`. `build.mjs` copies plugin source into the package before publish. Also installable from the marketplace (`plugin/.claude-plugin/plugin.json`). | `packages/medical-protocol/` in this repo |
 | **3. medprotocol CLI** (this repo) | Terminal calculator tool. Imports logic from `plugin/lib/`. No UI. | `packages/medprotocol/` in this repo |
 | **4. Generated UI** (no repo) | The agent generates each screen in the doctor's project with [UI SDK](https://ui-sdk.dev/docs) (React 19+, unstyled), importing the logic copied to `lib/medprotocol/`. Contract: `public/medical-protocol/context/building.md`. | Doctor's project only |
 
@@ -27,7 +27,7 @@ npx vitest run tests/vital-signs/     # Run a single test directory
 npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
 npm run version:bump 0.4.0            # Bump version across 5 files
 npm run build                         # Build medprotocol CLI
-bash packages/medical-protocol/build.sh  # Build plugin installer (bundles plugin/ into package)
+node packages/medical-protocol/build.mjs  # Build plugin installer (bundles plugin/ into package)
 npm run release <version>             # Gated publish (auth, version, tests)
 npx medprotocol <cmd> [opts]          # CLI calculators (abg, bmi, cardiology, ckd, diabetes, dka, pafi, sepsis, vitals, water-balance)
 ```
@@ -54,10 +54,11 @@ plugin/                            # Claude plugin source
 │   ├── acid-base/                 # analyze.ts, interfaces.ts, index.ts
 │   ├── vital-signs-validations/   # validation files per vital sign, severity.ts, types.ts
 │   └── *.ts                       # bmi, cardiology, ckd, diabetes-dx, dka, endocrine, format, hepatology, nephrology, pafi, patient, sepsis, sources, trace, water-balance
+├── agents/                        # qa-runner (Haiku): runs a QA recipe in the browser, writes a report
 ├── hooks/                         # privacy-guard, qa-reminder, track-workflow
 ├── skills/                        # SKILL.md + reference/ per skill
 └── settings.json
-packages/medical-protocol/         # Plugin installer (npx medical-protocol install). build.sh bundles plugin/ into package.
+packages/medical-protocol/         # Plugin installer (npx medical-protocol install). build.mjs bundles plugin/ into package.
 packages/medprotocol/              # CLI calculator tool
 tests/                             # Vitest — test files, clinical logic only, no UI rendering
 scripts/                           # bump-version.sh, npm/release.sh
@@ -71,5 +72,5 @@ scripts/                           # bump-version.sh, npm/release.sh
 - **Testing:** Logic-only via Vitest; UI QA via agent-browser (workflows/agent-qa.md)
 - **Content is markdown and JSON only** — no HTML
 - **Plugin:** skills in `plugin/skills/` (SKILL.md + reference docs), 3 hooks in `plugin/hooks/` (privacy-guard, qa-reminder, track-workflow)
-- **Shared context:** `public/medical-protocol/context/` — build contract, tool registry, classification, CLI ref, composition patterns, and per-module docs (single source of truth; `build.sh` copies them into skill `reference/` dirs)
+- **Shared context:** `public/medical-protocol/context/` — build contract, tool registry, classification, CLI ref, composition patterns, and per-module docs (single source of truth; `build.mjs` copies them into skill `reference/` dirs)
 - **Version:** synced across package.json files, provider manifest, and plugin.json via `npm run version:bump`
