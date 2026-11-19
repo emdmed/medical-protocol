@@ -28,7 +28,7 @@ npm test                              # Run all unit tests (Vitest)
 npm run test:watch                    # Watch mode
 npx vitest run tests/vital-signs/     # Run a single test directory
 npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
-npm run version:bump 0.4.0            # Bump version across 5 files
+npm run version:bump 0.4.0            # Bump version everywhere + rebuild both bundles
 npm run build                         # Build CLI → plugin/scripts/medprotocol.cjs (commit it)
 node packages/medical-protocol/build.mjs  # Sync reference docs into skills + build installer → scripts/medical-protocol.cjs (commit it)
 node plugin/scripts/medprotocol.cjs <cmd> [opts]  # CLI calculators (abg, bmi, cardiology, ckd, diabetes, dka, pafi, sepsis, vitals, water-balance, overlay)

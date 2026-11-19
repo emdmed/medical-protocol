@@ -61,19 +61,31 @@ update_json "$ROOT/package.json" "obj.version = '$VERSION';"
 # --- 2. providers/manifest.json ---
 update_json "$ROOT/public/medical-protocol/providers/manifest.json" "obj.version = '$VERSION';"
 
-# --- 4. packages/medprotocol/package.json ---
+# --- 3. packages/medprotocol/package.json ---
 update_json "$ROOT/packages/medprotocol/package.json" "obj.version = '$VERSION';"
 
-# --- 5. packages/medical-protocol/package.json ---
+# --- 4. packages/medical-protocol/package.json ---
 update_json "$ROOT/packages/medical-protocol/package.json" "obj.version = '$VERSION';"
 
-# --- 6. plugin/.claude-plugin/plugin.json ---
+# --- 5. plugin/.claude-plugin/plugin.json ---
 update_json "$ROOT/plugin/.claude-plugin/plugin.json" "obj.version = '$VERSION';"
 
+# --- 6. SPEC.md status line ---
+sed -i -E "s/\(v[0-9]+\.[0-9]+\.[0-9]+\)/(v$VERSION)/" "$ROOT/SPEC.md"
+
+# --- 7. lockfile + committed bundles (they embed the version at build time) ---
+cd "$ROOT"
+# edit versions directly; `npm install --package-lock-only` would also re-resolve deps
+node -e "
+  const fs = require('fs');
+  const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+  lock.version = '$VERSION';
+  for (const p of ['', 'packages/medprotocol', 'packages/medical-protocol'])
+    if (lock.packages[p]) lock.packages[p].version = '$VERSION';
+  fs.writeFileSync('package-lock.json', JSON.stringify(lock, null, 2) + '\\n');
+"
+npm run build --silent
+node packages/medical-protocol/build.mjs
+
 echo ""
-if [ "$CHANGED" -gt 0 ]; then
-  echo "Done. $CHANGED file(s) updated to $VERSION."
-  echo "Run 'npm install --package-lock-only' to sync package-lock.json."
-else
-  echo "Nothing to update — all files already at $VERSION."
-fi
+echo "Done. All parts at $VERSION. Commit, then: git tag v$VERSION"
