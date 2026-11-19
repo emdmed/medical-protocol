@@ -16,6 +16,7 @@ Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Before anything else, check if the current project already has clinical screens (e.g., `components/medprotocol/vital-signs/`, `components/medprotocol/acid-base/`, etc.):
 
 - If the doctor asks for something that already exists, route to the **modify** workflow — do not rebuild it.
+- If the doctor wants an existing screen checked or a patient case added ("check it", "is it working?", "also check a 45 kg patient"), route straight to `../qa/SKILL.md` — skip Steps 2–3.
 - If the doctor asks for something new that doesn't exist yet, proceed below.
 - Never re-scaffold the project if it already has a working setup.
 
@@ -52,6 +53,7 @@ Use the classification table to match the doctor's request to a domain, then rou
 | **preferences** | `../preferences/SKILL.md` |
 | **protocol-audit** | `../protocol-audit/SKILL.md` |
 | **calc-audit** | `../calc-audit/SKILL.md` |
+| **qa** | `../qa/SKILL.md` |
 
 ### Domains routed via workflow file
 

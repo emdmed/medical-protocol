@@ -21,7 +21,7 @@ Remember whether `connect` succeeded — it decides cleanup.
 
 ## 2. Follow the recipe
 
-Read the recipe. Do each step in order, exactly as written. Useful commands:
+Read the recipe. The **Cases** list says what each case is about; the **Steps** are what you do. Do each step in order, exactly as written. Useful commands:
 
 | Need | Command |
 |---|---|
@@ -49,13 +49,21 @@ Write `qa/reports/<recipe name>.md`:
 Status: PASS | FAIL | SKIPPED
 Run: <date and time>
 
-| # | Step | Expected | Seen | Result |
-|---|------|----------|------|--------|
-| 1 | ... | ... | ... | PASS |
+## Cases
+| # | Case | Result |
+|---|------|--------|
+| 1 | Adult, 70 kg, 1.75 m → BMI 22.9, Normal | FAIL |
+
+## Steps
+| # | Case | Step | Expected | Seen | Result |
+|---|------|------|----------|------|--------|
+| 3 | 1 | ... | BMI 22.9 | BMI NaN | FAIL |
 
 ## Failures
-- Step 3: expected "BMI 22.9", saw "BMI NaN". Screenshot: qa/screenshots/bmi-3.png
+- Step 3 (Case 1): expected "BMI 22.9", saw "BMI NaN". Screenshot: qa/screenshots/bmi-3.png
 ```
+
+A case is PASS only if every step tagged with it passed.
 
 Report only what you observed. Do not guess causes or suggest code changes.
 

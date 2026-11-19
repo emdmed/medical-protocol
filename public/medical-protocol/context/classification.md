@@ -54,6 +54,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **preferences** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty |
 | **protocol-audit** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check |
 | **calc-audit** | test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors |
+| **qa** | check it, is it working, try it, test the screen, test the calculator, check everything, add a case, also check a patient, what do you check |
 
 ---
 
@@ -64,6 +65,8 @@ When the doctor describes what they need, classify into one of these domains bas
 **If the request matches multiple domains**, prefer `dashboard` as it combines components.
 
 **If the doctor is reporting a problem** (signal words: not working, error, broken, crashed, blank/white screen, won't load, stuck, something wrong), always route to `troubleshoot` regardless of other domain matches.
+
+**If the doctor wants a built screen checked or a patient case added** (`qa` signal words), route to `qa` directly — skip Initial Clarification. If they describe a symptom ("it shows the wrong number"), that is `troubleshoot`.
 
 **If no domain matches**, ask: "Could you describe what clinical information you'd like to see or manage?"
 
