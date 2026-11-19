@@ -1,6 +1,6 @@
 {
   "name": "medical-protocol",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "description": "Clinical tool builder for healthcare professionals — vital signs, calculators, and critical care tools",
   "author": {
