@@ -6,10 +6,11 @@ user-invocable: true
 ---
 
 Read and follow: reference/core.md
-Read and follow: reference/component-fetching.md
+Read and follow: reference/building.md
 Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Also `Read` from `reference/composition.md` for component integration patterns and gotchas.
 
 You are customizing an existing clinical interface for a healthcare professional. Follow the phases below exactly.
@@ -33,20 +34,18 @@ Do NOT ask about CSS, styles, component architecture, state management, or file 
 
 Determine which files need to change:
 
-1. Read the existing project structure — check what components are already installed
+1. Read the existing project structure — check which screens already exist in `components/medprotocol/`
 
 2. Set the workflow marker:
    ```
    mkdir -p .claude/hooks-state && touch .claude/hooks-state/.workflow_active
    ```
 
-3. Read the installed component files in the project's `components/` directory. Each main TSX file has a JSDoc header documenting its props, data flow, and behavior — read these before modifying anything.
+3. Read the screens in `components/medprotocol/`. Each main file has a header comment (purpose, props, which `lib/medprotocol` functions it calls) — read it before modifying anything.
 
-4. Read the JSDoc header at the top of the main component file to understand its props, usage, and integration points before making changes.
+4. If the doctor requests a clinical tool the project doesn't have yet, build it per building.md (copy the logic, generate the screen with UI SDK).
 
-5. If the doctor requests a component that isn't installed yet, install it via `npx medical-ui-cli add <component-name>` following the Component Installation Process in the protocol context.
-
-6. If the doctor requests a feature that doesn't exist in the component library (e.g., medication tracker, lab results viewer, scheduling system), build it from scratch:
+5. If the doctor requests a feature no `lib/medprotocol` module covers (e.g., medication tracker, lab results viewer, scheduling system), build it from scratch:
    - Follow the patterns established in the existing project code
    - Use the same state management approach (localStorage for persistence if enabled, React state otherwise)
    - Place new components in the appropriate directory
@@ -62,12 +61,12 @@ Determine which files need to change:
 Common customization patterns:
 - **Remove a vital sign**: Remove its import and usage from the main vital-signs component
 - **Add a field to patient details**: Add the field to the patient details component and default data
-- **Change alert thresholds**: Modify the validation files in `validations/`
+- **Change alert thresholds**: Never edit `lib/medprotocol/` — thresholds come from the lib. Tell the doctor the guideline value in use; if it seems wrong, it is fixed upstream
 - **Rearrange layout**: Modify the grid/flex layout in the page file
 
 ## Phase 4: Quality & Preview
 
-1. Run the **Quality Checklist** from the protocol context automatically — review theming, responsiveness, error boundaries, and shadcn polish for any new or changed components. Fix any issues before proceeding.
+1. Run the **Quality Checklist** from the protocol context automatically — review theming, responsiveness, error boundaries, and the building.md rules (no clinical math in the UI, units, labels, disclaimer) for any new or changed screens. Update the header comment of any main file you changed. Fix any issues before proceeding.
 2. If `npm run dev` is already running, the changes will appear automatically. If not, start it.
 3. Tell the doctor:
    > "I've updated your interface. [Describe what changed in clinical terms]. You can see the changes at http://localhost:3000/[relevant-path]"

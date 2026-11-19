@@ -10,6 +10,12 @@ AI-agent-driven clinical tools — validated calculation logic, a terminal CLI, 
 npx medical-protocol install
 ```
 
+Or install it from the Claude Code plugin marketplace (run inside Claude Code):
+
+```
+/plugin install medical-protocol --marketplace emdmed/medical-protocol
+```
+
 Then describe what you need: *"I need a vital signs monitor with fluid balance tracking"* — the agent handles the rest.
 
 #### Symlink mode (for multi-project or dev setups)
@@ -78,7 +84,7 @@ BMI Calculator
 
 ## Architecture
 
-Three parts: **this repo** (workflows, plugin, `lib/` logic, CLI), **medprotocol-ui** (separate repo — shadcn-style component delivery), and the **doctor's project** (Next.js app built by the agent). Pure calculation logic lives in `lib/` — no framework deps, shared by CLI and UI. See `CLAUDE.md` for full directory structure.
+Two parts: **this repo** (workflows, plugin, `plugin/lib/` logic, CLI) and the **doctor's project** (Next.js app built by the agent). Pure calculation logic lives in `plugin/lib/` — no framework deps. It ships inside the plugin, is copied into the doctor's project at `lib/medprotocol/`, and is shared by the CLI and the generated screens. The UI is generated per project with [UI SDK](https://ui-sdk.dev/docs); see `public/medical-protocol/context/building.md`. See `CLAUDE.md` for full directory structure.
 
 ## Clinical Components
 
@@ -115,10 +121,7 @@ Covers: extreme values, negative inputs, triple acid-base disorders, zero diviso
 4. Run `npm test` — all 907 tests must pass
 5. Submit a PR
 
-New clinical modules need three things:
-1. Pure logic in `lib/`
-2. Workflow file in `public/medical-protocol/providers/claude-code/workflows/`
-3. Classification row in `public/medical-protocol/context/classification.md`
+New clinical modules: see `.patterns/new-module/new-module.md` (pure logic in `plugin/lib/`, tests, context doc, CLI command, skill/workflow, classification row).
 
 ## License
 

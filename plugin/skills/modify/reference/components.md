@@ -1,4 +1,4 @@
-# Component Registry
+# Tool Registry
 
 ## Available Tools
 
@@ -15,6 +15,8 @@
 | ckd | eGFR, KDIGO staging, KFRE risk prediction |
 | nephrology | CKD anemia, CKD-MBD, cardio-metabolic panels |
 | sepsis | SOFA, qSOFA, septic shock, hour-1 bundle |
+| diabetes-dx | ADA diabetes diagnosis, T1D staging, T1 vs T2, T2D/GDM screening |
+| hepatology | MASLD/MASH screening: FIB-4, LSM/ELF, referral |
 | dashboard | Combined overview of multiple tools |
 | modify | Modify layout, add/remove fields |
 | troubleshoot | Fix errors, blank screens, broken UI |
@@ -22,48 +24,50 @@
 | calc | Quick terminal-based calculations |
 | preferences | Configure doctor preferences and specialty |
 | protocol-audit | Audit protocol quality and compliance |
+| overlay-setup | Start the overlay server and wire the dev-only overlay `<script>` tag into any app |
+| overlay-audit | Audit a region selected in the dev overlay against protocol guidance (drains an "audit" work order; works on untagged apps) |
+| overlay-implement | Retrofit a medical-protocol component into a region selected in the dev overlay, staged as an approved diff (drains an "implement" work order) |
 
 ---
 
-## Component Reference
+## Tool → Logic → Context
 
-Run `npx medical-ui-cli list` for the canonical list of available components, groups, and sub-component aliases. The CLI resolves names in order: group → alias → standard folder.
+Clinical logic lives in `lib/medprotocol/` in the doctor's project (copied from the plugin). Import from `@/lib/medprotocol/<module>`. Each generated screen goes in `components/medprotocol/<tool>/<tool>.tsx`.
 
-**Base group:** `npx medical-ui-cli add base` (or alias `patient`) installs the patient demographics component.
+| Tool | Lib module file(s) in `lib/medprotocol/` | Context doc |
+|---|---|---|
+| patient | `patient.ts` | `patient.md` |
+| vital-signs | `vital-signs-validations/` (`severity.ts` + one file per vital) | `vital-signs.md` |
+| acid-base | `acid-base/` (`analyze.ts`, `interfaces.ts`, `index.ts`) | `acid-base.md` |
+| water-balance | `water-balance.ts` | `water-balance.md` |
+| bmi | `bmi.ts` | `bmi.md` |
+| pafi | `pafi.ts` | `pafi.md` |
+| dka | `dka.ts` + `acid-base/` | `dka.md` |
+| cardiology | `cardiology.ts`, `cardiology-types.ts` | `cardiology.md` |
+| ckd | `ckd.ts` | `nephrology.md` |
+| nephrology | `nephrology.ts` (+ `ckd.ts`) | `nephrology.md` |
+| sepsis | `sepsis.ts` | `sepsis.md` |
+| diabetes-dx | `diabetes-dx.ts`, `endocrine.ts` | `diabetes.md` |
+| hepatology | `hepatology.ts` | `hepatology.md` |
+| dashboard | any of the above | `composition.md` |
 
-Each installed component folder contains a JSDoc header in its main TSX file documenting props, usage, data flow, and behavior -- read this before modifying.
+Shared by all: `utils/safeParseFloat.ts`, `sources.ts` (guideline citations), `trace.ts` (calculation audit trail), `index.ts` (barrel export).
 
 ---
 
-## Component Dependencies
+## Data Dependencies
 
-The CLI does **not** auto-install dependent components -- you must install them separately:
+Tools that share data. Wire them with props (see `composition.md`) instead of asking for the same value twice.
 
-- `patient` provides age, sex, weight, height to other components. When both `patient` and a dependent component (ckd, dka, sepsis, water-balance, cardiology, bmi) are on the same dashboard, wire patient data into them instead of duplicating inline fields.
-- `dka` depends on `acid-base` -- install acid-base first
-- `sepsis` depends on `vital-signs` and `water-balance`
-- `nephrology` is a companion to `ckd` -- the `nephrology` group installs both. Wire `sex` from CKD to Anemia, `gfrCategory` from CKD to PhosphoCalcic.
-- Other components are self-contained
+- **patient** provides age, sex, weight, height. When patient and a dependent tool (ckd, nephrology, cardiology, diabetes-dx, hepatology, dka, sepsis, water-balance, bmi) share a dashboard, pass patient fields down instead of duplicating inline fields.
+- **dka** uses **acid-base**: it calls `analyze()` on each reading. Both modules are always copied together.
+- **sepsis** uses **vital-signs** (RR, SBP, FiO2 → qSOFA / respiration SOFA) and **water-balance** (urine output, fluid status).
+- **nephrology** is a companion to **ckd**. Wire `sex` from CKD to Anemia, `gfrCategory` (latest CKD reading) to PhosphoCalcic and CardioMetabolic, plus `age`, `hasDiabetes`, `hasPriorCVD`, `hasKidneyTransplant` to CardioMetabolic.
+- **diabetes-dx** uses `diabetes-dx.ts` for the diagnosis screen and `endocrine.ts` for the sub-screens (T1D staging, T1 vs T2, T2D screening, GDM screening). The tool name is `diabetes-dx`, not `diabetes`.
+- Other tools are self-contained.
 
 ---
 
-## Component Installation
+## How to Build
 
-Components are installed via the `medical-ui-cli` -- same model as shadcn/ui. The CLI copies component files into the doctor's project and installs shadcn dependencies automatically.
-
-**CLI commands:**
-```
-npx medical-ui-cli list              # Show all available components
-npx medical-ui-cli add <component>   # Install a component + shadcn deps
-npx medical-ui-cli debug             # Diagnostic info
-```
-
-**Prerequisite:** The doctor's project must have `components.json` (shadcn config) in the root.
-
-### Post-Installation
-
-1. **Install shared components**: The CLI does **not** auto-install shared components (`medical-disclaimer.tsx`, `layout-disclaimer.tsx`, `error-boundary.tsx`). After installing, check the component's imports -- if it references any of these shared files that don't exist in the project, create them as simple React components following the patterns in the installed code.
-2. **Handle missing imports**: After installation, check the component's imports for modules that aren't available in the project:
-   - **shadcn hook or component** (e.g. `@/hooks/use-mobile`) -- create it using standard shadcn patterns or install via `npx shadcn@latest add`
-   - **Another installable component** (e.g. `@/components/water-balance/water-balance`) -- install it via `npx medical-ui-cli add {name}`
-   - **Project-specific UI variant** (e.g. `@/components/ui/textarea-inv`) -- create it as a thin wrapper around the standard shadcn component
+Follow `building.md`: copy the logic, set up UI SDK, generate each screen from its module's **Screen spec**, verify against the CLI.

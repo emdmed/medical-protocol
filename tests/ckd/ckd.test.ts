@@ -25,7 +25,7 @@ import {
   assessPTH,
   assessVitaminD,
   getCKDMBDMonitoring,
-} from '../../lib/ckd';
+} from '../../plugin/lib/ckd';
 
 // ─── calculateEGFR ──────────────────────────────────────────────────
 

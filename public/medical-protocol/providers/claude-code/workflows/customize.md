@@ -25,18 +25,17 @@ Do NOT ask about:
 
 Determine which files need to change:
 
-1. **Read the existing project structure** — check what components are already installed
-2. **Read the JSDoc header** at the top of each component's main TSX file to understand its props, usage, data flow, and integration points before making changes
+1. **Read the existing project structure** — check which screens already exist in `components/medprotocol/`
+2. **Read the header comment** at the top of each screen's main TSX file to understand its props, usage, data flow, and integration points before making changes
 
-3. **If the doctor requests a component that isn't installed yet**, install it with `npx medical-ui-cli add <component>`
+3. **If the doctor requests a clinical tool that isn't built yet**, build it following **Building a Screen** in the main protocol (building.md)
 
-4. **If the project has multiple components wired together** (e.g., a dashboard with embedded calculators), review the installed component code and follow these composition rules before making changes:
+4. **If the project has multiple components wired together** (e.g., a dashboard with embedded calculators), review the existing screen code and follow these composition rules before making changes:
    - Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.
-   - Add `overflow-visible` to any shadcn Card that contains absolutely-positioned popups or overlays.
    - Null-guard all cross-component data.
 
 6. **If the doctor requests a feature that doesn't exist in the component library** (e.g., a medication tracker, lab results viewer, scheduling system), build it from scratch:
-   - Follow the patterns established in the existing project code (file structure, naming conventions, hook patterns, shadcn usage)
+   - Follow the patterns established in the existing project code (file structure, naming conventions, hook patterns, UI SDK parts)
    - Use the same state management approach (localStorage for persistence if enabled, React state otherwise)
    - Place new components in the appropriate directory (`components/` for reusable widgets, `app/{feature}/` for pages)
    - Include clinical validation where applicable
@@ -53,14 +52,14 @@ Determine which files need to change:
 Common customization patterns:
 - **Remove a vital sign**: Remove its import and usage from the main vital-signs component
 - **Add a field to patient details**: Add the field to the patient details component and default data
-- **Change alert thresholds**: Modify the validation files in `validations/`
+- **Change alert thresholds**: Thresholds live in `lib/medprotocol/` and must not be edited locally or copied into the UI. Explain to the doctor that thresholds follow the cited guideline; if they believe one is wrong, it is reported upstream (building.md §4). How alerts *look* can be changed freely
 - **Rearrange layout**: Modify the grid/flex layout in the page file
 
 ---
 
 ## Phase 4: Quality & Preview
 
-1. **Run the Quality Checklist** from the main protocol — automatically review theming, responsiveness, and shadcn polish for any new or changed components. Fix any issues before proceeding.
+1. **Run the Quality Checklist** from the main protocol — automatically review theming, responsiveness, and UI polish for any new or changed components. Fix any issues before proceeding.
 2. If `npm run dev` is already running, the changes will appear automatically. If not, start it.
 3. Tell the doctor:
    > "I've updated your interface. [Describe what changed in clinical terms]. You can see the changes at http://localhost:3000/[relevant-path]"

@@ -55,10 +55,10 @@ describe('medprotocol dka', () => {
     run(['--glucose', '150', '--ketones', '0.3', '--bicarbonate', '18', '--ph', '7.35', '--json']);
     const result = JSON.parse(stdout);
     expect(result.resolved).toBe(true);
-    expect(result.criteria.glucose).toBe(true);
     expect(result.criteria.ketones).toBe(true);
     expect(result.criteria.bicarbonate).toBe(true);
     expect(result.criteria.pH).toBe(true);
+    expect(result.criteria).not.toHaveProperty('glucose');
   });
 
   it('assesses DKA resolution — not resolved', () => {

@@ -18,300 +18,195 @@ import {
   getSOFASeverityLevel,
   getSOFASeverity,
   hasVasopressors,
-} from '../../lib/sepsis';
+} from '../../plugin/lib/sepsis';
 
 // ─── Respiration SOFA ───────────────────────────────────────────────
 
-describe('calculateRespirationSOFA', () => {
-  it('returns 0 for PaO2/FiO2 >= 400', () => {
-    // PaO2=100, FiO2=21% → ratio=476
-    expect(calculateRespirationSOFA('100', '21', false)).toBe(0);
+describe('calculateRespirationSOFA (SOFA-2)', () => {
+  it('PaO2:FiO2 >300 → 0, ≤300 → 1, ≤225 → 2', () => {
+    expect(calculateRespirationSOFA('70', '21', false)).toBe(0);   // 333
+    expect(calculateRespirationSOFA('63', '21', false)).toBe(1);   // 300
+    expect(calculateRespirationSOFA('90', '40', false)).toBe(2);   // 225
   });
 
-  it('returns 1 for PaO2/FiO2 300-399', () => {
-    // PaO2=80, FiO2=21% → ratio=381
-    expect(calculateRespirationSOFA('80', '21', false)).toBe(1);
+  it('without advanced support the maximum is 2', () => {
+    expect(calculateRespirationSOFA('50', '80', false)).toBe(2);   // 62.5
   });
 
-  it('returns 2 for PaO2/FiO2 200-299', () => {
-    // PaO2=60, FiO2=21% → ratio=286
-    expect(calculateRespirationSOFA('60', '21', false)).toBe(2);
+  it('≤150 with advanced support → 3, ≤75 → 4', () => {
+    expect(calculateRespirationSOFA('60', '40', true)).toBe(3);    // 150
+    expect(calculateRespirationSOFA('60', '80', true)).toBe(4);    // 75
   });
 
-  it('returns 2 (not 3) for PaO2/FiO2 <200 without ventilation', () => {
-    // PaO2=40, FiO2=21% → ratio=190, but no vent → capped at 2
-    expect(calculateRespirationSOFA('40', '21', false)).toBe(2);
+  it('ECMO → 4 regardless of ratio', () => {
+    expect(calculateRespirationSOFA('200', '30', true, true)).toBe(4);
   });
 
-  it('returns 3 for PaO2/FiO2 100-199 with ventilation', () => {
-    // PaO2=40, FiO2=21% → ratio=190 + vent → 3
-    expect(calculateRespirationSOFA('40', '21', true)).toBe(3);
+  it('ceiling of treatment lifts the cap without support', () => {
+    expect(calculateRespirationSOFA('50', '80', false, false, '', true)).toBe(4);
   });
 
-  it('returns 4 for PaO2/FiO2 <100 with ventilation', () => {
-    // PaO2=60, FiO2=80% → ratio=75 + vent → 4
-    expect(calculateRespirationSOFA('60', '80', true)).toBe(4);
+  it('SpO2:FiO2 only when PaO2 missing and SpO2 <98', () => {
+    expect(calculateRespirationSOFA('', '40', true, false, '96')).toBe(2);  // 240 ≤250
+    expect(calculateRespirationSOFA('', '50', true, false, '95')).toBe(3);  // 190 ≤200
+    expect(calculateRespirationSOFA('', '80', true, false, '92')).toBe(4);  // 115 ≤120
+    expect(calculateRespirationSOFA('', '50', true, false, '98')).toBe(0);  // SpO2 ≥98 not used
   });
 
-  it('returns 0 for empty inputs', () => {
-    expect(calculateRespirationSOFA('', '', false)).toBe(0);
-    expect(calculateRespirationSOFA('80', '', false)).toBe(0);
-  });
-
-  it('returns 0 for invalid FiO2 (out of range)', () => {
-    expect(calculateRespirationSOFA('80', '15', false)).toBe(0);
-    expect(calculateRespirationSOFA('80', '105', false)).toBe(0);
-  });
-
-  it('boundary: PaO2/FiO2 exactly 400', () => {
-    // PaO2=84, FiO2=21% → ratio=400 → score 0
-    expect(calculateRespirationSOFA('84', '21', false)).toBe(0);
-  });
-
-  it('boundary: PaO2/FiO2 exactly 300', () => {
-    // PaO2=63, FiO2=21% → ratio=300 → score 1 (not <300)
-    expect(calculateRespirationSOFA('63', '21', false)).toBe(1);
+  it('invalid FiO2 or missing values → 0', () => {
+    expect(calculateRespirationSOFA('80', '10', true)).toBe(0);
+    expect(calculateRespirationSOFA('', '40', true)).toBe(0);
   });
 });
 
-// ─── Coagulation SOFA ───────────────────────────────────────────────
-
-describe('calculateCoagulationSOFA', () => {
-  it('returns 0 for platelets >= 150', () => {
-    expect(calculateCoagulationSOFA('150')).toBe(0);
-    expect(calculateCoagulationSOFA('300')).toBe(0);
-  });
-
-  it('returns 1 for platelets 100-149', () => {
-    expect(calculateCoagulationSOFA('149')).toBe(1);
-    expect(calculateCoagulationSOFA('100')).toBe(1);
-  });
-
-  it('returns 2 for platelets 50-99', () => {
-    expect(calculateCoagulationSOFA('99')).toBe(2);
-    expect(calculateCoagulationSOFA('50')).toBe(2);
-  });
-
-  it('returns 3 for platelets 20-49', () => {
-    expect(calculateCoagulationSOFA('49')).toBe(3);
-    expect(calculateCoagulationSOFA('20')).toBe(3);
-  });
-
-  it('returns 4 for platelets < 20', () => {
-    expect(calculateCoagulationSOFA('19')).toBe(4);
-    expect(calculateCoagulationSOFA('5')).toBe(4);
-  });
-
-  it('returns 0 for empty string', () => {
-    expect(calculateCoagulationSOFA('')).toBe(0);
-  });
+describe('calculateCoagulationSOFA (SOFA-2)', () => {
+  it.each([['200', 0], ['150', 1], ['100', 2], ['81', 2], ['80', 3], ['51', 3], ['50', 4], ['10', 4]])(
+    'platelets %s → %i', (p, score) => expect(calculateCoagulationSOFA(p)).toBe(score),
+  );
+  it('missing → 0', () => expect(calculateCoagulationSOFA('')).toBe(0));
 });
 
-// ─── Liver SOFA ─────────────────────────────────────────────────────
-
-describe('calculateLiverSOFA', () => {
-  it('returns 0 for bilirubin < 1.2', () => {
-    expect(calculateLiverSOFA('0.5')).toBe(0);
-    expect(calculateLiverSOFA('1.1')).toBe(0);
-  });
-
-  it('returns 1 for bilirubin 1.2-1.9', () => {
-    expect(calculateLiverSOFA('1.2')).toBe(1);
-    expect(calculateLiverSOFA('1.9')).toBe(1);
-  });
-
-  it('returns 2 for bilirubin 2.0-5.9', () => {
-    expect(calculateLiverSOFA('2.0')).toBe(2);
-    expect(calculateLiverSOFA('5.9')).toBe(2);
-  });
-
-  it('returns 3 for bilirubin 6.0-11.9', () => {
-    expect(calculateLiverSOFA('6.0')).toBe(3);
-    expect(calculateLiverSOFA('11.9')).toBe(3);
-  });
-
-  it('returns 4 for bilirubin >= 12', () => {
-    expect(calculateLiverSOFA('12')).toBe(4);
-    expect(calculateLiverSOFA('20')).toBe(4);
-  });
-
-  it('returns 0 for empty string', () => {
-    expect(calculateLiverSOFA('')).toBe(0);
-  });
+describe('calculateLiverSOFA (SOFA-2)', () => {
+  it.each([['1.2', 0], ['1.3', 1], ['3.0', 1], ['3.1', 2], ['6.0', 2], ['6.1', 3], ['12.0', 3], ['12.1', 4]])(
+    'bilirubin %s → %i', (b, score) => expect(calculateLiverSOFA(b)).toBe(score),
+  );
+  it('missing → 0', () => expect(calculateLiverSOFA('')).toBe(0));
 });
 
-// ─── Cardiovascular SOFA ────────────────────────────────────────────
-
-describe('calculateCardiovascularSOFA', () => {
-  it('returns 0 for MAP >= 70, no vasopressors', () => {
+describe('calculateCardiovascularSOFA (SOFA-2)', () => {
+  it('no vasoactives: MAP ≥70 → 0, <70 → 1', () => {
     expect(calculateCardiovascularSOFA('75', '', '', '', '')).toBe(0);
-    expect(calculateCardiovascularSOFA('70', '0', '0', '0', '0')).toBe(0);
-  });
-
-  it('returns 1 for MAP < 70, no vasopressors', () => {
     expect(calculateCardiovascularSOFA('65', '', '', '', '')).toBe(1);
-    expect(calculateCardiovascularSOFA('69', '0', '0', '0', '0')).toBe(1);
   });
 
-  it('returns 2 for dopamine <= 5', () => {
-    expect(calculateCardiovascularSOFA('65', '5', '', '', '')).toBe(2);
-    expect(calculateCardiovascularSOFA('65', '3', '', '', '')).toBe(2);
+  it('NE+E sum ≤0.2 → 2, >0.2–0.4 → 3, >0.4 → 4', () => {
+    expect(calculateCardiovascularSOFA('65', '', '', '0.1', '0.1')).toBe(2);
+    expect(calculateCardiovascularSOFA('65', '', '', '0.1', '0.2')).toBe(3);
+    expect(calculateCardiovascularSOFA('65', '', '', '', '0.4')).toBe(3);
+    expect(calculateCardiovascularSOFA('65', '', '', '0.2', '0.3')).toBe(4);
   });
 
-  it('returns 2 for any dobutamine', () => {
+  it('other vasopressor or inotrope alone → 2', () => {
     expect(calculateCardiovascularSOFA('65', '', '5', '', '')).toBe(2);
+    expect(calculateCardiovascularSOFA('65', '', '', '', '', true)).toBe(2);
   });
 
-  it('returns 3 for dopamine > 5', () => {
-    expect(calculateCardiovascularSOFA('65', '10', '', '', '')).toBe(3);
+  it('low-dose NE+E plus another agent → 3, medium-dose plus another → 4', () => {
+    expect(calculateCardiovascularSOFA('65', '', '', '', '0.15', true)).toBe(3);
+    expect(calculateCardiovascularSOFA('65', '', '5', '', '0.3')).toBe(4);
   });
 
-  it('returns 3 for epinephrine <= 0.1', () => {
-    expect(calculateCardiovascularSOFA('65', '', '', '0.05', '')).toBe(3);
-    expect(calculateCardiovascularSOFA('65', '', '', '0.1', '')).toBe(3);
+  it('mechanical circulatory support → 4', () => {
+    expect(calculateCardiovascularSOFA('70', '', '', '', '', false, true)).toBe(4);
   });
 
-  it('returns 3 for norepinephrine <= 0.1', () => {
-    expect(calculateCardiovascularSOFA('65', '', '', '', '0.1')).toBe(3);
+  it('dopamine as the only vasopressor: ≤20 → 2, >20–40 → 3, >40 → 4', () => {
+    expect(calculateCardiovascularSOFA('65', '20', '', '', '')).toBe(2);
+    expect(calculateCardiovascularSOFA('65', '30', '', '', '')).toBe(3);
+    expect(calculateCardiovascularSOFA('65', '45', '', '', '')).toBe(4);
   });
 
-  it('returns 4 for dopamine > 15', () => {
-    expect(calculateCardiovascularSOFA('65', '20', '', '', '')).toBe(4);
+  it('MAP-only scoring with a ceiling of treatment', () => {
+    expect(calculateCardiovascularSOFA('65', '', '', '', '', false, false, true)).toBe(1);
+    expect(calculateCardiovascularSOFA('55', '', '', '', '', false, false, true)).toBe(2);
+    expect(calculateCardiovascularSOFA('45', '', '', '', '', false, false, true)).toBe(3);
+    expect(calculateCardiovascularSOFA('35', '', '', '', '', false, false, true)).toBe(4);
+    // without the ceiling flag MAP alone never exceeds 1
+    expect(calculateCardiovascularSOFA('35', '', '', '', '')).toBe(1);
   });
 
-  it('returns 4 for epinephrine > 0.1', () => {
-    expect(calculateCardiovascularSOFA('65', '', '', '0.2', '')).toBe(4);
-  });
-
-  it('returns 4 for norepinephrine > 0.1', () => {
-    expect(calculateCardiovascularSOFA('65', '', '', '', '0.2')).toBe(4);
-  });
-
-  it('returns 0 for all empty', () => {
+  it('missing MAP and no drugs → 0', () => {
     expect(calculateCardiovascularSOFA('', '', '', '', '')).toBe(0);
   });
 });
 
-// ─── CNS SOFA ───────────────────────────────────────────────────────
+describe('calculateCNSSOFA (SOFA-2)', () => {
+  it.each([['15', 0], ['13', 1], ['12', 2], ['9', 2], ['8', 3], ['6', 3], ['5', 4], ['3', 4]])(
+    'GCS %s → %i', (g, score) => expect(calculateCNSSOFA(g)).toBe(score),
+  );
+  it('drugs for delirium score at least 1', () => {
+    expect(calculateCNSSOFA('15', true)).toBe(1);
+    expect(calculateCNSSOFA('8', true)).toBe(3);
+  });
+  it('missing → 0', () => expect(calculateCNSSOFA('')).toBe(0));
+});
 
-describe('calculateCNSSOFA', () => {
-  it('returns 0 for GCS 15', () => {
-    expect(calculateCNSSOFA('15')).toBe(0);
+describe('calculateRenalSOFA (SOFA-2)', () => {
+  it.each([['1.2', 0], ['1.3', 1], ['2.0', 1], ['2.1', 2], ['3.5', 2], ['3.6', 3], ['6.0', 3]])(
+    'creatinine %s → %i', (cr, score) => expect(calculateRenalSOFA(cr, '', '70', '24')).toBe(score),
+  );
+
+  it('urine <0.5 mL/kg/h for 6–12 h → 1, ≥12 h → 2', () => {
+    // 70 kg × 0.4 mL/kg/h
+    expect(calculateRenalSOFA('0.8', String(0.4 * 70 * 6), '70', '6')).toBe(1);
+    expect(calculateRenalSOFA('0.8', String(0.4 * 70 * 12), '70', '12')).toBe(2);
+    // under 6 h does not count
+    expect(calculateRenalSOFA('0.8', String(0.4 * 70 * 4), '70', '4')).toBe(0);
   });
 
-  it('returns 1 for GCS 13-14', () => {
-    expect(calculateCNSSOFA('14')).toBe(1);
-    expect(calculateCNSSOFA('13')).toBe(1);
+  it('urine <0.3 mL/kg/h for ≥24 h or anuria ≥12 h → 3', () => {
+    expect(calculateRenalSOFA('0.8', String(0.2 * 70 * 24), '70', '24')).toBe(3);
+    expect(calculateRenalSOFA('0.8', '0', '70', '12')).toBe(3);
   });
 
-  it('returns 2 for GCS 10-12', () => {
-    expect(calculateCNSSOFA('12')).toBe(2);
-    expect(calculateCNSSOFA('10')).toBe(2);
+  it('urine criteria need weight', () => {
+    expect(calculateRenalSOFA('0.8', '0', '', '12')).toBe(0);
   });
 
-  it('returns 3 for GCS 6-9', () => {
-    expect(calculateCNSSOFA('9')).toBe(3);
-    expect(calculateCNSSOFA('6')).toBe(3);
+  it('receiving RRT → 4', () => {
+    expect(calculateRenalSOFA('0.8', '', '70', '24', true)).toBe(4);
   });
 
-  it('returns 4 for GCS < 6', () => {
-    expect(calculateCNSSOFA('5')).toBe(4);
-    expect(calculateCNSSOFA('3')).toBe(4);
-  });
-
-  it('returns 0 for empty string', () => {
-    expect(calculateCNSSOFA('')).toBe(0);
+  it('meeting RRT criteria → 4', () => {
+    // creatinine >1.2 + K ≥6.0
+    expect(calculateRenalSOFA('1.8', '', '70', '24', false, '6.0')).toBe(4);
+    // oliguria <0.3 for >6 h + pH ≤7.20 with HCO3 ≤12
+    expect(calculateRenalSOFA('1.0', String(0.2 * 70 * 8), '70', '8', false, '', '7.15', '11')).toBe(4);
+    // acidosis without bicarbonate ≤12 does not qualify
+    expect(calculateRenalSOFA('1.8', '', '70', '24', false, '', '7.15', '16')).toBe(1);
+    // high K without kidney injury does not qualify
+    expect(calculateRenalSOFA('1.0', '', '70', '24', false, '6.5')).toBe(0);
   });
 });
 
-// ─── Renal SOFA ─────────────────────────────────────────────────────
+describe('calculateTotalSOFA (SOFA-2)', () => {
+  const normal = {
+    paO2: '100', fiO2: '21', advancedRespiratorySupport: false,
+    platelets: '200', bilirubin: '0.5',
+    map: '80', dopamine: '', dobutamine: '', epinephrine: '', norepinephrine: '',
+    gcs: '15', creatinine: '0.8', urineOutput: '',
+  };
 
-describe('calculateRenalSOFA', () => {
-  it('returns 0 for creatinine < 1.2', () => {
-    expect(calculateRenalSOFA('0.8', '', '70', '1')).toBe(0);
-    expect(calculateRenalSOFA('1.1', '', '70', '1')).toBe(0);
-  });
-
-  it('returns 1 for creatinine 1.2-1.9', () => {
-    expect(calculateRenalSOFA('1.2', '', '70', '1')).toBe(1);
-    expect(calculateRenalSOFA('1.9', '', '70', '1')).toBe(1);
-  });
-
-  it('returns 2 for creatinine 2.0-3.4', () => {
-    expect(calculateRenalSOFA('2.0', '', '70', '1')).toBe(2);
-    expect(calculateRenalSOFA('3.4', '', '70', '1')).toBe(2);
-  });
-
-  it('returns 3 for creatinine 3.5-4.9', () => {
-    expect(calculateRenalSOFA('3.5', '', '70', '1')).toBe(3);
-    expect(calculateRenalSOFA('4.9', '', '70', '1')).toBe(3);
-  });
-
-  it('returns 4 for creatinine >= 5.0', () => {
-    expect(calculateRenalSOFA('5.0', '', '70', '1')).toBe(4);
-    expect(calculateRenalSOFA('7.0', '', '70', '1')).toBe(4);
-  });
-
-  it('returns 0 for empty creatinine', () => {
-    expect(calculateRenalSOFA('', '', '70', '1')).toBe(0);
-  });
-
-  it('urine output score overrides creatinine when higher', () => {
-    // Cr=1.5 → crScore=1, UO rate <0.3 → uoScore=4 → max=4
-    // 10mL / (70kg * 1hr) = 0.14 mL/kg/hr (<0.3)
-    expect(calculateRenalSOFA('1.5', '10', '70', '1')).toBe(4);
-  });
-
-  it('urine output <0.5 mL/kg/hr → score 3', () => {
-    // 30mL / (70kg * 1hr) = 0.43 mL/kg/hr (<0.5, ≥0.3)
-    expect(calculateRenalSOFA('0.8', '30', '70', '1')).toBe(3);
-  });
-
-  it('urine output >= 0.5 mL/kg/hr → no urine score override', () => {
-    // 40mL / (70kg * 1hr) = 0.57 mL/kg/hr (≥0.5)
-    expect(calculateRenalSOFA('0.8', '40', '70', '1')).toBe(0);
-  });
-
-  it('returns creatinine score when weight is 0 (no UO calc)', () => {
-    expect(calculateRenalSOFA('2.5', '10', '0', '1')).toBe(2);
-  });
-});
-
-// ─── Total SOFA ─────────────────────────────────────────────────────
-
-describe('calculateTotalSOFA', () => {
   it('returns 0 for all-normal values', () => {
-    const reading = {
-      paO2: '100', fiO2: '21', onVentilation: false,
-      platelets: '200', bilirubin: '0.5',
-      map: '80', dopamine: '', dobutamine: '', epinephrine: '', norepinephrine: '',
-      gcs: '15', creatinine: '0.8', urineOutput: '',
-    };
-    expect(calculateTotalSOFA(reading, '70', '1')).toBe(0);
+    expect(calculateTotalSOFA(normal, '70', '1')).toBe(0);
   });
 
   it('returns 24 for worst-case values', () => {
     const reading = {
-      paO2: '50', fiO2: '80', onVentilation: true,  // ratio=62.5 → 4
-      platelets: '10',                                // → 4
-      bilirubin: '15',                                 // → 4
-      map: '50', dopamine: '20', dobutamine: '', epinephrine: '', norepinephrine: '', // → 4
-      gcs: '3',                                        // → 4
-      creatinine: '6.0', urineOutput: '5',             // → 4
+      ...normal,
+      paO2: '50', fiO2: '80', advancedRespiratorySupport: true, // 62.5 → 4
+      platelets: '10', bilirubin: '15',                         // 4, 4
+      map: '50', norepinephrine: '0.5',                         // 4
+      gcs: '3', onRRT: true,                                    // 4, 4
     };
-    expect(calculateTotalSOFA(reading, '70', '1')).toBe(24);
+    expect(calculateTotalSOFA(reading, '70', '24')).toBe(24);
   });
 
   it('sums individual organ scores correctly', () => {
     const reading = {
-      paO2: '80', fiO2: '21', onVentilation: false,  // ratio=381 → 1
-      platelets: '120',                                // → 1
-      bilirubin: '1.5',                                // → 1
-      map: '65', dopamine: '', dobutamine: '', epinephrine: '', norepinephrine: '', // → 1
-      gcs: '14',                                       // → 1
-      creatinine: '1.5', urineOutput: '',              // → 1
+      ...normal,
+      paO2: '60', fiO2: '21',   // 286 → 1
+      platelets: '120',         // 1
+      bilirubin: '2.0',         // 1
+      map: '65',                // 1
+      gcs: '14',                // 1
+      creatinine: '1.5',        // 1
     };
-    expect(calculateTotalSOFA(reading, '70', '1')).toBe(6);
+    expect(calculateTotalSOFA(reading, '70', '24')).toBe(6);
+  });
+
+  it('passes the optional SOFA-2 fields through', () => {
+    expect(calculateTotalSOFA({ ...normal, deliriumDrugs: true, otherVasopressor: true }, '70', '24')).toBe(3);
   });
 });
 
@@ -398,9 +293,11 @@ describe('isQSOFAPositive', () => {
 // ─── Sepsis-3 Assessment ────────────────────────────────────────────
 
 describe('assessSepsis', () => {
-  it('returns true for infection + SOFA >= 2', () => {
-    expect(assessSepsis(2, 0, true)).toBe(true);
-    expect(assessSepsis(5, 0, true)).toBe(true);
+  it('uses the rise from baseline, not the absolute score', () => {
+    // chronic baseline 2, current 3 → delta 1 → not sepsis
+    expect(assessSepsis(3, 1, true)).toBe(false);
+    // unknown baseline: delta equals score
+    expect(assessSepsis(2, 2, true)).toBe(true);
   });
 
   it('returns true for infection + delta >= 2', () => {
@@ -491,6 +388,39 @@ describe('assessBundleCompliance', () => {
     expect(result.withinTimeLimit).toBe(false);
   });
 });
+describe('assessBundleCompliance — indicated items only', () => {
+  const core = {
+    lactateMeasured: true, bloodCulturesObtained: true, antibioticsGiven: true,
+    fluidBolusGiven: false, vasopressorsStarted: false, bundleStartTime: 1000,
+  };
+
+  it('no fluids or vasopressors needed without hypotension and lactate <4', () => {
+    const r = assessBundleCompliance({ ...core, hypotension: false, initialLactate: '2.5', persistentHypotension: false }, 1000 + 1800);
+    expect(r.complete).toBe(true);
+    expect(r.pending).toEqual([]);
+  });
+
+  it('fluids required when lactate ≥4', () => {
+    const r = assessBundleCompliance({ ...core, hypotension: false, initialLactate: '4.0', persistentHypotension: false }, 1000 + 1800);
+    expect(r.pending).toEqual(['fluids']);
+  });
+
+  it('vasopressors required when hypotension persists after fluids', () => {
+    const r = assessBundleCompliance({ ...core, fluidBolusGiven: true, hypotension: true, persistentHypotension: true }, 1000 + 1800);
+    expect(r.pending).toEqual(['vasopressors']);
+  });
+
+  it('missing context keeps every item required', () => {
+    expect(assessBundleCompliance(core, 1000 + 1800).pending).toEqual(['fluids', 'vasopressors']);
+  });
+
+  it('possible sepsis without shock allows 3 hours', () => {
+    const ctx = { ...core, hypotension: false, initialLactate: '1.5', persistentHypotension: false };
+    expect(assessBundleCompliance({ ...ctx, possibleSepsisWithoutShock: true }, 1000 + 150 * 60).withinTimeLimit).toBe(true);
+    expect(assessBundleCompliance(ctx, 1000 + 150 * 60).withinTimeLimit).toBe(false);
+  });
+});
+
 
 // ─── Lactate Clearance ──────────────────────────────────────────────
 
@@ -589,30 +519,28 @@ describe('hasVasopressors', () => {
 
   it('returns true for any vasopressor', () => {
     expect(hasVasopressors('5', '', '', '')).toBe(true);
-    expect(hasVasopressors('', '5', '', '')).toBe(true);
     expect(hasVasopressors('', '', '0.1', '')).toBe(true);
     expect(hasVasopressors('', '', '', '0.1')).toBe(true);
+    expect(hasVasopressors('', '', '', '', true)).toBe(true);
+  });
+
+  it('dobutamine is an inotrope, not a vasopressor', () => {
+    expect(hasVasopressors('', '5', '', '')).toBe(false);
   });
 });
 
 // ─── Edge Cases ─────────────────────────────────────────────────────
 
 describe('edge cases', () => {
-  it('negative values are treated as 0 by safeParseFloat for scoring', () => {
-    // Negative platelets → parsed as negative → <20 → score 4
-    expect(calculateCoagulationSOFA('-5')).toBe(4);
+  it('negative or non-numeric values count as missing (score 0)', () => {
+    expect(calculateCoagulationSOFA('-5')).toBe(0);
+    expect(calculateCoagulationSOFA('abc')).toBe(0);
+    expect(calculateLiverSOFA('xyz')).toBe(0);
   });
 
   it('extreme high values', () => {
     expect(calculateCoagulationSOFA('999')).toBe(0);
     expect(calculateLiverSOFA('100')).toBe(4);
     expect(calculateCNSSOFA('15')).toBe(0);
-  });
-
-  it('non-numeric strings parse to 0 and score accordingly', () => {
-    // 'abc' → 0, not empty → falls through to 0 < 20 → score 4
-    expect(calculateCoagulationSOFA('abc')).toBe(4);
-    // 'xyz' → 0, not empty → 0 < 1.2 → score 0
-    expect(calculateLiverSOFA('xyz')).toBe(0);
   });
 });

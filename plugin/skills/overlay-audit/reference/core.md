@@ -1,7 +1,7 @@
 # Overlay Audit — Core Procedure
 
 Static, read-only audit of a region selected in the dev overlay — on any app, tagged or not. Driven
-by an `audit` work order whose selection is described by DOM descriptors, not a registry id.
+by an `audit` work order whose selection is described by DOM descriptors, not a module id.
 
 ## Inputs
 
@@ -21,7 +21,7 @@ A drained `audit` work order (`npx medprotocol overlay --drain --json`):
 ## 1. Classify
 
 - `suggestedId` set → use it. Otherwise infer the clinical concept from `text`/`html`/`classes` via
-  `classification.md` signal words → registry module.
+  `classification.md` signal words → module.
 - Not clinical → report "out of scope for a protocol audit" and skip.
 
 ## 2. Locate in source (best-effort)

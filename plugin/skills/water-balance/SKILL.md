@@ -6,14 +6,16 @@ user-invocable: true
 ---
 
 Read and follow: reference/core.md
-Read and follow: reference/component-fetching.md
+Read and follow: reference/building.md
 Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 
-## Component
+## Build
 
-- **Component:** `water-balance` (install via `npx medical-ui-cli add water-balance`)
+- **Clinical logic:** `@/lib/medprotocol/water-balance` — copy it first (building.md §1)
+- **Component folder:** `components/medprotocol/water-balance/` — main file `water-balance.tsx`, built with UI SDK (building.md §2–3)
 - **Route:** `app/water-balance/page.tsx`
 - **Preview message:** "Your fluid balance tracker is ready. Enter the patient's weight, fluid intake (oral and IV), urine output, and stool count — it calculates the net balance including insensible losses. View it at http://localhost:3000/water-balance"
 

@@ -29,9 +29,9 @@ Ask the doctor which vital signs they need to monitor:
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build the Screen
 
-Follow the **Component Installation Process** from the main protocol for the `vital-signs` component.
+Follow **Building a Screen** from the main protocol (building.md) for the `vital-signs` module: copy the clinical logic, set up UI SDK, generate `components/medprotocol/vital-signs/vital-signs.tsx`.
 
 ---
 

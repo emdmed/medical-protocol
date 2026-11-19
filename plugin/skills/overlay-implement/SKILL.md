@@ -1,11 +1,13 @@
 ---
 name: overlay-implement
-description: Implement a medical-protocol component into a region the doctor selected in the dev overlay — drains an "implement" work order, classifies the selected UI, finds it in source, and stages a diff that replaces it with the right medprotocol component. For retrofitting medical protocol into apps built without it.
+description: Implement a medical-protocol component into a region the doctor selected in the dev overlay — drains an "implement" work order, classifies the selected UI, finds it in source, and stages a diff that replaces it with a screen built on the right medprotocol module. For retrofitting medical protocol into apps built without it.
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 user-invocable: true
 ---
 
 Read and follow: reference/core.md
+Read and follow: reference/building.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/queue.md
 
 ## Purpose
@@ -13,8 +15,8 @@ Read when needed: reference/queue.md
 Process **implement** work orders from the overlay queue (`.medprotocol/queue/`). The doctor pointed
 at any region of an app — usually one built **without** medical protocol — and chose "Implement with
 medical protocol". The work order describes the selected DOM (selector, `outerHTML`, text, classes),
-not a registry id. This skill classifies that region, picks the right medprotocol component, locates
-the markup in source, and **stages a diff** that swaps it for the component. Lease/apply: nothing
+not a module id. This skill classifies that region, picks the right medprotocol module, locates
+the markup in source, and **stages a diff** that swaps it for a screen built on that module. Lease/apply: nothing
 lands until the doctor approves.
 
 ## Phase 1: Drain the queue
@@ -32,7 +34,7 @@ lands until the doctor approves.
 For each order:
 1. Read the captured `html` + `text` + `classes`. If `suggestedId` is set (app already uses
    medprotocol), use it directly. Otherwise **infer** the clinical concept by matching the content
-   against `classification.md` signal words → registry component (e.g. "weight"/"height" → `bmi`;
+   against `classification.md` signal words → module in `components.md` (e.g. "weight"/"height" → `bmi`;
    "pH"/"pCO2"/"HCO3" → `acid-base`; "SOFA"/"qSOFA" → `sepsis`).
 2. **Confirm the inferred target with the doctor in chat** before writing anything: "This looks like
    a {component} — implement that here?" If the selection isn't clinical, say so and stop.
@@ -46,8 +48,8 @@ For each order:
 
 ## Phase 4: Lease — stage the swap
 
-1. Confirm the target component is available (`npx medical-ui-cli add <component>` if not installed).
-2. Replace the selected markup with the medprotocol component, scoped to the located region only.
+1. Copy the clinical logic and build the screen per building.md (`components/medprotocol/<module>/`); reuse it if it already exists. Staged like any other change.
+2. Replace the selected markup with that screen, scoped to the located region only.
 3. **Stage a diff** (shadow file under `.medprotocol/staged/` + a unified diff for review). Do not
    modify the real source during the lease. See reference/core.md.
 
@@ -66,4 +68,4 @@ For each order:
 - Implement a component for a non-clinical selection — confirm the inference first.
 - Edit outside the located region.
 - Add network/runtime deps or external API calls (privacy contract).
-- Invent clinical logic — it comes from the component's `lib/` validations and registry rules.
+- Invent clinical logic or edit `lib/medprotocol/` — every clinical value comes from the lib.

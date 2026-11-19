@@ -7,7 +7,6 @@
       "Bash(node *)",
       "Bash(tsc *)",
       "Bash(npx tsc --noEmit)",
-      "Bash(npx shadcn@latest *)",
       "Bash(npx create-next-app@latest *)",
       "Bash(npx wait-on *)",
       "Bash(git add *)",

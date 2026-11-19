@@ -14,7 +14,7 @@ import {
   isGCSDecreasing,
   assessDKAResolution,
   suggestInsulinAdjustment,
-} from '../../lib/dka';
+} from '../../plugin/lib/dka';
 
 // ─── Glucose Reduction Rate ───────────────────────────────────────────
 
@@ -305,85 +305,65 @@ describe('isGCSDecreasing', () => {
 
 // ─── DKA Resolution ──────────────────────────────────────────────────
 
-describe('assessDKAResolution', () => {
-  it('returns resolved when all 4 criteria met (mgdl)', () => {
-    const result = assessDKAResolution('180', '0.3', '16', '7.35', 'mgdl');
+describe('assessDKAResolution (2024 consensus)', () => {
+  it('resolved: ketones <0.6 with pH ≥7.30 and bicarbonate ≥18', () => {
+    const result = assessDKAResolution('0.3', '19', '7.35');
     expect(result.resolved).toBe(true);
-    expect(result.criteria.glucose).toBe(true);
-    expect(result.criteria.ketones).toBe(true);
-    expect(result.criteria.bicarbonate).toBe(true);
-    expect(result.criteria.pH).toBe(true);
+    expect(result.criteria).toEqual({ ketones: true, bicarbonate: true, pH: true });
   });
 
-  it('returns resolved when all 4 criteria met (mmol)', () => {
-    const result = assessDKAResolution('10.0', '0.3', '16', '7.35', 'mmol');
-    expect(result.resolved).toBe(true);
+  it('resolved with pH ≥7.30 even if bicarbonate <18', () => {
+    expect(assessDKAResolution('0.3', '16', '7.32').resolved).toBe(true);
   });
 
-  it('returns not resolved when glucose still high (mgdl)', () => {
-    const result = assessDKAResolution('250', '0.3', '16', '7.35', 'mgdl');
-    expect(result.resolved).toBe(false);
-    expect(result.criteria.glucose).toBe(false);
+  it('resolved with bicarbonate ≥18 even if pH <7.30', () => {
+    expect(assessDKAResolution('0.3', '18', '7.28').resolved).toBe(true);
   });
 
-  it('returns not resolved when ketones still high', () => {
-    const result = assessDKAResolution('180', '1.0', '16', '7.35', 'mgdl');
+  it('not resolved when ketones still high', () => {
+    const result = assessDKAResolution('1.0', '20', '7.35');
     expect(result.resolved).toBe(false);
     expect(result.criteria.ketones).toBe(false);
   });
 
-  it('returns not resolved when bicarbonate still low', () => {
-    const result = assessDKAResolution('180', '0.3', '12', '7.35', 'mgdl');
-    expect(result.resolved).toBe(false);
-    expect(result.criteria.bicarbonate).toBe(false);
-  });
-
-  it('returns not resolved when pH still low', () => {
-    const result = assessDKAResolution('180', '0.3', '16', '7.25', 'mgdl');
-    expect(result.resolved).toBe(false);
-    expect(result.criteria.pH).toBe(false);
-  });
-
-  it('returns not resolved when all criteria fail', () => {
-    const result = assessDKAResolution('350', '3.0', '8', '7.10', 'mgdl');
-    expect(result.resolved).toBe(false);
-    expect(Object.values(result.criteria).every(v => v === false)).toBe(true);
-  });
-
-  it('boundary: glucose at exactly 200 mg/dL is not resolved', () => {
-    const result = assessDKAResolution('200', '0.3', '16', '7.35', 'mgdl');
-    expect(result.criteria.glucose).toBe(false);
+  it('not resolved when both pH and bicarbonate fail', () => {
+    expect(assessDKAResolution('0.3', '16', '7.25').resolved).toBe(false);
   });
 
   it('boundary: ketones at exactly 0.6 is not resolved', () => {
-    const result = assessDKAResolution('180', '0.6', '16', '7.35', 'mgdl');
-    expect(result.criteria.ketones).toBe(false);
+    expect(assessDKAResolution('0.6', '20', '7.35').criteria.ketones).toBe(false);
   });
 
-  it('boundary: bicarbonate at exactly 15 is resolved', () => {
-    const result = assessDKAResolution('180', '0.3', '15', '7.35', 'mgdl');
-    expect(result.criteria.bicarbonate).toBe(true);
+  it('boundary: pH exactly 7.30 and bicarbonate exactly 18 meet the criterion', () => {
+    expect(assessDKAResolution('0.3', '10', '7.30').criteria.pH).toBe(true);
+    expect(assessDKAResolution('0.3', '18', '7.10').criteria.bicarbonate).toBe(true);
   });
 
-  it('boundary: pH at exactly 7.30 is not resolved', () => {
-    const result = assessDKAResolution('180', '0.3', '16', '7.30', 'mgdl');
-    expect(result.criteria.pH).toBe(false);
+  it('empty ketones is not resolved', () => {
+    expect(assessDKAResolution('', '20', '7.35').resolved).toBe(false);
+  });
+
+  it('all criteria fail', () => {
+    const result = assessDKAResolution('3.0', '8', '7.10');
+    expect(result.resolved).toBe(false);
+    expect(Object.values(result.criteria).every(v => v === false)).toBe(true);
   });
 });
 
 // ─── Insulin Adjustment ──────────────────────────────────────────────
 
 describe('suggestInsulinAdjustment', () => {
-  it('suggests switching to subcutaneous when glucose < 200 mg/dL', () => {
-    expect(suggestInsulinAdjustment('180', '60', '5', 'mgdl')).toBe(
-      'Consider switching to subcutaneous insulin'
-    );
+  it('does not switch to subcutaneous on low glucose alone', () => {
+    expect(suggestInsulinAdjustment('180', '60', '5', 'mgdl')).toMatch(/Continue IV insulin with dextrose/);
   });
 
-  it('suggests switching to subcutaneous when glucose < 11.1 mmol/L', () => {
-    expect(suggestInsulinAdjustment('10.0', '4.0', '5', 'mmol')).toBe(
-      'Consider switching to subcutaneous insulin'
-    );
+  it('suggests subcutaneous transition once DKA is resolved', () => {
+    expect(suggestInsulinAdjustment('180', '60', '5', 'mgdl', true)).toMatch(/transition to subcutaneous/);
+    expect(suggestInsulinAdjustment('300', '60', '5', 'mgdl', true)).toMatch(/transition to subcutaneous/);
+  });
+
+  it('keeps IV insulin below 11.1 mmol/L while DKA is unresolved', () => {
+    expect(suggestInsulinAdjustment('10.0', '4.0', '5', 'mmol')).toMatch(/Continue IV insulin/);
   });
 
   it('suggests reducing rate and adding dextrose when glucose < 252 mg/dL', () => {

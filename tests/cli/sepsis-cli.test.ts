@@ -63,7 +63,7 @@ describe('medprotocol sepsis sofa', () => {
   });
 
   it('scores high for critical values', () => {
-    run(['sofa', '--pao2', '50', '--fio2', '100', '--ventilation', '--platelets', '15', '--bilirubin', '13', '--dopamine', '20', '--gcs', '4', '--creatinine', '5.5', '--json']);
+    run(['sofa', '--pao2', '50', '--fio2', '100', '--advanced-support', '--platelets', '15', '--bilirubin', '13', '--norepinephrine', '0.5', '--gcs', '4', '--creatinine', '5.5', '--json']);
     const result = JSON.parse(stdout);
     expect(result.score).toBeGreaterThanOrEqual(20);
     expect(result.severityLevel).toBe('Very High');
@@ -98,13 +98,13 @@ describe('medprotocol sepsis sofa', () => {
     expect(result.lactate).toBe(4);
   });
 
-  it('ventilation flag affects respiration scoring', () => {
-    // PaO2/FiO2 = 80/(80/100) = 100 → without vent = 2, with vent = 4
+  it('advanced respiratory support affects respiration scoring', () => {
+    // PaO2/FiO2 = 100 → without support capped at 2, with support = 3
     run(['sofa', '--pao2', '80', '--fio2', '80', '--json']);
     const withoutVent = JSON.parse(stdout);
 
     stdout = '';
-    run(['sofa', '--pao2', '80', '--fio2', '80', '--ventilation', '--json']);
+    run(['sofa', '--pao2', '80', '--fio2', '80', '--advanced-support', '--json']);
     const withVent = JSON.parse(stdout);
 
     expect(withVent.score).toBeGreaterThan(withoutVent.score);

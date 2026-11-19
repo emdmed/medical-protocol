@@ -6,15 +6,17 @@ user-invocable: true
 ---
 
 Read and follow: reference/core.md
-Read and follow: reference/component-fetching.md
+Read and follow: reference/building.md
 Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Also `Read` from `reference/composition.md` for component integration patterns and gotchas.
 
-## Component
+## Build
 
-- **Components:** Multiple — install each block the doctor selects via `npx medical-ui-cli add <name>`
+- **Clinical logic:** copy it first (building.md §1); each block imports its module from `@/lib/medprotocol/<module>` (module per block in `components.md`)
+- **Component folders:** one per block, `components/medprotocol/<module>/`, built with UI SDK (building.md §2–3). Reuse any block that already exists.
 - **Available blocks:** `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`, `ckd`, `nephrology`
 - **Route:** `app/dashboard/page.tsx`
 - **Composition guide:** `Read` from `reference/composition.md` for integration patterns and known gotchas (overflow clipping, circular updates, null guards)
@@ -48,11 +50,11 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 
 - Layout: responsive grid `grid-cols-1 lg:grid-cols-2 gap-6`
 - Smaller widgets (acid-base, BMI, water-balance) work well grouped together
-- After installing each component, check its imports for missing dependencies — some reference other installable components
+- Check each block's dependencies in `components.md` (e.g. DKA needs acid-base, sepsis needs vital-signs and water-balance) and build those blocks too
 - Update home page to redirect to `/dashboard`
 
 ## NEVER
-- **Fetch workflow files for individual blocks** — blocks are installed via `npx medical-ui-cli add <name>`, not by fetching workflows. There are no per-block workflow files to download.
+- **Fetch workflow files for individual blocks** — blocks are generated per building.md. There are no per-block workflow files to download.
 - Combine components without testing that their data flows don't conflict
 - Hide component errors — always show which block has an issue
 - Use different unit systems across blocks in the same dashboard

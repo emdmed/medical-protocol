@@ -11,13 +11,13 @@ import {
   getCHADSVAScCategory,
   getCHADSVAScAction,
   getCHADSVAScSeverity,
-} from "../../../../lib/cardiology";
+} from "../../../../plugin/lib/cardiology";
 import type {
   ASCVDInputs,
   HEARTInputs,
   CHADSVAScInputs,
-} from "../../../../lib/cardiology-types";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
+} from "../../../../plugin/lib/cardiology-types";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 
 const USAGE = `Usage: medprotocol cardiology <sub-command> [options]
 

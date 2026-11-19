@@ -1,29 +1,45 @@
-# PaFi Component Context
+# PaFi Module Context
 
-## Component Summary
+PaO2/FiO2 ratio with Berlin criteria ARDS classification and FiO2 presets for oxygen delivery devices.
 
-PaFiCalculator — PaO2/FiO2 ratio with Berlin criteria ARDS classification and FiO2 presets for oxygen delivery devices.
-
-Install: `npx medical-ui-cli add pafi`
-Files: `pafi-calculator.tsx` — shadcn: card, input, button, badge, label
+Logic: `lib/medprotocol/pafi.ts` — import from `@/lib/medprotocol/pafi`. Build: see `building.md`.
 
 ---
 
-## Props
+## Screen spec
 
-Self-contained — no props, no data flow.
+**Shows:** PaFi ratio and ARDS classification badge, inline below the inputs.
+
+**Inputs** (strings):
+
+| Field | Unit | Default |
+|---|---|---|
+| PaO2 | mmHg | 90 |
+| FiO2 | % (21–100) | 21 |
+
+**FiO2 presets** (select): 21% (room air), 28%, 35%, 40%, 50%, 60%, 80%, 100%. Free entry still allowed.
+
+**Outputs:** ratio from `calculatePaFi`, label from `getPaFiClassification`, badge color from `getPaFiSeverity`.
+
+**Interaction:** click the card to enter edit mode, edit, save or cancel.
+
+**Display rules:** map severity to emphasis: `normal` → normal, `mild` → watch, `moderate` → warning, `severe` → critical, `default` → neutral.
+
+**Props contract:** `data?: { paO2?: string; fiO2?: string }` (read once on mount). No `onData`.
 
 ---
 
 ## Lib Functions
 
-See `lib/pafi.ts`. Three functions: `calculatePaFi(paO2, fiO2)` → ratio or null, `getPaFiClassification(paFi)` → Normal/>300, Mild/200-300, Moderate/100-200, Severe/<100, `getPaFiSeverity(paFi)` → normal/warning/critical.
+- `calculatePaFi(paO2, fiO2)` → `string | null` (integer). Null if PaO2 ≤0 or FiO2 outside 21–100.
+- `getPaFiClassification(paFi)` → `"Normal"` (>300) | `"Mild ARDS"` (200–300) | `"Moderate ARDS"` (100–199) | `"Severe ARDS"` (<100) | `"Unknown"`.
+- `getPaFiSeverity(paFi)` → `"normal"` | `"mild"` | `"moderate"` | `"severe"` | `"default"`.
 
 FiO2 entered as percentage (21-100), not fraction. All inputs `string`.
 
 ---
 
-## Cross-Component Data
+## Cross-Tool Data
 
 Self-contained. Uses PaO2 (arterial), not SpO2 (peripheral). Coexists with sepsis (both use PaO2/FiO2) but no programmatic link.
 
@@ -31,7 +47,6 @@ Self-contained. Uses PaO2 (arterial), not SpO2 (peripheral). Coexists with sepsi
 
 ## Gotchas
 
-- **No data prop, no onData.** Self-contained
 - **FiO2 as percentage.** Enter 40 for 40%, not 0.4
 - **PaO2 vs SpO2.** Different measurements — PaFi uses arterial blood gas
 

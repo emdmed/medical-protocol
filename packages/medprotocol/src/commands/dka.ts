@@ -4,8 +4,8 @@ import {
   isGlucoseOnTarget,
   assessDKAResolution,
   suggestInsulinAdjustment,
-} from "../../../../lib/dka";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
+} from "../../../../plugin/lib/dka";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 
 const USAGE = `Usage: medprotocol dka [options]
 
@@ -84,13 +84,12 @@ export const run = (argv: string[]): void => {
   }
 
   // Resolution assessment
+  let dkaResolved = false;
   if (values.ketones && values.bicarbonate && values.ph) {
     const resolution = assessDKAResolution(
-      values.glucose!,
       values.ketones!,
       values.bicarbonate!,
       values.ph!,
-      unit,
     );
 
     rows.push(["Ketones", `${values.ketones} mmol/L`]);
@@ -102,6 +101,7 @@ export const run = (argv: string[]): void => {
     data.bicarbonate = parseFloat(values.bicarbonate!);
     data.pH = parseFloat(values.ph!);
     data.resolved = resolution.resolved;
+    dkaResolved = resolution.resolved;
     data.criteria = resolution.criteria;
   }
 
@@ -120,6 +120,7 @@ export const run = (argv: string[]): void => {
       rate,
       values["insulin-rate"]!,
       unit,
+      dkaResolved,
     );
 
     rows.push(["Insulin rate", `${values["insulin-rate"]} U/hr`]);

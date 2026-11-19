@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/privacy-guard.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/privacy-guard.mjs\"",
             "timeout": 5
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/track-workflow.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/track-workflow.mjs\"",
             "timeout": 3
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/qa-reminder.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/qa-reminder.mjs\"",
             "timeout": 5
           }
         ]

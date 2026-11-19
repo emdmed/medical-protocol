@@ -21,11 +21,11 @@ Do NOT ask about BMI formula details, display preferences, or technical preferen
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build the Screen
 
-Follow the **Component Installation Process** from the main protocol for the `bmi` component.
+Follow **Building a Screen** from the main protocol (building.md) for the `bmi` module: copy the clinical logic, set up UI SDK, generate `components/medprotocol/bmi/bmi.tsx`.
 
-**Patient demographics:** This component uses weight and height. Ask: "Would you like a Patient demographics card above the BMI calculator?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient weight and height into the BMI component following the patient data wiring pattern in the composition context.
+**Patient demographics:** This component uses weight and height. Ask: "Would you like a Patient demographics card above the BMI calculator?" (Default: yes). If yes, build the `patient` screen first (`components/medprotocol/patient/`). Wire patient weight and height into the BMI screen following the patient data wiring pattern in the composition context.
 
 ---
 

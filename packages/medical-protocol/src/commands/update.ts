@@ -2,9 +2,9 @@ import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { execSync } from "child_process";
 import { version as VERSION } from "../../package.json";
-import { getBundledPluginDir, getSkillsDir, getHooksDir, getSettingsPath, listFiles, copyFile } from "../files";
+import { getBundledPluginDir, getSkillsDir, getHooksDir, getLibDir, getSettingsPath, listFiles, copyFile } from "../files";
 import { hashFile, readManifest, writeManifest, type FileManifest } from "../manifest";
-import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
+import { formatError, printResult, formatHeader, formatTable } from "../../../../plugin/lib/format";
 import { isInteractive, confirmOverwriteModified } from "../prompts";
 import * as fs from "fs";
 import * as path from "path";
@@ -132,6 +132,9 @@ async function updateCopyInteractive(baseDir: string, manifest: FileManifest, fo
   if (fs.existsSync(bundledHooksDir)) {
     processDir(bundledHooksDir, hooksDir, "hooks", manifest, force, newHashes, updated, skipped, added);
   }
+  if (fs.existsSync(path.join(bundledDir, "lib"))) {
+    processDir(path.join(bundledDir, "lib"), getLibDir(baseDir), "lib", manifest, force, newHashes, updated, skipped, added);
+  }
 
   // If there are skipped (modified) files and not forcing, prompt
   if (skipped.length > 0 && !force) {
@@ -144,10 +147,8 @@ async function updateCopyInteractive(baseDir: string, manifest: FileManifest, fo
       for (const key of [...skipped]) {
         const [prefix, ...rest] = key.split("/");
         const relPath = rest.join("/");
-        const bundledBase = prefix === "skills" ? bundledSkillsDir : bundledHooksDir;
-        const installedBase = prefix === "skills" ? skillsDir : hooksDir;
-        const bundledPath = path.join(bundledBase, relPath);
-        const installedPath = path.join(installedBase, relPath);
+        const bundledPath = path.join(bundledDir, prefix, relPath);
+        const installedPath = resolveInstalledPath(baseDir, key)!;
         const bundledHash = hashFile(bundledPath);
         copyFile(bundledPath, installedPath);
         newHashes[key] = bundledHash;
@@ -292,6 +293,9 @@ function updateCopy(baseDir: string, manifest: FileManifest, force: boolean, jso
   if (fs.existsSync(bundledHooksDir)) {
     processDir(bundledHooksDir, hooksDir, "hooks", manifest, force, newHashes, updated, skipped, added);
   }
+  if (fs.existsSync(path.join(bundledDir, "lib"))) {
+    processDir(path.join(bundledDir, "lib"), getLibDir(baseDir), "lib", manifest, force, newHashes, updated, skipped, added);
+  }
 
   const bundledKeys = new Set(Object.keys(newHashes));
   for (const key of Object.keys(manifest.files)) {
@@ -401,6 +405,9 @@ function resolveInstalledPath(baseDir: string, key: string): string | null {
   }
   if (key.startsWith("hooks/")) {
     return path.join(getHooksDir(baseDir), key.slice("hooks/".length));
+  }
+  if (key.startsWith("lib/")) {
+    return path.join(getLibDir(baseDir), key.slice("lib/".length));
   }
   return null;
 }

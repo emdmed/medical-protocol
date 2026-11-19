@@ -6,7 +6,7 @@ import {
   classifyRandomPG,
   getDiagnosis,
   checkConfirmation,
-} from '../../lib/diabetes-dx';
+} from '../../plugin/lib/diabetes-dx';
 
 // ─── A1C Classification (ADA Table 2.1 / 2.2) ──────────────────────
 

@@ -22,11 +22,11 @@ Do NOT ask about ARDS classification thresholds, display preferences, or technic
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build the Screen
 
-Follow the **Component Installation Process** from the main protocol for the `pafi` component.
+Follow **Building a Screen** from the main protocol (building.md) for the `pafi` module: copy the clinical logic, set up UI SDK, generate `components/medprotocol/pafi/pafi.tsx`.
 
-**Clinical logic library:** The PaFi component imports calculation functions from `lib/pafi`. Create in the project:
+**Clinical logic:** The PaFi screen imports these from `@/lib/medprotocol/pafi` (copied from the plugin — never reimplement or edit them):
 - `calculatePaFi(paO2, fiO2)` — PaO2 / (FiO2 / 100), returns rounded number or null
 - `getPaFiClassification(ratio)` — "Normal", "Mild ARDS", "Moderate ARDS", "Severe ARDS"
 - `getPaFiSeverity(ratio)` — "normal", "mild", "moderate", "severe" (for badge styling)

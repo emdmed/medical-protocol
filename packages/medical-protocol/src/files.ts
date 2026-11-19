@@ -12,6 +12,11 @@ export function getSkillsDir(baseDir: string): string {
   return path.join(baseDir, ".claude", "skills");
 }
 
+// Clinical logic sits beside skills/ so skills reach it at ${CLAUDE_SKILL_DIR}/../../lib
+export function getLibDir(baseDir: string): string {
+  return path.join(baseDir, ".claude", "lib");
+}
+
 export function getHooksDir(baseDir: string): string {
   return path.join(baseDir, ".claude", "hooks");
 }

@@ -5,7 +5,7 @@ import {
   calculateEndogenousGeneration,
   calculateDefecationLoss,
   calculateWaterBalance,
-} from '../../lib/water-balance';
+} from '../../plugin/lib/water-balance';
 
 describe('safeParseFloat', () => {
   it('returns 0 for empty string', () => {

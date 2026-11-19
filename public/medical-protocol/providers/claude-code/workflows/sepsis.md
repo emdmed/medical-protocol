@@ -26,20 +26,20 @@ Do NOT ask about SOFA scoring thresholds, Sepsis-3 criteria, vasopressor dose cu
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build the Screen
 
-Follow the **Component Installation Process** from the main protocol for the `sepsis` component.
+Follow **Building a Screen** from the main protocol (building.md) for the `sepsis` module: copy the clinical logic, set up UI SDK, generate `components/medprotocol/sepsis/sepsis.tsx`.
 
-**Clinical logic library:** The sepsis component imports calculation functions from `lib/sepsis`. Create in the project:
-- `calculateRespirationSOFA(paO2, fiO2, onVentilation)` — PaO2/FiO2 ratio → 0-4
+**Clinical logic:** The sepsis screen imports these from `@/lib/medprotocol/sepsis` (copied from the plugin — never reimplement or edit them):
+- `calculateRespirationSOFA(paO2, fiO2, advancedSupport, ecmo?, spO2?, ceilingOfTreatment?)` — SOFA-2 respiratory → 0-4
 - `calculateCoagulationSOFA(platelets)` — platelet count → 0-4
 - `calculateLiverSOFA(bilirubin)` — bilirubin → 0-4
-- `calculateCardiovascularSOFA(map, dopamine, dobutamine, epinephrine, norepinephrine)` — hemodynamics → 0-4
-- `calculateCNSSOFA(gcs)` — GCS → 0-4
-- `calculateRenalSOFA(creatinine, urineOutput, weight, hours)` — renal function → 0-4
-- `calculateTotalSOFA(reading, weight, hours)` — sum of 6 organs (0-24)
+- `calculateCardiovascularSOFA(map, dopamine, dobutamine, epinephrine, norepinephrine, otherVasopressor?, mechanicalSupport?, ceilingOfTreatment?)` — SOFA-2 cardiovascular → 0-4
+- `calculateCNSSOFA(gcs, deliriumDrugs?)` — SOFA-2 brain → 0-4
+- `calculateRenalSOFA(creatinine, urineOutput, weight, hours, onRRT?, potassium?, pH?, bicarbonate?)` — SOFA-2 kidney → 0-4
+- `calculateTotalSOFA(reading, weight, hours)` — SOFA-2 total, sum of 6 organs (0-24)
 - `calculateSOFADelta(current, baseline)` — change from baseline
-- `calculateQSOFA(rr, sbp, gcs)` — quick SOFA screen (0-3)
+- `calculateQSOFA(rr, sbp, gcs)` — quick SOFA (0-3, prognostic; not a screening tool on its own)
 - `isQSOFAPositive(score)` — positive if ≥2
 - `assessSepsis(sofaScore, sofaDelta, suspectedInfection)` — Sepsis-3 criteria
 - `assessSepticShock(hasSepsis, vasopressorsNeeded, lactate)` — shock criteria
@@ -48,7 +48,7 @@ Follow the **Component Installation Process** from the main protocol for the `se
 - `isLactateClearanceAdequate(clearance)` — adequate if ≥10%
 - `getSOFASeverityLevel(score)` — Low / Moderate / High / Very High
 
-**Patient demographics:** This component uses weight. Ask: "Would you like a Patient demographics card above the sepsis monitor?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient weight into the sepsis component following the patient data wiring pattern in the composition context.
+**Patient demographics:** This component uses weight. Ask: "Would you like a Patient demographics card above the sepsis monitor?" (Default: yes). If yes, build the `patient` screen first (`components/medprotocol/patient/`). Wire patient weight into the sepsis screen following the patient data wiring pattern in the composition context.
 
 ---
 

@@ -25,23 +25,15 @@ Do NOT ask about clinical thresholds, resolution criteria, insulin adjustment fo
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build the Screen
 
-Follow the **Component Installation Process** from the main protocol for the `dka` component:
+Follow **Building a Screen** from the main protocol (building.md) for the `dka` module: copy the clinical logic, set up UI SDK, generate `components/medprotocol/dka/dka.tsx`.
 
-```bash
-npx medical-ui-cli add dka
-```
+**Acid-base dependency:** Also build the `acid-base` screen — DKA uses it for blood gas analysis on every reading.
 
-**Acid-base dependency:** Also install the `acid-base` component — DKA uses it for blood gas analysis on every reading:
+**Patient demographics:** This component uses weight. Ask: "Would you like a Patient demographics card above the DKA monitor?" (Default: yes). If yes, build the `patient` screen first (`components/medprotocol/patient/`). Wire patient weight into the DKA screen following the patient data wiring pattern in the composition context.
 
-```bash
-npx medical-ui-cli add acid-base
-```
-
-**Patient demographics:** This component uses weight. Ask: "Would you like a Patient demographics card above the DKA monitor?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient weight into the DKA component following the patient data wiring pattern in the composition context.
-
-**Clinical logic library:** The DKA component imports calculation functions from `lib/dka`. Create in the project:
+**Clinical logic:** The DKA screen imports these from `@/lib/medprotocol/dka` (copied from the plugin — never reimplement or edit them):
 - `calculateGlucoseReductionRate(current, previous, hours)` — rate of glucose drop per hour
 - `isGlucoseOnTarget(rate, unit)` — target: 50–70 mg/dL/hr or 3–4 mmol/L/hr
 - `calculateKetoneReductionRate(current, previous, hours)` — rate of ketone clearance per hour
@@ -54,7 +46,7 @@ npx medical-ui-cli add acid-base
 - `isUrineOutputOnTarget(rate)` — target: ≥0.5 mL/kg/hr
 - `classifyGCS(value)` — normal / mild / moderate / severe
 - `isGCSDecreasing(current, previous)` — drop ≥2 triggers cerebral edema warning
-- `assessDKAResolution(glucose, ketones, bicarbonate, pH, unit)` — checks all 4 resolution criteria
+- `assessDKAResolution(ketones, bicarbonate, pH)` — 2024 resolution criteria: β-hydroxybutyrate <0.6 AND (pH ≥7.30 OR bicarbonate ≥18)
 - `suggestInsulinAdjustment(glucose, rate, currentInsulin, unit)` — text suggestion based on glucose level and rate
 
 ---

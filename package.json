@@ -13,8 +13,6 @@
     "build:installer": "npm run build -w packages/medical-protocol",
     "medprotocol": "node packages/medprotocol/dist/index.js",
     "version:bump": "bash scripts/bump-version.sh",
-    "drift:check": "node scripts/drift-check.js",
-    "push": "bash scripts/git/push.sh",
     "release": "bash scripts/npm/release.sh"
   },
   "devDependencies": {

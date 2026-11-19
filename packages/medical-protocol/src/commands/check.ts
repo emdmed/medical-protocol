@@ -1,9 +1,9 @@
 import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { version as VERSION } from "../../package.json";
-import { getBundledPluginDir, getSkillsDir, getHooksDir, listFiles, isSymlink, getRepoStatus } from "../files";
+import { getBundledPluginDir, getSkillsDir, getHooksDir, getLibDir, listFiles, isSymlink, getRepoStatus } from "../files";
 import { hashFile, readManifest } from "../manifest";
-import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
+import { formatError, printResult, formatHeader, formatTable } from "../../../../plugin/lib/format";
 import { isInteractive } from "../prompts";
 import * as fs from "fs";
 import * as path from "path";
@@ -321,6 +321,9 @@ function resolveInstalledPath(baseDir: string, key: string): string | null {
   }
   if (key.startsWith("hooks/")) {
     return path.join(getHooksDir(baseDir), key.slice("hooks/".length));
+  }
+  if (key.startsWith("lib/")) {
+    return path.join(getLibDir(baseDir), key.slice("lib/".length));
   }
   return null;
 }

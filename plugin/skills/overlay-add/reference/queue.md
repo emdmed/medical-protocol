@@ -2,7 +2,7 @@
 
 The dev overlay writes one JSON file per selection to `.medprotocol/queue/` at the project root.
 The CLI bridge claims them; this skill acts on them. Selections are described by **DOM descriptors**,
-not a registry id — the overlay works on any app, including ones built without medical protocol.
+not a module id — the overlay works on any app, including ones built without medical protocol.
 
 ## Schema
 
@@ -16,7 +16,7 @@ not a registry id — the overlay works on any app, including ones built without
   "text": "Patient overview…",          // trimmed visible text (≤300 chars)
   "html": "<section …>…</section>",     // outerHTML, capped (~4KB) — anchor markup
   "rect": { "x": 320, "y": 113, "w": 640, "h": 280 },
-  "suggestedId": null,                  // registry id IFF a data-medprotocol-id was present (fast path)
+  "suggestedId": null,                  // module id IFF a data-medprotocol-id was present (fast path)
   "source": null,                       // source path IFF a data-medprotocol-source was present
   "url": "http://localhost:3000/",      // page the selection was made on
   "ts": "2026-06-14T07:46:52.611Z",     // ISO timestamp

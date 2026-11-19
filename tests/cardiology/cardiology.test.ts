@@ -11,12 +11,12 @@ import {
   getCHADSVAScCategory,
   getCHADSVAScAction,
   getCHADSVAScSeverity,
-} from "../../lib/cardiology";
+} from "../../plugin/lib/cardiology";
 import type {
   ASCVDInputs,
   HEARTInputs,
   CHADSVAScInputs,
-} from "../../lib/cardiology-types";
+} from "../../plugin/lib/cardiology-types";
 
 // ── Helper ─────────────────────────────────────────────
 

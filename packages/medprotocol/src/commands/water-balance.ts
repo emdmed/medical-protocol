@@ -5,8 +5,8 @@ import {
   calculateEndogenousGeneration,
   calculateDefecationLoss,
   safeParseFloat,
-} from "../../../../lib/water-balance";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
+} from "../../../../plugin/lib/water-balance";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 
 const USAGE = `Usage: medprotocol water-balance [options]
 

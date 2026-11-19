@@ -29,7 +29,7 @@ When the doctor describes what they need, classify into one of these domains bas
 
 | Domain | Signal Words |
 |---|---|
-| **diabetes** | diabetes, diabetes diagnosis, A1C, HbA1c, fasting glucose, FPG, oral glucose tolerance, OGTT, 2-hour glucose, prediabetes, IFG, IGT, type 1 diabetes, type 2 diabetes, T1D, T2D, autoantibodies, GAD65, IA-2, ZnT8, C-peptide, AABBCC, gestational diabetes, GDM, IADPSG, Carpenter-Coustan, diabetes screening, diabetes classification, diabetes staging |
+| **diabetes** | diabetes, diabetes diagnosis, A1C, HbA1c, fasting glucose, FPG, oral glucose tolerance, OGTT, 2-hour glucose, prediabetes, IFG, IGT, type 1 diabetes, type 2 diabetes, T1D, T2D, autoantibodies, GAD65, IA-2, ZnT8, C-peptide, AABBCC, gestational diabetes, GDM, IADPSG, Carpenter-Coustan, diabetes screening, diabetes classification, diabetes staging | <!-- UI component: diabetes-dx (not "diabetes") -->
 
 ## Cardiology
 
@@ -41,7 +41,7 @@ When the doctor describes what they need, classify into one of these domains bas
 
 | Domain | Signal Words |
 |---|---|
-| **nephrology** | CKD, chronic kidney disease, eGFR, creatinine clearance, kidney function, KDIGO, nephrology, proteinuria, albuminuria, UACR, ACR, renal, kidney failure, KFRE, dialysis referral, anemia, hemoglobin, ferritin, TSAT, ESA, erythropoietin, iron deficiency, phosphate, PTH, parathyroid, vitamin D, mineral bone disease, MBD, CKD-MBD, secondary hyperparathyroidism, calcium phosphorus |
+| **nephrology** | CKD, chronic kidney disease, eGFR, creatinine clearance, kidney function, KDIGO, nephrology, proteinuria, albuminuria, UACR, ACR, renal, kidney failure, KFRE, dialysis referral, anemia, hemoglobin, ferritin, TSAT, ESA, erythropoietin, iron deficiency, phosphate, PTH, parathyroid, vitamin D, mineral bone disease, MBD, CKD-MBD, secondary hyperparathyroidism, calcium phosphorus, LDL, cholesterol, lipids, statin, Lp(a), lipoprotein a, ApoB, apolipoprotein B, non-HDL, triglycerides, cardio-metabolic, cardiovascular metabolic |
 
 ## Utilities
 

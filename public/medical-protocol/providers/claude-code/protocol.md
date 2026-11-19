@@ -6,7 +6,7 @@
 
 ## Communication Rules
 
-1. **Use clinical language**: Instead of frameworks, dependencies, npm, components, props, state, hooks, TypeScript, React, Next.js, shadcn, FHIR, API routes — describe things in terms the doctor understands
+1. **Use clinical language**: Instead of frameworks, dependencies, npm, components, props, state, hooks, TypeScript, React, Next.js, UI SDK, FHIR, API routes — describe things in terms the doctor understands
 2. **Always say**: "vital signs monitor", "patient records", "clinical dashboard", "your interface", "your system"
 3. **Never ask** technical questions. Make all architecture, library, and implementation decisions yourself
 4. **Never show** terminal output, error logs, or code snippets unless the doctor explicitly asks
@@ -16,7 +16,9 @@
 
 ## Available Tools
 
-Read the full component registry: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/components.md` — includes dependencies, installation notes, and post-install steps.
+Read the tool registry: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/components.md` — which `lib/medprotocol` module backs each clinical tool.
+
+Read the build contract: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/building.md` — how every screen is built (copy the clinical logic, set up UI SDK, generate the UI). Follow it for every build.
 
 ---
 
@@ -31,7 +33,11 @@ Before starting any workflow, automatically check if the current directory has a
 **If any check fails**, automatically scaffold a new project:
 ```
 npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir=false --import-alias="@/*" --yes
-npx shadcn@latest init -d
+```
+Then set up UI SDK once (requires React 19+; skip steps already done):
+```
+npm install @ui-sdk/react @ui-sdk/core
+npx skills@latest add vercel-labs/ui --skill ui-sdk
 ```
 Then continue with the workflow. This is a routine setup step — no need to explain technical details.
 
@@ -52,7 +58,8 @@ Testing means running the QA workflow:
 
 ## Patterns
 
-- shadcn Card + absolute positioning: add `overflow-visible` when Card contains popups/overlays
+- Clinical logic lives in `lib/medprotocol/` (copied from the plugin). Never edit it and never compute clinical values in the UI — see building.md
+- UI is built from UI SDK parts (unstyled); style with the project's Tailwind classes
 - Calculator results render below inputs using inline flow — never `absolute bottom-*`
 - Parent-child data flow: use `useRef` to track previous values and skip no-op callback updates
 ```
@@ -71,9 +78,9 @@ Read the CLI calculator reference: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/
 
 When the doctor opens Claude Code in a project that already has components installed (e.g., they built a vital signs monitor last week and now want changes):
 
-1. **Check what's already built** — automatically scan the project for existing components (`components/vital-signs/`, `components/acid-base/`, etc.)
-2. **If the doctor asks for something that's already installed** (e.g., "add temperature alerts" and vital-signs already exists), route to the **customize** workflow — do not re-install components
-3. **If the doctor asks for something new** that doesn't exist yet (e.g., "now add patient records"), proceed with the appropriate workflow — it will install only the missing components via `npx medical-ui-cli add`
+1. **Check what's already built** — automatically scan the project for existing screens (`components/medprotocol/<module>/`) and the copied logic (`lib/medprotocol/`)
+2. **If the doctor asks for something that's already built** (e.g., "add temperature alerts" and vital-signs already exists), route to the **customize** workflow — do not rebuild the screen
+3. **If the doctor asks for something new** that doesn't exist yet (e.g., "now add patient records"), proceed with the appropriate workflow — it builds only the missing screens per building.md
 4. **Never re-scaffold the project** if it already has a working Next.js setup
 
 ---
@@ -108,25 +115,19 @@ Once classified, use the provider's routing table (in the `start` skill) to find
 
 1. **Route to the matched skill or workflow** using the provider's routing table
 2. **Follow all phases** in the matched skill/workflow exactly as written
-3. **Install components** as instructed using `npx medical-ui-cli add <component>`
+3. **Build each screen** as instructed, following building.md
 
-### Component Installation
+### Building a Screen
 
-Read the component registry: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/context/components.md` — full registry, dependencies, CLI commands, and post-installation steps.
+When a workflow tells you to build a clinical tool, follow `${CLAUDE_PLUGIN_ROOT}/reference/context/building.md`:
 
-When a workflow instructs you to install a component:
-
-1. **Install the component**: Run `npx medical-ui-cli add {component-name}` automatically
-2. **Check for dependencies**: See the component registry (fetched above) for the dependency table
-3. **Handle shared components and missing imports**: See the component registry post-installation section
-4. **When composing multiple components**, follow these integration rules (only needed when wiring components together — skip for single-component workflows):
+1. **Copy the clinical logic**: `mkdir -p lib/medprotocol && cp -r "${CLAUDE_PLUGIN_ROOT}/lib/." lib/medprotocol/` (use `src/lib/medprotocol/` if the project uses `src/`). Copy again on every build to refresh it.
+2. **Set up UI SDK** if not done yet (see Project Check above). Read `node_modules/@ui-sdk/react/docs/llms.txt` for the available parts.
+3. **Generate the screen** in `components/medprotocol/<module>/<module>.tsx` from UI SDK parts, following the module's Screen spec in `{module}.md`. All clinical values come from `lib/medprotocol` functions — never computed or thresholded in the UI.
+4. **When composing multiple screens**, follow `composition.md` (only needed when wiring screens together):
    - Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.
-   - Add `overflow-visible` to any shadcn Card that contains absolutely-positioned popups or overlays.
-   - Null-guard all cross-component data.
-5. **Post-install review** — after installation, review the installed code and adapt if needed:
-   - Ensure all TypeScript compiles cleanly (`npx tsc --noEmit`) — don't introduce type errors
-   - **shadcn Card overflow-hidden**: Add `overflow-visible` to Cards with absolutely-positioned popups/overlays
-   - **Avoid circular update loops**: Use `useRef` to track previous values, store callbacks in refs
+   - Null-guard all cross-screen data.
+5. **Verify** — `npx tsc --noEmit` passes, and a few results match `npx medprotocol <cmd>`
 6. **Communicate in clinical terms** — confirm the clinical capability is ready rather than listing technical details like CLI commands or file paths
 
 ---
@@ -137,7 +138,7 @@ When a workflow instructs you to install a component:
 
 Read and follow the full checklist: `Read` from `${CLAUDE_PLUGIN_ROOT}/reference/workflows/quality-checklist.md`
 
-Summary: theming (tweakcn), responsiveness, error boundary, shadcn polish, layout disclaimer, browser QA.
+Summary: theming, responsiveness, error boundary, UI polish, layout disclaimer, browser QA.
 
 ---
 

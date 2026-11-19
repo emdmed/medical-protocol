@@ -91,7 +91,7 @@ Run only for built components:
 
 | Symptom | Fix |
 |---|---|
-| Popup clipped | `overflow-visible` on Card |
+| Popup clipped | `overflow-visible` on the clipping container |
 | Results overlap title | Move below inputs, avoid `absolute bottom-*` |
 | Overflow at 768px | Responsive Tailwind classes |
 | "undefined"/"NaN" | Add null checks / defaults |

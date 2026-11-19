@@ -6,17 +6,19 @@ user-invocable: true
 ---
 
 Read and follow: reference/core.md
-Read and follow: reference/component-fetching.md
+Read and follow: reference/building.md
 Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/compensation-formulas.md
 Read when needed: reference/anion-gap-interpretation.md
 Read when needed: reference/mixed-disorders.md
 
-## Component
+## Build
 
-- **Component:** `acid-base` (install via `npx medical-ui-cli add acid-base`)
+- **Clinical logic:** `@/lib/medprotocol/acid-base` — copy it first (building.md §1)
+- **Component folder:** `components/medprotocol/acid-base/` — main file `acid-base.tsx`, built with UI SDK (building.md §2–3)
 - **Route:** `app/acid-base/page.tsx`
 - **Preview message:** "Your blood gas analyzer is ready. Enter pH, pCO₂, and HCO₃ to get an acid-base interpretation. You can also add Na⁺, Cl⁻, and albumin for anion gap analysis. View it at http://localhost:3000/acid-base"
 

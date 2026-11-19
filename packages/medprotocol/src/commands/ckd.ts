@@ -21,8 +21,8 @@ import {
   assessPTH,
   assessVitaminD,
   getCKDMBDMonitoring,
-} from "../../../../lib/ckd";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
+} from "../../../../plugin/lib/ckd";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 
 const USAGE = `Usage: medprotocol ckd <sub-command> [options]
 

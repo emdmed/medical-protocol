@@ -1,43 +1,80 @@
-# Cardiology Component Context
+# Cardiology Module Context
 
-## Component Summary
+Three cardiovascular risk calculators: ASCVD 10-year risk (Pooled Cohort Equations), HEART Score (chest pain triage), CHA2DS2-VASc (AF stroke risk).
 
-CardiologyCalculator — three cardiovascular risk calculators: ASCVD 10-year risk (Pooled Cohort Equations), HEART Score (chest pain triage), CHA2DS2-VASc (AF stroke risk).
-
-Install: `npx medical-ui-cli add cardiology`
-Files: `cardiology-calculator.tsx`, `lib.ts`, `types/cardiology.ts` — shadcn: card, input, button, badge, label, separator, select, checkbox
+Logic: `lib/medprotocol/cardiology.ts` + `cardiology-types.ts` — import from `@/lib/medprotocol/cardiology` and `@/lib/medprotocol/cardiology-types`. Build: see `building.md`.
 
 ---
 
-## Props
+## Screen spec
 
-Self-contained — no props, no data flow. Three internal sub-calculators with tabs/sections.
+**Shows:** Tabs: ASCVD | HEART | CHA₂DS₂-VASc. Each tab is its own calculator with result, category badge and (HEART, CHA₂DS₂-VASc) recommended action.
+
+**Interaction:** each tab: click to enter edit mode, edit, save or cancel. Results inline below inputs.
+
+### ASCVD
+
+| Input | Type / unit | Default |
+|---|---|---|
+| Age | years (40–79) | 55 |
+| Sex | male / female | male |
+| Race | white / aa (African American) / other | white |
+| Total cholesterol | mg/dL | 213 |
+| HDL cholesterol | mg/dL | 50 |
+| Systolic BP | mmHg | 120 |
+| On BP treatment | toggle | off |
+| Diabetes | toggle | off |
+| Smoker | toggle | off |
+
+Outputs: 10-year risk % (`calculateASCVD`), category (`getASCVDCategory`), color (`getASCVDSeverity`). Show "Unknown" when age is outside 40–79.
+
+### HEART
+
+Five criteria, each a 0/1/2 choice (Segmented Control or Radio), all default 0:
+
+| Criterion | 0 | 1 | 2 |
+|---|---|---|---|
+| History | Slightly suspicious | Moderately suspicious | Highly suspicious |
+| ECG | Normal | Non-specific changes | Significant ST deviation |
+| Age | < 45 | 45-64 | ≥ 65 |
+| Risk factors | No known factors | 1-2 risk factors | ≥ 3 or history of atherosclerosis |
+| Troponin | ≤ normal limit | 1-3× normal limit | > 3× normal limit |
+
+Outputs: score 0–10, category, action, color.
+
+### CHA₂DS₂-VASc
+
+Checkboxes, all default off: CHF, hypertension, age ≥75 (+2), diabetes, stroke/TIA (+2), vascular disease, age 65–74, female sex. Age ≥75 and 65–74 are mutually exclusive.
+
+Outputs: score 0–9, category, action, color (all sex-aware).
+
+**Props contract:** `data?: { ascvd?: Partial<ASCVDInputs>; heart?: Partial<HEARTInputs>; chadsvasc?: Partial<CHADSVAScInputs> }` — merged over the defaults, read once on mount. No `onData`.
 
 ---
 
 ## Lib Functions
 
-See `lib/cardiology.ts` and `lib/cardiology-types.ts` for interfaces.
+Types in `cardiology-types.ts`: `ASCVDInputs`, `HEARTInputs` (each field `0 | 1 | 2`), `CHADSVAScInputs`.
 
-- **ASCVD:** `calculateASCVD(inputs)` → % risk or null. `getASCVDCategory` → Low/Borderline/Intermediate/High. Valid ages 40-79.
-- **HEART:** `calculateHEARTScore(inputs)` → 0-10. `getHEARTCategory` → Low/Moderate/High. `getHEARTAction` → clinical action.
-- **CHA2DS2-VASc:** `calculateCHADSVASc(inputs)` → 0-9. `getCHADSVAScCategory(score, isFemale)` → Low/Moderate/High.
+- **ASCVD:** `calculateASCVD(inputs: ASCVDInputs)` → `string | null` (% risk, 1 decimal; null outside age 40-79 or missing labs). `getASCVDCategory(risk)` → Low (<5) / Borderline (5–7.4) / Intermediate (7.5–19.9) / High (≥20) / Unknown. `getASCVDSeverity(risk)` → low / borderline / intermediate / high / default.
+- **HEART:** `calculateHEARTScore(inputs)` → 0-10. `getHEARTCategory(score)` → Low (0–3) / Moderate (4–6) / High (7–10). `getHEARTAction(score)` → clinical action. `getHEARTSeverity(score)` → low / moderate / high.
+- **CHA2DS2-VASc:** `calculateCHADSVASc(inputs)` → 0-9. `getCHADSVAScCategory(score, isFemale)` → Low / Low-Moderate / Moderate-High. `getCHADSVAScAction(score, isFemale)` → anticoagulation recommendation. `getCHADSVAScSeverity(score, isFemale)`.
 
-All numeric inputs are `string` (parsed via `safeParseFloat`).
+ASCVD numeric inputs are `string` (parsed via `safeParseFloat`). `race: "other"` uses white coefficients.
 
 ---
 
-## Cross-Component Data
+## Cross-Tool Data
 
-Self-contained. SBP from vital-signs could inform ASCVD but no programmatic link.
+- **← Patient:** age, sex (ASCVD; CHA₂DS₂-VASc female/age boxes)
+- SBP from vital-signs could inform ASCVD but no programmatic link
 
 ---
 
 ## Gotchas
 
-- **No data prop, no onData.** Purely self-contained
 - **ASCVD age range:** 40-79 only, returns `null` outside
-- **CHA2DS2-VASc sex:** `isFemale` adds 1 point but doesn't change low-risk anticoagulation threshold
+- **CHA2DS2-VASc sex:** female sex adds 1 point; thresholds are sex-specific (female score 1 = Low, male score 1 = Low-Moderate). Always pass `isFemale`
 
 ---
 

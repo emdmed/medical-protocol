@@ -2,22 +2,22 @@ import { parseArgs } from "node:util";
 import {
   getBloodPressureCategory,
   BLOOD_PRESSURE_LIMITS,
-} from "../../../../lib/vital-signs-validations/blood-pressure-validations";
+} from "../../../../plugin/lib/vital-signs-validations/blood-pressure-validations";
 import {
   getHeartRateCategory,
   HEART_RATE_LIMITS,
-} from "../../../../lib/vital-signs-validations/heart-rate-validations";
+} from "../../../../plugin/lib/vital-signs-validations/heart-rate-validations";
 import {
   getRespiratoryRateCategory,
   RESPIRATORY_RATE_LIMITS,
-} from "../../../../lib/vital-signs-validations/respiratory-rate-validations";
+} from "../../../../plugin/lib/vital-signs-validations/respiratory-rate-validations";
 import {
   getTemperatureStatusCli,
   TEMPERATURE_LIMITS,
   validateTemperatureInput,
-} from "../../../../lib/vital-signs-validations/temperature-validations";
-import { bloodOxygenValidations } from "../../../../lib/vital-signs-validations/blood-oxygen-validations";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
+} from "../../../../plugin/lib/vital-signs-validations/temperature-validations";
+import { bloodOxygenValidations } from "../../../../plugin/lib/vital-signs-validations/blood-oxygen-validations";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 
 const USAGE = `Usage: medprotocol vitals [options]
 

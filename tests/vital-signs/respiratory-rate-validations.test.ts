@@ -5,7 +5,7 @@ import {
   getRespiratoryRateCategory,
   parseRespiratoryRateValue,
   RESPIRATORY_RATE_LIMITS,
-} from '../../lib/vital-signs-validations/respiratory-rate-validations';
+} from '../../plugin/lib/vital-signs-validations/respiratory-rate-validations';
 
 describe('validateRespiratoryRateInput', () => {
   it('returns null for normal rate (16)', () => {

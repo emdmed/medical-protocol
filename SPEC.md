@@ -1,6 +1,6 @@
 # Medical Protocol — System Specification
 
-> Status: descriptive spec of the system as built (v0.7.7). This document is the
+> Status: descriptive spec of the system as built (v0.7.10). This document is the
 > authoritative description of *what the system is and how its parts contract
 > with each other*. Per-module clinical math, thresholds, and edge cases are
 > captured by the test suite (`tests/`) and the per-module context docs
@@ -13,14 +13,15 @@
 
 The Medical Protocol system lets a **healthcare professional who does not code**
 build privacy-first clinical interfaces by describing needs in clinical language.
-An AI agent (Claude Code) reads bundled protocols, installs validated UI
-components, and wires them up. The same validated calculation logic is also
+An AI agent (Claude Code) reads bundled protocols, copies the validated clinical
+logic into the doctor's project, and generates the UI for it with UI SDK. The same validated calculation logic is also
 exposed as a terminal CLI for agents and clinicians.
 
 Three properties hold the system together:
 
 - **One source of clinical truth.** Calculation/validation logic lives once in
-  `lib/`. Everything else (CLI, UI components) consumes or mirrors it.
+  `plugin/lib/`. The CLI imports it; doctor projects get an unmodified copy at
+  `lib/medprotocol/` and the generated UI only calls it.
 - **Privacy by construction.** Patient data never leaves the doctor's machine.
   Outbound-data commands are blocked at the tool layer.
 - **Clinical-language interface.** The agent never exposes frameworks, code, or
@@ -32,35 +33,35 @@ Three properties hold the system together:
 
 | # | Part | npm name | Lives in | Role |
 |---|------|----------|----------|------|
-| 1 | **Core** (this repo) | `medprotocol-core` (private root) | repo root | Source of truth: `lib/` logic, markdown protocols/workflows/context, plugin source, build/release tooling. |
-| 2 | **Plugin installer** | `medical-protocol` | `packages/medical-protocol/` | `npx medical-protocol install` — bundles `plugin/` + context and installs skills/hooks/settings into a doctor's project. |
-| 3 | **CLI calculator** | `medprotocol` | `packages/medprotocol/` | `npx medprotocol <cmd>` — terminal calculators importing `lib/`. No UI. |
-| 4 | **UI delivery** | `medical-ui-cli` (separate repo) | `../medprotocol-ui` | shadcn-style React component delivery copied into doctor projects. Vendors its own copy of `lib/` logic. |
+| 1 | **Core** (this repo) | `medprotocol-core` (private root) | repo root | Source of truth: `plugin/lib/` logic, markdown protocols/workflows/context, plugin source, build/release tooling. |
+| 2 | **Plugin installer** | `medical-protocol` | `packages/medical-protocol/` | `npx medical-protocol install` — bundles `plugin/` (incl. `lib/`) + context and installs skills/hooks/settings/lib into a doctor's project's `.claude/`. Also installable from the marketplace (`plugin/.claude-plugin/plugin.json`). |
+| 3 | **CLI calculator** | `medprotocol` | `packages/medprotocol/` | `npx medprotocol <cmd>` — terminal calculators importing `plugin/lib/`. No UI. |
+| 4 | **Generated UI** | — (no package) | doctor's project | Screens generated per project with [UI SDK](https://ui-sdk.dev/docs) (React 19+, unstyled) following `context/building.md`. They import the copied logic from `lib/medprotocol/`. |
 
 ```
                         ┌─────────────────────────────────┐
                         │  medprotocol-core (this repo)    │
                         │                                  │
-                        │   lib/  ← single source of truth │
-                        │     │                            │
-                        │     ├──────────────┐             │
-                        │     │ imports      │ mirrored    │
-                        │     ▼              ▼ (drift-check)│
-                        │  packages/      (vendored copy)   │
-                        │  medprotocol      in UI repo      │
-                        │  (CLI)                            │
+                        │   plugin/lib/ ← single source    │
+                        │     │            of truth        │
+                        │     │ imports                    │
+                        │     ▼                            │
+                        │  packages/medprotocol (CLI)      │
                         │                                  │
                         │  plugin/  ──build.sh──▶ packages/ │
-                        │  (skills,            medical-     │
-                        │   hooks,             protocol     │
-                        │   settings)          (installer)  │
+                        │  (skills, hooks,     medical-     │
+                        │   settings, lib)     protocol     │
+                        │                      (installer)  │
                         └───────────────┬──────────────────┘
                                         │ npx medical-protocol install
+                                        │ (or marketplace plugin)
                                         ▼
                         ┌─────────────────────────────────┐
                         │  Doctor's Next.js project        │
-                        │   .claude/ (skills, hooks)       │
-                        │   components/ ← medical-ui-cli   │
+                        │   .claude/ (skills, hooks, lib)  │
+                        │   lib/medprotocol/ ← copied lib  │
+                        │   components/medprotocol/        │
+                        │     ← generated with UI SDK      │
                         └─────────────────────────────────┘
 ```
 
@@ -71,25 +72,26 @@ Three properties hold the system together:
 These are hard constraints. Violations are bugs.
 
 1. **This repo contains no React/Next.js/UI code.** The target stack (React 19,
-   Next.js app router, shadcn/ui v4+, Tailwind, FHIR) describes what doctors end
+   Next.js app router, UI SDK, Tailwind, FHIR) describes what doctors end
    up with — not this repo. Never create component files here.
-2. **`lib/` has no framework dependencies.** Pure TypeScript. It is the bridge
-   consumed by the CLI (import) and the UI (vendored copy).
+2. **`plugin/lib/` has no framework dependencies.** Pure TypeScript. It is the
+   bridge consumed by the CLI (import) and the generated UI (unmodified copy).
 3. **No production dependencies in the root.** Root has only devDependencies
    (`typescript`, `vitest`, `@types/node`). Do not add runtime packages to the
    root. (Sub-packages may have their own build/CLI deps — see §6–7.)
 4. **Content is markdown and JSON only.** Protocols, workflows, context,
    manifests. No HTML.
-5. **`lib/` is the source of truth for clinical logic.** The UI's vendored copies
-   must not diverge except at the reviewed string↔typed boundary (see §8).
+5. **`plugin/lib/` is the source of truth for clinical logic.** Doctor projects
+   never edit their copy, and generated UI never computes or thresholds a
+   clinical value itself (see §8).
 6. **Versions are synced across files** via one tool (see §9). Drift in version
    numbers is a release error.
 
 ---
 
-## 4. The `lib/` Contract — Source of Truth
+## 4. The `plugin/lib/` Contract — Source of Truth
 
-`lib/` is pure calculation + validation logic. A single barrel (`lib/index.ts`)
+`plugin/lib/` is pure calculation + validation logic. A single barrel (`plugin/lib/index.ts`)
 re-exports every public function, giving one import point:
 `import { calculateBMI, analyze, ... } from "../lib"`.
 
@@ -99,7 +101,7 @@ re-exports every public function, giving one import point:
   parse internally (e.g. `calculateBMI(w, hFt, hIn, hM, metric)` returns
   `string | null`). This is because the same logic backs both a CLI (argv
   strings) and React inputs. Parsing uses `safeParseFloat` /
-  `safeParseFloatOrNull` (`lib/utils/safeParseFloat.ts`).
+  `safeParseFloatOrNull` (`plugin/lib/utils/safeParseFloat.ts`).
 - **Invalid input → `null` (or a typed "Unknown"/error), never a throw.** E.g.
   BMI rejects non-numeric, ≤0, or out-of-realistic-bounds values by returning
   `null`; `getBMICategory(null)` returns `"Unknown"`.
@@ -110,25 +112,29 @@ re-exports every public function, giving one import point:
 - **Realistic bounds reject data-entry errors** (e.g. `MAX_WEIGHT_KG = 700`,
   `MAX_HEIGHT_M = 2.75`).
 - **Named constants carry citations.** Thresholds are named consts with comments
-  referencing the clinical standard (these comments are intentionally dropped in
-  the UI copy — see §8).
+  referencing the clinical standard; `sources.ts` holds citations the UI shows.
 
 ### 4.2 Module Inventory
 
 | Module | File(s) | Public surface (representative) |
 |--------|---------|-------------------------------|
-| **BMI** | `lib/bmi.ts` | `calculateBMI`, `getBMICategory` (WHO tiers) |
-| **Acid-Base / ABG** | `lib/acid-base/` (`analyze.ts`, `interfaces.ts`, `index.ts`) | `analyze({ values, isChronic })` → primary disorder, compensation (Winter's), anion gap, delta ratio; types `ABGValues`, `ABGResult` |
-| **PaFi (ARDS)** | `lib/pafi.ts` | `calculatePaFi`, `getPaFiClassification` (Berlin), `getPaFiSeverity` |
-| **Water Balance** | `lib/water-balance.ts` | `calculateInsensibleLoss`, `calculateEndogenousGeneration`, `calculateDefecationLoss`, `calculateWaterBalance` |
-| **DKA** | `lib/dka.ts` | glucose/ketone/HCO3 rate calcs + on-target checks, `classifyPotassium`, `classifyGCS`, `assessDKAResolution`, `suggestInsulinAdjustment` |
-| **Cardiology** | `lib/cardiology.ts`, `lib/cardiology-types.ts` | `calculateASCVD` (Cox + `COEFFICIENTS`), `calculateHEARTScore`, `calculateCHADSVASc`, each with category/action/severity helpers |
-| **Sepsis** | `lib/sepsis.ts` | per-organ SOFA (`calculate*SOFA`), `calculateTotalSOFA`, `calculateSOFADelta`, `calculateQSOFA`, `assessSepsis`, `assessSepticShock`, `assessBundleCompliance`, `calculateLactateClearance` |
-| **CKD / Nephrology** | `lib/ckd.ts` | `calculateEGFR` (CKD-EPI 2021), GFR/albuminuria classification, `calculateKFRE`, drug-eligibility checks (RASi/SGLT2i/finerenone), eGFR-slope/progression, plus CKD-MBD & anemia management (CLI-only block) |
-| **Diabetes Dx** | `lib/diabetes-dx.ts` | `classifyA1C`/`FPG`/`2hPG`/`RandomPG`, `getDiagnosis`, `checkConfirmation` (ADA) |
-| **Endocrine** | `lib/endocrine.ts` | `classifyT1DStage`, `classifyT1vsT2`, `getT2DScreeningRecommendation`, `classifyGDM_OneStep`/`TwoStep` |
-| **Vital Signs** | `lib/vital-signs-validations/` | per-vital validate/parse/category + limits consts for BP, HR, RR, SpO2, Temp; shared `types.ts` |
-| **Formatting** | `lib/format.ts` | `formatJson`, `formatTable`, `formatHeader`, `formatError`, `printResult` — CLI output helpers (not clinical) |
+| **BMI** | `plugin/lib/bmi.ts` | `calculateBMI`, `getBMICategory` (WHO tiers) |
+| **Acid-Base / ABG** | `plugin/lib/acid-base/` (`analyze.ts`, `interfaces.ts`, `index.ts`) | `analyze({ values, isChronic })` → primary disorder, compensation (Winter's), anion gap, delta ratio; types `ABGValues`, `ABGResult` |
+| **PaFi (ARDS)** | `plugin/lib/pafi.ts` | `calculatePaFi`, `getPaFiClassification` (Berlin), `getPaFiSeverity` |
+| **Water Balance** | `plugin/lib/water-balance.ts` | `calculateInsensibleLoss`, `calculateEndogenousGeneration`, `calculateDefecationLoss`, `calculateWaterBalance` |
+| **DKA** | `plugin/lib/dka.ts` | glucose/ketone/HCO3 rate calcs + on-target checks, `classifyPotassium`, `classifyGCS`, `assessDKAResolution`, `suggestInsulinAdjustment` |
+| **Cardiology** | `plugin/lib/cardiology.ts`, `plugin/lib/cardiology-types.ts` | `calculateASCVD` (Cox + `COEFFICIENTS`), `calculateHEARTScore`, `calculateCHADSVASc`, each with category/action/severity helpers |
+| **Sepsis** | `plugin/lib/sepsis.ts` | per-organ SOFA-2 (`calculate*SOFA`), `calculateTotalSOFA`, `calculateSOFADelta`, `calculateQSOFA`, `assessSepsis`, `assessSepticShock`, `assessBundleCompliance`, `calculateLactateClearance` |
+| **CKD / Nephrology** | `plugin/lib/ckd.ts` | `calculateEGFR` (CKD-EPI 2021), GFR/albuminuria classification, `calculateKFRE`, drug-eligibility checks (RASi/SGLT2i/finerenone), eGFR-slope/progression, plus CKD-MBD & anemia management (CLI-only block) |
+| **Diabetes Dx** | `plugin/lib/diabetes-dx.ts` | `classifyA1C`/`FPG`/`2hPG`/`RandomPG`, `getDiagnosis`, `checkConfirmation` (ADA) |
+| **Endocrine** | `plugin/lib/endocrine.ts` | `classifyT1DStage`, `classifyT1vsT2`, `getT2DScreeningRecommendation`, `classifyGDM_OneStep`/`TwoStep` |
+| **Vital Signs** | `plugin/lib/vital-signs-validations/` | per-vital validate/parse/category + limits consts for BP, HR, RR, SpO2, Temp; shared `types.ts` |
+| **Nephrology panels** | `plugin/lib/nephrology.ts` | CKD anemia, CKD-MBD, cardio-metabolic classifications (re-exports ESA/MBD helpers from `ckd.ts`) |
+| **Hepatology** | `plugin/lib/hepatology.ts` | `calculateFIB4`, `getMASLDRiskStratification`, `getMASLDTreatmentRecommendation` |
+| **Patient** | `plugin/lib/patient.ts` | `calculateAge` |
+| **Severity** | `plugin/lib/vital-signs-validations/severity.ts` | shared vital-sign severity levels for UI display |
+| **Sources / Trace** | `plugin/lib/sources.ts`, `plugin/lib/trace.ts` | guideline citations shown in the UI; calculation trace |
+| **Formatting** | `plugin/lib/format.ts` | `formatJson`, `formatTable`, `formatHeader`, `formatError`, `printResult` — CLI output helpers (not clinical) |
 
 > Per-module clinical detail (formulas, thresholds, tiers) is documented in
 > `public/medical-protocol/context/<module>.md` and pinned by `tests/`.
@@ -146,7 +152,7 @@ re-exports every public function, giving one import point:
   `ckd egfr|stage|kfre|treatment|anemia|mbd`; `diabetes diagnose|t1d-stage|
   t1-vs-t2|t2d-screen|gdm`).
 - **Each command module** exports `run(argv)` and a `USAGE` string, parses flags,
-  calls `lib/` functions, and prints via `lib/format.ts`.
+  calls `plugin/lib/` functions, and prints via `plugin/lib/format.ts`.
 - **Global `--json` contract:** every command accepts `--json` for
   machine-readable output. This is the integration point for QA: the agent runs
   the CLI with `--json` and compares against the UI to verify the UI's math.
@@ -216,8 +222,10 @@ agent instruction. It mandates:
 
 - **Communication in clinical language only** — never expose frameworks, code,
   or terminal output unless asked.
-- **Project check / scaffold** — ensure a Next.js + shadcn project exists, else
-  scaffold; write a project `CLAUDE.md` with QA rules.
+- **Project check / scaffold** — ensure a Next.js project exists (else
+  `create-next-app`), set up UI SDK; write a project `CLAUDE.md` with QA rules.
+- **Building a screen** — per `context/building.md`: copy logic to
+  `lib/medprotocol/`, generate the UI with UI SDK.
 - **Initial Clarification (blocking)** → **Classification** → **Workflow
   execution** → **Quality Checklist** → **Browser QA**.
 - `providers/manifest.json` registers providers (currently only `claude-code`,
@@ -233,14 +241,17 @@ first; multi-domain → prefer `dashboard`; problem reports → always
 `troubleshoot`; CKD routes to the **nephrology** domain. The `start` skill holds
 the domain→skill/workflow routing table.
 
-### 7.3 Skills (14)
+### 7.3 Skills
 
 Each skill is a directory under `plugin/skills/<name>/` with a `SKILL.md`
 (frontmatter: `name`, `description`, `allowed-tools`, `user-invocable`) plus a
 `reference/` dir of supporting docs. `SKILL.md` files delegate via
-`Read and follow: reference/<file>`. Skills: `start`, `bmi`, `acid-base`,
-`vital-signs`, `water-balance`, `pafi`, `dka`, `dashboard`, `modify`,
-`troubleshoot`, `calc`, `calc-audit`, `preferences`, `protocol-audit`.
+`Read and follow: reference/<file>`; build skills also declare
+`Clinical logic source:` (the plugin's `lib/` folder). Skills: `start`, `bmi`,
+`acid-base`, `vital-signs`, `water-balance`, `pafi`, `dka`, `dashboard`,
+`modify`, `troubleshoot`, `calc`, `calc-audit`, `preferences`,
+`protocol-audit`, `overlay-setup`, `overlay-audit`, `overlay-implement`,
+`overlay-add`.
 (`start` is the entry router; `nephrology`/`cardiology`/`sepsis`/`diabetes`
 domains route to workflow files inside `start/reference/` rather than their own
 skill.)
@@ -250,46 +261,32 @@ skill.)
 | Hook | Event | Behavior |
 |------|-------|----------|
 | `privacy-guard.mjs` | PreToolUse (Bash) | **Denies** outbound-data commands: `git push`, `npm/yarn/pnpm publish`, `scp/sftp/ftp`, `nc/netcat`, `rsync` to remote, `curl`/`wget`/`httpie` with data-sending methods, `docker push`, non-local `ssh`, base64/env piped to network. Allows GET, local dev, git add/commit, tsc. |
-| `track-workflow.mjs` | PostToolUse (Bash) | When a workflow is active, sets marker files in `.claude/hooks-state/`: `.qa_started` (on tweakcn/shadcn/tsc/eslint), `.dev_server_up` (on `npm run dev`). |
+| `track-workflow.mjs` | PostToolUse (Bash) | When a workflow is active, sets marker files in `.claude/hooks-state/`: `.qa_started` (on `tsc --noEmit`/`npx medprotocol`/eslint/prettier), `.dev_server_up` (on `npm run dev`). |
 | `qa-reminder.mjs` | Stop | If a workflow ran but QA/dev-server markers are missing, **blocks** stop and instructs the agent to finish the Quality Checklist + start dev server. On success, clears the state dir. |
 
 The hooks are dependency-free Node (`.mjs`) scripts — no bash/jq/grep — so they run identically on Windows, macOS, and Linux. `hooks.json` invokes each via `node "$CLAUDE_PROJECT_DIR/.claude/hooks/<name>.mjs"`; `settings.json` carries plugin settings.
 
 ---
 
-## 8. Part 4 — UI Delivery & the Drift-Check Contract
+## 8. Part 4 — Generated UI
 
-The UI repo (`medprotocol-ui`) ships shadcn-style components copied into doctor
-projects. Because copied components can't import an external package at runtime,
-the UI **vendors its own copy** of each `lib/` module as a per-component
-`lib.ts`/`.tsx`. This duplication is deliberate and is guarded by
-`scripts/drift-check.js`.
+There is no component package. The UI for each clinical tool is generated in the
+doctor's project by the agent, following `public/medical-protocol/context/building.md`:
 
-### 8.1 Contract
+1. **Copy logic:** `cp -r <plugin lib>/. lib/medprotocol/` on every build
+   (refreshes it to the plugin's version).
+2. **Set up UI SDK** once (`@ui-sdk/react`, `@ui-sdk/core`, React 19+).
+3. **Generate** `components/medprotocol/<module>/<module>.tsx` from UI SDK
+   parts, following the module's Screen spec in `context/<module>.md`.
 
-- **`lib/` is canonical; the UI copy must match its clinical logic.**
-- `drift-check.js` holds a `PAIRS` table mapping each core file to its UI copy
-  (e.g. `lib/bmi.ts ↔ components/bmi/lib.ts`). It extracts exported functions,
-  **normalizes away cosmetic deltas** (comments, semicolons, whitespace, and the
-  `safeParseFloatOrNull`→`safeFloat` rename), and compares per function.
-- An **`ACK` table** whitelists *reviewed-benign* divergence:
-  - `coreOnly` — functions intentionally absent from the UI (e.g. CKD-MBD/anemia
-    block, CLI-only temperature helper). The UI must not import them.
-  - `boundary` — shared functions whose bodies differ *only* at the
-    string-vs-typed input / null-handling boundary, with identical clinical math.
-- **Anything not acknowledged fails.** New, unreviewed drift trips the alarm.
-  Known live bugs are intentionally left red (e.g. blood-oxygen S/F ratio off by
-  100× in the UI; two temperature functions awaiting a UI fix).
-- **Exit codes:** `0` in sync (also when the UI repo isn't checked out beside
-  this one — so machines without the sibling repo don't break), `1` drift, `2`
-  setup error (a mapped file is missing).
-- **Resolution:** UI dir is `../medprotocol-ui`, overridable via `--ui <path>`
-  or `MEDPROTOCOL_UI_DIR`.
+Rules: every clinical value on screen comes from a `lib/medprotocol` function;
+`lib/medprotocol/` is never edited locally (fixes go upstream to `plugin/lib/`);
+no thresholds in the UI; units and guideline sources shown; disclaimer on every
+clinical screen. Correctness is checked by comparing the screen against
+`npx medprotocol <cmd> --json` during QA.
 
-### 8.2 Adding/changing shared logic
-
-When you change a `PAIRS`-mapped `lib/` file, you must reconcile the UI copy (or
-add a reviewed `ACK` entry) or the push gate (§9) will block.
+Because the doctor's project holds an unmodified copy rather than a hand-ported
+fork, there is nothing to keep in sync.
 
 ---
 
@@ -302,15 +299,7 @@ add a reviewed `ACK` entry) or the push gate (§9) will block.
 `packages/medical-protocol/package.json`. The script validates semver and is
 idempotent; follow with `npm install --package-lock-only` to sync the lockfile.
 
-### 9.1 Gated push — `scripts/git/push.sh` (`npm run push`)
-
-Drives both repos (`core`, `ui`, or `all`) from core. Runs `drift-check.js` once
-as a **shared gate**, then pushes via `git -C` (no `cd`). `--no-verify` bypasses
-the gate (and skips the redundant pre-push hook run). A pre-push git hook
-(`scripts/hooks/pre-push`, installed via `scripts/hooks/install.sh`) runs the same
-drift-check so a plain `git push` is also gated.
-
-### 9.2 Gated release — `scripts/npm/release.sh` (`npm run release`)
+### 9.1 Gated release — `scripts/npm/release.sh` (`npm run release`)
 
 `release.sh <version> [all|cli|installer] [-- <npm args>]`. Gates, all must pass
 before anything publishes:
@@ -356,19 +345,18 @@ Then: `version:bump` (all files) → lockfile sync → per-target `build` →
 
 ## 12. End-to-End Data Flow
 
-1. **Author** edits clinical logic in `lib/` (source of truth) and/or markdown
+1. **Author** edits clinical logic in `plugin/lib/` (source of truth) and/or markdown
    context in `public/medical-protocol/`.
 2. **Tests** (`tests/`) pin the logic; CLI commands surface it via `--json`.
-3. **drift-check** ensures the UI repo's vendored copies still match `lib/`.
-4. **`build.sh`** bundles `plugin/` + canonical context into the installer
+3. **`build.sh`** bundles `plugin/` + canonical context into the installer
    package; **`release.sh`** gates and publishes `medprotocol` (CLI) and
    `medical-protocol` (installer).
-5. **Doctor** runs `npx medical-protocol install` → skills/hooks/settings land in
+4. **Doctor** runs `npx medical-protocol install` → skills/hooks/settings land in
    their project's `.claude/`.
-6. **Agent** (Claude Code) reads the protocol, clarifies, classifies, routes to a
-   skill/workflow, installs UI components via `npx medical-ui-cli add`, and wires
-   them — communicating only in clinical language.
-7. **Privacy guard + QA hooks** enforce data locality and quality at runtime.
+5. **Agent** (Claude Code) reads the protocol, clarifies, classifies, routes to a
+   skill/workflow, copies the logic into `lib/medprotocol/`, generates the
+   screens with UI SDK, and wires them — communicating only in clinical language.
+6. **Privacy guard + QA hooks** enforce data locality and quality at runtime.
 
 ---
 
@@ -376,15 +364,14 @@ Then: `version:bump` (all files) → lockfile sync → per-target `build` →
 
 Per `.patterns/new-module/` and the README contributing section:
 
-1. **Pure logic** in `lib/<module>.ts`, exported from `lib/index.ts`.
+1. **Pure logic** in `plugin/lib/<module>.ts`, exported from `plugin/lib/index.ts`.
 2. **Tests** in `tests/<module>/`.
 3. **CLI command** in `packages/medprotocol/src/commands/<module>.ts` (+ register
    in `index.ts`, add `--json`), with `tests/cli/<module>-cli.test.ts`.
 4. **Context doc** `public/medical-protocol/context/<module>.md`.
 5. **Classification row** in `public/.../context/classification.md` and routing
    in the `start` skill.
-6. **Workflow file** under `providers/claude-code/workflows/`.
-7. If the module gets a UI component: add a `PAIRS` entry to `drift-check.js`
-   (and `ACK` for any reviewed boundary divergence).
-8. Bump version via `npm run version:bump`.
+6. **Skill** under `plugin/skills/<module>/` (or a workflow file under
+   `providers/claude-code/workflows/`), plus its reference copies in `build.sh`.
+7. Bump version via `npm run version:bump`.
 ```

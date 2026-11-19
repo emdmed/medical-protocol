@@ -31,8 +31,8 @@ The **`prompt` is the spec**; the DOM descriptors say **where** the new componen
 
 ## 1. Classify the brief (infer → confirm)
 
-- Parse `prompt` for clinical signal words and map them via `classification.md` → registry
-  component(s) in `components.md`. Examples: anemia/CKD/hemoglobin/eGFR/creatinine → `ckd`/nephrology;
+- Parse `prompt` for clinical signal words and map them via `classification.md` → module(s)
+  in `components.md`. Examples: anemia/CKD/hemoglobin/eGFR/creatinine → `ckd`/nephrology;
   weight/height/BMI → `bmi`; pH/pCO2/HCO3/anion gap → `acid-base`; SOFA/qSOFA/lactate → `sepsis`.
 - A brief may compose **several** modules (e.g. a tracker = a calculator + a trend list). Name them.
 - **Confirm in chat**: "I'll build `{component(s)}` and place it in `{anchor}` — go?" Stop if the brief
@@ -50,10 +50,9 @@ The work order has no file path (foreign app). Find the **exact JSX node** the d
 
 ## 3. Lease — build + stage, don't write
 
-1. Install/compose the component(s):
-   - Registry match → `npx medical-ui-cli add <component>`, then compose it.
-   - No exact match → build it in the doctor's project from the module's `lib/` validations + registry
-     rules. Reuse existing components; never re-implement clinical math inline.
+1. Build the screen(s) per building.md: copy the logic to `lib/medprotocol/`, generate
+   `components/medprotocol/<module>/` with UI SDK. Reuse existing screens; several modules compose per
+   `composition.md`. Never re-implement clinical math inline.
 2. **Place it AT the selected anchor — literally.** This is the contract: the doctor pointed at a
    specific element and expects the component to appear *there*. Insert the new component as the **last
    child inside the located node**, or immediately **after** it if inside is impossible (self-closing
@@ -90,7 +89,7 @@ doctor sees it in the overlay panel:
 
 ```jsonc
 "status": "done",
-"result": { "report": "Built a CKD anemia tracker: added <Anemia/> (components/nephrology/anemia.tsx). Placed it **inline, as the last child inside the selected `<div class=\"min-w-0\">`** (the patient main-content column) — so it renders right where you pointed, no extra click.\nDiff: +1 component import, +5 lines render block at the anchor.\nApproval pending — review/approve in Claude Code." }
+"result": { "report": "Built a CKD anemia tracker: added <Anemia/> (components/medprotocol/nephrology/anemia.tsx). Placed it **inline, as the last child inside the selected `<div class=\"min-w-0\">`** (the patient main-content column) — so it renders right where you pointed, no extra click.\nDiff: +1 component import, +5 lines render block at the anchor.\nApproval pending — review/approve in Claude Code." }
 ```
 
 The placement line must name the **selected element** and how the component sits relative to it
@@ -102,4 +101,4 @@ doctor has read the result (clearing removes it).
 ## Scope discipline
 - One brief per order; insert only at the located anchor.
 - No runtime/network deps, no external API calls (privacy contract).
-- Clinical logic from `lib/` validations + registry rules, never invented inline.
+- Clinical logic from `lib/medprotocol`, never invented inline or edited locally.

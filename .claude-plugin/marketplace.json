@@ -3,6 +3,9 @@
   "owner": {
     "name": "emdmed"
   },
+  "metadata": {
+    "description": "Medical protocol skills and hooks for building clinical tools with Claude Code"
+  },
   "plugins": [
     {
       "name": "medical-protocol",

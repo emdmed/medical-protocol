@@ -11,32 +11,42 @@ import {
   isQSOFAPositive,
   calculateLactateClearance,
   isLactateClearanceAdequate,
-} from "../../../../lib/sepsis";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
+} from "../../../../plugin/lib/sepsis";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 
 const USAGE = `Usage: medprotocol sepsis <sub-command> [options]
 
 Sub-commands:
-  sofa         SOFA score (Sepsis-3 organ dysfunction)
-  qsofa        Quick SOFA screening
+  sofa         SOFA-2 score (Sepsis-3 organ dysfunction)
+  qsofa        Quick SOFA (prognostic; not a screening tool on its own)
   lactate      Lactate clearance calculation
 
-SOFA options:
+SOFA-2 options:
   --pao2 <number>            PaO2 mmHg
   --fio2 <number>            FiO2 percentage (21-100)
-  --ventilation              On mechanical ventilation
+  --spo2 <number>            SpO2 % (used only if no PaO2 and SpO2 <98)
+  --advanced-support         HFNC, CPAP, BiPAP/NIV or invasive ventilation
+  --ecmo                     On ECMO
   --platelets <number>       Platelet count (×10³/µL)
   --bilirubin <number>       Bilirubin (mg/dL)
   --map <number>             Mean arterial pressure (mmHg)
   --dopamine <number>        Dopamine dose (µg/kg/min)
   --dobutamine <number>      Dobutamine dose (µg/kg/min)
   --epinephrine <number>     Epinephrine dose (µg/kg/min)
-  --norepinephrine <number>  Norepinephrine dose (µg/kg/min)
+  --norepinephrine <number>  Norepinephrine base dose (µg/kg/min)
+  --other-vasopressor        Any other vasopressor (e.g. vasopressin)
+  --mechanical-support       Mechanical circulatory support (IABP, LVAD, VA-ECMO)
+  --delirium-drugs           Receiving drugs to treat delirium
   --gcs <number>             Glasgow Coma Scale (3-15)
   --creatinine <number>      Creatinine (mg/dL)
   --urine-output <number>    Urine output (mL)
   --weight <number>          Patient weight (kg)
   --hours <number>           Hours for urine output (default: 24)
+  --rrt                      Receiving renal replacement therapy (incl. chronic)
+  --potassium <number>       Potassium (mmol/L), for RRT criteria
+  --ph <number>              pH, for RRT criteria
+  --bicarbonate <number>     Bicarbonate (mmol/L), for RRT criteria
+  --ceiling                  Support unavailable or precluded by a ceiling of treatment
   --baseline <number>        Baseline SOFA score (default: 0)
   --infection                Suspected infection
   --lactate <number>         Lactate level (mmol/L)
@@ -56,7 +66,7 @@ Global options:
 
 Examples:
   medprotocol sepsis sofa --pao2 80 --fio2 40 --platelets 90 --gcs 13 --creatinine 2.5
-  medprotocol sepsis sofa --pao2 60 --fio2 80 --ventilation --platelets 40 --infection --lactate 4
+  medprotocol sepsis sofa --pao2 60 --fio2 80 --advanced-support --platelets 40 --infection --lactate 4
   medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13
   medprotocol sepsis lactate --initial 4.2 --repeat 2.1`;
 
@@ -66,7 +76,17 @@ const runSOFA = (argv: string[], json: boolean): void => {
     options: {
       pao2: { type: "string", default: "" },
       fio2: { type: "string", default: "" },
-      ventilation: { type: "boolean", default: false },
+      spo2: { type: "string", default: "" },
+      "advanced-support": { type: "boolean", default: false },
+      ecmo: { type: "boolean", default: false },
+      "other-vasopressor": { type: "boolean", default: false },
+      "mechanical-support": { type: "boolean", default: false },
+      "delirium-drugs": { type: "boolean", default: false },
+      rrt: { type: "boolean", default: false },
+      potassium: { type: "string", default: "" },
+      ph: { type: "string", default: "" },
+      bicarbonate: { type: "string", default: "" },
+      ceiling: { type: "boolean", default: false },
       platelets: { type: "string", default: "" },
       bilirubin: { type: "string", default: "" },
       map: { type: "string", default: "" },
@@ -96,7 +116,17 @@ const runSOFA = (argv: string[], json: boolean): void => {
   const reading = {
     paO2: values.pao2!,
     fiO2: values.fio2!,
-    onVentilation: values.ventilation!,
+    advancedRespiratorySupport: values["advanced-support"]!,
+    ecmo: values.ecmo!,
+    spO2: values.spo2!,
+    otherVasopressor: values["other-vasopressor"]!,
+    mechanicalCirculatorySupport: values["mechanical-support"]!,
+    deliriumDrugs: values["delirium-drugs"]!,
+    onRRT: values.rrt!,
+    potassium: values.potassium!,
+    pH: values.ph!,
+    bicarbonate: values.bicarbonate!,
+    ceilingOfTreatment: values.ceiling!,
     platelets: values.platelets!,
     bilirubin: values.bilirubin!,
     map: values.map!,
@@ -139,6 +169,7 @@ const runSOFA = (argv: string[], json: boolean): void => {
         values.dobutamine!,
         values.epinephrine!,
         values.norepinephrine!,
+        values["other-vasopressor"]!,
       );
       const septicShock = assessSepticShock(true, vasopressorsNeeded, values.lactate!);
       data.septicShock = septicShock;
@@ -149,7 +180,7 @@ const runSOFA = (argv: string[], json: boolean): void => {
   }
 
   printResult(data, json, () => {
-    return [formatHeader("SOFA Score (Sepsis-3)"), formatTable(rows)].join("\n");
+    return [formatHeader("SOFA-2 Score (Sepsis-3)"), formatTable(rows)].join("\n");
   });
 };
 

@@ -10,19 +10,19 @@ It's designed for two consumers:
 
 ## What It's For
 
-Each command wraps pure calculation functions from `lib/` with argument parsing, validation, and formatted output.
+Each command wraps pure calculation functions from `plugin/lib/` with argument parsing, validation, and formatted output.
 
 Current commands (7):
 
 | Command | Sub-commands | Lib file | Description |
 |---------|-------------|----------|-------------|
-| `bmi` | — | `lib/bmi.ts` | Body Mass Index |
-| `abg` | — | `lib/acid-base.ts` | Arterial blood gas analysis |
-| `water-balance` | — | `lib/water-balance.ts` | Fluid intake/output balance |
-| `vitals` | — | `lib/vital-signs.ts` | Vital signs evaluation |
-| `pafi` | — | `lib/pafi.ts` | PaO2/FiO2 ratio (ARDS) |
-| `dka` | — | `lib/dka.ts` | DKA assessment |
-| `cardiology` | `ascvd`, `heart`, `chadsvasc` | `lib/cardiology.ts` | Cardiology risk scores |
+| `bmi` | — | `plugin/lib/bmi.ts` | Body Mass Index |
+| `abg` | — | `plugin/lib/acid-base/` | Arterial blood gas analysis |
+| `water-balance` | — | `plugin/lib/water-balance.ts` | Fluid intake/output balance |
+| `vitals` | — | `plugin/lib/vital-signs-validations/` | Vital signs evaluation |
+| `pafi` | — | `plugin/lib/pafi.ts` | PaO2/FiO2 ratio (ARDS) |
+| `dka` | — | `plugin/lib/dka.ts` | DKA assessment |
+| `cardiology` | `ascvd`, `heart`, `chadsvasc` | `plugin/lib/cardiology.ts` | Cardiology risk scores |
 
 ## Architecture
 
@@ -44,7 +44,7 @@ packages/medprotocol/
 ├── package.json              # bin: { "medprotocol": "./dist/index.js" }
 └── tsconfig.json
 
-lib/                          # Pure calculation functions (shared with React components)
+plugin/lib/                   # Pure calculation functions (copied into doctor projects as lib/medprotocol/)
 tests/cli/                    # CLI-specific tests (vitest)
 ```
 
@@ -74,7 +74,7 @@ Every command file exports a single `run(argv: string[]): void` function that fo
 1. Parse args     → node:util parseArgs() with strict: true
 2. Handle --help  → write USAGE to stdout, return
 3. Validate       → check required flags, write errors to stderr, set exitCode = 1
-4. Calculate      → call pure function from lib/
+4. Calculate      → call pure function from plugin/lib/
 5. Handle error   → null result = invalid inputs, stderr + exitCode = 1
 6. Output         → printResult(data, isJson, humanFormatFn)
 ```
@@ -90,12 +90,12 @@ Every command file exports a single `run(argv: string[]): void` function that fo
 
 ## How to Add a New Command
 
-### Step 1: Pure logic in `lib/`
+### Step 1: Pure logic in `plugin/lib/`
 
-Create (or reuse) a `lib/<name>.ts` with pure calculation functions. These are shared with the React component — the CLI is just another consumer.
+Create (or reuse) a `plugin/lib/<name>.ts` with pure calculation functions. These are shared with the generated UI screens in doctor projects — the CLI is just another consumer.
 
 ```typescript
-// lib/my-metric.ts
+// plugin/lib/my-metric.ts
 export const calculateMyMetric = (input1: string, input2: string): string | null => {
   // ... returns null on invalid input
 };
@@ -108,7 +108,7 @@ Create `packages/medprotocol/src/commands/<name>.ts`:
 
 ```typescript
 import { parseArgs } from "node:util";
-import { calculateMyMetric, getMyMetricCategory } from "../../../../lib/my-metric";
+import { calculateMyMetric, getMyMetricCategory } from "../../../../plugin/lib/my-metric";
 import { formatHeader, formatTable, printResult, formatError } from "../format";
 
 const USAGE = `Usage: medprotocol my-metric [options]
@@ -275,7 +275,7 @@ export const run = (argv: string[]): void => {
 
 ## Checklist: Adding a Command
 
-- [ ] Pure logic exists in `lib/<name>.ts` (with unit tests in `tests/<name>/`)
+- [ ] Pure logic exists in `plugin/lib/<name>.ts` (with unit tests in `tests/<name>/`)
 - [ ] Command file at `packages/medprotocol/src/commands/<name>.ts`
 - [ ] Exports `run(argv: string[]): void`
 - [ ] `--json` and `--help` flags supported

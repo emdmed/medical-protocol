@@ -5,7 +5,7 @@ import {
   getT2DScreeningRecommendation,
   classifyGDM_OneStep,
   classifyGDM_TwoStep,
-} from '../../lib/endocrine';
+} from '../../plugin/lib/endocrine';
 
 // ─── T1D Staging (ADA Table 2.4) ────────────────────────────────────
 

@@ -1,27 +1,29 @@
 ---
 name: calc-audit
-description: Scan installed components for calculation logic and test them against the canonical library via CLI and browser
+description: Scan the project's clinical screens for calculation logic and test them against the canonical library via CLI and browser
 allowed-tools: Read, Grep, Glob, Bash
 user-invocable: true
 ---
 
 Read and follow: reference/core.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/test-vectors.md
 
 ## Purpose
 
-Discover which clinical components are installed in the doctor's project, validate their calculation logic against the canonical medprotocol CLI, and optionally verify the UI renders matching results via agent-browser.
+Discover which clinical screens exist in the doctor's project, validate their calculation logic against the canonical medprotocol CLI, and optionally verify the UI renders matching results via agent-browser.
 
 ## Phase 1: Discover
 
-Scan the project for installed components:
+Scan the project for clinical screens:
 
-1. Check for `components/` directory — list all component subdirectories found
-2. Check for `app/` routes that correspond to components
-3. For each found component, grep the source for calculation function calls (e.g., `calculateBMI`, `analyzeABG`, `calculatePaFi`, `calculateTotalSOFA`, `calculateQSOFA`, `calculateEGFR`, `analyzeDKA`, `calculateWaterBalance`) to confirm which lib functions are in use
-4. Build a component inventory mapping each installed module to its calculation functions
+1. Check for `components/medprotocol/` — list all module folders found (also check `src/`)
+2. Check for `app/` routes that correspond to them
+3. Confirm `lib/medprotocol/` matches the clinical logic source (`diff -r <clinical logic source> lib/medprotocol`). Any local edit is a Calculation Accuracy finding.
+4. For each screen, grep the source for calculation function calls imported from `lib/medprotocol` (e.g., `calculateBMI`, `analyzeABG`, `calculatePaFi`, `calculateTotalSOFA`, `calculateQSOFA`, `calculateEGFR`, `analyzeDKA`, `calculateWaterBalance`) to confirm which lib functions are in use. Any clinical value computed in the UI instead of the lib is a finding.
+5. Build a component inventory mapping each module to its calculation functions
 
-If no components are found, tell the doctor: "I don't see any clinical components installed yet. Run /medical-protocol:start to build your first component, then come back to test."
+If no screens are found, tell the doctor: "I don't see any clinical tools built yet. Run /medical-protocol:start to build your first component, then come back to test."
 
 ## Phase 2: CLI Validation
 

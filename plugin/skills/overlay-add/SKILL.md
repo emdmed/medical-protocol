@@ -1,11 +1,13 @@
 ---
 name: overlay-add
-description: Build a NEW medical-protocol component from a free-text brief the doctor typed in the dev overlay, and place it into the region they selected — drains an "add" work order, reads its `prompt`, classifies the requested clinical concept, composes the right medprotocol component(s), and stages a diff that inserts it at the selected anchor. For adding capability to an app, not retrofitting existing markup.
+description: Build a NEW medical-protocol component from a free-text brief the doctor typed in the dev overlay, and place it into the region they selected — drains an "add" work order, reads its `prompt`, classifies the requested clinical concept, builds a screen on the right medprotocol module(s), and stages a diff that inserts it at the selected anchor. For adding capability to an app, not retrofitting existing markup.
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 user-invocable: true
 ---
 
 Read and follow: reference/core.md
+Read and follow: reference/building.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/queue.md
 
 ## Purpose
@@ -30,10 +32,10 @@ component there from the `prompt`. Lease/apply: nothing lands until the doctor a
 
 For each order:
 1. Read the order's `prompt` — that is what to build. Classify the **requested clinical concept** by
-   matching the brief against `classification.md` signal words → registry component(s) in
+   matching the brief against `classification.md` signal words → module(s) in
    `components.md` (e.g. "anemia"/"CKD"/"hemoglobin"/"eGFR" → `ckd`/nephrology; "weight"/"height" →
    `bmi`; "pH"/"pCO2"/"HCO3" → `acid-base`; "SOFA"/"qSOFA" → `sepsis`).
-2. **Confirm the plan in chat** before writing anything: name the component(s) you'll compose and where
+2. **Confirm the plan in chat** before writing anything: name the module(s) you'll build on and where
    you'll place them. If the brief isn't clinical, or no medprotocol module covers it, say so and stop
    — do not invent clinical logic.
 
@@ -46,9 +48,9 @@ For each order:
 
 ## Phase 4: Lease — stage the new component
 
-1. If the brief maps to an existing registry component, install it (`npx medical-ui-cli add
-   <component>`) and compose it. If it needs a composition not yet in the registry, build it in the
-   doctor's project from the module's `lib/` validations + registry rules — never inline clinical math.
+1. Copy the clinical logic and build the screen per building.md (`components/medprotocol/<module>/`,
+   reusing any that exist). A brief spanning several modules composes them per `composition.md` —
+   never inline clinical math.
 2. **Place it AT the selected anchor — literally.** Insert the component as the last child **inside**
    the located node (or immediately **after** it if inside is impossible). The doctor pointed at a
    specific element and expects it to appear *there*, with no extra click. **Do NOT** add it to a
@@ -76,4 +78,4 @@ For each order:
 - Build a component for a non-clinical brief, or one no medprotocol module covers — confirm first, else stop.
 - Edit outside the located anchor region.
 - Add network/runtime deps or external API calls (privacy contract).
-- Invent clinical logic — it comes from the module's `lib/` validations and registry rules.
+- Invent clinical logic or edit `lib/medprotocol/` — every clinical value comes from the lib.

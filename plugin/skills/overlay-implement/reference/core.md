@@ -22,14 +22,14 @@ A drained `implement` work order (`npx medprotocol overlay --drain --json`):
 }
 ```
 
-The selection is described by **DOM descriptors, not a registry id** — the whole point is to work on
+The selection is described by **DOM descriptors, not a module id** — the whole point is to work on
 untagged foreign markup.
 
 ## 1. Classify (infer → confirm)
 
 - `suggestedId` present → use it (fast-path; app already medprotocol-based).
-- Otherwise infer from `text` + `html` + `classes` via `classification.md` signal words → registry
-  component. Examples: weight/height/BMI → `bmi`; pH/pCO2/HCO3/anion gap → `acid-base`;
+- Otherwise infer from `text` + `html` + `classes` via `classification.md` signal words → module in
+  `components.md`. Examples: weight/height/BMI → `bmi`; pH/pCO2/HCO3/anion gap → `acid-base`;
   creatinine/eGFR → `ckd`; SOFA/qSOFA/lactate → `sepsis`.
 - **Confirm in chat**: "This looks like a `{component}` — implement that here?" Stop if the selection
   isn't clinical or the doctor declines.
@@ -45,8 +45,9 @@ The work order has no file path (foreign app). Find it from descriptors:
 
 ## 3. Lease — stage, don't write
 
-1. Ensure the component is installed: `npx medical-ui-cli add <component>`.
-2. Compose the replacement: swap the located markup for the medprotocol component, wiring any obvious
+1. Build the screen per building.md: copy the logic to `lib/medprotocol/`, generate
+   `components/medprotocol/<module>/` with UI SDK (reuse it if it exists).
+2. Compose the replacement: swap the located markup for that screen, wiring any obvious
    inputs (e.g. existing weight/height fields) into its props. Scope strictly to the located region.
 3. Stage it: write the modified file to `.medprotocol/staged/<path>` and produce a unified diff
    (`git diff --no-index <path> .medprotocol/staged/<path>`). Present the diff. Do **not** touch the
@@ -71,7 +72,7 @@ doctor sees it in the overlay panel:
 
 ```jsonc
 "status": "done",
-"result": { "report": "Staged: replaced the weight/height block with <BMICalculator/> (bmi/bmi-card.tsx).\nDiff: +1 component, -12 lines of hand-rolled inputs.\nApproval pending — review/approve in Claude Code." }
+"result": { "report": "Staged: replaced the weight/height block with <Bmi/> (components/medprotocol/bmi/bmi.tsx).\nDiff: +1 component, -12 lines of hand-rolled inputs.\nApproval pending — review/approve in Claude Code." }
 ```
 
 Recommend `/medical-protocol:overlay-audit` on the same region to verify. Don't `--clear` until the
@@ -80,4 +81,4 @@ doctor has read the result (clearing removes it).
 ## Scope discipline
 - One selection per order; only the located region.
 - No runtime/network deps, no external API calls (privacy contract).
-- Clinical logic from `lib/` validations + registry rules, never invented inline.
+- Clinical logic from `lib/medprotocol`, never invented inline or edited locally.

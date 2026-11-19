@@ -6,14 +6,16 @@ user-invocable: true
 ---
 
 Read and follow: reference/core.md
-Read and follow: reference/component-fetching.md
+Read and follow: reference/building.md
 Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 
-## Component
+## Build
 
-- **Component:** `bmi` (install via `npx medical-ui-cli add bmi`)
+- **Clinical logic:** `@/lib/medprotocol/bmi` — copy it first (building.md §1)
+- **Component folder:** `components/medprotocol/bmi/` — main file `bmi.tsx`, built with UI SDK (building.md §2–3)
 - **Route:** `app/bmi/page.tsx`
 - **Preview message:** "Your BMI calculator is ready. Click to enter weight and height, and it will show the BMI with its category. You can switch between metric and imperial units. View it at http://localhost:3000/bmi"
 

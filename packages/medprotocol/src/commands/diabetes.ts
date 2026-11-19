@@ -5,15 +5,15 @@ import {
   classify2hPG,
   classifyRandomPG,
   getDiagnosis,
-} from "../../../../lib/diabetes-dx";
+} from "../../../../plugin/lib/diabetes-dx";
 import {
   classifyT1DStage,
   classifyT1vsT2,
   getT2DScreeningRecommendation,
   classifyGDM_OneStep,
   classifyGDM_TwoStep,
-} from "../../../../lib/endocrine";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
+} from "../../../../plugin/lib/endocrine";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 
 const USAGE = `Usage: medprotocol diabetes <sub-command> [options]
 

@@ -24,9 +24,9 @@ Do NOT ask about technical integrations, display preferences, or which formulas 
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build the Screen
 
-Follow the **Component Installation Process** from the main protocol for the `acid-base` component.
+Follow **Building a Screen** from the main protocol (building.md) for the `acid-base` module: copy the clinical logic, set up UI SDK, generate `components/medprotocol/acid-base/acid-base.tsx`.
 
 ---
 

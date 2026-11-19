@@ -23,6 +23,12 @@ Tell the doctor: "Let me take a look." Do not ask them technical questions.
    - **Phase 3**: Doctor Communication — if auto-fix fails, explain in plain language
    - **Phase 4**: Verify — confirm the fix worked
 
+## Clinical Logic
+
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
+
+If imports from `@/lib/medprotocol/...` fail, re-copy the logic: `mkdir -p lib/medprotocol && cp -r "<clinical logic source>/." lib/medprotocol/` (`src/lib/medprotocol/` if the project uses `src/`). Never fix a clinical error by editing `lib/medprotocol/` — tell the doctor. To understand a screen, read the header comment of its main file in `components/medprotocol/<module>/`.
+
 ## Rules
 
 - **Never show** terminal output, error logs, code snippets, or technical details to the doctor

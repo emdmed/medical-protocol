@@ -28,19 +28,19 @@ Do NOT ask about eGFR formula choice, KDIGO staging thresholds, KFRE coefficient
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build the Screen
 
-Follow the **Component Installation Process** from the main protocol.
+Follow **Building a Screen** from the main protocol (building.md).
 
-**Full nephrology suite (group install):** `npx medical-ui-cli add nephrology` — installs both `ckd/` and `nephrology/` folders
-**CKD only:** `npx medical-ui-cli add ckd`
-**Sub-component aliases:** `npx medical-ui-cli add anemia`, `add phospho-calcic`, or `add cardio-metabolic` — each installs the `nephrology/` folder
+**Full nephrology suite:** build both `components/medprotocol/ckd/` and `components/medprotocol/nephrology/`
+**CKD only:** build `components/medprotocol/ckd/ckd.tsx`
+**Single panel:** anemia, phospho-calcic, or cardio-metabolic — each lives in `components/medprotocol/nephrology/`
 
-These are **separate** components. Do NOT add anemia or MBD logic into `ckd-evaluator.tsx` — use the nephrology component's `anemia.tsx` and `phospho-calcic.tsx` instead.
+These are **separate** screens. Do NOT add anemia or MBD panels into the CKD screen — build `anemia.tsx` and `phospho-calcic.tsx` in the nephrology folder instead.
 
-**Patient demographics:** This component uses age and sex. Ask: "Would you like a Patient demographics card above the CKD evaluator to manage patient info in one place?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient age and sex into the CKD component following the patient data wiring pattern in the composition context.
+**Patient demographics:** This component uses age and sex. Ask: "Would you like a Patient demographics card above the CKD evaluator to manage patient info in one place?" (Default: yes). If yes, build the `patient` screen first (`components/medprotocol/patient/`). Wire patient age and sex into the CKD screen following the patient data wiring pattern in the composition context.
 
-**Clinical logic library:** The CKD component imports calculation functions from `lib/ckd`. Create in the project:
+**Clinical logic:** The CKD screen imports these from `@/lib/medprotocol/ckd` (copied from the plugin — never reimplement or edit them):
 - `calculateEGFR(creatinine, age, sex)` — CKD-EPI 2021 race-free eGFR
 - `classifyGFRCategory(egfr)` — G1–G5 staging
 - `classifyAlbuminuriaCategory(acr)` — A1–A3 staging
@@ -59,11 +59,9 @@ These are **separate** components. Do NOT add anemia or MBD logic into `ckd-eval
 - `hasACRDoubling(previous, current)` — true if ≥2× increase
 - `getCKDSeverity(gfrCategory)` — normal/warning/critical for UI styling
 
-**Nephrology component** (installed via group `add nephrology` or individually via `add anemia`/`add phospho-calcic`/`add cardio-metabolic`):
+**Nephrology screens** (`components/medprotocol/nephrology/`): `anemia.tsx`, `phospho-calcic.tsx`, `cardio-metabolic.tsx`.
 
-The `nephrology/` folder contains `anemia.tsx`, `phospho-calcic.tsx`, `cardio-metabolic.tsx`, `lib.ts`, `ui-helpers.tsx`, and `types/interfaces.ts`.
-
-Nephrology lib functions (in `nephrology/lib.ts`):
+Nephrology logic (import from `@/lib/medprotocol/nephrology`):
 - `classifyAnemiaBySex(hb, sex)` — sex-specific Hb classification (male <13, female <12 g/dL); returns `{label, severity, anemic}`
 - `checkESAEligibility(hb, ferritin, tsat, sex)` — Hb <10 + iron replete → eligible; returns `{eligible, reason}`
 - `getPhosphateRecommendation(phosphorus, gfrCategory?)` — target 2.5–4.5 mg/dL for G3a-G5; returns `{status, recommendation}`

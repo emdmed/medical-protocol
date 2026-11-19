@@ -28,20 +28,17 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build the Screen
 
-For each block the doctor selected, install via CLI. Install each component with `npx medical-ui-cli add <component>`. Available components: `base` (patient), `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`, `ckd`. For nephrology, use the group install `npx medical-ui-cli add nephrology` to install both `ckd/` and `nephrology/` folders at once.
+Follow **Building a Screen** from the main protocol (building.md): copy the clinical logic once, set up UI SDK once, then generate one screen per selected block in `components/medprotocol/<module>/`. Modules: `patient`, `vital-signs`, `acid-base`, `bmi`, `water-balance`, `pafi`, `dka`, `cardiology`, `sepsis`, `ckd`, `nephrology` (nephrology = both `ckd/` and `nephrology/`). Skip any screen that already exists.
 
-If Patient was included (explicitly or auto-included), install it first: `npx medical-ui-cli add base`. Then wire patient data into dependent components following the patient data wiring pattern in the composition context.
+If Patient was included (explicitly or auto-included), build it first. Then wire patient data into dependent screens following the patient data wiring pattern in the composition context.
 
-Check if any installed component has dependencies on other components — if so, install those too with `npx medical-ui-cli add`.
+Check `components.md` for dependencies between tools (e.g. DKA needs acid-base, sepsis needs vital-signs and water-balance) and build those screens too.
 
-Refer to the composition context for integration patterns and known gotchas (overflow clipping, circular updates, null guards). Key rules:
+Refer to the composition context for integration patterns and known gotchas (clipped popups, circular updates, null guards). Key rules:
 - Props down, callbacks up. Use `useRef` to skip no-op updates and prevent circular render loops.
-- Add `overflow-visible` to any shadcn Card that contains absolutely-positioned popups or overlays.
-- When wiring multiple components on a single page, null-guard all cross-component data.
-
-Install all selected components via `npx medical-ui-cli add <name>` (deduplicated — skip any already installed).
+- When wiring multiple screens on a single page, null-guard all cross-screen data.
 
 ---
 

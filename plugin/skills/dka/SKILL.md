@@ -6,19 +6,21 @@ user-invocable: true
 ---
 
 Read and follow: reference/core.md
-Read and follow: reference/component-fetching.md
+Read and follow: reference/building.md
 Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/resolution-criteria.md
 Read when needed: reference/insulin-protocol.md
 Read when needed: reference/potassium-management.md
 
-## Component
+## Build
 
-- **Component:** `dka` (install via `npx medical-ui-cli add dka`)
+- **Clinical logic:** `@/lib/medprotocol/dka` + `@/lib/medprotocol/acid-base` — copy it first (building.md §1)
+- **Component folder:** `components/medprotocol/dka/` — main file `dka.tsx`, built with UI SDK (building.md §2–3)
 - **Route:** `app/dka/page.tsx`
-- **Dependencies:** Also install `acid-base` via `npx medical-ui-cli add acid-base` (DKA uses it for blood gas analysis on every reading)
+- **Dependencies:** Every reading also runs blood gas analysis through `@/lib/medprotocol/acid-base` — reuse `components/medprotocol/acid-base/` if it exists, otherwise build it
 - **Preview message:** "Your DKA monitoring tool is ready. You can set the patient's weight, choose glucose units, and add hourly readings. It tracks glucose reduction rates, resolution criteria, potassium levels, and alerts you to GCS changes. View it at http://localhost:3000/dka"
 
 ## Phase 1: Clinical Requirements

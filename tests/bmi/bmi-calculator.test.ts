@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateBMI, getBMICategory } from '../../lib/bmi';
+import { calculateBMI, getBMICategory } from '../../plugin/lib/bmi';
 
 describe('calculateBMI — imperial', () => {
   it('calculates BMI for 154 lbs, 5\'9"', () => {
@@ -106,9 +106,12 @@ describe('getBMICategory', () => {
     expect(getBMICategory('29.9')).toBe('Overweight');
   });
 
-  it('returns Obese for BMI >= 30', () => {
-    expect(getBMICategory('30.0')).toBe('Obese');
-    expect(getBMICategory('35.0')).toBe('Obese');
+  it('returns WHO obesity classes for BMI >= 30', () => {
+    expect(getBMICategory('30.0')).toBe('Obese I');
+    expect(getBMICategory('34.9')).toBe('Obese I');
+    expect(getBMICategory('35.0')).toBe('Obese II');
+    expect(getBMICategory('39.9')).toBe('Obese II');
+    expect(getBMICategory('40.0')).toBe('Obese III');
   });
 
   it('returns Unknown for null', () => {

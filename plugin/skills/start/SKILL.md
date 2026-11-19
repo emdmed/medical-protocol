@@ -8,12 +8,14 @@ user-invocable: true
 Read and follow: reference/core.md
 Read and follow: reference/project-setup.md
 Read and follow: reference/clinical-context.md
+Read and follow: reference/building.md (when building a screen)
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 
 ## Step 1: Returning Project Check
 
-Before anything else, check if the current project already has components installed (e.g., `components/vital-signs/`, `components/acid-base/`, etc.):
+Before anything else, check if the current project already has clinical screens (e.g., `components/medprotocol/vital-signs/`, `components/medprotocol/acid-base/`, etc.):
 
-- If the doctor asks for something that's already installed, route to the **modify** workflow — do not re-install components.
+- If the doctor asks for something that already exists, route to the **modify** workflow — do not rebuild it.
 - If the doctor asks for something new that doesn't exist yet, proceed below.
 - Never re-scaffold the project if it already has a working setup.
 

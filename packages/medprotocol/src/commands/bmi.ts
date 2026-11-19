@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
-import { calculateBMI, getBMICategory } from "../../../../lib/bmi";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../lib/format";
+import { calculateBMI, getBMICategory } from "../../../../plugin/lib/bmi";
+import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 
 const USAGE = `Usage: medprotocol bmi [options]
 

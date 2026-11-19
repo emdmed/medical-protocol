@@ -13,7 +13,7 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 | `pafi` | Calculates PaO2/FiO2 ratio and classifies ARDS severity | `medprotocol pafi --pao2 60 --fio2 40` |
 | `dka` | Evaluates DKA parameters: glucose reduction rate, resolution criteria | `medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl` |
 | `cardiology` | Cardiology risk scores (ASCVD, HEART, CHA2DS2-VASc) | `medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120` |
-| `sepsis` | Sepsis assessment (SOFA, qSOFA, lactate clearance) | `medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13` |
+| `sepsis` | Sepsis assessment (SOFA-2, qSOFA, lactate clearance) | `medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13` |
 | `ckd` | CKD evaluation (eGFR, KDIGO staging, KFRE) | `medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male` |
 
 ## When to Suggest Calculator vs Full Interface

@@ -45,8 +45,8 @@ async function main() {
       process.exit(0);
     }
 
-    // QA indicators: tweakcn fetch, shadcn add, tsc check, eslint
-    if (/(tweakcn|gh api.*jnsahaj|npx shadcn|npx tsc --noemit|eslint|prettier)/.test(cmd)) {
+    // QA indicators: tsc check, CLI comparison (not overlay drains), eslint, prettier
+    if (/(npx tsc --noemit|npx medprotocol (?!overlay)|eslint|prettier)/.test(cmd)) {
       fs.mkdirSync(stateDir, { recursive: true });
       fs.writeFileSync(path.join(stateDir, ".qa_started"), "");
     }

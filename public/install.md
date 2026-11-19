@@ -6,7 +6,7 @@ Choose your AI coding provider to get started:
 
 ### Claude Code (Recommended)
 
-The fully supported provider. Claude Code reads the protocol, installs components via medical-ui-cli, and builds clinical interfaces automatically.
+The fully supported provider. Claude Code reads the protocol, copies the clinical logic into your project, and generates clinical interfaces automatically with UI SDK.
 
 **Quick start:**
 ```

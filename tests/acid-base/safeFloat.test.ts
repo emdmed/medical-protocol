@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { safeParseFloatOrNull as safeFloat } from '../../lib/utils/safeParseFloat';
-import { safeParseFloat } from '../../lib/water-balance';
+import { safeParseFloatOrNull as safeFloat } from '../../plugin/lib/utils/safeParseFloat';
+import { safeParseFloat } from '../../plugin/lib/water-balance';
 
 describe('safeFloat', () => {
   it('parses valid integer string', () => {

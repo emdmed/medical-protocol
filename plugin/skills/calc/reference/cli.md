@@ -13,7 +13,7 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 | `pafi` | Calculates PaO2/FiO2 ratio and classifies ARDS severity | `medprotocol pafi --pao2 60 --fio2 40` |
 | `dka` | Evaluates DKA parameters: glucose reduction rate, resolution criteria | `medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl` |
 | `cardiology` | Cardiology risk scores (ASCVD, HEART, CHA2DS2-VASc) | `medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120` |
-| `sepsis` | Sepsis assessment (SOFA, qSOFA, lactate clearance) | `medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13` |
+| `sepsis` | Sepsis assessment (SOFA-2, qSOFA, lactate clearance) | `medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13` |
 | `ckd` | CKD evaluation (eGFR, KDIGO staging, KFRE) | `medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male` |
 
 ## When to Suggest Calculator vs Full Interface
@@ -28,3 +28,24 @@ When the doctor's request is simple enough for the quick calculator, offer it as
 - Call it "quick calculator" or "command-line tool" -- never "Node.js CLI" or "npm script"
 - Always use `--json` internally, then translate the output to clinical language
 - Never show raw terminal output unless the doctor explicitly asks
+
+## Dev overlay bridge (not a calculator)
+
+`medprotocol overlay` is a developer tool, not a clinical calculator — keep it out of the table
+above. It serves the overlay used to **retrofit medical protocol into any app** (hover any element →
+Audit or Implement) and drains the resulting work-order queue (`.medprotocol/queue/`), emitting a
+dispatch plan naming the skill to run for each selection (`/medical-protocol:overlay-audit` or
+`overlay-implement`). See `context/overlay.md` for the queue schema and the Audit/Implement semantics.
+
+```bash
+npx medprotocol overlay --serve    # serve overlay.js + accept browser selections (add the printed <script> tag, dev only)
+npx medprotocol overlay --serve --auto  # …and auto-process each selection via a headless Claude run (opt-in, needs `claude` CLI)
+npx medprotocol overlay --list     # show pending selections
+npx medprotocol overlay --drain    # claim pending selections, print dispatch plan
+npx medprotocol overlay --watch    # live-report new selections
+npx medprotocol overlay --clear    # remove completed work orders
+```
+
+The overlay itself is the vanilla script served at `GET /overlay.js` by `--serve` — there is no
+React component to install, and the target app needs no medprotocol tags. The `data-medprotocol-*`
+tags are an optional fast-path for apps already built with medical protocol.

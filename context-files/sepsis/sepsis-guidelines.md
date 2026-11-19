@@ -69,9 +69,9 @@ Load **only** the section matching the current clinical domain. Do not build fea
 | 2 — Antimicrobial Therapy | `assessBundleCompliance()` (antibiotics item) | Bundle checklist: "Antibiotics given" toggle + timestamp | Partial — timing tracked, no drug selection logic |
 | 3 — Hemodynamics & Fluids | `calculateCardiovascularSOFA()`, `assessBundleCompliance()` (fluid item), `calculateLactateClearance()`, `isLactateClearanceAdequate()` | MAP input, fluid bolus toggle, lactate trend chart | High — MAP thresholds, lactate clearance, bundle fluid item |
 | 4 — Vasopressors & Inotropes | `calculateCardiovascularSOFA()`, `hasVasopressors()`, `assessSepticShock()` | Vasopressor dose inputs (dopamine, dobutamine, epi, norepi) | High — dose-based SOFA scoring and shock detection |
-| 5 — Ventilation & Respiratory | `calculateRespirationSOFA()` | PaO2, FiO2, ventilation toggle | Partial — PaO2/FiO2 ratio only; no HFNC/NIV/PEEP logic |
+| 5 — Ventilation & Respiratory | `calculateRespirationSOFA()` | PaO2, FiO2, SpO2, advanced support (HFNC/CPAP/NIV/IMV), ECMO toggles | SOFA-2 respiratory (P/F or S/F); no PEEP logic |
 | 6 — Adjunctive Therapies | — | — | None — no backing code |
-| 7 — Supportive Care | `calculateRenalSOFA()`, `calculateCoagulationSOFA()` | Creatinine, urine output, platelets inputs | Partial — organ scoring only; no RRT/VTE/nutrition logic |
+| 7 — Supportive Care | `calculateRenalSOFA()`, `calculateCoagulationSOFA()` | Creatinine, urine output, RRT, K⁺/pH/HCO₃⁻, platelets inputs | SOFA-2 kidney incl. RRT criteria; no VTE/nutrition logic |
 | 8 — Post-Acute & Discharge | — | — | None — no backing code |
 
 ### Rules for Agents

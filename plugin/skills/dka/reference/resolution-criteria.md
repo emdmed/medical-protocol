@@ -1,26 +1,30 @@
 # DKA Resolution Criteria
 
-## Standard Resolution Criteria (ALL must be met)
+Computed by `assessDKAResolution(ketones, bicarbonate, pH)` in `lib/medprotocol/dka`. Never re-implement in the UI.
+
+## Resolution (2024 consensus)
 
 | Criterion | Target | Notes |
 |-----------|--------|-------|
-| pH | > 7.30 | Venous or arterial |
-| Serum bicarbonate | > 15 mEq/L | Some protocols use > 18 mEq/L |
-| Anion gap | < 12 mEq/L | Calculated: Na⁺ − (Cl⁻ + HCO₃⁻) |
+| Blood β-hydroxybutyrate | < 0.6 mmol/L | Required. Not urine ketones |
+| Venous pH | ≥ 7.30 | Either this… |
+| Serum bicarbonate | ≥ 18 mmol/L | …or this |
+
+Resolved = β-hydroxybutyrate < 0.6 AND (pH ≥ 7.30 OR bicarbonate ≥ 18).
 
 ## Additional Markers (supportive, not required)
 
-- Blood glucose < 200 mg/dL (11.1 mmol/L) — often resolves before acidosis
-- Serum ketones clearing (β-hydroxybutyrate < 0.6 mmol/L)
+- Blood glucose falling (often normalizes hours before acidosis). Glucose is not a resolution criterion.
+- Anion gap closing
 - Patient tolerating oral intake
 
 ## Common Pitfalls
 
-- **Do NOT mark resolved based on glucose alone** — hyperglycemia resolves hours before acidosis
-- **Check all three criteria** — partial resolution (e.g., pH corrected but AG still elevated) requires continued insulin
-- **Transition timing** — switch to subcutaneous insulin only after ALL criteria met AND patient can eat; overlap IV insulin for 1–2 hours after first subcutaneous dose
+- **Do NOT mark resolved based on glucose** — hyperglycemia resolves hours before ketosis and acidosis
+- **Ketones must clear** — pH or bicarbonate alone is not enough
+- **Transition timing** — switch to subcutaneous insulin only after resolution AND the patient can eat; give basal insulin 1–2 hours before stopping the IV infusion
 
 ## Sources
 
-- ADA Diabetes Care 2009; Kitabchi et al.
+- Umpierrez GE et al. Hyperglycemic Crises in Adults With Diabetes: A Consensus Report. Diabetes Care 2024 (`sources.ADA_DKA_2024`)
 - Joint British Diabetes Societies (JBDS) Inpatient Care Group guidelines

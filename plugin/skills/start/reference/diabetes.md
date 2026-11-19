@@ -27,19 +27,15 @@ Do NOT ask about ADA threshold values, classification algorithms, AABBCC scoring
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build
 
-Follow the **Component Installation Process** from the main protocol for the `diabetes` component:
+Follow `building.md` for the `diabetes-dx` module: copy the clinical logic to `lib/medprotocol/`, then build the screen in `components/medprotocol/diabetes-dx/` (main file `diabetes-dx.tsx`) with UI SDK.
 
-```bash
-npx medical-ui-cli add diabetes
-```
+**Patient demographics:** This screen uses age. Ask: "Would you like a Patient demographics card above the diabetes evaluator?" (Default: yes). If yes, build `components/medprotocol/patient/` first on `@/lib/medprotocol/patient`. Wire patient data into the diabetes screen following the patient data wiring pattern in the composition context.
 
-**Patient demographics:** This component uses age. Ask: "Would you like a Patient demographics card above the diabetes evaluator?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient data into the diabetes component following the patient data wiring pattern in the composition context.
+**Clinical logic:** The screen imports these functions — never re-implement them in the UI.
 
-**Clinical logic library:** The diabetes component imports calculation functions from two lib files. Create in the project:
-
-From `lib/diabetes-dx`:
+From `@/lib/medprotocol/diabetes-dx`:
 - `classifyA1C(a1c)` — Normal / Prediabetes / Diabetes (ADA Table 2.1/2.2)
 - `classifyFPG(fpg)` — Normal / IFG / Diabetes
 - `classify2hPG(value)` — Normal / IGT / Diabetes
@@ -47,7 +43,7 @@ From `lib/diabetes-dx`:
 - `getDiagnosis(a1c, fpg, twohPG, randomPG, hasSymptoms)` — composite category
 - `checkConfirmation(readings[], hasSymptoms)` — two abnormal results required per ADA
 
-From `lib/endocrine`:
+From `@/lib/medprotocol/endocrine`:
 - `classifyT1DStage(autoantibodyCount, fpg, twohPG, a1c, hasSymptoms)` — Stages 1–3 (ADA Table 2.4)
 - `classifyT1vsT2(age, bmi, hasAutoantibodies, cPeptide, ...)` — AABBCC mnemonic + C-peptide decision tree (ADA Figure 2.1)
 - `getT2DScreeningRecommendation(age, bmi, ethnicity, riskFactors)` — screening eligibility (ADA Table 2.5)

@@ -6,16 +6,18 @@ user-invocable: true
 ---
 
 Read and follow: reference/core.md
-Read and follow: reference/component-fetching.md
+Read and follow: reference/building.md
 Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/ards-berlin-criteria.md
 Read when needed: reference/ventilation-targets.md
 
-## Component
+## Build
 
-- **Component:** `pafi` (install via `npx medical-ui-cli add pafi`)
+- **Clinical logic:** `@/lib/medprotocol/pafi` — copy it first (building.md §1)
+- **Component folder:** `components/medprotocol/pafi/` — main file `pafi.tsx`, built with UI SDK (building.md §2–3)
 - **Route:** `app/pafi/page.tsx`
 - **Preview message:** "Your PaFi calculator is ready. Enter PaO2 and FiO2 values to get the PaO2/FiO2 ratio with ARDS classification. You can use the FiO2 presets for common oxygen levels. View it at http://localhost:3000/pafi"
 

@@ -41,9 +41,9 @@ Fix automatically. Use clinical language if you need to explain anything.
 | `server-port` | `lsof -ti :3000 \| xargs kill -9` then `npm run dev` |
 | `server-stopped` | `npm run dev` |
 | `server-crashed` | `pkill -f "next dev"` then `npm run dev` |
-| `component-missing` | `npx medical-ui-cli add <component>` |
-| `component-typescript` | Read errors, fix (missing imports, shadcn adds) |
-| `browser-no-page` | Create page with installed component imports |
+| `component-missing` | Rebuild the screen per building.md (re-copy `lib/medprotocol/`, regenerate) |
+| `component-typescript` | Read errors, fix (missing imports, missing UI SDK setup) |
+| `browser-no-page` | Create page importing the existing screens |
 | `browser-build` | Read errors, fix |
 | `browser-render` | Check `"use client"`, imports, mount crashes |
 | `data-no-storage` | Add localStorage persistence |

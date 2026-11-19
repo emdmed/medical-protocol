@@ -14,14 +14,14 @@ Score a built project against clinical compliance criteria, produce a structured
 
 ## Phase 1: Scan
 
-Scan the project for installed components:
+Scan the project for clinical screens:
 
-1. Check for `components/` directory — list all component subdirectories found
+1. Check for `components/medprotocol/` — list all module folders found (also check `src/`)
 2. Check for clinical context file (`.clinical-context.md`)
-3. Check for `app/` routes that correspond to components
-4. Build a component inventory: which components are installed, which routes exist
+3. Check for `app/` routes that correspond to them
+4. Build a component inventory: which screens exist, which routes exist, which `lib/medprotocol` functions each calls (from its header comment and imports)
 
-If no components are found, tell the doctor: "I don't see any clinical components installed yet. Run /medical-protocol:start to build your first component, then come back for an audit."
+If no screens are found, tell the doctor: "I don't see any clinical tools built yet. Run /medical-protocol:start to build your first component, then come back for an audit."
 
 ## Phase 2: Score
 
@@ -37,8 +37,8 @@ Evaluate 5 dimensions (0–4 points each, total /20). Read the scoring criteria 
 
 ### How to Score
 
-For each installed component:
-1. Read the component source files
+For each screen:
+1. Read the component source files. Check the building.md rules: no clinical value computed or threshold hardcoded in the UI, `lib/medprotocol/` unedited, units and disclaimer shown
 2. Check against the scoring criteria
 3. Note specific findings with severity levels
 4. Calculate dimension scores
@@ -85,9 +85,9 @@ For each finding, map to the skill that can fix it:
 | Finding Type | Recommendation |
 |-------------|---------------|
 | Missing component feature | "Run /medical-protocol:modify to add {feature}" |
-| Component not installed | "Run /medical-protocol:{skill-name} to add {component}" |
+| Component not built | "Run /medical-protocol:{skill-name} to add {component}" |
 | Accessibility issue | "Run /medical-protocol:modify to fix {issue}" |
-| Clinical logic error | "Update {component} {specific file}" |
+| Clinical logic error | UI computes its own value → "Run /medical-protocol:modify to use the lib function"; error inside `lib/medprotocol` → report it upstream, never patch locally |
 
 ## NEVER
 - Report a passing score without actually reading the source code

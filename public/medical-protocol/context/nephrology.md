@@ -1,140 +1,122 @@
-# Nephrology Component Context
+# Nephrology Module Context
 
-## Component Summary
+Two tools that share one context:
 
-CKDEvaluator — eGFR (CKD-EPI 2021), CGA staging (Cause + GFR + Albuminuria), KFRE risk, treatment eligibility (RASi, SGLT2i, finerenone), progression monitoring. Includes CKD cause categorization (glomerular, tubulointerstitial, vascular, cystic-congenital, systemic, unknown).
+- **ckd** — eGFR (CKD-EPI 2021), CGA staging (Cause + GFR + Albuminuria), KFRE risk, treatment eligibility (RASi, SGLT2i, finerenone), progression monitoring. Includes CKD cause categorization (glomerular, tubulointerstitial, vascular, cystic-congenital, systemic, unknown).
+- **nephrology** (companion to ckd) — three panels:
+  - **Anemia** — sex-specific Hb (KDIGO 2012), iron status (ferritin, TSAT, serum iron, reticulocytes), ESA eligibility
+  - **PhosphoCalcic** — Ca/P/PTH/VitD, Ca×P product, corrected Ca, CKD-MBD monitoring by GFR category
+  - **CardioMetabolic** — LDL, HDL, Non-HDL, Lp(a), ApoB, triglycerides, HbA1c, BP, glucose
 
-Install: `npx medical-ui-cli add ckd`
-Files: `ckd-evaluator.tsx`, `lib.ts`, `types/ckd.ts` — shadcn: card, input, button, badge, label, separator, select, checkbox
+Logic: `lib/medprotocol/ckd.ts` (import `@/lib/medprotocol/ckd`) and `lib/medprotocol/nephrology.ts` (import `@/lib/medprotocol/nephrology`). Build: see `building.md`. Screens: `components/medprotocol/ckd/ckd.tsx` and `components/medprotocol/nephrology/{anemia,phospho-calcic,cardio-metabolic}.tsx`.
 
-**Companion — Nephrology** (separate install):
-- **Anemia** — sex-specific Hb (KDIGO 2012), iron status (ferritin, TSAT, serum iron, reticulocytes), ESA eligibility
-- **PhosphoCalcic** — Ca/P/PTH/VitD, Ca×P product, corrected Ca, CKD-MBD monitoring by GFR category
-- **CardioMetabolic** — LDL, HDL, Non-HDL, Lp(a), ApoB, triglycerides, HbA1c, BP, glucose, KDIGO statin indication
-
-Shared UI primitives in `nephrology/ui-helpers.tsx`: `useSyncedReadings`, `ValueGrid`, `AddForm`, `HistoryTable`, `V` (severity-colored value display). Uses semantic CSS severity classes (`severity-normal`, `severity-warning`, `severity-critical`, `severity-urgent`, `severity-watch`).
-
-```bash
-npx medical-ui-cli add nephrology        # GROUP — installs ckd/ + nephrology/
-npx medical-ui-cli add ckd               # CKD only
-npx medical-ui-cli add anemia            # ALIAS — nephrology/ folder
-npx medical-ui-cli add phospho-calcic    # ALIAS — nephrology/ folder
-npx medical-ui-cli add cardio-metabolic  # ALIAS — nephrology/ folder
-```
-
-**IMPORTANT:** Nephrology is a **separate** component — do NOT modify `ckd-evaluator.tsx` to add anemia or MBD logic.
+**IMPORTANT:** Nephrology panels are **separate** screens — do NOT add anemia or MBD logic to the CKD screen.
 
 ---
 
-## Props
+## Screen spec — CKD
 
-```typescript
-// CKD
-interface CKDProps { data?: CKDPatientData; onData?: (data: CKDPatientData) => void; }
+**Shows:**
+- **Header:** age, sex, CKD cause category + free-text detail, comorbidities (diabetes, heart failure, prior CVD, kidney transplant, on max RASi, potassium normal). Click to edit
+- **Current status:** eGFR (mL/min/1.73m²), GFR category + label, albuminuria category + label, KDIGO risk heatmap color, monitoring frequency (times/year)
+- **KFRE:** 2-year and 5-year kidney failure risk (%) + referral recommendation
+- **Treatment:** RASi, SGLT2i, finerenone eligibility badges with evidence grade
+- **Progression:** eGFR slope (mL/min/1.73m²/yr), rapid-decline alert, significant-change alert (>20% drop), ACR doubling alert
+- **Reading history:** compact table with eGFR trend
 
-// Anemia
-interface AnemiaProps { data?: AnemiaReading[]; onData?: (data: AnemiaReading[]) => void; sex?: string; }
+**Add reading:** date (YYYY-MM-DD), creatinine (mg/dL, > 0), ACR (mg/g). eGFR, GFR category and albuminuria category are computed by the lib at save time and stored on the reading.
 
-// PhosphoCalcic
-interface PhosphoCalcicProps { data?: PhosphoCalcicReading[]; onData?: (data: PhosphoCalcicReading[]) => void; gfrCategory?: string; }
+**Cause options:** Glomerular, Tubulointerstitial, Vascular, Cystic / Congenital, Systemic, Unknown.
 
-// CardioMetabolic
-interface CardioMetabolicProps {
-  data?: CardioMetabolicReading[];
-  onData?: (data: CardioMetabolicReading[]) => void;
-  gfrCategory?: string;
-  age?: number | null;
-  hasDiabetes?: boolean;
-  hasPriorCVD?: boolean;
-  hasKidneyTransplant?: boolean;
-}
-```
+**Display rules:** heatmap color from `getCKDRiskLevel`; severity from `getCKDSeverity`. Treatment eligibility is informational.
 
-### Key Types
+**Props contract:** `data?: CKDPatientData`, `onData?: (data: CKDPatientData) => void`.
 
 ```typescript
 type CKDCauseCategory = "" | "glomerular" | "tubulointerstitial" | "vascular" | "cystic-congenital" | "systemic" | "unknown";
 
+interface CKDReading {
+  id: string; date: string;           // YYYY-MM-DD
+  creatinine: string;                 // mg/dL
+  acr: string;                        // mg/g
+  egfr: number; gfrCategory: string; albCategory: string;   // stored from lib at save
+  trace?: TraceEntry[];
+}
+
 interface CKDPatientData {
   age: string;
-  sex: string;
-  causeCategory: CKDCauseCategory;  // CGA "C" axis
-  causeDetail: string;               // free-text specific cause
-  hasDiabetes: boolean;
-  hasHeartFailure: boolean;
-  hasPriorCVD: boolean;              // prior cardiovascular disease
-  hasKidneyTransplant: boolean;      // kidney transplant recipient
-  onMaxRASi: boolean;
-  potassiumNormal: boolean;
+  sex: string;                        // "male" | "female"
+  causeCategory: CKDCauseCategory;    // CGA "C" axis
+  causeDetail: string;
+  hasDiabetes: boolean; hasHeartFailure: boolean; hasPriorCVD: boolean; hasKidneyTransplant: boolean;
+  onMaxRASi: boolean; potassiumNormal: boolean;
   readings: CKDReading[];
-}
-
-interface AnemiaReading {
-  id: string; date: string;
-  hemoglobin: string;     // g/dL
-  ferritin: string;       // ng/mL
-  tsat: string;           // % (transferrin saturation)
-  iron: string;           // µg/dL (serum iron)
-  reticulocytes: string;  // %
-  sex?: string;
-}
-
-interface CardioMetabolicReading {
-  id: string; date: string;
-  totalCholesterol: string; ldl: string; hdl: string;  // mg/dL
-  triglycerides: string;                                // mg/dL
-  hba1c: string;                                        // %
-  glucose: string;                                      // mg/dL
-  sbp: string; dbp: string;                             // mmHg
-  lpa: string;                                          // mg/dL — Lp(a)
-  apoB: string;                                         // mg/dL — ApoB
 }
 ```
 
-See `types/ckd.ts` and `nephrology/types/interfaces.ts` for full type definitions.
+---
+
+## Screen spec — Nephrology panels
+
+All three share one layout: latest-reading value grid (value + unit + lib severity), recommendation strip, history table, add-reading form. On narrow containers a Latest / History toggle replaces the side-by-side view. Each reading has `id`, `date` and optional `trace`.
+
+| Panel | Inputs (unit) | Outputs | Extra props |
+|---|---|---|---|
+| **Anemia** | Hb (g/dL), ferritin (ng/mL), TSAT (%), serum iron (µg/dL), reticulocytes (%) | Hb class (sex-specific when `sex` known), ferritin + TSAT class, iron supplementation needed + reason, ESA eligibility + reason | `sex?: string` |
+| **PhosphoCalcic** | Calcium (mg/dL), phosphorus (mg/dL), PTH (pg/mL), 25-OH vitamin D (ng/mL), albumin (g/dL) | Corrected Ca, Ca×P product (target <55), class per value, phosphate / PTH / vitamin D recommendations (only when abnormal), monitoring schedule for `gfrCategory` | `gfrCategory?: string` |
+| **CardioMetabolic** | Total cholesterol, LDL, HDL, triglycerides (mg/dL), HbA1c (%), glucose (mg/dL), SBP/DBP (mmHg), Lp(a), ApoB (mg/dL) | Class per value, BP vs CKD target, Non-HDL class | `gfrCategory?`, `age?: number \| null`, `hasDiabetes?`, `hasPriorCVD?`, `hasKidneyTransplant?` |
+
+**Props contract (each panel):** `data?: <Reading>[]`, `onData?: (data: <Reading>[]) => void`, plus the extra props above.
+
+**Statin indication (KDIGO 2013, CardioMetabolic):** from `getStatinIndication`. LDL does not drive it. ≥50 y + eGFR <60 → statin or statin/ezetimibe (1A); ≥50 y + eGFR ≥60 → statin (1B); 18–49 y → statin if coronary disease, diabetes, prior ischemic stroke or 10-y coronary risk >10% (2A); kidney transplant → statin (2B); dialysis → do not initiate, continue if already on one. Show the recommendation and grade.
 
 ---
 
 ## Lib Functions
 
-### Shared lib (`lib/ckd.ts`)
+### `ckd.ts`
 
-Key functions: `calculateEGFR`, `classifyGFRCategory`, `classifyAlbuminuriaCategory`, `getGFRCategoryLabel`, `getAlbuminuriaCategoryLabel`, `getCKDRiskLevel`, `getMonitoringFrequency`, `calculateKFRE`, `assessReferralNeed`, `getReferralLabel`, `checkRASiEligibility`, `checkSGLT2iEligibility`, `checkFinerenoneEligibility`, `calculateEGFRSlope`, `isRapidDecline`, `hasSignificantEGFRChange`, `hasACRDoubling`, `classifyAnemia`, `assessIronStatus`, `checkESAEligibility`, `assessPhosphate`, `correctCalcium`, `assessPTH`, `assessVitaminD`, `getCKDMBDMonitoring`, `getCKDSeverity`.
+All inputs `string` (parsed via `safeParseFloat`) unless noted.
 
-### Nephrology component lib (`nephrology/lib.ts`)
+- Staging: `calculateEGFR(creatinine, age, sex)` → `number`; `classifyGFRCategory(egfr)` → G1–G5; `getGFRCategoryLabel(category)`; `classifyAlbuminuriaCategory(acr)` → A1–A3; `getAlbuminuriaCategoryLabel(category)`; `getCKDRiskLevel(gfrCategory, albCategory)` → green / yellow / orange / red / deep-red; `getMonitoringFrequency(gfrCategory, albCategory)` → times/year; `getCKDSeverity(gfrCategory)` → normal / warning / critical
+- KFRE: `calculateKFRE(age, sex, egfr, acr)` → `{ twoYear, fiveYear }` (%); `assessReferralNeed(kfre5yr)` → none / nephrology / multidisciplinary / krt-planning; `getReferralLabel(referral)`
+- Treatment: `checkRASiEligibility(gfrCategory, albCategory, hasDiabetes)`, `checkSGLT2iEligibility(egfr, acr, hasHeartFailure)`, `checkFinerenoneEligibility(egfr, acr, hasDiabetes, onMaxRASi, potassiumNormal)` — each → `{ eligible, grade }`
+- Progression: `calculateEGFRSlope(readings: string)` — **JSON string** of `[{ egfr, date }]`, → `number | null`; `isRapidDecline(slope: string)` — ≤ −5/yr; `hasSignificantEGFRChange(previous, current)` — >20% drop; `hasACRDoubling(previous, current)`
+- Anemia / MBD (CLI-oriented, also usable): `classifyAnemia(hb, sex)`, `assessIronStatus(ferritin, tsat)`, `checkESAEligibility(hb, ferritin, tsat, sex)`, `assessPhosphate(phosphate, gfrCategory)`, `correctCalcium(calcium, albumin)`, `assessPTH(pth, gfrCategory)`, `assessVitaminD(vitaminD)`, `getCKDMBDMonitoring(gfrCategory)`
 
-Cardio-metabolic: `classifyLDL`, `classifyHbA1c`, `classifyBPInCKD`, `classifyTriglycerides`, `classifyLpa`, `classifyNonHDL`, `classifyApoB`.
+### `nephrology.ts`
 
-Phospho-calcic: `calculateCaPhProduct`, `calculateCorrectedCalcium`, `classifyCalcium`, `classifyPhosphorus`, `classifyPTH`, `classifyVitaminD`, `classifyCaPhProduct`, `getPhosphateRecommendation`, `getPTHRecommendation`, `getVitaminDRecommendation`, `getCKDMBDMonitoring`.
+Each `classify*` returns `{ label, severity }` (severity `normal | warning | critical`).
 
-Anemia: `classifyHemoglobin`, `classifyFerritin`, `classifyTSAT`, `needsIronSupplementation`, `classifyAnemiaBySex`, `checkESAEligibility`.
+- Cardio-metabolic: `classifyLDL(ldl)`, `classifyHbA1c(hba1c)`, `classifyBPInCKD(sbp, dbp)` (target <120/80), `classifyTriglycerides(tg)`, `classifyLpa(lpa)`, `classifyNonHDL(nonHdl: number)`, `classifyApoB(apoB)`, `calculateNonHDL(totalCholesterol, hdl)` → `number | null`, `getStatinIndication({ age, gfrCategory, onDialysis?, kidneyTransplant?, alreadyOnStatin?, coronaryDisease?, hasDiabetes?, priorIschemicStroke?, tenYearCoronaryRiskOver10? })` → `{ indicated, recommendation, grade }`
+- Phospho-calcic: `calculateCaPhProduct(calcium, phosphorus)` → `number | null`, `calculateCorrectedCalcium(calcium, albumin)` → `number | null` (Ca + 0.8 × (4.0 − albumin)), `classifyCalcium`, `classifyPhosphorus`, `classifyPTH(pth, gfrCategory?)` (G4–G5: 130–585 pg/mL = within target, <130 = avoid over-suppression; same rules as `assessPTH`), `classifyVitaminD`, `classifyCaPhProduct(product: number)`, `getPhosphateRecommendation(phosphorus, gfrCategory?)`, `getPTHRecommendation(pth, gfrCategory?)`, `getVitaminDRecommendation(vitaminD)` (each → `{ status, recommendation }`), `getCKDMBDMonitoring(gfrCategory)` (re-exported from `ckd.ts`)
+- Anemia: `classifyHemoglobin(hb)` (against the ESA target: ≤11.5 on target, >13 too high; use only for patients on ESA), `classifyAnemiaBySex(hb, sex)` → `{ label, severity, anemic }`, `classifyFerritin`, `classifyTSAT`, `needsIronSupplementation(ferritin, tsat)` → `{ needed, reason }` (deficiency if ferritin <100 or TSAT <20; trial of iron if TSAT ≤30 and ferritin ≤500; not routine if ferritin >500), `checkESAEligibility(hb, ferritin, tsat, sex)` (re-exported from `ckd.ts`)
 
-All inputs are `string` (parsed internally via local `sf()` parser).
+Non-HDL: `classifyNonHDL(calculateNonHDL(tc, hdl) ?? 0)`. Do not subtract in the UI.
 
 ---
 
-## Cross-Component Data
+## Cross-Tool Data
 
+- **← Patient:** age, sex → CKD
+- **CKD → Anemia:** `sex` (enables sex-specific Hb thresholds)
+- **CKD → PhosphoCalcic:** `gfrCategory` from latest CKD reading (enables stage-aware PTH + monitoring frequency)
+- **CKD → CardioMetabolic:** `gfrCategory`, `age`, `hasDiabetes`, `hasPriorCVD`, `hasKidneyTransplant`
 - **CKD ↔ Vital-Signs:** BP informational for RASi dosing context, not a direct lib input
 - **CKD ↔ Acid-Base:** Bicarbonate relevant for metabolic acidosis, no programmatic link
 - **CKD ↔ Sepsis:** Both use creatinine but different contexts (chronic vs acute)
-- **CKD ↔ CardioMetabolic:** Statin indication uses `age`, `gfrCategory`, `hasDiabetes`, `hasPriorCVD`, `hasKidneyTransplant` from CKD
 
 ---
 
-## Composition
+## Gotchas
 
-Wire `sex` from CKDPatientData → Anemia (enables sex-specific Hb thresholds). Wire `gfrCategory` from latest CKD reading → PhosphoCalcic (enables stage-aware PTH + monitoring frequency). Wire `gfrCategory`, `age`, `hasDiabetes`, `hasPriorCVD`, `hasKidneyTransplant` from CKD → CardioMetabolic (enables KDIGO statin indication). Use grid layout for dashboard.
-
-### Gotchas
-
-- **CKD uses strings everywhere.** Convert from other components: `String(value ?? "")`
+- **CKD uses strings everywhere.** Convert from other tools: `String(value ?? "")`. CardioMetabolic `age` is a number: `Number(ckd.age) || null`
 - **No circular loops.** Guard `onData` → `data` flows with `useRef` + serialized comparison
-- **Inbound sync required.** CKD evaluator (and all nephrology sub-components) must have a `useEffect` that syncs the `data` prop into local state after mount — otherwise parent updates (age/sex from Patient card) are ignored after initial render. Nephrology sub-components use shared `useSyncedReadings` hook for this.
+- **Inbound sync required.** CKD and every nephrology panel must sync the `data` prop into local state after mount — otherwise parent updates (age/sex from Patient) are ignored
 - **KFRE requires eGFR, not creatinine.** Calculate eGFR first
+- **`calculateEGFRSlope` takes a JSON string**, not an array; `isRapidDecline` takes the slope as a string
 - **Wire `sex` to Anemia** — without it, falls back to generic classification
 - **Wire `gfrCategory` to PhosphoCalcic** — without it, PTH uses generic ranges
-- **Wire CKD comorbidities to CardioMetabolic** — without them, statin indication logic is incomplete
 - Treatment eligibility is **informational** — always confirm clinically
 - **CKD Cause is CGA, not optional.** KDIGO recommends classifying cause as part of staging (Cause-GFR-Albuminuria)
 
@@ -154,4 +136,4 @@ npx medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --
 
 ## Guideline Reference
 
-KDIGO 2024 (CKD), KDIGO 2012 (Anemia), KDIGO 2017 (CKD-MBD), KDIGO 2013 (Lipids): CKD-EPI 2021 race-free eGFR, CGA staging (Cause + GFR G1-G5 + Albuminuria A1-A3), KFRE (Tangri), RASi/SGLT2i/Finerenone eligibility, eGFR slope, sex-specific Hb, iron/ESA, Ca/P/PTH/VitD monitoring, Lp(a)/ApoB/Non-HDL, statin indication by age + CKD stage.
+KDIGO 2024 (CKD), KDIGO 2012 (Anemia), KDIGO 2017 (CKD-MBD), KDIGO 2013 (Lipids), KDIGO 2021 (BP): CKD-EPI 2021 race-free eGFR, CGA staging (Cause + GFR G1-G5 + Albuminuria A1-A3), KFRE (Tangri), RASi/SGLT2i/Finerenone eligibility, eGFR slope, sex-specific Hb, iron/ESA, Ca/P/PTH/VitD monitoring, Lp(a)/ApoB/Non-HDL, statin indication by age + CKD stage. Citation strings in `lib/medprotocol/sources.ts`.

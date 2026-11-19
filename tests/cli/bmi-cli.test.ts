@@ -64,7 +64,7 @@ describe('medprotocol bmi', () => {
   it('classifies obese BMI', () => {
     run(['--weight', '100', '--height-m', '1.70', '--metric', '--json']);
     const result = JSON.parse(stdout);
-    expect(result.category).toBe('Obese');
+    expect(result.category).toBe('Obese I'); // BMI 34.6
   });
 
   it('classifies underweight BMI', () => {

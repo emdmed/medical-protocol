@@ -5,6 +5,7 @@ import {
   getBundledPluginDir,
   getSkillsDir,
   getHooksDir,
+  getLibDir,
   getSettingsPath,
   listFiles,
   copyFile,
@@ -18,7 +19,7 @@ import {
   removeLink,
 } from "../files";
 import { hashFile, writeManifest, readManifest, type FileManifest } from "../manifest";
-import { formatError, printResult, formatHeader, formatTable } from "../../../../lib/format";
+import { formatError, printResult, formatHeader, formatTable } from "../../../../plugin/lib/format";
 import { isInteractive, selectInstallMode, confirmAlreadyInstalled, promptSourcePath, confirmInstallAgentBrowser } from "../prompts";
 import { execSync } from "child_process";
 import * as fs from "fs";
@@ -328,6 +329,17 @@ function installCopy(baseDir: string, force: boolean, json: boolean): void {
     }
   }
 
+  // Copy clinical logic
+  const bundledLibDir = path.join(bundledDir, "lib");
+  if (fs.existsSync(bundledLibDir)) {
+    for (const relPath of listFiles(bundledLibDir)) {
+      const src = path.join(bundledLibDir, relPath);
+      copyFile(src, path.join(getLibDir(baseDir), relPath));
+      fileHashes[`lib/${relPath}`] = hashFile(src);
+      totalFiles++;
+    }
+  }
+
   // Copy hooks
   if (fs.existsSync(bundledHooksDir)) {
     const hookFiles = listFiles(bundledHooksDir);
@@ -387,7 +399,7 @@ function installCopy(baseDir: string, force: boolean, json: boolean): void {
 }
 
 function syncGlobalCache(bundledDir: string, cacheDir: string, version: string): void {
-  const dirsToSync = ["skills", "hooks", "context", "reference"];
+  const dirsToSync = ["skills", "hooks", "lib", "context", "reference"];
   for (const dir of dirsToSync) {
     const srcDir = path.join(bundledDir, dir);
     if (!fs.existsSync(srcDir)) continue;

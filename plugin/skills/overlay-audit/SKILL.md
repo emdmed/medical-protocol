@@ -13,7 +13,7 @@ Read when needed: reference/queue.md
 Process **audit** work orders from the overlay queue (`.medprotocol/queue/`). The doctor pointed at
 any region of an app — possibly one built **without** medical protocol — and chose "Audit this with
 medical protocol". The work order describes the selected DOM (selector, `outerHTML`, text, classes),
-not a registry id. This skill classifies the region, finds it in source, and **reports findings**
+not a module id. This skill classifies the region, finds it in source, and **reports findings**
 against the relevant protocol guidance. Static and read-only — it never modifies files.
 
 ## Phase 1: Drain the queue
@@ -26,7 +26,7 @@ against the relevant protocol guidance. Static and read-only — it never modifi
 
 For each order:
 1. If `suggestedId` is set (app already uses medprotocol), use it. Otherwise **infer** the clinical
-   concept from `html` + `text` + `classes` via `classification.md` signal words → registry module.
+   concept from `html` + `text` + `classes` via `classification.md` signal words → module.
 2. If the selection isn't clinical, say so and skip it — there's nothing to audit against protocol.
 
 ## Phase 3: Locate in source (best-effort)

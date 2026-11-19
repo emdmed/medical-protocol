@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculatePaFi, getPaFiClassification, getPaFiSeverity } from '../../lib/pafi';
+import { calculatePaFi, getPaFiClassification, getPaFiSeverity } from '../../plugin/lib/pafi';
 
 describe('calculatePaFi', () => {
   it('calculates PaFi for PaO2 90, FiO2 21%: 90 / 0.21 = 429', () => {

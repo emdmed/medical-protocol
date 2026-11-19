@@ -22,11 +22,11 @@ Do NOT ask about calculation formulas, display preferences, or technical prefere
 
 ---
 
-## Phase 2: Fetch & Install
+## Phase 2: Build the Screen
 
-Follow the **Component Installation Process** from the main protocol for the `water-balance` component.
+Follow **Building a Screen** from the main protocol (building.md) for the `water-balance` module: copy the clinical logic, set up UI SDK, generate `components/medprotocol/water-balance/water-balance.tsx`.
 
-**Patient demographics:** This component uses weight. Ask: "Would you like a Patient demographics card above the fluid balance tracker?" (Default: yes). If yes, install first: `npx medical-ui-cli add base`. Wire patient weight into the water balance component following the patient data wiring pattern in the composition context.
+**Patient demographics:** This component uses weight. Ask: "Would you like a Patient demographics card above the fluid balance tracker?" (Default: yes). If yes, build the `patient` screen first (`components/medprotocol/patient/`). Wire patient weight into the water balance screen following the patient data wiring pattern in the composition context.
 
 ---
 

@@ -1,0 +1,7 @@
+{
+  "name": "medical-protocol",
+  "version": "0.7.10",
+  "description": "Clinical tool builder for healthcare professionals — vital signs, calculators, and critical care tools",
+  "author": { "name": "emdmed" },
+  "repository": "https://github.com/emdmed/medical-protocol"
+}

@@ -6,17 +6,19 @@ user-invocable: true
 ---
 
 Read and follow: reference/core.md
-Read and follow: reference/component-fetching.md
+Read and follow: reference/building.md
 Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
+Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
 Read when needed: reference/normal-ranges.md
 Read when needed: reference/critical-values.md
 Read when needed: reference/pediatric-ranges.md
 
-## Component
+## Build
 
-- **Component:** `vital-signs` (install via `npx medical-ui-cli add vital-signs`)
+- **Clinical logic:** `@/lib/medprotocol/vital-signs-validations/*` — copy it first (building.md §1)
+- **Component folder:** `components/medprotocol/vital-signs/` — main file `vital-signs.tsx`, built with UI SDK (building.md §2–3)
 - **Route:** `app/vital-signs/page.tsx`
 - **Preview message:** "Your vital signs monitor is ready. It tracks [list signs]. View it at http://localhost:3000/vital-signs"
 
