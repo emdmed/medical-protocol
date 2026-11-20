@@ -57,7 +57,7 @@ plugin/                            # Claude plugin source
 │   ├── vital-signs-validations/   # validation files per vital sign, severity.ts, types.ts
 │   └── *.ts                       # bmi, cardiology, ckd, diabetes-dx, dka, endocrine, format, hepatology, nephrology, pafi, patient, sepsis, sources, trace, water-balance
 ├── agents/                        # qa-runner (Haiku): browser QA report; extraction-verifier: re-checks a first-pass extraction
-├── hooks/                         # privacy-guard, extraction-guard, qa-reminder, track-workflow
+├── hooks/                         # privacy-guard, extraction-guard, note-consent, qa-reminder, track-workflow
 ├── scripts/medprotocol.cjs        # Built CLI (skills run it via node; nothing is published to npm)
 ├── skills/                        # SKILL.md + reference/ per skill
 └── settings.json
@@ -74,6 +74,6 @@ scripts/                           # bump-version.sh, medical-protocol.cjs (buil
 - **No production deps** — devDependencies only (typescript, vitest). Do not add runtime packages.
 - **Testing:** Logic-only via Vitest; UI QA via agent-browser (workflows/agent-qa.md)
 - **Content is markdown and JSON only** — no HTML
-- **Plugin:** skills in `plugin/skills/` (SKILL.md + reference docs), 4 hooks in `plugin/hooks/` (privacy-guard, extraction-guard, qa-reminder, track-workflow)
+- **Plugin:** skills in `plugin/skills/` (SKILL.md + reference docs), 5 hooks in `plugin/hooks/` (privacy-guard, extraction-guard, note-consent, qa-reminder, track-workflow)
 - **Shared context:** `public/medical-protocol/context/` — build contract, tool registry, classification, CLI ref, composition patterns, and per-module docs (single source of truth; `build.mjs` copies them into skill `reference/` dirs)
 - **Version:** synced across package.json files, provider manifest, and plugin.json via `npm run version:bump`

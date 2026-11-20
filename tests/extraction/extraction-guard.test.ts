@@ -27,6 +27,7 @@ describe("extraction-guard hook", () => {
 
   it("blocks creating a note, so only --save names the folder", () => {
     expect(denied("extractions/made-up-name/note.md")).toBe(true);
+    expect(denied("extractions/abc123def456/.consent")).toBe(true);
   });
 
   it("allows creating them, and writing the verification files", () => {

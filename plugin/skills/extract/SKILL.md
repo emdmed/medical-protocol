@@ -3,6 +3,21 @@ name: extract
 description: "[Internal] Extract values from a clinical note, each with the exact words it came from, and build a screen showing the extraction beside the note — extraction only, no clinical analysis"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
 user-invocable: true
+hooks:
+  UserPromptSubmit:
+    - hooks:
+        - type: command
+          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
+  PreToolUse:
+    - matcher: "Read|Bash|Grep|Artifact"
+      hooks:
+        - type: command
+          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
+  PostToolUse:
+    - matcher: "Read|Bash|Grep"
+      hooks:
+        - type: command
+          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
 ---
 
 Read and follow: reference/core.md
@@ -23,7 +38,7 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 ## Phase 1: Clinical Requirements
 
-- **Before reading any note**, say once: "To extract values I have to read the note, so it is sent to the AI model. Use a de-identified note unless your setup allows patient data here." Wait for the doctor to confirm. (`patient-privacy.md`)
+- **Before reading any note**, say once: "To extract values I have to read the note, so it is sent to the AI model. Use a de-identified or made-up note, and give it to me as a file path rather than pasting it." (`patient-privacy.md`) The `note-consent` hook enforces this: a pasted note is held back unless the message says "not real data", and the first read of `<hash>/note.md` asks the doctor. If the doctor declines, stop.
 - "What should I pull out — vital signs, labs, medications, or something specific?" (Default: every value in the `extraction.md` key table that the note states)
 
 Then extract and check as in `extraction.md` § Who extracts, steps 1–5 in order: hash and save the raw note (`medprotocol extract --save`) → `extractions/<hash>/note.md`, first pass → `<hash>/extraction.json`, verify with the `extraction-verifier` agent → `<hash>/verify.json` + `<hash>/corrected.json`, the doctor accepts or rejects each correction, then the screen data.

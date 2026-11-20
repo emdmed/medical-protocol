@@ -3,6 +3,21 @@ name: extract-artifact
 description: "[Internal] Turn a checked note extraction into a page: the note beside the extracted values, quotes highlighted, in the Medical Protocol look. Written as a local HTML file; published as a private claude.ai Artifact only if the doctor says yes"
 allowed-tools: Read, Glob, Bash, Artifact
 user-invocable: true
+hooks:
+  UserPromptSubmit:
+    - hooks:
+        - type: command
+          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
+  PreToolUse:
+    - matcher: "Read|Bash|Grep|Artifact"
+      hooks:
+        - type: command
+          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
+  PostToolUse:
+    - matcher: "Read|Bash|Grep"
+      hooks:
+        - type: command
+          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
 ---
 
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever this file says `medprotocol`
