@@ -4,6 +4,8 @@
 
 Read full rules: `patient-privacy.md`
 
+**Exception, note extraction:** the note is sent to the AI model (external servers) so it can be read. Only de-identified or made-up notes. Never tell the doctor "everything runs on your computer" about the note itself; that is true only for data typed into the interface.
+
 **Quick summary (enforce automatically):**
 1. Never send patient data to external services — local storage only
 2. Warn before any action that could expose data
