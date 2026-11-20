@@ -47,6 +47,7 @@ When the doctor describes what they need, classify into one of these domains bas
 
 | Domain | Signal Words |
 |---|---|
+| **extraction** | extract, extraction, pull values from a note, from this note, read the note, clinical note, parse the note, structure the note, note vs extraction, where did this come from | <!-- skill: extract -->
 | **dashboard** | dashboard, overview, summary, at a glance, clinic view, combined |
 | **modify** | change, modify, add field, remove, adjust, different layout |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix |

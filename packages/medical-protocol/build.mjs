@@ -21,7 +21,8 @@ cpSync(join(DIR, "dist/index.js"), join(DIR, "../../scripts/medical-protocol.cjs
 
 // Sync reference files from public/ source of truth into each skill's reference/ dir
 // Synced into plugin/ itself, since the marketplace installs plugin/ directly
-const UI_SKILLS = ["start", "bmi", "pafi", "acid-base", "dka", "vital-signs", "water-balance", "dashboard", "modify"];
+const UI_SKILLS = ["start", "bmi", "pafi", "acid-base", "dka", "vital-signs", "water-balance", "dashboard", "modify", "extract"];
+copyTo(join(PUBLIC, "context/extraction.md"), ["extract"]);
 copyTo(join(PUBLIC, "context/classification.md"), ["start"]);
 copyTo(join(PUBLIC, "context/cli.md"), ["calc"]);
 copyTo(join(PUBLIC, "context/components.md"), UI_SKILLS);

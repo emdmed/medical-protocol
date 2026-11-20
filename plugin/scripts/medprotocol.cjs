@@ -3799,6 +3799,308 @@ Examples:
   }
 });
 
+// ../../plugin/lib/extraction.ts
+var FIELDS, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, checkItem, checkExtraction, toNumber, unitOk, toInputs;
+var init_extraction = __esm({
+  "../../plugin/lib/extraction.ts"() {
+    "use strict";
+    FIELDS = {
+      sbp: { label: "Systolic blood pressure", units: ["mmHg"] },
+      dbp: { label: "Diastolic blood pressure", units: ["mmHg"] },
+      map: { label: "Mean arterial pressure", units: ["mmHg"] },
+      hr: { label: "Heart rate", units: ["bpm", "/min", "lpm", "beats/min"] },
+      rr: { label: "Respiratory rate", units: ["breaths/min", "/min", "rpm", "resp/min"] },
+      temp: { label: "Temperature", units: ["\xB0C", "\xB0F", "\xBAC", "\xBAF"] },
+      spo2: { label: "SpO2", units: ["%"] },
+      fio2: { label: "FiO2", units: ["%"] },
+      gcs: { label: "Glasgow Coma Scale", units: ["/15"] },
+      weight: { label: "Weight", units: ["kg", "lb", "lbs"] },
+      height: { label: "Height", units: ["cm", "m", "in"] },
+      ph: { label: "pH", units: [] },
+      pco2: { label: "pCO2", units: ["mmHg"] },
+      pao2: { label: "PaO2", units: ["mmHg"] },
+      hco3: { label: "Bicarbonate", units: ["mEq/L", "mmol/L"] },
+      lactate: { label: "Lactate", units: ["mmol/L"] },
+      na: { label: "Sodium", units: ["mEq/L", "mmol/L"] },
+      potassium: { label: "Potassium", units: ["mmol/L", "mEq/L"] },
+      cl: { label: "Chloride", units: ["mEq/L", "mmol/L"] },
+      albumin: { label: "Albumin", units: ["g/dL"] },
+      creatinine: { label: "Creatinine", units: ["mg/dL"] },
+      glucose: { label: "Glucose", units: ["mg/dL", "mmol/L"] },
+      ketones: { label: "Ketones", units: ["mmol/L"] },
+      bilirubin: { label: "Bilirubin", units: ["mg/dL"] },
+      platelets: { label: "Platelets", units: ["\xD710\xB3/\xB5L", "x10^3/uL", "10^3/\xB5L", "/mm\xB3", "\xD710\u2079/L", "x10^9/L"] },
+      hb: { label: "Hemoglobin", units: ["g/dL"] },
+      a1c: { label: "HbA1c", units: ["%"] },
+      egfr: { label: "eGFR", units: ["mL/min/1.73m\xB2", "mL/min/1.73m2", "mL/min"] },
+      acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g"] },
+      tc: { label: "Total cholesterol", units: ["mg/dL"] },
+      hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
+      "urine-output": { label: "Urine output", units: ["mL"] }
+    };
+    EPISODES = ["current", "history"];
+    MAX_EDITS = 5;
+    stripAccents = (s) => s.normalize("NFD").replace(new RegExp("\\p{Mn}", "gu"), "");
+    collapse = (s) => s.replace(/\s+/g, " ").trim();
+    collapseWithMap = (note) => {
+      let text = "";
+      const map = [];
+      for (let i = 0; i < note.length; i++) {
+        if (/\s/.test(note[i])) {
+          if (text && !text.endsWith(" ")) {
+            text += " ";
+            map.push(i);
+          }
+        } else {
+          text += note[i];
+          map.push(i);
+        }
+      }
+      return { text, map };
+    };
+    numbersIn = (s) => [...s.matchAll(/\d+(?:[.,·]\d+)?/g)].map(([m]) => {
+      const [whole, frac] = m.split(/[.,·]/);
+      const decimal = Number(frac === void 0 ? whole : `${whole}.${frac}`);
+      return m.includes(",") && frac?.length === 3 ? [decimal, Number(whole + frac)] : [decimal];
+    });
+    same = (a, b) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+    valueInQuote = (value, quote) => {
+      const source = numbersIn(quote);
+      let at = 0;
+      for (const values of numbersIn(value)) {
+        const found = source.findIndex((readings, i) => i >= at && readings.some((r) => values.some((v) => same(r, v))));
+        if (found === -1) return false;
+        at = found + 1;
+      }
+      return true;
+    };
+    closestSpan = (text, quote) => {
+      const fold = (c) => stripAccents(c).toLowerCase();
+      const t = text.split("").map(fold);
+      const q = quote.split("").map(fold);
+      let prev = q.map((_, i) => i + 1);
+      prev.unshift(0);
+      let starts = prev.map(() => 0);
+      let best = { distance: prev[q.length], start: 0, end: 0 };
+      for (let j = 0; j < t.length; j++) {
+        const cur = [0];
+        const curStart = [j + 1];
+        for (let i = 1; i <= q.length; i++) {
+          const sub = prev[i - 1] + (q[i - 1] === t[j] ? 0 : 1);
+          const del = prev[i] + 1;
+          const ins = cur[i - 1] + 1;
+          const d = Math.min(sub, del, ins);
+          cur.push(d);
+          curStart.push(d === sub ? starts[i - 1] : d === del ? starts[i] : curStart[i - 1]);
+        }
+        if (cur[q.length] < best.distance) best = { distance: cur[q.length], start: curStart[q.length], end: j + 1 };
+        prev = cur;
+        starts = curStart;
+      }
+      return best;
+    };
+    editDistance = (a, b) => {
+      let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+      for (let i = 1; i <= a.length; i++) {
+        const cur = [i];
+        for (let j = 1; j <= b.length; j++) cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)));
+        prev = cur;
+      }
+      return prev[b.length];
+    };
+    wordsOf = (s) => [...s.matchAll(/[\p{L}\p{N}]+(?:[.,·/^][\p{L}\p{N}]+)*/gu)].map((m) => ({
+      w: stripAccents(m[0]).toLowerCase(),
+      start: m.index,
+      end: m.index + m[0].length
+    }));
+    reorderedSpan = (note, quote) => {
+      const qw = wordsOf(quote).map((x) => x.w);
+      const nw = wordsOf(note);
+      const cost = (a, b) => a === b ? 0 : /\d/.test(a) || /\d/.test(b) ? Infinity : editDistance(a, b);
+      let best = null;
+      for (let i = 0; i + qw.length <= nw.length; i++) {
+        const window = nw.slice(i, i + qw.length);
+        const pairs = qw.flatMap((a, x) => window.map((b, y) => ({ x, y, d: cost(a, b.w) }))).sort((p, r) => p.d - r.d);
+        const usedQ = /* @__PURE__ */ new Set();
+        const usedN = /* @__PURE__ */ new Set();
+        let distance = 0;
+        for (const p of pairs) {
+          if (usedQ.has(p.x) || usedN.has(p.y)) continue;
+          usedQ.add(p.x);
+          usedN.add(p.y);
+          distance += p.d;
+        }
+        if (distance < (best?.distance ?? Infinity)) best = { distance, start: window[0].start, end: window.at(-1).end };
+      }
+      return best;
+    };
+    checkItem = (note, item) => {
+      const q = collapse(item.quote.normalize("NFC"));
+      if (!q) return { ...item, status: "none" };
+      const nfc = note.normalize("NFC");
+      const { text, map } = collapseWithMap(nfc);
+      const at = text.indexOf(q);
+      if (at < 0) {
+        const budget = Math.min(MAX_EDITS, Math.floor(q.length / 4));
+        const span = closestSpan(text, q);
+        if (span.end === 0 || span.distance > budget) {
+          const words = reorderedSpan(nfc, q);
+          if (!words || words.distance > budget) return { ...item, status: "unverified" };
+          return {
+            ...item,
+            status: valueInQuote(item.value, nfc.slice(words.start, words.end)) ? "reordered" : "mismatched",
+            start: words.start,
+            end: words.end,
+            match: "words",
+            distance: words.distance
+          };
+        }
+        const start = map[span.start];
+        const end = map[span.end - 1] + 1;
+        return {
+          ...item,
+          // The value is checked against the note's words, so an edit that changed a digit fails here.
+          status: !valueInQuote(item.value, nfc.slice(start, end)) ? "mismatched" : span.distance === 0 ? "edited" : "approximate",
+          start,
+          end,
+          match: "loose",
+          distance: span.distance
+        };
+      }
+      return {
+        ...item,
+        status: valueInQuote(item.value, q) ? "quoted" : "mismatched",
+        match: "exact",
+        start: map[at],
+        end: map[at + q.length - 1] + 1,
+        ...text.indexOf(q, at + 1) >= 0 ? { ambiguous: true } : {}
+      };
+    };
+    checkExtraction = (note, items) => items.map((item) => checkItem(note, item));
+    toNumber = (value) => {
+      const v = value.trim();
+      if (!/^-?\d+(?:[.,]\d+)?$/.test(v) || /,\d{3}$/.test(v)) return null;
+      return Number(v.replace(",", "."));
+    };
+    unitOk = (key, unit) => !unit || FIELDS[key].units.some((u) => u.toLowerCase() === unit.trim().toLowerCase());
+    toInputs = (checked) => {
+      const keyed = checked.filter((c) => c.key && c.episode !== "history");
+      const count = (k) => keyed.filter((c) => c.key === k && c.episode === "current").length;
+      const out = { inputs: {}, review: [] };
+      for (const item of keyed) {
+        const key = item.key;
+        const value = toNumber(item.value);
+        const reason = item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence" : item.status !== "quoted" ? "not-verified" : item.episode !== "current" ? "no-episode" : value === null ? "not-a-number" : !unitOk(key, item.unit) ? "unit" : count(key) > 1 ? "repeated" : null;
+        if (reason) out.review.push({ item, reason });
+        else out.inputs[key] = { value, ...item.unit ? { unit: item.unit } : {}, quote: item.quote, ...item.time ? { time: item.time } : {} };
+      }
+      return out;
+    };
+  }
+});
+
+// src/commands/extract.ts
+var extract_exports = {};
+__export(extract_exports, {
+  run: () => run11
+});
+var import_node_fs, import_node_util11, USAGE11, run11;
+var init_extract = __esm({
+  "src/commands/extract.ts"() {
+    "use strict";
+    import_node_fs = require("fs");
+    import_node_util11 = require("util");
+    init_extraction();
+    init_format();
+    USAGE11 = `Usage: medprotocol extract --note <file> --items <file> [options]
+
+Checks an extraction against its note: is each quote in the note verbatim, and does it state the value?
+No clinical interpretation.
+
+Options:
+  --note <file>     The clinical note (plain text)
+  --items <file>    JSON array of { field, value, unit?, quote, episode, key?, time? }
+                    episode: "current" (this illness) or "history" (before it)
+  --json            Output as JSON
+  --help            Show this help
+
+Output: each item's status, plus "inputs" (verified numbers by key, for the calculators) and
+"review" (keyed items held back, with the reason). Keys: ${Object.keys(FIELDS).join(", ")}
+
+Statuses: quoted (exact) \xB7 edited (case/accents differ) \xB7 approximate (within 5 characters)
+          \xB7 reordered (same words, another order, within 5 characters) \xB7 mismatched (span found, value not in it) \xB7 unverified (not in note) \xB7 none (no quote)
+          edited, approximate and reordered are lower confidence: highlighted, but held back from "inputs".
+
+Example:
+  medprotocol extract --note note.txt --items extraction.json --json`;
+    run11 = (argv) => {
+      const { values } = (0, import_node_util11.parseArgs)({
+        args: argv,
+        options: {
+          note: { type: "string" },
+          items: { type: "string" },
+          json: { type: "boolean", default: false },
+          help: { type: "boolean", default: false }
+        },
+        strict: true
+      });
+      if (values.help) {
+        process.stdout.write(USAGE11 + "\n");
+        return;
+      }
+      if (!values.note || !values.items) {
+        process.stderr.write(formatError("--note and --items are required") + "\n\n" + USAGE11 + "\n");
+        process.exitCode = 1;
+        return;
+      }
+      let note;
+      let items;
+      try {
+        note = (0, import_node_fs.readFileSync)(values.note, "utf8");
+        items = JSON.parse((0, import_node_fs.readFileSync)(values.items, "utf8"));
+      } catch (e) {
+        process.stderr.write(formatError(e.message) + "\n");
+        process.exitCode = 1;
+        return;
+      }
+      if (!Array.isArray(items) || items.some((i) => typeof i?.field !== "string" || typeof i?.value !== "string" || typeof i?.quote !== "string")) {
+        process.stderr.write(formatError("--items must be a JSON array of { field, value, unit?, quote } strings") + "\n");
+        process.exitCode = 1;
+        return;
+      }
+      const badEpisode = items.find((i) => !EPISODES.includes(i.episode));
+      if (badEpisode) {
+        process.stderr.write(formatError(`"${badEpisode.field}" needs episode "current" or "history"`) + "\n");
+        process.exitCode = 1;
+        return;
+      }
+      const badKey = items.find((i) => i.key !== void 0 && !Object.hasOwn(FIELDS, i.key));
+      if (badKey) {
+        process.stderr.write(formatError(`unknown key "${badKey.key}" \u2014 use one of: ${Object.keys(FIELDS).join(", ")}`) + "\n");
+        process.exitCode = 1;
+        return;
+      }
+      const checked = checkExtraction(note, items);
+      const counts = Object.fromEntries(
+        ["quoted", "edited", "approximate", "reordered", "mismatched", "unverified", "none"].map((s) => [s, checked.filter((c) => c.status === s).length])
+      );
+      const { inputs, review } = toInputs(checked);
+      printResult(
+        { items: checked, counts, inputs, review },
+        values.json,
+        () => [
+          formatHeader("Extraction vs note"),
+          formatTable(checked.map((c) => [c.field, `${c.value}${c.unit ? ` ${c.unit}` : ""}  (${c.episode})  [${c.status}${c.distance ? `, ${c.distance} chars off` : ""}${c.ambiguous ? ", ambiguous" : ""}]  "${c.quote}"`])),
+          "",
+          formatTable(Object.entries(counts).map(([s, n]) => [s, String(n)])),
+          ...Object.keys(inputs).length ? [formatHeader("Inputs for calculators"), formatTable(Object.entries(inputs).map(([k, v]) => [k, `${v.value}${v.unit ? ` ${v.unit}` : ""}`]))] : [],
+          ...review.length ? [formatHeader("Held back"), formatTable(review.map((r) => [r.item.key, `${r.item.value}  [${r.reason}]`]))] : []
+        ].join("\n")
+      );
+    };
+  }
+});
+
 // src/overlay-client.ts
 var OVERLAY_CLIENT_JS;
 var init_overlay_client = __esm({
@@ -4527,19 +4829,19 @@ var init_overlay_client = __esm({
 // src/commands/overlay.ts
 var overlay_exports = {};
 __export(overlay_exports, {
-  run: () => run11
+  run: () => run12
 });
-var import_node_util11, import_node_fs, import_node_path, import_node_http, import_node_child_process, USAGE11, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run11;
+var import_node_util12, import_node_fs2, import_node_path, import_node_http, import_node_child_process, USAGE12, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run12;
 var init_overlay = __esm({
   "src/commands/overlay.ts"() {
     "use strict";
-    import_node_util11 = require("util");
-    import_node_fs = require("fs");
+    import_node_util12 = require("util");
+    import_node_fs2 = require("fs");
     import_node_path = require("path");
     import_node_http = require("http");
     import_node_child_process = require("child_process");
     init_overlay_client();
-    USAGE11 = `Usage: medprotocol overlay [options]
+    USAGE12 = `Usage: medprotocol overlay [options]
 
 The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
@@ -4592,11 +4894,11 @@ Examples:
       }
     };
     readQueue = (dir) => {
-      if (!(0, import_node_fs.existsSync)(dir)) return [];
-      return (0, import_node_fs.readdirSync)(dir).filter((f) => f.endsWith(".json")).sort().map((f) => {
+      if (!(0, import_node_fs2.existsSync)(dir)) return [];
+      return (0, import_node_fs2.readdirSync)(dir).filter((f) => f.endsWith(".json")).sort().map((f) => {
         const file = (0, import_node_path.join)(dir, f);
         try {
-          return { file, order: JSON.parse((0, import_node_fs.readFileSync)(file, "utf8")) };
+          return { file, order: JSON.parse((0, import_node_fs2.readFileSync)(file, "utf8")) };
         } catch {
           return null;
         }
@@ -4676,7 +4978,7 @@ Examples:
       };
     };
     serve = (dir, port, auto) => {
-      (0, import_node_fs.mkdirSync)(dir, { recursive: true });
+      (0, import_node_fs2.mkdirSync)(dir, { recursive: true });
       const dispatch = auto ? makeDispatcher(process.cwd()) : null;
       const server = (0, import_node_http.createServer)((req, res) => {
         const origin = req.headers.origin;
@@ -4720,13 +5022,13 @@ Examples:
         if (req.method === "GET" && path === "/result") {
           const fileParam = new URL(req.url ?? "/", "http://localhost").searchParams.get("file") ?? "";
           const resolved = (0, import_node_path.resolve)(fileParam);
-          if (!within(dir, resolved) || !(0, import_node_fs.existsSync)(resolved)) {
+          if (!within(dir, resolved) || !(0, import_node_fs2.existsSync)(resolved)) {
             res.writeHead(404, JSON_HEADER);
             res.end(JSON.stringify({ error: "not found" }));
             return;
           }
           try {
-            const order = JSON.parse((0, import_node_fs.readFileSync)(resolved, "utf8"));
+            const order = JSON.parse((0, import_node_fs2.readFileSync)(resolved, "utf8"));
             res.writeHead(200, JSON_HEADER);
             res.end(
               JSON.stringify({
@@ -4758,14 +5060,14 @@ Examples:
               return;
             }
             const resolved = (0, import_node_path.resolve)(fileParam);
-            if (!within(dir, resolved) || !(0, import_node_fs.existsSync)(resolved)) {
+            if (!within(dir, resolved) || !(0, import_node_fs2.existsSync)(resolved)) {
               res.writeHead(404, JSON_HEADER);
               res.end(JSON.stringify({ error: "not found" }));
               return;
             }
             let order;
             try {
-              order = JSON.parse((0, import_node_fs.readFileSync)(resolved, "utf8"));
+              order = JSON.parse((0, import_node_fs2.readFileSync)(resolved, "utf8"));
             } catch {
               res.writeHead(500, JSON_HEADER);
               res.end(JSON.stringify({ error: "could not read work order" }));
@@ -4778,7 +5080,7 @@ Examples:
             }
             const record = { ...order, approved: true, status: "pending" };
             try {
-              (0, import_node_fs.writeFileSync)(resolved, JSON.stringify(record, null, 2) + "\n");
+              (0, import_node_fs2.writeFileSync)(resolved, JSON.stringify(record, null, 2) + "\n");
             } catch (err) {
               res.writeHead(500, JSON_HEADER);
               res.end(JSON.stringify({ error: `could not approve: ${err.message}` }));
@@ -4815,14 +5117,14 @@ Examples:
               return;
             }
             const resolved = (0, import_node_path.resolve)(payload.file ?? "");
-            if (!within(dir, resolved) || !(0, import_node_fs.existsSync)(resolved)) {
+            if (!within(dir, resolved) || !(0, import_node_fs2.existsSync)(resolved)) {
               res.writeHead(404, JSON_HEADER);
               res.end(JSON.stringify({ error: "originating order not found" }));
               return;
             }
             let src;
             try {
-              src = JSON.parse((0, import_node_fs.readFileSync)(resolved, "utf8"));
+              src = JSON.parse((0, import_node_fs2.readFileSync)(resolved, "utf8"));
             } catch {
               res.writeHead(500, JSON_HEADER);
               res.end(JSON.stringify({ error: "could not read originating order" }));
@@ -4850,8 +5152,8 @@ Examples:
             const slug = (skill.split(":").pop() || "skill").replace(/[^a-z0-9-]/gi, "").slice(0, 24) || "skill";
             const file = (0, import_node_path.join)(dir, `${ts.replace(/[:.]/g, "-")}-${slug}.json`);
             try {
-              (0, import_node_fs.mkdirSync)(dir, { recursive: true });
-              (0, import_node_fs.writeFileSync)(file, JSON.stringify(record, null, 2) + "\n");
+              (0, import_node_fs2.mkdirSync)(dir, { recursive: true });
+              (0, import_node_fs2.writeFileSync)(file, JSON.stringify(record, null, 2) + "\n");
             } catch (err) {
               res.writeHead(500, JSON_HEADER);
               res.end(JSON.stringify({ error: `could not write work order: ${err.message}` }));
@@ -4901,8 +5203,8 @@ Examples:
             const slug = order.action === "add" ? "add" : (order.suggestedId || order.tag || "selection").replace(/[^a-z0-9-]/gi, "").slice(0, 24) || "selection";
             const file = (0, import_node_path.join)(dir, `${ts.replace(/[:.]/g, "-")}-${slug}.json`);
             try {
-              (0, import_node_fs.mkdirSync)(dir, { recursive: true });
-              (0, import_node_fs.writeFileSync)(file, JSON.stringify(record, null, 2) + "\n");
+              (0, import_node_fs2.mkdirSync)(dir, { recursive: true });
+              (0, import_node_fs2.writeFileSync)(file, JSON.stringify(record, null, 2) + "\n");
             } catch (err) {
               process.stderr.write(`Failed to write work order: ${err.message}
 `);
@@ -4960,8 +5262,8 @@ Examples:
         }
       });
     };
-    run11 = (argv) => {
-      const { values } = (0, import_node_util11.parseArgs)({
+    run12 = (argv) => {
+      const { values } = (0, import_node_util12.parseArgs)({
         args: argv,
         options: {
           serve: { type: "boolean", default: false },
@@ -4978,7 +5280,7 @@ Examples:
         strict: true
       });
       if (values.help) {
-        process.stdout.write(USAGE11 + "\n");
+        process.stdout.write(USAGE12 + "\n");
         return;
       }
       const dir = (0, import_node_path.resolve)(values.dir ?? (0, import_node_path.join)(".medprotocol", "queue"));
@@ -4995,7 +5297,7 @@ Examples:
       }
       if (values.clear) {
         const done = readQueue(dir).filter((e) => statusOf(e.order) === "done");
-        for (const { file } of done) (0, import_node_fs.unlinkSync)(file);
+        for (const { file } of done) (0, import_node_fs2.unlinkSync)(file);
         if (json) {
           process.stdout.write(JSON.stringify({ cleared: done.length }) + "\n");
         } else {
@@ -5005,7 +5307,7 @@ Examples:
         return;
       }
       if (values.watch) {
-        if (!(0, import_node_fs.existsSync)(dir)) {
+        if (!(0, import_node_fs2.existsSync)(dir)) {
           process.stderr.write(`Queue directory does not exist yet: ${dir}
 Waiting for the overlay to create it\u2026
 `);
@@ -5022,13 +5324,13 @@ Waiting for the overlay to create it\u2026
         report();
         process.stdout.write(`Watching ${dir} \u2026 (Ctrl-C to stop)
 `);
-        if ((0, import_node_fs.existsSync)(dir)) (0, import_node_fs.watch)(dir, report);
+        if ((0, import_node_fs2.existsSync)(dir)) (0, import_node_fs2.watch)(dir, report);
         return;
       }
       if (values.drain) {
         const pending2 = readQueue(dir).filter((e) => statusOf(e.order) === "pending");
         for (const { file, order } of pending2) {
-          (0, import_node_fs.writeFileSync)(file, JSON.stringify({ ...order, status: "processing" }, null, 2) + "\n");
+          (0, import_node_fs2.writeFileSync)(file, JSON.stringify({ ...order, status: "processing" }, null, 2) + "\n");
         }
         printOrders(pending2, json, "Dispatch plan \u2014 claimed pending work orders");
         return;
@@ -5043,7 +5345,7 @@ Waiting for the overlay to create it\u2026
 var version = "1.0.1";
 
 // src/index.ts
-var USAGE12 = `medprotocol \u2014 Medical calculations from the terminal
+var USAGE13 = `medprotocol \u2014 Medical calculations from the terminal
 
 Usage: medprotocol <command> [options]
 
@@ -5058,6 +5360,7 @@ Commands:
   sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
+  extract          Check extracted values against the note they came from
   overlay          Drain the dev overlay work-order queue (.medprotocol/queue/)
 
 Global options:
@@ -5087,6 +5390,7 @@ Examples:
   medprotocol diabetes t1-vs-t2 --age 25 --bmi 22 --autoantibodies --c-peptide 150
   medprotocol diabetes t2d-screen --age 40 --bmi 28 --hypertension
   medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160
+  medprotocol extract --note note.txt --items extraction.json
   medprotocol overlay --drain`;
 var command = process.argv[2];
 var commandArgs = process.argv.slice(3);
@@ -5096,7 +5400,7 @@ if (command === "--version" || command === "-v") {
   process.exit(0);
 }
 if (!command || command === "--help" || command === "-h") {
-  process.stdout.write(USAGE12 + "\n");
+  process.stdout.write(USAGE13 + "\n");
   process.exit(0);
 }
 var commands = {
@@ -5110,6 +5414,7 @@ var commands = {
   sepsis: () => Promise.resolve().then(() => (init_sepsis2(), sepsis_exports)),
   ckd: () => Promise.resolve().then(() => (init_ckd2(), ckd_exports)),
   diabetes: () => Promise.resolve().then(() => (init_diabetes(), diabetes_exports)),
+  extract: () => Promise.resolve().then(() => (init_extract(), extract_exports)),
   overlay: () => Promise.resolve().then(() => (init_overlay(), overlay_exports))
 };
 var loader = commands[command];

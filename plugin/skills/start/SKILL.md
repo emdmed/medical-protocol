@@ -47,6 +47,7 @@ Use the classification table to match the doctor's request to a domain, then rou
 | **water-balance** | `../water-balance/SKILL.md` |
 | **pafi** | `../pafi/SKILL.md` |
 | **dka** | `../dka/SKILL.md` |
+| **extraction** | `../extract/SKILL.md` |
 | **dashboard** | `../dashboard/SKILL.md` |
 | **modify** | `../modify/SKILL.md` |
 | **troubleshoot** | `../troubleshoot/SKILL.md` |
