@@ -7,8 +7,8 @@ import { tmpdir } from "node:os";
 const HOOK = join(__dirname, "../../plugin/hooks/extraction-guard.mjs");
 const dir = mkdtempSync(join(tmpdir(), "guard-"));
 mkdirSync(join(dir, "data/extractions"), { recursive: true });
-mkdirSync(join(dir, "extractions"));
-for (const f of ["extractions/note.md", "extractions/note.json", "extractions/note.corrected.json", "data/extractions/note.json"]) writeFileSync(join(dir, f), "x");
+mkdirSync(join(dir, "extractions/abc123def456"), { recursive: true });
+for (const f of ["extractions/abc123def456/note.md", "extractions/abc123def456/extraction.json", "extractions/abc123def456/corrected.json", "data/extractions/abc123def456.json"]) writeFileSync(join(dir, f), "x");
 
 const denied = (file: string) =>
   execFileSync("node", [HOOK], {
@@ -20,15 +20,16 @@ const denied = (file: string) =>
 
 describe("extraction-guard hook", () => {
   it("blocks writes to an existing first pass or note", () => {
-    expect(denied("extractions/note.json")).toBe(true);
-    expect(denied("extractions/note.md")).toBe(true);
-    expect(denied(join(dir, "extractions/note.json"))).toBe(true);
+    expect(denied("extractions/abc123def456/extraction.json")).toBe(true);
+    expect(denied("extractions/abc123def456/note.md")).toBe(true);
+    expect(denied(join(dir, "extractions/abc123def456/extraction.json"))).toBe(true);
   });
 
   it("allows creating them, and writing the verification files", () => {
-    expect(denied("extractions/new.json")).toBe(false);
-    expect(denied("extractions/note.corrected.json")).toBe(false);
-    expect(denied("extractions/note.verify.json")).toBe(false);
-    expect(denied("data/extractions/note.json")).toBe(false);
+    expect(denied("extractions/0123456789ab/extraction.json")).toBe(false);
+    expect(denied("extractions/abc123def456/corrected.json")).toBe(false);
+    expect(denied("extractions/abc123def456/verify.json")).toBe(false);
+    expect(denied("extractions/abc123def456/artifact.html")).toBe(false);
+    expect(denied("data/extractions/abc123def456.json")).toBe(false);
   });
 });

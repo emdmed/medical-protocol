@@ -1,17 +1,24 @@
-import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { basename, dirname, extname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { FIELDS, EPISODES, checkExtraction, toInputs, type ExtractedItem } from "../../../../plugin/lib/extraction";
+import { FIELDS, EPISODES, checkExtraction, noteSegments, toInputs, type ExtractedItem } from "../../../../plugin/lib/extraction";
 import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { EXTRACT_ARTIFACT_HTML } from "../extract-artifact";
 
 const USAGE = `Usage: medprotocol extract --note <file> --items <file> [options]
+       medprotocol extract --save <file>
 
 Checks an extraction against its note: is each quote in the note verbatim, and does it state the value?
 No clinical interpretation.
 
 Options:
+  --save <file>     Store a raw note as extractions/<hash>/note.md (hash: first 12 hex of its SHA-256)
+                    and print the folder. The same note always lands in the same folder.
   --note <file>     The clinical note (plain text)
   --items <file>    JSON array of { field, value, unit?, quote, episode, key?, time? }
                     episode: "current" (this illness) or "history" (before it)
+  --artifact <file> Also write a page showing the note beside the extraction (HTML)
   --json            Output as JSON
   --help            Show this help
 
@@ -29,8 +36,10 @@ export const run = (argv: string[]): void => {
   const { values } = parseArgs({
     args: argv,
     options: {
+      save: { type: "string" },
       note: { type: "string" },
       items: { type: "string" },
+      artifact: { type: "string" },
       json: { type: "boolean", default: false },
       help: { type: "boolean", default: false },
     },
@@ -39,6 +48,25 @@ export const run = (argv: string[]): void => {
 
   if (values.help) {
     process.stdout.write(USAGE + "\n");
+    return;
+  }
+
+  if (values.save) {
+    let raw: Buffer;
+    try {
+      raw = readFileSync(values.save);
+    } catch (e) {
+      process.stderr.write(formatError((e as Error).message) + "\n");
+      process.exitCode = 1;
+      return;
+    }
+    const dir = join("extractions", createHash("sha256").update(raw).digest("hex").slice(0, 12));
+    const existed = existsSync(join(dir, "note.md"));
+    if (!existed) {
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, "note.md"), raw);
+    }
+    printResult({ dir, existed }, values.json!, () => dir + (existed ? "  (already saved)" : ""));
     return;
   }
 
@@ -85,6 +113,15 @@ export const run = (argv: string[]): void => {
   );
 
   const { inputs, review } = toInputs(checked);
+
+  if (values.artifact) {
+    // extractions/<hash>/note.md is named by its folder
+    const name = basename(values.note) === "note.md" ? basename(dirname(resolve(values.note))) : basename(values.note, extname(values.note));
+    const data = { name, checkedAt: new Date().toISOString().slice(0, 10), items: checked, segments: noteSegments(note, checked) };
+    // \u003c keeps "</script>" in a note from closing the data block
+    const html = EXTRACT_ARTIFACT_HTML.replace("__TITLE__", () => `${name.replace(/[<&]/g, "")} extraction`).replace("__DATA__", () => JSON.stringify(data).replace(/</g, "\\u003c"));
+    writeFileSync(values.artifact, html);
+  }
 
   printResult({ items: checked, counts, inputs, review }, values.json!, () =>
     [

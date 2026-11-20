@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { run } from '../../packages/medprotocol/src/commands/extract';
@@ -70,5 +71,44 @@ describe('medprotocol extract', () => {
     writeFileSync(bad, JSON.stringify([{ episode: 'current', field: 'HR', value: 88 }]));
     run(['--note', notePath, '--items', bad]);
     expect(process.exitCode).toBe(1);
+  });
+
+  it('writes the page with the checked items and note segments, safe against </script>', () => {
+    const note = join(dir, 'adm-1.md');
+    writeFileSync(note, 'HR 88 bpm. </script><b>');
+    const out = join(dir, 'page.html');
+    run(['--note', note, '--items', itemsPath, '--artifact', out]);
+    const html = readFileSync(out, 'utf8');
+    expect(html).toContain('<title>adm-1 extraction</title>');
+    expect(html.match(/<\/script>/g)).toHaveLength(2);
+    const data = JSON.parse(html.match(/<script type="application\/json" id="data">(.*?)<\/script>/s)![1]);
+    expect(data.name).toBe('adm-1');
+    expect(data.items[0].status).toBe('quoted');
+    expect(data.segments.map((s: any) => s.text).join('')).toBe('HR 88 bpm. </script><b>');
+  });
+
+  it('saves a note under the hash of its bytes, once', () => {
+    const cwd = process.cwd();
+    process.chdir(dir);
+    try {
+      run(['--save', notePath, '--json']);
+      const hash = createHash('sha256').update('BP 120/80, HR 88 bpm.').digest('hex').slice(0, 12);
+      expect(JSON.parse(stdout)).toEqual({ dir: join('extractions', hash), existed: false });
+      expect(readFileSync(join('extractions', hash, 'note.md'), 'utf8')).toBe('BP 120/80, HR 88 bpm.');
+      stdout = '';
+      run(['--save', notePath, '--json']);
+      expect(JSON.parse(stdout).existed).toBe(true);
+    } finally {
+      process.chdir(cwd);
+    }
+  });
+
+  it('names the page after the hash folder', () => {
+    const sub = join(dir, 'extractions', 'abc123def456');
+    mkdirSync(sub, { recursive: true });
+    writeFileSync(join(sub, 'note.md'), 'HR 88 bpm.');
+    const out = join(sub, 'artifact.html');
+    run(['--note', join(sub, 'note.md'), '--items', itemsPath, '--artifact', out]);
+    expect(readFileSync(out, 'utf8')).toContain('<title>abc123def456 extraction</title>');
   });
 });
