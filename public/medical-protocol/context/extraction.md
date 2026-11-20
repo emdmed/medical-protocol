@@ -10,19 +10,19 @@ Logic: `lib/medprotocol/extraction.ts` — import from `@/lib/medprotocol/extrac
 
 The agent does, in the terminal — the doctor's app has no model. The lib only checks.
 
-Run these steps in this order, every time. Each note gets its own folder, `extractions/<hash>/`, named by the first 12 hex characters of the SHA-256 of the raw note. `medprotocol extract --save` computes it; never make one up. Everything about that note lives in that folder:
+Run these steps in this order, every time. Each note gets its own folder, `extractions/<hash>/`, named by the first 12 hex characters of the SHA-256 of the note (line endings and trailing whitespace evened out, so the same note pasted twice lands in the same folder). `medprotocol extract --save` computes it; never make one up. Everything about that note lives in that folder:
 
 | File in `extractions/<hash>/` | Written by | Then |
 |---|---|---|
 | `note.md` | step 1 — the raw note | **never changed** |
-| `extraction.json` | step 2 — the first pass | **never changed** — the `extraction-guard` hook blocks any Write/Edit to it and to `note.md` |
+| `extraction.json` | step 2 — the first pass | **never changed** — the `extraction-guard` hook blocks any Write/Edit to it once it exists, and to `note.md` always |
 | `verify.json` | step 3 — the mistakes found | |
 | `corrected.json` | step 3 — the first pass with every proposed correction applied | step 4, if the doctor rejects a correction |
 | `artifact.html` | `/medical-protocol:extract-artifact` — the page | |
 
 Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
 
-1. The doctor gives a note (pasted or a file). Treat it as patient data (`patient-privacy.md`). Make sure `extractions/` is in the project's `.gitignore` (add the line if missing). A pasted note → write it exactly as pasted to `extractions/pasted.md` first; a file → use it where it is. No cleanup, no reformatting. Then run `medprotocol extract --save <that file> --json`: it hashes the bytes, copies them to `<dir>/note.md` and prints `{ dir, existed }`. Delete `extractions/pasted.md` afterwards. `existed: true` means this exact note was saved before: if `<dir>/extraction.json` is there too, tell the doctor it was already extracted and ask whether to reuse it (go on from step 3) — the first pass can't be redone. `<dir>/note.md`, not your memory of the note, is what every quote is checked against.
+1. The doctor gives a note (pasted or a file). Treat it as patient data (`patient-privacy.md`). Make sure `extractions/` is in the project's `.gitignore` (add the line if missing). A pasted note → write it exactly as pasted to `extractions/pasted.md` first; a file → use it where it is. No cleanup, no reformatting. Then run `medprotocol extract --save <that file> --json`: it hashes the note, copies its bytes to `<dir>/note.md`, deletes `extractions/pasted.md` (a staging copy) and prints `{ dir, existed }`. Only `--save` writes `note.md`; the `extraction-guard` hook blocks any Write/Edit to it. `existed: true` means this exact note was saved before: if `<dir>/extraction.json` is there too, tell the doctor it was already extracted and ask whether to reuse it (go on from step 3) — the first pass can't be redone. `<dir>/note.md`, not your memory of the note, is what every quote is checked against.
 2. Read `<dir>/note.md` and write one item per value the doctor asked for: `{ field, value, unit?, quote, episode, key?, time? }`. Save the JSON array to `<dir>/extraction.json`; that is the first pass.
    - `quote` is copied **character for character** from the note (the loose pass is a safety net for slips, not permission to paraphrase) — no fixing typos, case, accents or abbreviations. Quote enough words to be unique in the note.
    - `value` is what the note states, not a conversion or a calculation. No derived values (MAP unless the note writes it, BMI, eGFR, totals). For a keyed item, one number only.

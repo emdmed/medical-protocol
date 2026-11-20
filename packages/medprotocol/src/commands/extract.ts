@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { FIELDS, EPISODES, checkExtraction, noteSegments, toInputs, type ExtractedItem } from "../../../../plugin/lib/extraction";
@@ -13,8 +13,10 @@ Checks an extraction against its note: is each quote in the note verbatim, and d
 No clinical interpretation.
 
 Options:
-  --save <file>     Store a raw note as extractions/<hash>/note.md (hash: first 12 hex of its SHA-256)
-                    and print the folder. The same note always lands in the same folder.
+  --save <file>     Store a raw note as extractions/<hash>/note.md and print the folder. The hash is the first
+                    12 hex of the SHA-256 of the note with line endings and trailing whitespace evened out,
+                    so the same note always lands in the same folder. A <file> directly in extractions/
+                    is a staging copy and is deleted once saved.
   --note <file>     The clinical note (plain text)
   --items <file>    JSON array of { field, value, unit?, quote, episode, key?, time? }
                     episode: "current" (this illness) or "history" (before it)
@@ -52,6 +54,11 @@ export const run = (argv: string[]): void => {
   }
 
   if (values.save) {
+    if (values.note || values.items || values.artifact) {
+      process.stderr.write(formatError("--save takes no other options but --json") + "\n");
+      process.exitCode = 1;
+      return;
+    }
     let raw: Buffer;
     try {
       raw = readFileSync(values.save);
@@ -60,12 +67,16 @@ export const run = (argv: string[]): void => {
       process.exitCode = 1;
       return;
     }
-    const dir = join("extractions", createHash("sha256").update(raw).digest("hex").slice(0, 12));
+    // CRLF vs LF or a trailing newline must not split one note into two folders; note.md keeps the raw bytes
+    const canonical = raw.toString("utf8").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").trimEnd();
+    const dir = join("extractions", createHash("sha256").update(canonical).digest("hex").slice(0, 12));
     const existed = existsSync(join(dir, "note.md"));
     if (!existed) {
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "note.md"), raw);
     }
+    // a pasted note staged at extractions/<file> is patient data; don't leave it behind
+    if (dirname(resolve(values.save)) === resolve("extractions")) rmSync(values.save);
     printResult({ dir, existed }, values.json!, () => dir + (existed ? "  (already saved)" : ""));
     return;
   }
@@ -117,10 +128,16 @@ export const run = (argv: string[]): void => {
   if (values.artifact) {
     // extractions/<hash>/note.md is named by its folder
     const name = basename(values.note) === "note.md" ? basename(dirname(resolve(values.note))) : basename(values.note, extname(values.note));
-    const data = { name, checkedAt: new Date().toISOString().slice(0, 10), items: checked, segments: noteSegments(note, checked) };
+    const data = { name, checkedAt: new Date().toLocaleDateString("sv"), items: checked, segments: noteSegments(note, checked) };
     // \u003c keeps "</script>" in a note from closing the data block
     const html = EXTRACT_ARTIFACT_HTML.replace("__TITLE__", () => `${name.replace(/[<&]/g, "")} extraction`).replace("__DATA__", () => JSON.stringify(data).replace(/</g, "\\u003c"));
-    writeFileSync(values.artifact, html);
+    try {
+      writeFileSync(values.artifact, html);
+    } catch (e) {
+      process.stderr.write(formatError((e as Error).message) + "\n");
+      process.exitCode = 1;
+      return;
+    }
   }
 
   printResult({ items: checked, counts, inputs, review }, values.json!, () =>

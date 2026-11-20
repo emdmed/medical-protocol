@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { run } from '../../packages/medprotocol/src/commands/extract';
@@ -101,6 +101,36 @@ describe('medprotocol extract', () => {
     } finally {
       process.chdir(cwd);
     }
+  });
+
+  it('gives the same note one folder whatever its line endings, and removes a staging copy', () => {
+    const cwd = process.cwd();
+    process.chdir(dir);
+    try {
+      mkdirSync('extractions', { recursive: true });
+      writeFileSync('extractions/pasted.md', 'HR 88\r\nBP 120/80\r\n');
+      run(['--save', 'extractions/pasted.md', '--json']);
+      const first = JSON.parse(stdout);
+      expect(existsSync('extractions/pasted.md')).toBe(false);
+      expect(readFileSync(join(first.dir, 'note.md'), 'utf8')).toBe('HR 88\r\nBP 120/80\r\n');
+      writeFileSync(join(dir, 'lf.md'), 'HR 88\nBP 120/80');
+      stdout = '';
+      run(['--save', join(dir, 'lf.md'), '--json']);
+      expect(JSON.parse(stdout)).toEqual({ dir: first.dir, existed: true });
+      expect(existsSync(join(dir, 'lf.md'))).toBe(true);
+    } finally {
+      process.chdir(cwd);
+    }
+  });
+
+  it('rejects --save mixed with other options', () => {
+    run(['--save', notePath, '--note', notePath]);
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('reports an unwritable --artifact path instead of crashing', () => {
+    run(['--note', notePath, '--items', itemsPath, '--artifact', join(dir, 'missing', 'a.html')]);
+    expect(process.exitCode).toBe(1);
   });
 
   it('names the page after the hash folder', () => {

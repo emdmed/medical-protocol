@@ -25,6 +25,10 @@ describe("extraction-guard hook", () => {
     expect(denied(join(dir, "extractions/abc123def456/extraction.json"))).toBe(true);
   });
 
+  it("blocks creating a note, so only --save names the folder", () => {
+    expect(denied("extractions/made-up-name/note.md")).toBe(true);
+  });
+
   it("allows creating them, and writing the verification files", () => {
     expect(denied("extractions/0123456789ab/extraction.json")).toBe(false);
     expect(denied("extractions/abc123def456/corrected.json")).toBe(false);

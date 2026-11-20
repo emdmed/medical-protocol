@@ -11,10 +11,10 @@ One page per extraction. Extraction only: the page shows what the note says and 
 
 ## Steps
 
-1. **Pick the extraction.** `<dir>` is `extractions/<hash>/`, the folder just finished by `/medical-protocol:extract`, or the one the doctor names. List `extractions/*/note.md` if unsure, show the first line of each, and ask which. It needs `<dir>/note.md` and its items: `<dir>/corrected.json` if it exists, else `<dir>/extraction.json`. Neither → tell the doctor to run the extraction first and stop.
+1. **Pick the extraction.** `<dir>` is `extractions/<hash>/`, the folder just finished by `/medical-protocol:extract`, or the one the doctor names. List `extractions/*/note.md` if unsure, show the first line of each, and ask which. It needs `<dir>/note.md` and its items, `<items>` below: `<dir>/corrected.json` if it exists, else `<dir>/extraction.json`. Neither → tell the doctor to run the extraction first and stop.
 2. **Write the local page:**
    ```bash
-   medprotocol extract --note <dir>/note.md --items <dir>/corrected.json --artifact <dir>/artifact.html
+   medprotocol extract --note <dir>/note.md --items <items> --artifact <dir>/artifact.html
    ```
    It must exit 0. It fails on a bad item (no episode, unknown key) → report the CLI's error and stop; never hand-edit the items to get past it. The page is built by the CLI from a fixed template: never write or edit its HTML yourself.
 3. **Tell the doctor where it is:** "The page is saved at <dir>/artifact.html. Open it in your browser; it stays on this computer."

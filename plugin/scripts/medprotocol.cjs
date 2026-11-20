@@ -4338,8 +4338,10 @@ Checks an extraction against its note: is each quote in the note verbatim, and d
 No clinical interpretation.
 
 Options:
-  --save <file>     Store a raw note as extractions/<hash>/note.md (hash: first 12 hex of its SHA-256)
-                    and print the folder. The same note always lands in the same folder.
+  --save <file>     Store a raw note as extractions/<hash>/note.md and print the folder. The hash is the first
+                    12 hex of the SHA-256 of the note with line endings and trailing whitespace evened out,
+                    so the same note always lands in the same folder. A <file> directly in extractions/
+                    is a staging copy and is deleted once saved.
   --note <file>     The clinical note (plain text)
   --items <file>    JSON array of { field, value, unit?, quote, episode, key?, time? }
                     episode: "current" (this illness) or "history" (before it)
@@ -4374,6 +4376,11 @@ Example:
         return;
       }
       if (values.save) {
+        if (values.note || values.items || values.artifact) {
+          process.stderr.write(formatError("--save takes no other options but --json") + "\n");
+          process.exitCode = 1;
+          return;
+        }
         let raw;
         try {
           raw = (0, import_node_fs.readFileSync)(values.save);
@@ -4382,12 +4389,14 @@ Example:
           process.exitCode = 1;
           return;
         }
-        const dir = (0, import_node_path.join)("extractions", (0, import_node_crypto.createHash)("sha256").update(raw).digest("hex").slice(0, 12));
+        const canonical = raw.toString("utf8").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").trimEnd();
+        const dir = (0, import_node_path.join)("extractions", (0, import_node_crypto.createHash)("sha256").update(canonical).digest("hex").slice(0, 12));
         const existed = (0, import_node_fs.existsSync)((0, import_node_path.join)(dir, "note.md"));
         if (!existed) {
           (0, import_node_fs.mkdirSync)(dir, { recursive: true });
           (0, import_node_fs.writeFileSync)((0, import_node_path.join)(dir, "note.md"), raw);
         }
+        if ((0, import_node_path.dirname)((0, import_node_path.resolve)(values.save)) === (0, import_node_path.resolve)("extractions")) (0, import_node_fs.rmSync)(values.save);
         printResult({ dir, existed }, values.json, () => dir + (existed ? "  (already saved)" : ""));
         return;
       }
@@ -4430,9 +4439,15 @@ Example:
       const { inputs, review } = toInputs(checked);
       if (values.artifact) {
         const name = (0, import_node_path.basename)(values.note) === "note.md" ? (0, import_node_path.basename)((0, import_node_path.dirname)((0, import_node_path.resolve)(values.note))) : (0, import_node_path.basename)(values.note, (0, import_node_path.extname)(values.note));
-        const data = { name, checkedAt: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), items: checked, segments: noteSegments(note, checked) };
+        const data = { name, checkedAt: (/* @__PURE__ */ new Date()).toLocaleDateString("sv"), items: checked, segments: noteSegments(note, checked) };
         const html = EXTRACT_ARTIFACT_HTML.replace("__TITLE__", () => `${name.replace(/[<&]/g, "")} extraction`).replace("__DATA__", () => JSON.stringify(data).replace(/</g, "\\u003c"));
-        (0, import_node_fs.writeFileSync)(values.artifact, html);
+        try {
+          (0, import_node_fs.writeFileSync)(values.artifact, html);
+        } catch (e) {
+          process.stderr.write(formatError(e.message) + "\n");
+          process.exitCode = 1;
+          return;
+        }
       }
       printResult(
         { items: checked, counts, inputs, review },
