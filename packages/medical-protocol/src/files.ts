@@ -63,14 +63,6 @@ export function copyFile(src: string, dest: string): void {
   }
 }
 
-export function getGlobalPluginCacheDir(version: string): string {
-  return path.join(homedir(), ".claude", "plugins", "cache", "medical-protocol", "medical-protocol", version);
-}
-
-export function getInstalledPluginsPath(): string {
-  return path.join(homedir(), ".claude", "plugins", "installed_plugins.json");
-}
-
 const REPO_URL = "https://github.com/emdmed/medical-protocol.git";
 
 export function getDefaultSourceDir(): string {

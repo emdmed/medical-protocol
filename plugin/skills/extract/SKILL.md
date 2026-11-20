@@ -7,7 +7,7 @@ hooks:
   UserPromptSubmit:
     - hooks:
         - type: command
-          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
+          command: 'node "$CLAUDE_PLUGIN_ROOT/hooks/note-consent.mjs" --all 2>/dev/null || node "$CLAUDE_PLUGIN_ROOT/../../hooks/note-consent.mjs" --all'
 ---
 
 Read and follow: reference/core.md

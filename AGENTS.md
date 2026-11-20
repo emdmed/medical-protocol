@@ -13,8 +13,8 @@ Steps for agents changing this repo. Project layout and commands are in `CLAUDE.
 
 ## When testing the installer
 
-`install` also writes the plugin into the global cache at `~/.claude/plugins/cache/medical-protocol/`, which changes the real plugin that Claude Code loads on this machine.
+`install` writes into the target project's `.claude/` only: skills, agents, hooks, lib, scripts, and `settings.json`, where it registers the safety hooks.
 
-1. Install into a throwaway project: `--dir <temp dir>`.
-2. Point `HOME` (`USERPROFILE` on Windows) at a temp dir too, so the global cache write lands there: `HOME=<temp dir> node scripts/medical-protocol.cjs install -y --dir <temp dir>/project`.
-3. Delete both temp dirs when done.
+1. Install into a throwaway project: `node scripts/medical-protocol.cjs install -y --dir <temp dir>`.
+2. Check the hooks are active: `node scripts/medical-protocol.cjs check --dir <temp dir>`.
+3. Delete the temp dir when done.

@@ -7,7 +7,7 @@ hooks:
   UserPromptSubmit:
     - hooks:
         - type: command
-          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
+          command: 'node "$CLAUDE_PLUGIN_ROOT/hooks/note-consent.mjs" --all 2>/dev/null || node "$CLAUDE_PLUGIN_ROOT/../../hooks/note-consent.mjs" --all'
 ---
 
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever this file says `medprotocol`

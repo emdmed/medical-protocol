@@ -1202,8 +1202,8 @@ var require_command = __commonJS({
     "use strict";
     var EventEmitter = require("events").EventEmitter;
     var childProcess = require("child_process");
-    var path6 = require("path");
-    var fs6 = require("fs");
+    var path7 = require("path");
+    var fs7 = require("fs");
     var process2 = require("process");
     var { Argument: Argument2, humanReadableArgName } = require_argument();
     var { CommanderError: CommanderError2 } = require_error();
@@ -2197,7 +2197,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @param {string} subcommandName
        */
       _checkForMissingExecutable(executableFile, executableDir, subcommandName) {
-        if (fs6.existsSync(executableFile)) return;
+        if (fs7.existsSync(executableFile)) return;
         const executableDirMessage = executableDir ? `searched for local subcommand relative to directory '${executableDir}'` : "no directory for search for local subcommand, use .executableDir() to supply a custom directory";
         const executableMissing = `'${executableFile}' does not exist
  - if '${subcommandName}' is not meant to be an executable command, remove description parameter from '.command()' and use '.description()' instead
@@ -2215,11 +2215,11 @@ Expecting one of '${allowedValues.join("', '")}'`);
         let launchWithNode = false;
         const sourceExt = [".js", ".ts", ".tsx", ".mjs", ".cjs"];
         function findFile(baseDir, baseName) {
-          const localBin = path6.resolve(baseDir, baseName);
-          if (fs6.existsSync(localBin)) return localBin;
-          if (sourceExt.includes(path6.extname(baseName))) return void 0;
+          const localBin = path7.resolve(baseDir, baseName);
+          if (fs7.existsSync(localBin)) return localBin;
+          if (sourceExt.includes(path7.extname(baseName))) return void 0;
           const foundExt = sourceExt.find(
-            (ext) => fs6.existsSync(`${localBin}${ext}`)
+            (ext) => fs7.existsSync(`${localBin}${ext}`)
           );
           if (foundExt) return `${localBin}${foundExt}`;
           return void 0;
@@ -2231,21 +2231,21 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (this._scriptPath) {
           let resolvedScriptPath;
           try {
-            resolvedScriptPath = fs6.realpathSync(this._scriptPath);
+            resolvedScriptPath = fs7.realpathSync(this._scriptPath);
           } catch {
             resolvedScriptPath = this._scriptPath;
           }
-          executableDir = path6.resolve(
-            path6.dirname(resolvedScriptPath),
+          executableDir = path7.resolve(
+            path7.dirname(resolvedScriptPath),
             executableDir
           );
         }
         if (executableDir) {
           let localFile = findFile(executableDir, executableFile);
           if (!localFile && !subcommand._executableFile && this._scriptPath) {
-            const legacyName = path6.basename(
+            const legacyName = path7.basename(
               this._scriptPath,
-              path6.extname(this._scriptPath)
+              path7.extname(this._scriptPath)
             );
             if (legacyName !== this._name) {
               localFile = findFile(
@@ -2256,7 +2256,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
           }
           executableFile = localFile || executableFile;
         }
-        launchWithNode = sourceExt.includes(path6.extname(executableFile));
+        launchWithNode = sourceExt.includes(path7.extname(executableFile));
         let proc;
         if (process2.platform !== "win32") {
           if (launchWithNode) {
@@ -3171,7 +3171,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @return {Command}
        */
       nameFromFilename(filename) {
-        this._name = path6.basename(filename, path6.extname(filename));
+        this._name = path7.basename(filename, path7.extname(filename));
         return this;
       }
       /**
@@ -3185,9 +3185,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @param {string} [path]
        * @return {(string|null|Command)}
        */
-      executableDir(path7) {
-        if (path7 === void 0) return this._executableDir;
-        this._executableDir = path7;
+      executableDir(path8) {
+        if (path8 === void 0) return this._executableDir;
+        this._executableDir = path8;
         return this;
       }
       /**
@@ -4620,12 +4620,6 @@ function copyFile(src, dest) {
     fs.chmodSync(dest, 493);
   }
 }
-function getGlobalPluginCacheDir(version2) {
-  return path.join((0, import_os.homedir)(), ".claude", "plugins", "cache", "medical-protocol", "medical-protocol", version2);
-}
-function getInstalledPluginsPath() {
-  return path.join((0, import_os.homedir)(), ".claude", "plugins", "installed_plugins.json");
-}
 function getDefaultSourceDir() {
   return path.join((0, import_os.homedir)(), ".medical-protocol");
 }
@@ -4761,6 +4755,80 @@ var init_manifest = __esm({
   }
 });
 
+// packages/medical-protocol/src/settings.ts
+function mergeSettings(baseDir, pluginDir) {
+  const target = getSettingsPath(baseDir);
+  const existing = readSettings(target);
+  const bundledPath = path3.join(pluginDir, "settings.json");
+  const bundled = fs3.existsSync(bundledPath) ? JSON.parse(fs3.readFileSync(bundledPath, "utf-8")) : {};
+  const perms = existing.permissions ?? {};
+  for (const key of ["allow", "deny"]) {
+    const merged = [.../* @__PURE__ */ new Set([...perms[key] ?? [], ...bundled.permissions?.[key] ?? []])];
+    if (merged.length) perms[key] = merged;
+  }
+  existing.permissions = perms;
+  const source = pluginHooks(pluginDir);
+  const ours = new Set(fs3.readdirSync(path3.join(pluginDir, "hooks")).filter((f) => f.endsWith(".mjs")));
+  const isOurs = (command) => command.includes("/.claude/hooks/") && ours.has(scriptOf(command) ?? "");
+  const hooks = existing.hooks ?? {};
+  for (const event of Object.keys(hooks)) {
+    hooks[event] = hooks[event].map((g) => ({ ...g, hooks: g.hooks.filter((h) => !isOurs(h.command)) })).filter((g) => g.hooks.length);
+    if (!hooks[event].length) delete hooks[event];
+  }
+  for (const [event, groups] of Object.entries(source)) {
+    hooks[event] = [...hooks[event] ?? [], ...groups.map((g) => ({ ...g, hooks: g.hooks.map((h) => ({ ...h, command: localCommand(h.command) })) }))];
+  }
+  existing.hooks = hooks;
+  fs3.mkdirSync(path3.dirname(target), { recursive: true });
+  fs3.writeFileSync(target, JSON.stringify(existing, null, 2) + "\n");
+}
+function hookIssues(baseDir, pluginDir) {
+  let settings;
+  try {
+    settings = readSettings(getSettingsPath(baseDir));
+  } catch (e) {
+    return [e.message];
+  }
+  const registered = settings.hooks ?? {};
+  const issues = [];
+  for (const [event, groups] of Object.entries(pluginHooks(pluginDir))) {
+    for (const g of groups) {
+      for (const h of g.hooks) {
+        const command = localCommand(h.command);
+        const script = scriptOf(command) ?? command;
+        if (!(registered[event] ?? []).some((r) => r.matcher === g.matcher && r.hooks.some((x) => x.command === command)))
+          issues.push(`Safety hook not active: ${script} (${event}). Run 'medical-protocol update'.`);
+        if (scriptOf(command) && !fs3.existsSync(path3.join(getHooksDir(baseDir), script)))
+          issues.push(`Safety hook file missing: .claude/hooks/${script}. Run 'medical-protocol update'.`);
+      }
+    }
+  }
+  return [...new Set(issues)];
+}
+var fs3, path3, localCommand, scriptOf, readSettings, pluginHooks;
+var init_settings = __esm({
+  "packages/medical-protocol/src/settings.ts"() {
+    "use strict";
+    fs3 = __toESM(require("fs"));
+    path3 = __toESM(require("path"));
+    init_files();
+    localCommand = (command) => command.replaceAll("${CLAUDE_PLUGIN_ROOT}", "${CLAUDE_PROJECT_DIR}/.claude");
+    scriptOf = (command) => command.match(/\/hooks\/([\w.-]+\.mjs)/)?.[1];
+    readSettings = (file) => {
+      if (!fs3.existsSync(file)) return {};
+      try {
+        return JSON.parse(fs3.readFileSync(file, "utf-8"));
+      } catch {
+        throw new Error(`Can't parse ${file}. Fix or remove it, then run this again.`);
+      }
+    };
+    pluginHooks = (pluginDir) => {
+      const file = path3.join(pluginDir, "hooks", "hooks.json");
+      return fs3.existsSync(file) ? JSON.parse(fs3.readFileSync(file, "utf-8")).hooks ?? {} : {};
+    };
+  }
+});
+
 // plugin/lib/format.ts
 var formatJson, formatTable, formatHeader, formatError, printResult;
 var init_format = __esm({
@@ -4857,9 +4925,17 @@ __export(update_exports, {
   run: () => run
 });
 async function run(opts) {
+  try {
+    await runUpdate(opts);
+  } catch (e) {
+    process.stderr.write(formatError(e.message) + "\n");
+    process.exitCode = 1;
+  }
+}
+async function runUpdate(opts) {
   const baseDir = opts.dir;
   const skillsDir = getSkillsDir(baseDir);
-  const linkManifest = readManifest(path3.join(baseDir, ".claude"));
+  const linkManifest = readManifest(path4.join(baseDir, ".claude"));
   if (linkManifest?.mode === "link") {
     if (isInteractive(opts)) {
       await updateLinkedInteractive(baseDir, linkManifest);
@@ -4887,7 +4963,7 @@ async function run(opts) {
 async function updateLinkedInteractive(baseDir, manifest) {
   mt(import_picocolors.default.bgCyan(import_picocolors.default.black(" medical-protocol ")));
   const sourcePath = manifest.sourcePath;
-  if (!fs3.existsSync(path3.join(sourcePath, ".git"))) {
+  if (!fs4.existsSync(path4.join(sourcePath, ".git"))) {
     O2.error(`Source repo not found at ${sourcePath}`);
     gt(import_picocolors.default.red("Update failed"));
     process.exitCode = 1;
@@ -4904,21 +4980,12 @@ async function updateLinkedInteractive(baseDir, manifest) {
     pullFailed = true;
   }
   const alreadyUpToDate = !pullFailed && pullOutput.includes("Already up to date");
-  const pluginDir = path3.join(sourcePath, "plugin");
-  const hooksDir = getHooksDir(baseDir);
-  const sourceHooksJson = path3.join(pluginDir, "hooks", "hooks.json");
-  if (fs3.existsSync(sourceHooksJson)) {
-    mergeHooksJson(path3.join(hooksDir, "hooks.json"), sourceHooksJson);
-  }
-  const bundledSettingsPath = path3.join(pluginDir, "settings.json");
-  if (fs3.existsSync(bundledSettingsPath)) {
-    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
-  }
+  mergeSettings(baseDir, path4.join(sourcePath, "plugin"));
   const newManifest = {
     ...manifest,
     installedAt: (/* @__PURE__ */ new Date()).toISOString()
   };
-  writeManifest(path3.join(baseDir, ".claude"), newManifest);
+  writeManifest(path4.join(baseDir, ".claude"), newManifest);
   if (pullFailed) {
     s.stop(import_picocolors.default.yellow("Pull skipped (local changes in repo)"));
   } else if (alreadyUpToDate) {
@@ -4935,27 +5002,27 @@ async function updateCopyInteractive(baseDir, manifest, force) {
   const skillsDir = getSkillsDir(baseDir);
   const hooksDir = getHooksDir(baseDir);
   const bundledDir = getBundledPluginDir();
-  const bundledSkillsDir = path3.join(bundledDir, "skills");
-  const bundledHooksDir = path3.join(bundledDir, "hooks");
+  const bundledSkillsDir = path4.join(bundledDir, "skills");
+  const bundledHooksDir = path4.join(bundledDir, "hooks");
   const updated = [];
   const skipped = [];
   const added = [];
   const removed = [];
   const newHashes = {};
-  if (fs3.existsSync(bundledSkillsDir)) {
+  if (fs4.existsSync(bundledSkillsDir)) {
     processDir(bundledSkillsDir, skillsDir, "skills", manifest, force, newHashes, updated, skipped, added);
   }
-  if (fs3.existsSync(bundledHooksDir)) {
+  if (fs4.existsSync(bundledHooksDir)) {
     processDir(bundledHooksDir, hooksDir, "hooks", manifest, force, newHashes, updated, skipped, added);
   }
-  if (fs3.existsSync(path3.join(bundledDir, "lib"))) {
-    processDir(path3.join(bundledDir, "lib"), getLibDir(baseDir), "lib", manifest, force, newHashes, updated, skipped, added);
+  if (fs4.existsSync(path4.join(bundledDir, "lib"))) {
+    processDir(path4.join(bundledDir, "lib"), getLibDir(baseDir), "lib", manifest, force, newHashes, updated, skipped, added);
   }
-  if (fs3.existsSync(path3.join(bundledDir, "scripts"))) {
-    processDir(path3.join(bundledDir, "scripts"), getScriptsDir(baseDir), "scripts", manifest, force, newHashes, updated, skipped, added);
+  if (fs4.existsSync(path4.join(bundledDir, "scripts"))) {
+    processDir(path4.join(bundledDir, "scripts"), getScriptsDir(baseDir), "scripts", manifest, force, newHashes, updated, skipped, added);
   }
-  if (fs3.existsSync(path3.join(bundledDir, "agents"))) {
-    processDir(path3.join(bundledDir, "agents"), getAgentsDir(baseDir), "agents", manifest, force, newHashes, updated, skipped, added);
+  if (fs4.existsSync(path4.join(bundledDir, "agents"))) {
+    processDir(path4.join(bundledDir, "agents"), getAgentsDir(baseDir), "agents", manifest, force, newHashes, updated, skipped, added);
   }
   if (skipped.length > 0 && !force) {
     s.stop(import_picocolors.default.yellow(`${skipped.length} locally modified file(s) found`));
@@ -4966,7 +5033,7 @@ async function updateCopyInteractive(baseDir, manifest, force) {
       for (const key of [...skipped]) {
         const [prefix, ...rest] = key.split("/");
         const relPath = rest.join("/");
-        const bundledPath = path3.join(bundledDir, prefix, relPath);
+        const bundledPath = path4.join(bundledDir, prefix, relPath);
         const installedPath = resolveInstalledPath(baseDir, key);
         const bundledHash = hashFile(bundledPath);
         copyFile(bundledPath, installedPath);
@@ -4982,8 +5049,8 @@ async function updateCopyInteractive(baseDir, manifest, force) {
   for (const key of Object.keys(manifest.files)) {
     if (bundledKeys.has(key)) continue;
     const installedPath = resolveInstalledPath(baseDir, key);
-    if (installedPath && fs3.existsSync(installedPath)) {
-      fs3.unlinkSync(installedPath);
+    if (installedPath && fs4.existsSync(installedPath)) {
+      fs4.unlinkSync(installedPath);
     }
     removed.push(key);
   }
@@ -4994,10 +5061,7 @@ async function updateCopyInteractive(baseDir, manifest, force) {
     mode: "copy"
   };
   writeManifest(skillsDir, newManifest);
-  const bundledSettingsPath = path3.join(bundledDir, "settings.json");
-  if (fs3.existsSync(bundledSettingsPath)) {
-    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
-  }
+  mergeSettings(baseDir, bundledDir);
   const totalChanged = updated.length + added.length + removed.length;
   if (skipped.length === 0 && totalChanged === 0) {
     s.stop(import_picocolors.default.green("Already up-to-date"));
@@ -5012,7 +5076,7 @@ async function updateCopyInteractive(baseDir, manifest, force) {
 }
 function updateLinked(baseDir, manifest, json) {
   const sourcePath = manifest.sourcePath;
-  if (!fs3.existsSync(path3.join(sourcePath, ".git"))) {
+  if (!fs4.existsSync(path4.join(sourcePath, ".git"))) {
     process.stderr.write(formatError(`Source repo not found at ${sourcePath}`) + "\n");
     process.exitCode = 1;
     return;
@@ -5026,21 +5090,12 @@ function updateLinked(baseDir, manifest, json) {
     pullFailed = true;
   }
   const alreadyUpToDate = !pullFailed && pullOutput.includes("Already up to date");
-  const pluginDir = path3.join(sourcePath, "plugin");
-  const hooksDir = getHooksDir(baseDir);
-  const sourceHooksJson = path3.join(pluginDir, "hooks", "hooks.json");
-  if (fs3.existsSync(sourceHooksJson)) {
-    mergeHooksJson(path3.join(hooksDir, "hooks.json"), sourceHooksJson);
-  }
-  const bundledSettingsPath = path3.join(pluginDir, "settings.json");
-  if (fs3.existsSync(bundledSettingsPath)) {
-    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
-  }
+  mergeSettings(baseDir, path4.join(sourcePath, "plugin"));
   const newManifest = {
     ...manifest,
     installedAt: (/* @__PURE__ */ new Date()).toISOString()
   };
-  writeManifest(path3.join(baseDir, ".claude"), newManifest);
+  writeManifest(path4.join(baseDir, ".claude"), newManifest);
   const statusText = pullFailed ? "pull-skipped" : alreadyUpToDate ? "up-to-date" : "updated";
   const data = {
     status: statusText,
@@ -5069,34 +5124,34 @@ function updateCopy(baseDir, manifest, force, json) {
   const skillsDir = getSkillsDir(baseDir);
   const hooksDir = getHooksDir(baseDir);
   const bundledDir = getBundledPluginDir();
-  const bundledSkillsDir = path3.join(bundledDir, "skills");
-  const bundledHooksDir = path3.join(bundledDir, "hooks");
+  const bundledSkillsDir = path4.join(bundledDir, "skills");
+  const bundledHooksDir = path4.join(bundledDir, "hooks");
   const updated = [];
   const skipped = [];
   const added = [];
   const removed = [];
   const newHashes = {};
-  if (fs3.existsSync(bundledSkillsDir)) {
+  if (fs4.existsSync(bundledSkillsDir)) {
     processDir(bundledSkillsDir, skillsDir, "skills", manifest, force, newHashes, updated, skipped, added);
   }
-  if (fs3.existsSync(bundledHooksDir)) {
+  if (fs4.existsSync(bundledHooksDir)) {
     processDir(bundledHooksDir, hooksDir, "hooks", manifest, force, newHashes, updated, skipped, added);
   }
-  if (fs3.existsSync(path3.join(bundledDir, "lib"))) {
-    processDir(path3.join(bundledDir, "lib"), getLibDir(baseDir), "lib", manifest, force, newHashes, updated, skipped, added);
+  if (fs4.existsSync(path4.join(bundledDir, "lib"))) {
+    processDir(path4.join(bundledDir, "lib"), getLibDir(baseDir), "lib", manifest, force, newHashes, updated, skipped, added);
   }
-  if (fs3.existsSync(path3.join(bundledDir, "scripts"))) {
-    processDir(path3.join(bundledDir, "scripts"), getScriptsDir(baseDir), "scripts", manifest, force, newHashes, updated, skipped, added);
+  if (fs4.existsSync(path4.join(bundledDir, "scripts"))) {
+    processDir(path4.join(bundledDir, "scripts"), getScriptsDir(baseDir), "scripts", manifest, force, newHashes, updated, skipped, added);
   }
-  if (fs3.existsSync(path3.join(bundledDir, "agents"))) {
-    processDir(path3.join(bundledDir, "agents"), getAgentsDir(baseDir), "agents", manifest, force, newHashes, updated, skipped, added);
+  if (fs4.existsSync(path4.join(bundledDir, "agents"))) {
+    processDir(path4.join(bundledDir, "agents"), getAgentsDir(baseDir), "agents", manifest, force, newHashes, updated, skipped, added);
   }
   const bundledKeys = new Set(Object.keys(newHashes));
   for (const key of Object.keys(manifest.files)) {
     if (bundledKeys.has(key)) continue;
     const installedPath = resolveInstalledPath(baseDir, key);
-    if (installedPath && fs3.existsSync(installedPath)) {
-      fs3.unlinkSync(installedPath);
+    if (installedPath && fs4.existsSync(installedPath)) {
+      fs4.unlinkSync(installedPath);
     }
     removed.push(key);
   }
@@ -5107,10 +5162,7 @@ function updateCopy(baseDir, manifest, force, json) {
     mode: "copy"
   };
   writeManifest(skillsDir, newManifest);
-  const bundledSettingsPath = path3.join(bundledDir, "settings.json");
-  if (fs3.existsSync(bundledSettingsPath)) {
-    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
-  }
+  mergeSettings(baseDir, bundledDir);
   const totalChanged = updated.length + added.length + removed.length;
   const data = {
     status: totalChanged === 0 && skipped.length === 0 ? "up-to-date" : "updated",
@@ -5145,8 +5197,8 @@ function processDir(bundledBase, installedBase, prefix, manifest, force, newHash
   const files = listFiles(bundledBase);
   for (const relPath of files) {
     const key = `${prefix}/${relPath}`;
-    const bundledPath = path3.join(bundledBase, relPath);
-    const installedPath = path3.join(installedBase, relPath);
+    const bundledPath = path4.join(bundledBase, relPath);
+    const installedPath = path4.join(installedBase, relPath);
     const bundledHash = hashFile(bundledPath);
     const manifestHash = manifest.files[key];
     if (!manifestHash) {
@@ -5159,7 +5211,7 @@ function processDir(bundledBase, installedBase, prefix, manifest, force, newHash
       newHashes[key] = manifestHash;
       continue;
     }
-    if (fs3.existsSync(installedPath)) {
+    if (fs4.existsSync(installedPath)) {
       const installedHash = hashFile(installedPath);
       if (installedHash !== manifestHash && !force) {
         skipped.push(key);
@@ -5174,81 +5226,23 @@ function processDir(bundledBase, installedBase, prefix, manifest, force, newHash
 }
 function resolveInstalledPath(baseDir, key) {
   if (key.startsWith("skills/")) {
-    return path3.join(getSkillsDir(baseDir), key.slice("skills/".length));
+    return path4.join(getSkillsDir(baseDir), key.slice("skills/".length));
   }
   if (key.startsWith("hooks/")) {
-    return path3.join(getHooksDir(baseDir), key.slice("hooks/".length));
+    return path4.join(getHooksDir(baseDir), key.slice("hooks/".length));
   }
   if (key.startsWith("lib/")) {
-    return path3.join(getLibDir(baseDir), key.slice("lib/".length));
+    return path4.join(getLibDir(baseDir), key.slice("lib/".length));
   }
   if (key.startsWith("scripts/")) {
-    return path3.join(getScriptsDir(baseDir), key.slice("scripts/".length));
+    return path4.join(getScriptsDir(baseDir), key.slice("scripts/".length));
   }
   if (key.startsWith("agents/")) {
-    return path3.join(getAgentsDir(baseDir), key.slice("agents/".length));
+    return path4.join(getAgentsDir(baseDir), key.slice("agents/".length));
   }
   return null;
 }
-function mergeSettings(targetPath, bundledPath) {
-  let existing = {};
-  if (fs3.existsSync(targetPath)) {
-    try {
-      existing = JSON.parse(fs3.readFileSync(targetPath, "utf-8"));
-    } catch {
-      existing = {};
-    }
-  }
-  const bundled = JSON.parse(fs3.readFileSync(bundledPath, "utf-8"));
-  const bundledPerms = bundled.permissions ?? {};
-  const existingPerms = existing.permissions ?? {};
-  for (const key of ["allow", "deny"]) {
-    const bundledList = bundledPerms[key] ?? [];
-    const existingList = existingPerms[key] ?? [];
-    const existingSet = new Set(existingList);
-    const merged = [...existingList];
-    for (const entry of bundledList) {
-      if (!existingSet.has(entry)) {
-        merged.push(entry);
-      }
-    }
-    if (merged.length > 0) {
-      if (!existingPerms[key]) existingPerms[key] = [];
-      existingPerms[key] = merged;
-    }
-  }
-  existing.permissions = existingPerms;
-  fs3.mkdirSync(path3.dirname(targetPath), { recursive: true });
-  fs3.writeFileSync(targetPath, JSON.stringify(existing, null, 2) + "\n");
-}
-function mergeHooksJson(targetPath, sourcePath) {
-  let existing = {};
-  if (fs3.existsSync(targetPath)) {
-    try {
-      existing = JSON.parse(fs3.readFileSync(targetPath, "utf-8"));
-    } catch {
-      existing = {};
-    }
-  }
-  const source = JSON.parse(fs3.readFileSync(sourcePath, "utf-8"));
-  for (const [event, hooks] of Object.entries(source)) {
-    if (!Array.isArray(hooks)) continue;
-    const existingHooks = existing[event] ?? [];
-    for (const hook of hooks) {
-      const hookObj = hook;
-      const exists = existingHooks.some(
-        (h) => h.command === hookObj.command
-      );
-      if (!exists) {
-        existingHooks.push(hookObj);
-      }
-    }
-    existing[event] = existingHooks;
-  }
-  fs3.mkdirSync(path3.dirname(targetPath), { recursive: true });
-  fs3.writeFileSync(targetPath, JSON.stringify(existing, null, 2) + "\n");
-}
-var import_picocolors, import_child_process2, fs3, path3;
+var import_picocolors, import_child_process2, fs4, path4;
 var init_update = __esm({
   "packages/medical-protocol/src/commands/update.ts"() {
     "use strict";
@@ -5260,8 +5254,9 @@ var init_update = __esm({
     init_manifest();
     init_format();
     init_prompts();
-    fs3 = __toESM(require("fs"));
-    path3 = __toESM(require("path"));
+    init_settings();
+    fs4 = __toESM(require("fs"));
+    path4 = __toESM(require("path"));
   }
 });
 
@@ -5281,9 +5276,9 @@ async function runInteractive(opts) {
   mt(import_picocolors2.default.bgCyan(import_picocolors2.default.black(" medical-protocol ")));
   const baseDir = opts.dir;
   const skillsDir = getSkillsDir(baseDir);
-  const manifestPath = path4.join(skillsDir, ".manifest.json");
-  const linkManifest = readManifest(path4.join(baseDir, ".claude"));
-  const alreadyInstalled = fs4.existsSync(manifestPath) || linkManifest?.mode === "link";
+  const manifestPath = path5.join(skillsDir, ".manifest.json");
+  const linkManifest = readManifest(path5.join(baseDir, ".claude"));
+  const alreadyInstalled = fs5.existsSync(manifestPath) || linkManifest?.mode === "link";
   if (alreadyInstalled) {
     const action = await confirmAlreadyInstalled();
     if (action === "cancel") {
@@ -5369,8 +5364,8 @@ function runNonInteractive(opts) {
   const useLink = opts.link || !!opts.source;
   const baseDir = opts.dir;
   const skillsDir = getSkillsDir(baseDir);
-  const manifestPath = path4.join(skillsDir, ".manifest.json");
-  if (fs4.existsSync(manifestPath) && !opts.force) {
+  const manifestPath = path5.join(skillsDir, ".manifest.json");
+  if (fs5.existsSync(manifestPath) && !opts.force) {
     process.stderr.write(
       formatError(`Skills already installed at ${skillsDir}
 Use --force to overwrite, or use 'update' to update changed files.`) + "\n"
@@ -5378,10 +5373,13 @@ Use --force to overwrite, or use 'update' to update changed files.`) + "\n"
     process.exitCode = 1;
     return;
   }
-  if (useLink) {
-    installLinked(baseDir, opts.source, !!opts.force, !!opts.json);
-  } else {
-    installCopy(baseDir, !!opts.force, !!opts.json);
+  try {
+    if (useLink) installLinked(baseDir, opts.source, !!opts.force, !!opts.json);
+    else installCopy(baseDir, !!opts.force, !!opts.json);
+  } catch (e) {
+    process.stderr.write(formatError(e.message) + "\n");
+    process.exitCode = 1;
+    return;
   }
   if (opts.agentBrowser && process.exitCode !== 1 && !isAgentBrowserInstalled()) {
     try {
@@ -5406,61 +5404,54 @@ function installLinked(baseDir, sourcePath, force, json) {
     process.exitCode = 1;
     return;
   }
-  const pluginDir = path4.join(sourceDir, "plugin");
-  if (!fs4.existsSync(pluginDir)) {
+  const pluginDir = path5.join(sourceDir, "plugin");
+  if (!fs5.existsSync(pluginDir)) {
     process.stderr.write(formatError(`Plugin directory not found at ${pluginDir}. Is this the right repo?`) + "\n");
     process.exitCode = 1;
     return;
   }
-  const sourceSkillsDir = path4.join(pluginDir, "skills");
-  const sourceHooksDir = path4.join(pluginDir, "hooks");
-  const bundledSettingsPath = path4.join(pluginDir, "settings.json");
-  if (fs4.existsSync(skillsDir) && force) {
+  const sourceSkillsDir = path5.join(pluginDir, "skills");
+  const sourceHooksDir = path5.join(pluginDir, "hooks");
+  if (fs5.existsSync(skillsDir) && force) {
     if (isLink(skillsDir)) {
       removeLink(skillsDir);
     } else {
-      fs4.rmSync(skillsDir, { recursive: true });
+      fs5.rmSync(skillsDir, { recursive: true });
     }
   }
-  if (fs4.existsSync(sourceSkillsDir)) {
+  if (fs5.existsSync(sourceSkillsDir)) {
     symlinkDir(sourceSkillsDir, skillsDir);
   }
   for (const [dir, dest] of [["lib", getLibDir(baseDir)], ["scripts", getScriptsDir(baseDir)]]) {
-    const src = path4.join(pluginDir, dir);
-    if (!fs4.existsSync(src)) continue;
-    if (fs4.existsSync(dest) && force) {
+    const src = path5.join(pluginDir, dir);
+    if (!fs5.existsSync(src)) continue;
+    if (fs5.existsSync(dest) && force) {
       if (isLink(dest)) removeLink(dest);
-      else fs4.rmSync(dest, { recursive: true });
+      else fs5.rmSync(dest, { recursive: true });
     }
     symlinkDir(src, dest);
   }
-  const sourceAgentsDir = path4.join(pluginDir, "agents");
-  if (fs4.existsSync(sourceAgentsDir)) {
+  const sourceAgentsDir = path5.join(pluginDir, "agents");
+  if (fs5.existsSync(sourceAgentsDir)) {
     for (const relPath of listFiles(sourceAgentsDir)) {
-      symlinkFile(path4.join(sourceAgentsDir, relPath), path4.join(getAgentsDir(baseDir), relPath));
+      symlinkFile(path5.join(sourceAgentsDir, relPath), path5.join(getAgentsDir(baseDir), relPath));
     }
   }
   let hookCount = 0;
-  if (fs4.existsSync(sourceHooksDir)) {
-    fs4.mkdirSync(hooksDir, { recursive: true });
+  if (fs5.existsSync(sourceHooksDir)) {
+    fs5.mkdirSync(hooksDir, { recursive: true });
     const hookFiles = listFiles(sourceHooksDir);
     for (const relPath of hookFiles) {
       if (relPath === "hooks.json") continue;
-      const target = path4.join(sourceHooksDir, relPath);
-      const linkPath = path4.join(hooksDir, relPath);
+      const target = path5.join(sourceHooksDir, relPath);
+      const linkPath = path5.join(hooksDir, relPath);
       symlinkFile(target, linkPath);
       hookCount++;
     }
-    const sourceHooksJson = path4.join(sourceHooksDir, "hooks.json");
-    if (fs4.existsSync(sourceHooksJson)) {
-      mergeHooksJson2(path4.join(hooksDir, "hooks.json"), sourceHooksJson);
-    }
   }
-  if (fs4.existsSync(bundledSettingsPath)) {
-    mergeSettings2(getSettingsPath(baseDir), bundledSettingsPath);
-  }
-  const manifestDir = path4.join(baseDir, ".claude");
-  fs4.mkdirSync(manifestDir, { recursive: true });
+  mergeSettings(baseDir, pluginDir);
+  const manifestDir = path5.join(baseDir, ".claude");
+  fs5.mkdirSync(manifestDir, { recursive: true });
   const manifest = {
     version,
     installedAt: (/* @__PURE__ */ new Date()).toISOString(),
@@ -5469,9 +5460,6 @@ function installLinked(baseDir, sourcePath, force, json) {
     sourcePath: sourceDir
   };
   writeManifest(manifestDir, manifest);
-  const cacheDir = getGlobalPluginCacheDir(version);
-  syncGlobalCache(pluginDir, cacheDir, version);
-  updateInstalledPlugins(path4.resolve(baseDir), version, pluginDir);
   const data = {
     status: "installed",
     mode: "link",
@@ -5480,8 +5468,7 @@ function installLinked(baseDir, sourcePath, force, json) {
     sourcePath: sourceDir,
     skillsDir,
     hooksDir,
-    hookFiles: hookCount,
-    globalCache: cacheDir
+    hookFiles: hookCount
   };
   printResult(
     data,
@@ -5494,8 +5481,7 @@ function installLinked(baseDir, sourcePath, force, json) {
         ["Source", sourceDir],
         ["Repo", repoAction],
         ["Skills", `${skillsDir} -> ${sourceSkillsDir}`],
-        ["Hooks", `${hookCount} files symlinked`],
-        ["Global cache", cacheDir]
+        ["Hooks", `${hookCount} files symlinked`]
       ]),
       "",
       "Next: open Claude Code in this project and run  /medical-protocol:start  to build your first interface.",
@@ -5507,71 +5493,68 @@ function installCopy(baseDir, force, json) {
   const skillsDir = getSkillsDir(baseDir);
   const hooksDir = getHooksDir(baseDir);
   const bundledDir = getBundledPluginDir();
-  if (!fs4.existsSync(bundledDir)) {
+  if (!fs5.existsSync(bundledDir)) {
     process.stderr.write(formatError("Bundled plugin directory not found. Package may be corrupted.") + "\n");
     process.exitCode = 1;
     return;
   }
-  const bundledSkillsDir = path4.join(bundledDir, "skills");
-  const bundledHooksDir = path4.join(bundledDir, "hooks");
-  const bundledSettingsPath = path4.join(bundledDir, "settings.json");
+  const bundledSkillsDir = path5.join(bundledDir, "skills");
+  const bundledHooksDir = path5.join(bundledDir, "hooks");
   const fileHashes = {};
   let totalFiles = 0;
-  if (fs4.existsSync(skillsDir) && isLink(skillsDir)) {
+  if (fs5.existsSync(skillsDir) && isLink(skillsDir)) {
     removeLink(skillsDir);
   }
-  if (fs4.existsSync(bundledSkillsDir)) {
+  if (fs5.existsSync(bundledSkillsDir)) {
     const skillFiles = listFiles(bundledSkillsDir);
     for (const relPath of skillFiles) {
-      const src = path4.join(bundledSkillsDir, relPath);
-      const dest = path4.join(skillsDir, relPath);
+      const src = path5.join(bundledSkillsDir, relPath);
+      const dest = path5.join(skillsDir, relPath);
       copyFile(src, dest);
       const key = `skills/${relPath}`;
       fileHashes[key] = hashFile(src);
       totalFiles++;
     }
   }
-  const bundledLibDir = path4.join(bundledDir, "lib");
-  if (fs4.existsSync(bundledLibDir)) {
+  const bundledLibDir = path5.join(bundledDir, "lib");
+  if (fs5.existsSync(bundledLibDir)) {
     for (const relPath of listFiles(bundledLibDir)) {
-      const src = path4.join(bundledLibDir, relPath);
-      copyFile(src, path4.join(getLibDir(baseDir), relPath));
+      const src = path5.join(bundledLibDir, relPath);
+      copyFile(src, path5.join(getLibDir(baseDir), relPath));
       fileHashes[`lib/${relPath}`] = hashFile(src);
       totalFiles++;
     }
   }
-  const bundledScriptsDir = path4.join(bundledDir, "scripts");
-  if (fs4.existsSync(bundledScriptsDir)) {
+  const bundledScriptsDir = path5.join(bundledDir, "scripts");
+  if (fs5.existsSync(bundledScriptsDir)) {
     for (const relPath of listFiles(bundledScriptsDir)) {
-      const src = path4.join(bundledScriptsDir, relPath);
-      copyFile(src, path4.join(getScriptsDir(baseDir), relPath));
+      const src = path5.join(bundledScriptsDir, relPath);
+      copyFile(src, path5.join(getScriptsDir(baseDir), relPath));
       fileHashes[`scripts/${relPath}`] = hashFile(src);
       totalFiles++;
     }
   }
-  const bundledAgentsDir = path4.join(bundledDir, "agents");
-  if (fs4.existsSync(bundledAgentsDir)) {
+  const bundledAgentsDir = path5.join(bundledDir, "agents");
+  if (fs5.existsSync(bundledAgentsDir)) {
     for (const relPath of listFiles(bundledAgentsDir)) {
-      const src = path4.join(bundledAgentsDir, relPath);
-      copyFile(src, path4.join(getAgentsDir(baseDir), relPath));
+      const src = path5.join(bundledAgentsDir, relPath);
+      copyFile(src, path5.join(getAgentsDir(baseDir), relPath));
       fileHashes[`agents/${relPath}`] = hashFile(src);
       totalFiles++;
     }
   }
-  if (fs4.existsSync(bundledHooksDir)) {
+  if (fs5.existsSync(bundledHooksDir)) {
     const hookFiles = listFiles(bundledHooksDir);
     for (const relPath of hookFiles) {
-      const src = path4.join(bundledHooksDir, relPath);
-      const dest = path4.join(hooksDir, relPath);
+      const src = path5.join(bundledHooksDir, relPath);
+      const dest = path5.join(hooksDir, relPath);
       copyFile(src, dest);
       const key = `hooks/${relPath}`;
       fileHashes[key] = hashFile(src);
       totalFiles++;
     }
   }
-  if (fs4.existsSync(bundledSettingsPath)) {
-    mergeSettings2(getSettingsPath(baseDir), bundledSettingsPath);
-  }
+  mergeSettings(baseDir, bundledDir);
   const manifest = {
     version,
     installedAt: (/* @__PURE__ */ new Date()).toISOString(),
@@ -5579,17 +5562,13 @@ function installCopy(baseDir, force, json) {
     mode: "copy"
   };
   writeManifest(skillsDir, manifest);
-  const cacheDir = getGlobalPluginCacheDir(version);
-  syncGlobalCache(bundledDir, cacheDir, version);
-  updateInstalledPlugins(path4.resolve(baseDir), version, cacheDir);
   const data = {
     status: "installed",
     mode: "copy",
     version,
     filesInstalled: totalFiles,
     skillsDir,
-    hooksDir,
-    globalCache: cacheDir
+    hooksDir
   };
   printResult(
     data,
@@ -5600,8 +5579,7 @@ function installCopy(baseDir, force, json) {
         ["Version", `v${version}`],
         ["Files", `${totalFiles}`],
         ["Skills", skillsDir],
-        ["Hooks", hooksDir],
-        ["Global cache", cacheDir]
+        ["Hooks", hooksDir]
       ]),
       "",
       "Next: open Claude Code in this project and run  /medical-protocol:start  to build your first interface.",
@@ -5609,119 +5587,7 @@ function installCopy(baseDir, force, json) {
     ].join("\n")
   );
 }
-function syncGlobalCache(bundledDir, cacheDir, version2) {
-  const dirsToSync = ["skills", "agents", "hooks", "lib", "scripts", "context", "reference"];
-  for (const dir of dirsToSync) {
-    const srcDir = path4.join(bundledDir, dir);
-    if (!fs4.existsSync(srcDir)) continue;
-    const files = listFiles(srcDir);
-    for (const relPath of files) {
-      copyFile(path4.join(srcDir, relPath), path4.join(cacheDir, dir, relPath));
-    }
-  }
-  const settingsSrc = path4.join(bundledDir, "settings.json");
-  if (fs4.existsSync(settingsSrc)) {
-    copyFile(settingsSrc, path4.join(cacheDir, "settings.json"));
-  }
-  const pluginJsonDir = path4.join(cacheDir, ".claude-plugin");
-  fs4.mkdirSync(pluginJsonDir, { recursive: true });
-  const pluginJson = {
-    name: "medical-protocol",
-    version: version2,
-    description: "Medical protocol plugin for Claude Code \u2014 clinical interface builder with safety hooks for healthcare professionals. Use /medical-protocol:start to begin.",
-    author: { name: "Medical Protocol Team" },
-    homepage: "https://github.com/emdmed/medical-protocol",
-    skills: "./skills"
-  };
-  fs4.writeFileSync(path4.join(pluginJsonDir, "plugin.json"), JSON.stringify(pluginJson, null, 2) + "\n");
-}
-function updateInstalledPlugins(projectPath, version2, installPath) {
-  const pluginsPath = getInstalledPluginsPath();
-  let data = { version: 2, plugins: {} };
-  if (fs4.existsSync(pluginsPath)) {
-    try {
-      data = JSON.parse(fs4.readFileSync(pluginsPath, "utf-8"));
-    } catch {
-      data = { version: 2, plugins: {} };
-    }
-  }
-  const key = "medical-protocol@medical-protocol";
-  const entries = data.plugins[key] ?? [];
-  const now = (/* @__PURE__ */ new Date()).toISOString();
-  const idx = entries.findIndex((e) => e.projectPath === projectPath);
-  const entry = {
-    scope: "project",
-    projectPath,
-    installPath,
-    version: version2,
-    installedAt: idx >= 0 ? entries[idx].installedAt : now,
-    lastUpdated: now
-  };
-  if (idx >= 0) entries[idx] = entry;
-  else entries.push(entry);
-  data.plugins[key] = entries;
-  fs4.mkdirSync(path4.dirname(pluginsPath), { recursive: true });
-  fs4.writeFileSync(pluginsPath, JSON.stringify(data, null, 2) + "\n");
-}
-function mergeSettings2(targetPath, bundledPath) {
-  let existing = {};
-  if (fs4.existsSync(targetPath)) {
-    try {
-      existing = JSON.parse(fs4.readFileSync(targetPath, "utf-8"));
-    } catch {
-      existing = {};
-    }
-  }
-  const bundled = JSON.parse(fs4.readFileSync(bundledPath, "utf-8"));
-  const bundledPerms = bundled.permissions ?? {};
-  const existingPerms = existing.permissions ?? {};
-  for (const key of ["allow", "deny"]) {
-    const bundledList = bundledPerms[key] ?? [];
-    const existingList = existingPerms[key] ?? [];
-    const existingSet = new Set(existingList);
-    const merged = [...existingList];
-    for (const entry of bundledList) {
-      if (!existingSet.has(entry)) {
-        merged.push(entry);
-      }
-    }
-    if (merged.length > 0) {
-      if (!existingPerms[key]) existingPerms[key] = [];
-      existingPerms[key] = merged;
-    }
-  }
-  existing.permissions = existingPerms;
-  fs4.mkdirSync(path4.dirname(targetPath), { recursive: true });
-  fs4.writeFileSync(targetPath, JSON.stringify(existing, null, 2) + "\n");
-}
-function mergeHooksJson2(targetPath, sourcePath) {
-  let existing = {};
-  if (fs4.existsSync(targetPath)) {
-    try {
-      existing = JSON.parse(fs4.readFileSync(targetPath, "utf-8"));
-    } catch {
-      existing = {};
-    }
-  }
-  const source = JSON.parse(fs4.readFileSync(sourcePath, "utf-8"));
-  for (const [event, hooks] of Object.entries(source)) {
-    if (!Array.isArray(hooks)) continue;
-    const existingHooks = existing[event] ?? [];
-    for (const hook of hooks) {
-      const hookObj = hook;
-      const exists = existingHooks.some(
-        (h) => h.command === hookObj.command
-      );
-      if (!exists) {
-        existingHooks.push(hookObj);
-      }
-    }
-    existing[event] = existingHooks;
-  }
-  fs4.mkdirSync(path4.dirname(targetPath), { recursive: true });
-  fs4.writeFileSync(targetPath, JSON.stringify(existing, null, 2) + "\n");
-}
-var import_picocolors2, import_child_process3, fs4, path4;
+var import_picocolors2, import_child_process3, fs5, path5;
 var init_install = __esm({
   "packages/medical-protocol/src/commands/install.ts"() {
     "use strict";
@@ -5730,11 +5596,12 @@ var init_install = __esm({
     init_package();
     init_files();
     init_manifest();
+    init_settings();
     init_format();
     init_prompts();
     import_child_process3 = require("child_process");
-    fs4 = __toESM(require("fs"));
-    path4 = __toESM(require("path"));
+    fs5 = __toESM(require("fs"));
+    path5 = __toESM(require("path"));
   }
 });
 
@@ -5746,7 +5613,7 @@ __export(check_exports, {
 async function run3(opts) {
   const baseDir = opts.dir;
   const skillsDir = getSkillsDir(baseDir);
-  const linkManifest = readManifest(path5.join(baseDir, ".claude"));
+  const linkManifest = readManifest(path6.join(baseDir, ".claude"));
   if (linkManifest?.mode === "link") {
     if (isInteractive(opts)) {
       await checkLinkedInteractive(baseDir, linkManifest);
@@ -5803,7 +5670,7 @@ async function checkCopyInteractive(baseDir, manifest) {
   mt(import_picocolors3.default.bgCyan(import_picocolors3.default.black(" medical-protocol ")));
   const s = fe();
   s.start("Checking plugin status...");
-  const { stale, added, removed, modified, upToDate } = gatherCopyStatus(baseDir, manifest);
+  const { stale, added, removed, modified, issues, upToDate } = gatherCopyStatus(baseDir, manifest);
   if (upToDate) {
     s.stop(import_picocolors3.default.green("Plugin is up-to-date"));
   } else {
@@ -5814,7 +5681,8 @@ async function checkCopyInteractive(baseDir, manifest) {
   if (added.length > 0) O2.info(`New: ${added.length} file(s)`);
   if (removed.length > 0) O2.info(`Removed upstream: ${removed.length} file(s)`);
   if (modified.length > 0) O2.warn(`Locally modified: ${modified.length} file(s)`);
-  gt(upToDate ? import_picocolors3.default.green("All good") : import_picocolors3.default.yellow("Run 'medical-protocol update' to update"));
+  for (const issue of issues) O2.warn(issue);
+  gt(upToDate ? import_picocolors3.default.green("All good") : import_picocolors3.default.yellow("Run 'medical-protocol update' to fix"));
   if (!upToDate) {
     process.exitCode = 1;
   }
@@ -5824,31 +5692,32 @@ function gatherLinkedStatus(baseDir, manifest) {
   const hooksDir = getHooksDir(baseDir);
   const sourcePath = manifest.sourcePath;
   const issues = [];
-  if (!fs5.existsSync(skillsDir)) {
+  if (!fs6.existsSync(skillsDir)) {
     issues.push("Skills directory missing");
   } else if (!isSymlink(skillsDir)) {
     issues.push("Skills directory is not a symlink (expected linked mode)");
   } else {
-    const target = fs5.readlinkSync(skillsDir);
-    if (!fs5.existsSync(target)) {
+    const target = fs6.readlinkSync(skillsDir);
+    if (!fs6.existsSync(target)) {
       issues.push(`Skills symlink target missing: ${target}`);
     }
   }
-  if (fs5.existsSync(hooksDir)) {
-    const entries = fs5.readdirSync(hooksDir, { withFileTypes: true });
+  if (fs6.existsSync(hooksDir)) {
+    const entries = fs6.readdirSync(hooksDir, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.name === "hooks.json") continue;
-      const fullPath = path5.join(hooksDir, entry.name);
+      const fullPath = path6.join(hooksDir, entry.name);
       if (isSymlink(fullPath)) {
-        const target = fs5.readlinkSync(fullPath);
-        if (!fs5.existsSync(target)) {
+        const target = fs6.readlinkSync(fullPath);
+        if (!fs6.existsSync(target)) {
           issues.push(`Broken hook symlink: ${entry.name} -> ${target}`);
         }
       }
     }
   }
+  issues.push(...hookIssues(baseDir, path6.join(sourcePath, "plugin")));
   let repoStatus = null;
-  if (fs5.existsSync(path5.join(sourcePath, ".git"))) {
+  if (fs6.existsSync(path6.join(sourcePath, ".git"))) {
     try {
       repoStatus = getRepoStatus(sourcePath);
     } catch {
@@ -5862,8 +5731,8 @@ function gatherLinkedStatus(baseDir, manifest) {
 function gatherCopyStatus(baseDir, manifest) {
   const skillsDir = getSkillsDir(baseDir);
   const bundledDir = getBundledPluginDir();
-  const bundledSkillsDir = path5.join(bundledDir, "skills");
-  const bundledHooksDir = path5.join(bundledDir, "hooks");
+  const bundledSkillsDir = path6.join(bundledDir, "skills");
+  const bundledHooksDir = path6.join(bundledDir, "hooks");
   const stale = [];
   const added = [];
   const removed = [];
@@ -5872,16 +5741,16 @@ function gatherCopyStatus(baseDir, manifest) {
   for (const [prefix, bundledBase] of [
     ["skills", bundledSkillsDir],
     ["hooks", bundledHooksDir],
-    ["lib", path5.join(bundledDir, "lib")],
-    ["scripts", path5.join(bundledDir, "scripts")],
-    ["agents", path5.join(bundledDir, "agents")]
+    ["lib", path6.join(bundledDir, "lib")],
+    ["scripts", path6.join(bundledDir, "scripts")],
+    ["agents", path6.join(bundledDir, "agents")]
   ]) {
-    if (!fs5.existsSync(bundledBase)) continue;
+    if (!fs6.existsSync(bundledBase)) continue;
     const files = listFiles(bundledBase);
     for (const relPath of files) {
       const key = `${prefix}/${relPath}`;
       allBundledKeys.add(key);
-      const bundledHash = hashFile(path5.join(bundledBase, relPath));
+      const bundledHash = hashFile(path6.join(bundledBase, relPath));
       const manifestHash = manifest.files[key];
       if (!manifestHash) {
         added.push(key);
@@ -5897,14 +5766,15 @@ function gatherCopyStatus(baseDir, manifest) {
   }
   for (const key of Object.keys(manifest.files)) {
     const installedPath = resolveInstalledPath2(baseDir, key);
-    if (!installedPath || !fs5.existsSync(installedPath)) continue;
+    if (!installedPath || !fs6.existsSync(installedPath)) continue;
     const installedHash = hashFile(installedPath);
     if (installedHash !== manifest.files[key]) {
       modified.push(key);
     }
   }
-  const upToDate = stale.length === 0 && added.length === 0 && removed.length === 0;
-  return { stale, added, removed, modified, upToDate };
+  const issues = hookIssues(baseDir, bundledDir);
+  const upToDate = stale.length === 0 && added.length === 0 && removed.length === 0 && issues.length === 0;
+  return { stale, added, removed, modified, issues, upToDate };
 }
 function checkLinked(baseDir, manifest, json) {
   const sourcePath = manifest.sourcePath;
@@ -5940,7 +5810,7 @@ function checkLinked(baseDir, manifest, json) {
       );
       if (repoStatus.behind > 0) {
         lines.push(`
-  Run 'medical-protocol update --dir ${path5.resolve(baseDir)}' to pull latest changes.`);
+  Run 'medical-protocol update --dir ${path6.resolve(baseDir)}' to pull latest changes.`);
       }
     }
     if (issues.length > 0) {
@@ -5956,7 +5826,7 @@ function checkLinked(baseDir, manifest, json) {
   }
 }
 function checkCopy(baseDir, manifest, json) {
-  const { stale, added, removed, modified, upToDate } = gatherCopyStatus(baseDir, manifest);
+  const { stale, added, removed, modified, issues, upToDate } = gatherCopyStatus(baseDir, manifest);
   const data = {
     status: upToDate ? "up-to-date" : "updates-available",
     mode: "copy",
@@ -5965,7 +5835,8 @@ function checkCopy(baseDir, manifest, json) {
     stale,
     added,
     removed,
-    modified
+    modified,
+    issues
   };
   printResult(data, json, () => {
     const lines = [formatHeader("medical-protocol status")];
@@ -5996,6 +5867,11 @@ function checkCopy(baseDir, manifest, json) {
   Locally modified (${modified.length}):`);
       for (const f of modified) lines.push(`    ${f}`);
     }
+    if (issues.length > 0) {
+      lines.push(`
+  Issues:`);
+      for (const issue of issues) lines.push(`    - ${issue}`);
+    }
     lines.push("");
     return lines.join("\n");
   });
@@ -6005,23 +5881,23 @@ function checkCopy(baseDir, manifest, json) {
 }
 function resolveInstalledPath2(baseDir, key) {
   if (key.startsWith("skills/")) {
-    return path5.join(getSkillsDir(baseDir), key.slice("skills/".length));
+    return path6.join(getSkillsDir(baseDir), key.slice("skills/".length));
   }
   if (key.startsWith("hooks/")) {
-    return path5.join(getHooksDir(baseDir), key.slice("hooks/".length));
+    return path6.join(getHooksDir(baseDir), key.slice("hooks/".length));
   }
   if (key.startsWith("lib/")) {
-    return path5.join(getLibDir(baseDir), key.slice("lib/".length));
+    return path6.join(getLibDir(baseDir), key.slice("lib/".length));
   }
   if (key.startsWith("scripts/")) {
-    return path5.join(getScriptsDir(baseDir), key.slice("scripts/".length));
+    return path6.join(getScriptsDir(baseDir), key.slice("scripts/".length));
   }
   if (key.startsWith("agents/")) {
-    return path5.join(getAgentsDir(baseDir), key.slice("agents/".length));
+    return path6.join(getAgentsDir(baseDir), key.slice("agents/".length));
   }
   return null;
 }
-var import_picocolors3, fs5, path5;
+var import_picocolors3, fs6, path6;
 var init_check = __esm({
   "packages/medical-protocol/src/commands/check.ts"() {
     "use strict";
@@ -6032,8 +5908,9 @@ var init_check = __esm({
     init_manifest();
     init_format();
     init_prompts();
-    fs5 = __toESM(require("fs"));
-    path5 = __toESM(require("path"));
+    init_settings();
+    fs6 = __toESM(require("fs"));
+    path6 = __toESM(require("path"));
   }
 });
 

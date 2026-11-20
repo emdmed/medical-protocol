@@ -5,6 +5,7 @@ import { getBundledPluginDir, getSkillsDir, getHooksDir, getLibDir, getScriptsDi
 import { hashFile, readManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../plugin/lib/format";
 import { isInteractive } from "../prompts";
+import { hookIssues } from "../settings";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -91,7 +92,7 @@ async function checkCopyInteractive(baseDir: string, manifest: import("../manife
   const s = p.spinner();
   s.start("Checking plugin status...");
 
-  const { stale, added, removed, modified, upToDate } = gatherCopyStatus(baseDir, manifest);
+  const { stale, added, removed, modified, issues, upToDate } = gatherCopyStatus(baseDir, manifest);
 
   if (upToDate) {
     s.stop(pc.green("Plugin is up-to-date"));
@@ -105,8 +106,9 @@ async function checkCopyInteractive(baseDir: string, manifest: import("../manife
   if (added.length > 0) p.log.info(`New: ${added.length} file(s)`);
   if (removed.length > 0) p.log.info(`Removed upstream: ${removed.length} file(s)`);
   if (modified.length > 0) p.log.warn(`Locally modified: ${modified.length} file(s)`);
+  for (const issue of issues) p.log.warn(issue);
 
-  p.outro(upToDate ? pc.green("All good") : pc.yellow("Run 'medical-protocol update' to update"));
+  p.outro(upToDate ? pc.green("All good") : pc.yellow("Run 'medical-protocol update' to fix"));
 
   if (!upToDate) {
     process.exitCode = 1;
@@ -143,6 +145,8 @@ function gatherLinkedStatus(baseDir: string, manifest: import("../manifest").Fil
       }
     }
   }
+
+  issues.push(...hookIssues(baseDir, path.join(sourcePath, "plugin")));
 
   let repoStatus: { branch: string; ahead: number; behind: number } | null = null;
   if (fs.existsSync(path.join(sourcePath, ".git"))) {
@@ -209,9 +213,10 @@ function gatherCopyStatus(baseDir: string, manifest: import("../manifest").FileM
     }
   }
 
-  const upToDate = stale.length === 0 && added.length === 0 && removed.length === 0;
+  const issues = hookIssues(baseDir, bundledDir);
+  const upToDate = stale.length === 0 && added.length === 0 && removed.length === 0 && issues.length === 0;
 
-  return { stale, added, removed, modified, upToDate };
+  return { stale, added, removed, modified, issues, upToDate };
 }
 
 function checkLinked(baseDir: string, manifest: import("../manifest").FileManifest, json: boolean): void {
@@ -269,7 +274,7 @@ function checkLinked(baseDir: string, manifest: import("../manifest").FileManife
 }
 
 function checkCopy(baseDir: string, manifest: import("../manifest").FileManifest, json: boolean): void {
-  const { stale, added, removed, modified, upToDate } = gatherCopyStatus(baseDir, manifest);
+  const { stale, added, removed, modified, issues, upToDate } = gatherCopyStatus(baseDir, manifest);
 
   const data = {
     status: upToDate ? "up-to-date" : "updates-available",
@@ -280,6 +285,7 @@ function checkCopy(baseDir: string, manifest: import("../manifest").FileManifest
     added,
     removed,
     modified,
+    issues,
   };
 
   printResult(data, json, () => {
@@ -307,6 +313,10 @@ function checkCopy(baseDir: string, manifest: import("../manifest").FileManifest
     if (modified.length > 0) {
       lines.push(`\n  Locally modified (${modified.length}):`);
       for (const f of modified) lines.push(`    ${f}`);
+    }
+    if (issues.length > 0) {
+      lines.push(`\n  Issues:`);
+      for (const issue of issues) lines.push(`    - ${issue}`);
     }
 
     lines.push("");

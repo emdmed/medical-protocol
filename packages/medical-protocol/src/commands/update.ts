@@ -2,10 +2,11 @@ import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { execSync } from "child_process";
 import { version as VERSION } from "../../package.json";
-import { getBundledPluginDir, getSkillsDir, getHooksDir, getLibDir, getScriptsDir, getAgentsDir, getSettingsPath, listFiles, copyFile } from "../files";
+import { getBundledPluginDir, getSkillsDir, getHooksDir, getLibDir, getScriptsDir, getAgentsDir, listFiles, copyFile } from "../files";
 import { hashFile, readManifest, writeManifest, type FileManifest } from "../manifest";
 import { formatError, printResult, formatHeader, formatTable } from "../../../../plugin/lib/format";
 import { isInteractive, confirmOverwriteModified } from "../prompts";
+import { mergeSettings } from "../settings";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -17,6 +18,15 @@ interface UpdateOptions {
 }
 
 export async function run(opts: UpdateOptions): Promise<void> {
+  try {
+    await runUpdate(opts);
+  } catch (e) {
+    process.stderr.write(formatError((e as Error).message) + "\n");
+    process.exitCode = 1;
+  }
+}
+
+async function runUpdate(opts: UpdateOptions): Promise<void> {
   const baseDir = opts.dir;
   const skillsDir = getSkillsDir(baseDir);
 
@@ -76,18 +86,8 @@ async function updateLinkedInteractive(baseDir: string, manifest: FileManifest):
 
   const alreadyUpToDate = !pullFailed && pullOutput.includes("Already up to date");
 
-  // Re-merge hooks.json and settings.json
-  const pluginDir = path.join(sourcePath, "plugin");
-  const hooksDir = getHooksDir(baseDir);
-  const sourceHooksJson = path.join(pluginDir, "hooks", "hooks.json");
-  if (fs.existsSync(sourceHooksJson)) {
-    mergeHooksJson(path.join(hooksDir, "hooks.json"), sourceHooksJson);
-  }
-
-  const bundledSettingsPath = path.join(pluginDir, "settings.json");
-  if (fs.existsSync(bundledSettingsPath)) {
-    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
-  }
+  // Re-merge permissions and hooks into settings.json
+  mergeSettings(baseDir, path.join(sourcePath, "plugin"));
 
   // Update manifest timestamp
   const newManifest: FileManifest = {
@@ -187,10 +187,7 @@ async function updateCopyInteractive(baseDir: string, manifest: FileManifest, fo
   };
   writeManifest(skillsDir, newManifest);
 
-  const bundledSettingsPath = path.join(bundledDir, "settings.json");
-  if (fs.existsSync(bundledSettingsPath)) {
-    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
-  }
+  mergeSettings(baseDir, bundledDir);
 
   const totalChanged = updated.length + added.length + removed.length;
 
@@ -230,18 +227,8 @@ function updateLinked(baseDir: string, manifest: FileManifest, json: boolean): v
 
   const alreadyUpToDate = !pullFailed && pullOutput.includes("Already up to date");
 
-  // Re-merge hooks.json and settings.json
-  const pluginDir = path.join(sourcePath, "plugin");
-  const hooksDir = getHooksDir(baseDir);
-  const sourceHooksJson = path.join(pluginDir, "hooks", "hooks.json");
-  if (fs.existsSync(sourceHooksJson)) {
-    mergeHooksJson(path.join(hooksDir, "hooks.json"), sourceHooksJson);
-  }
-
-  const bundledSettingsPath = path.join(pluginDir, "settings.json");
-  if (fs.existsSync(bundledSettingsPath)) {
-    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
-  }
+  // Re-merge permissions and hooks into settings.json
+  mergeSettings(baseDir, path.join(sourcePath, "plugin"));
 
   // Update manifest timestamp
   const newManifest: FileManifest = {
@@ -327,10 +314,7 @@ function updateCopy(baseDir: string, manifest: FileManifest, force: boolean, jso
   };
   writeManifest(skillsDir, newManifest);
 
-  const bundledSettingsPath = path.join(bundledDir, "settings.json");
-  if (fs.existsSync(bundledSettingsPath)) {
-    mergeSettings(getSettingsPath(baseDir), bundledSettingsPath);
-  }
+  mergeSettings(baseDir, bundledDir);
 
   const totalChanged = updated.length + added.length + removed.length;
   const data = {
@@ -428,70 +412,4 @@ function resolveInstalledPath(baseDir: string, key: string): string | null {
     return path.join(getAgentsDir(baseDir), key.slice("agents/".length));
   }
   return null;
-}
-
-function mergeSettings(targetPath: string, bundledPath: string): void {
-  let existing: Record<string, unknown> = {};
-  if (fs.existsSync(targetPath)) {
-    try {
-      existing = JSON.parse(fs.readFileSync(targetPath, "utf-8"));
-    } catch {
-      existing = {};
-    }
-  }
-
-  const bundled: Record<string, unknown> = JSON.parse(fs.readFileSync(bundledPath, "utf-8"));
-  const bundledPerms = (bundled.permissions ?? {}) as Record<string, string[]>;
-  const existingPerms = (existing.permissions ?? {}) as Record<string, string[]>;
-
-  for (const key of ["allow", "deny"] as const) {
-    const bundledList = bundledPerms[key] ?? [];
-    const existingList = existingPerms[key] ?? [];
-    const existingSet = new Set(existingList);
-    const merged = [...existingList];
-    for (const entry of bundledList) {
-      if (!existingSet.has(entry)) {
-        merged.push(entry);
-      }
-    }
-    if (merged.length > 0) {
-      if (!existingPerms[key]) existingPerms[key] = [];
-      existingPerms[key] = merged;
-    }
-  }
-
-  existing.permissions = existingPerms;
-  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-  fs.writeFileSync(targetPath, JSON.stringify(existing, null, 2) + "\n");
-}
-
-function mergeHooksJson(targetPath: string, sourcePath: string): void {
-  let existing: Record<string, unknown> = {};
-  if (fs.existsSync(targetPath)) {
-    try {
-      existing = JSON.parse(fs.readFileSync(targetPath, "utf-8"));
-    } catch {
-      existing = {};
-    }
-  }
-
-  const source: Record<string, unknown> = JSON.parse(fs.readFileSync(sourcePath, "utf-8"));
-
-  for (const [event, hooks] of Object.entries(source)) {
-    if (!Array.isArray(hooks)) continue;
-    const existingHooks = (existing[event] ?? []) as Array<Record<string, unknown>>;
-    for (const hook of hooks) {
-      const hookObj = hook as Record<string, unknown>;
-      const exists = existingHooks.some(
-        (h) => h.command === hookObj.command,
-      );
-      if (!exists) {
-        existingHooks.push(hookObj);
-      }
-    }
-    existing[event] = existingHooks;
-  }
-
-  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-  fs.writeFileSync(targetPath, JSON.stringify(existing, null, 2) + "\n");
 }
