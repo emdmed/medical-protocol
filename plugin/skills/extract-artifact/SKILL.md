@@ -8,16 +8,6 @@ hooks:
     - hooks:
         - type: command
           command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
-  PreToolUse:
-    - matcher: "Read|Bash|Grep|Artifact"
-      hooks:
-        - type: command
-          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
-  PostToolUse:
-    - matcher: "Read|Bash|Grep"
-      hooks:
-        - type: command
-          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
 ---
 
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever this file says `medprotocol`

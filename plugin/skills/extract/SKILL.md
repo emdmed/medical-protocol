@@ -8,16 +8,6 @@ hooks:
     - hooks:
         - type: command
           command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
-  PreToolUse:
-    - matcher: "Read|Bash|Grep|Artifact"
-      hooks:
-        - type: command
-          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
-  PostToolUse:
-    - matcher: "Read|Bash|Grep"
-      hooks:
-        - type: command
-          command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/note-consent.mjs" --all'
 ---
 
 Read and follow: reference/core.md

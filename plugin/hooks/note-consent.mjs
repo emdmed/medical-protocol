@@ -1,14 +1,17 @@
 #!/usr/bin/env node
 // Medical Protocol Hook: UserPromptSubmit + PreToolUse/PostToolUse (Read/Bash/Grep)
 // A clinical note reaches the AI model only after the doctor says it is not real patient data.
-// Registered by the extract skills' frontmatter (with --all), so it runs once extraction starts; hooks.json
-// adds only the prompt check without --all, for a note pasted into the /extract message itself.
+// Tool checks run plugin-wide from hooks.json (plugin hooks also run inside the verifier subagent; a plugin
+// agent's own frontmatter hooks are ignored) and do nothing unless a note is pending. The prompt check
+// looks at every prompt only once an extract skill registered it (--all); before that, only at /extract ones.
 // - a prompt that looks like a clinical note is blocked unless it says "not real data";
-// - the first read of extractions/<hash>/note.md asks the doctor; after a yes, <hash>/.consent
-//   is written and later reads (the verifier, the page) go through;
+// - a saved note is "pending" until the doctor clears it: extractions/<hash>/ has note.md but no .consent.
+//   Any Read or Grep that reaches a pending folder (real path, so symlinks and ".." count) asks; a yes
+//   writes <hash>/.consent and later reads (the verifier, the page) go through. Any Bash command asks
+//   while a note is pending, since a shell command can read it in too many ways to parse;
 // - publishing an extraction page with the Artifact tool always asks.
-// shortcut: notes are spotted by vitals/units patterns and paths by name; a note in another file, or a
-// Grep over the whole extractions/ folder, is not caught. Widen the patterns if notes slip through.
+// shortcut: pasted notes are spotted by vitals/units patterns, and a note file the doctor gives is
+// unguarded until `extract --save` copies it into extractions/. Widen the patterns if notes slip through.
 
 import * as fs from "fs";
 import * as path from "path";
@@ -59,22 +62,53 @@ if (input.tool_name === "Artifact") {
   process.exit(0);
 }
 
-const target = [t.file_path, t.path, t.command].filter(Boolean).join(" ");
-const m = target.match(/extractions[\/\\]([^\/\\\s"']+)[\/\\]note\.md/);
-if (!m) process.exit(0);
-const consent = path.join(projectDir, "extractions", m[1], ".consent");
+const cwd = input.cwd || projectDir;
+const real = (p) => {
+  try {
+    return fs.realpathSync(p);
+  } catch {
+    return path.resolve(p);
+  }
+};
+const root = real(path.join(projectDir, "extractions"));
+const pending = fs.existsSync(root)
+  ? fs
+      .readdirSync(root, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && fs.existsSync(path.join(root, d.name, "note.md")) && !fs.existsSync(path.join(root, d.name, ".consent")))
+      .map((d) => d.name)
+  : [];
+if (!pending.length) process.exit(0);
+
+const within = (inner, outer) => {
+  const r = path.relative(outer, inner);
+  return r === "" || (!r.startsWith("..") && !path.isAbsolute(r));
+};
+let touched = [];
+let clears = []; // folders a yes to this call clears
+if (input.tool_name === "Read" || input.tool_name === "Grep") {
+  const p = real(path.resolve(cwd, (input.tool_name === "Read" ? t.file_path : t.path) || "."));
+  touched = pending.filter((h) => within(p, path.join(root, h)) || within(path.join(root, h), p));
+  clears = touched;
+} else if (input.tool_name === "Bash") {
+  touched = pending;
+  clears = pending.filter((h) => (t.command || "").includes(h));
+}
+if (!touched.length) process.exit(0);
 
 if (input.hook_event_name === "PostToolUse") {
-  // only runs if the read was allowed, i.e. the doctor said yes
-  if (fs.existsSync(path.dirname(consent))) fs.writeFileSync(consent, new Date().toISOString() + "\n");
+  // only runs if the call was allowed, i.e. the doctor said yes
+  for (const h of clears) fs.writeFileSync(path.join(root, h, ".consent"), new Date().toISOString() + "\n");
   process.exit(0);
 }
 
-if (!fs.existsSync(consent))
-  out({
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "ask",
-      permissionDecisionReason: `NOTE CONSENT: this sends the note in extractions/${m[1]}/ to the AI model, which runs on external servers. Allow only if it is not real patient data (made up or de-identified).`,
-    },
-  });
+const where = touched.map((h) => `extractions/${h}/`).join(", ");
+out({
+  hookSpecificOutput: {
+    hookEventName: "PreToolUse",
+    permissionDecision: "ask",
+    permissionDecisionReason:
+      input.tool_name === "Bash"
+        ? `NOTE CONSENT: a saved note (${where}) is not cleared yet and this command could send it to the AI model, which runs on external servers. Allow only if that note is not real patient data (made up or de-identified).`
+        : `NOTE CONSENT: this sends the note in ${where} to the AI model, which runs on external servers. Allow only if it is not real patient data (made up or de-identified).`,
+  },
+});
