@@ -12,7 +12,8 @@
 //   sent to `cat` in Bash: only the Bash permission dialog shows the doctor this hook's question. Any Bash
 //   command asks while a note is pending, since a shell command can read it in too many ways to parse; a
 //   yes to one naming the folder writes <hash>/.consent and later reads (the verifier, the page) go through;
-// - publishing an extraction page with the Artifact tool always asks, wherever the page was copied to.
+// - publishing an extraction page with the Artifact tool is always denied, wherever the page was copied
+//   to: the page holds the full note and stays a local file.
 // shortcut: pasted notes are spotted by vitals/units/ID patterns; @-attached files and images are not seen,
 // and a note file the doctor gives is unguarded until `extract --save` copies it into extractions/.
 // Widen the patterns if notes slip through.
@@ -61,7 +62,7 @@ if (input.hook_event_name === "UserPromptSubmit") {
 const projectDir = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const t = input.tool_input || {};
 
-// Publishing uploads the whole note to claude.ai: ask every time, consent to the model doesn't cover it.
+// Publishing uploads the whole note to claude.ai: never, consent to the model doesn't cover hosting it.
 if (input.tool_name === "Artifact") {
   // the page can be copied out of extractions/, so also look in the file for the CLI template's data block
   let page = "";
@@ -69,7 +70,13 @@ if (input.tool_name === "Artifact") {
     page = fs.readFileSync(path.resolve(input.cwd || projectDir, t.file_path || ""), "utf8");
   } catch {}
   if (input.hook_event_name === "PreToolUse" && (/extractions[\/\\]/.test(JSON.stringify(t)) || page.includes('<script type="application/json" id="data">')))
-    ask("NOTE CONSENT: this publishes the extraction page, with the full note, to claude.ai. Allow only if it is not real patient data (made up or de-identified).");
+    out({
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: "NOTE CONSENT: extraction pages hold the full note and are never published. The page stays a local file; tell the doctor to open it in their browser.",
+      },
+    });
   process.exit(0);
 }
 

@@ -1,10 +1,12 @@
 // The page `medprotocol extract --artifact <file>` writes: one extraction, the note on the left with
 // each quote highlighted, the items on the right. Same paper, faces and peach spot as the website.
-// It is a claude.ai Artifact page (the host adds doctype/head/body) and also opens as a local file.
+// A standalone local file: it holds the full note and is never published.
 // __TITLE__ and __DATA__ are filled by the CLI. Kept as String.raw with no backticks or `${`.
 
-export const EXTRACT_ARTIFACT_HTML = String.raw`<title>__TITLE__</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+export const EXTRACT_ARTIFACT_HTML = String.raw`<!doctype html>
+<meta charset="utf-8">
+<title>__TITLE__</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,500..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Martian+Mono:wght@400;500;600&display=swap">

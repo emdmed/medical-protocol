@@ -76,11 +76,11 @@ describe("note-consent hook", () => {
     expect(decision("Read", { file_path: "other/link.md" })).toBeUndefined();
   });
 
-  it("asks every time an extraction page is published", () => {
+  it("never lets an extraction page be published, even a cleared one or a copy", () => {
     writeFileSync(join(folder, ".consent"), "x");
-    expect(asks("Artifact", { file_path: "extractions/abc123def456/artifact.html" })).toBe(true);
-    expect(asks("Artifact", { file_path: "docs/page.html" })).toBe(false);
+    expect(denies("Artifact", { file_path: "extractions/abc123def456/artifact.html" })).toBe(true);
+    expect(decision("Artifact", { file_path: "docs/page.html" })).toBeUndefined();
     writeFileSync(join(dir, "other/copy.html"), EXTRACT_ARTIFACT_HTML);
-    expect(asks("Artifact", { file_path: "other/copy.html" })).toBe(true);
+    expect(denies("Artifact", { file_path: "other/copy.html" })).toBe(true);
   });
 });

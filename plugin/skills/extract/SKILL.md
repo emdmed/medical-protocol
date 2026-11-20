@@ -33,7 +33,7 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 Then extract and check as in `extraction.md` § Who extracts, steps 1–5 in order: hash and save the raw note (`medprotocol extract --save`) → `extractions/<hash>/note.md`, first pass → `<hash>/extraction.json`, verify with the `extraction-verifier` agent → `<hash>/verify.json` + `<hash>/corrected.json`, the doctor accepts or rejects each correction, then the screen data.
 
-Then offer once: "Want a page of this extraction you can open in the browser, or share as a private claude.ai link?" On yes, run `/medical-protocol:extract-artifact` for `<hash>`.
+Then offer once: "Want a page of this extraction you can open in the browser? It stays on this computer." On yes, run `/medical-protocol:extract-artifact` for `<hash>`.
 
 Do NOT ask about layout, colours, or matching rules.
 

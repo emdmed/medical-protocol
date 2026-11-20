@@ -1,7 +1,7 @@
 ---
 name: extract-artifact
-description: "[Internal] Turn a checked note extraction into a page: the note beside the extracted values, quotes highlighted, in the Medical Protocol look. Written as a local HTML file; published as a private claude.ai Artifact only if the doctor says yes"
-allowed-tools: Read, Glob, Bash, Artifact
+description: "[Internal] Turn a checked note extraction into a page: the note beside the extracted values, quotes highlighted, in the Medical Protocol look. A local HTML file that stays on the doctor's computer; never published or hosted"
+allowed-tools: Read, Glob, Bash
 user-invocable: true
 hooks:
   UserPromptSubmit:
@@ -23,11 +23,9 @@ One page per extraction. Extraction only: the page shows what the note says and 
    ```
    It must exit 0. It fails on a bad item (no episode, unknown key) → report the CLI's error and stop; never hand-edit the items to get past it. The page is built by the CLI from a fixed template: never write or edit its HTML yourself.
 3. **Tell the doctor where it is:** "The page is saved at <dir>/artifact.html. Open it in your browser; it stays on this computer."
-4. **Offer to publish,** every time and once: "I can also publish it as a private page on claude.ai, so you can open it from another device. That uploads the note text to claude.ai, outside this computer. Only do this with a de-identified note. Publish it?" Wait for a clear yes for this extraction. A yes for an earlier extraction does not count.
-5. **On yes:** publish with the Artifact tool: `file_path: <dir>/artifact.html`, `icon: "document"`, `description: "Values extracted from note <hash>, each beside the words it came from"`. Give the doctor the link. If the Artifact tool isn't available here, say so; the local file from step 3 is the result.
 
 ## NEVER
-- Publish without a yes to step 4 for this extraction, or publish a note the doctor said holds patient identifiers
+- Publish, upload or host the page anywhere (the Artifact tool, a gist, a web server): it holds the full note and stays a local file. The `note-consent` hook denies the Artifact tool for it
 - Write, edit or restyle the page's HTML, or build a page some other way
 - Add ranges, flags, scores or comments on the values to the page or to your reply
 - Change `<dir>/note.md` or `<dir>/extraction.json` (the `extraction-guard` hook blocks it anyway)
