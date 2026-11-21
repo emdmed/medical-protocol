@@ -1,8 +1,10 @@
 # Medical Protocol
 
-An educational Claude Code plugin that lets doctors build clinical tools for learning by describing them in clinical language. The agent writes the screens. The math comes from a tested clinical library that ships with the plugin. Open source, privacy-first, 989 tests.
+**Clinical skills for Claude Code. For learning, not patient care.**
 
-> *"I need a vital signs monitor with fluid balance tracking"* — the agent sets up the project, builds the screen and checks it in the browser.
+An open-source educational plugin. It gives Claude Code a tested clinical library, so you can study calculations, practise on made-up cases and prototype clinical screens by describing them in clinical language. The agent writes the screens. The math comes from the library, never from the model. Privacy-first, 989 tests.
+
+> *"I need a vital signs monitor with fluid balance tracking, to practise on teaching cases"* — the agent sets up the project, builds the screen and checks it in the browser.
 
 ## Medical disclaimer
 

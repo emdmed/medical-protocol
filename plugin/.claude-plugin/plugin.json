@@ -2,7 +2,7 @@
   "name": "medical-protocol",
   "version": "1.0.1",
   "license": "MIT",
-  "description": "Clinical tool builder for healthcare professionals — vital signs, calculators, and critical care tools",
+  "description": "Educational clinical skills for Claude Code — tested calculators, screen prototyping and browser checks. For learning only, not for patient care",
   "author": {
     "name": "emdmed"
   },

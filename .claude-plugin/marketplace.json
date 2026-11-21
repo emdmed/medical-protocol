@@ -4,13 +4,13 @@
     "name": "emdmed"
   },
   "metadata": {
-    "description": "Medical protocol skills and hooks for building clinical tools with Claude Code"
+    "description": "Educational clinical skills and hooks for Claude Code. For learning only, not for patient care"
   },
   "plugins": [
     {
       "name": "medical-protocol",
       "source": "./plugin",
-      "description": "Clinical tool builder for healthcare professionals — vital signs, calculators, and critical care tools"
+      "description": "Educational clinical skills for Claude Code — tested calculators, screen prototyping and browser checks. For learning only, not for patient care"
     }
   ]
 }

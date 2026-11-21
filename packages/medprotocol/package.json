@@ -1,7 +1,7 @@
 {
   "name": "medprotocol",
   "version": "1.0.1",
-  "description": "Medical calculations from the terminal — for AI agents and clinicians",
+  "description": "Educational medical calculations from the terminal — for AI agents and learners",
   "license": "MIT",
   "private": true,
   "scripts": {
