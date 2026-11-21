@@ -51,9 +51,9 @@ The calculations in your app are the same code the tests cover. Nothing is recom
 | `preferences` | Set your specialty, patient population, guidelines and units |
 | `protocol-audit` | Audit the project for safety, completeness, privacy and accessibility |
 | `calc-audit` | Test the clinical calculations in your screens against the library |
-| `overlay-setup` | Turn on the dev overlay: hover over any part of your app to audit it, replace it with a medical-protocol screen, or add a new one |
+| `overlay` | Turn on the dev overlay, or process what you selected in it: hover over any part of your app to audit it, replace it with a medical-protocol screen, or add a new one |
 
-Internal skills (called by the agent): `vital-signs`, `acid-base`, `bmi`, `pafi`, `dka`, `water-balance`, `dashboard`, `modify`, `calc`, `qa`, `troubleshoot`, `overlay-audit`, `overlay-implement`, `overlay-add`.
+Internal skills (called by the agent): `vital-signs`, `acid-base`, `bmi`, `pafi`, `dka`, `water-balance`, `dashboard`, `modify`, `calc`, `qa`, `troubleshoot`, `overlay-setup`, `overlay-audit`, `overlay-implement`, `overlay-add`.
 
 ### Hooks
 

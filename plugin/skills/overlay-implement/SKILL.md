@@ -2,7 +2,7 @@
 name: overlay-implement
 description: Implement a medical-protocol component into a region the doctor selected in the dev overlay — drains an "implement" work order, classifies the selected UI, finds it in source, and stages a diff that replaces it with a screen built on the right medprotocol module. For retrofitting medical protocol into apps built without it.
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md
@@ -22,8 +22,8 @@ lands until the doctor approves.
 
 ## Phase 1: Drain the queue
 
-1. Run `medprotocol overlay --drain --json` to claim pending work orders.
-2. Keep only orders with `"action": "implement"`. If none, tell the doctor to select a region in
+1. Run `medprotocol overlay --drain --action implement --json` to claim pending `implement` orders (other actions stay queued for their own skill).
+2. If none, tell the doctor to select a region in
    their app and choose Implement, then stop.
 3. **Apply fast-path:** if a drained order has `"approved": true` **and** a staged shadow already
    exists under `.medprotocol/staged/` (the doctor clicked **Apply** in the overlay), skip Phases 2–4

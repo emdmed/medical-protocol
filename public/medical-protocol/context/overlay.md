@@ -9,7 +9,7 @@ Intent lands as one JSON file per selection in the project's queue directory; th
 the queue and plugin skills act on each work order.
 
 ```
-overlay selection → POST /queue → .medprotocol/queue/<ts>-<slug>.json → `medprotocol overlay --drain` → /medical-protocol:overlay-audit | overlay-implement | overlay-add
+overlay selection → POST /queue → .medprotocol/queue/<ts>-<slug>.json → `medprotocol overlay --drain` → /medical-protocol:overlay → overlay-audit | overlay-implement | overlay-add
 ```
 
 The overlay does **not** require the target app to use medical protocol. The `data-medprotocol-*`
@@ -35,7 +35,9 @@ import Script from "next/script";
 ```
 (Non-React apps add a plain `<script async>` to their `index.html` instead.)
 
-The doctor never hand-edits this: `/medical-protocol:overlay-setup` starts the server, detects the
+The doctor uses one skill, `/medical-protocol:overlay`: it wires the overlay when the app has no tag
+yet, and otherwise processes whatever is queued, routing each order by its `action`. The doctor never
+hand-edits the tag: the internal `overlay-setup` skill starts the server, detects the
 mount point (app-router `layout.tsx` → pages `_app.tsx` → `index.html`), and injects the dev-gated
 tag idempotently (marked with `data-medprotocol-overlay`). Hand-paste is the documented fallback.
 
@@ -46,7 +48,7 @@ The `--serve` process exposes:
 - `POST /queue` — accepts a work order from the browser and writes it to `.medprotocol/queue/`.
 - `GET /status` — returns `{ auto, orders }`, where `orders` is each work order's
   `{ file, action, selector, status, hasResult }` and `auto` reports whether a processor is attached
-  (the server was started with `--auto`). The client polls this and pins a **live progress marker** over
+  (automatic mode — the default). The client polls this and pins a **live progress marker** over
   the selected element. When `auto` is on (or the order is `processing`), it shows a spinner ("queued…" →
   "auditing…/implementing…/adding…" as the order moves `pending → processing`) that turns into a green
   "✓" when the order reaches `done`. If the order has a result it becomes a clickable "✓ — view" pill;
@@ -60,30 +62,30 @@ The `--serve` process exposes:
 - `POST /run` `{ file, skill, prompt? }` — a **skill trigger** from the result panel. The doctor clicks a
   skill the report recommended; the server reads the originating order, **inherits its selection anchor**
   (selector/html/source/url), and mints a new `skill` work order that re-processes that same region with
-  the named skill. `skill` is validated against the `medical-protocol:` namespace. With `--auto` it kicks
-  the dispatcher immediately; otherwise the doctor runs the overlay queue in Claude Code to process it.
+  the named skill. `skill` is validated against the `medical-protocol:` namespace. In automatic mode it kicks
+  the dispatcher immediately; otherwise the doctor runs `/medical-protocol:overlay` in Claude Code.
 - `POST /approve` `{ file }` — the result panel's **Apply** button. For a staged `add`/`implement` order
   it sets `approved: true` and re-queues it (`status → pending`) so the matching skill **lands the staged
-  diff** (re-applies, does not re-stage). With `--auto` this also kicks the dispatcher to apply
-  immediately; otherwise the doctor runs the overlay skill in Claude Code to land it.
+  diff** (re-applies, does not re-stage). In automatic mode this also kicks the dispatcher to apply
+  immediately; otherwise the doctor runs `/medical-protocol:overlay` in Claude Code to land it.
 
 The script POSTs back to the origin it was loaded from, so the browser→filesystem write seam lives
 entirely in the one CLI process that already owns the queue. Nothing else needs to be installed in
 the target app.
 
-### Closing the loop: `--auto`
+### Closing the loop: automatic by default
 
-By default the overlay only **records** intent — a human still runs `/medical-protocol:overlay-audit`
-(or `overlay-implement`) in Claude Code to actually process the queue, and the marker sits in the
-slate "queued — needs drain" state until they do (the client learns there's no processor from
-`/status`'s `auto: false`). `medprotocol overlay
---serve --auto` closes that loop: on each selection it spawns a **headless Claude Code run**
-(`claude -p "<process the queue>" --permission-mode acceptEdits`) in the project directory, which
-drains the order, runs the matching skill, and writes the result back — so the overlay's spinner
-turns into a viewable report with no terminal step. It is **opt-in** (runs Claude unattended, needs
-the `claude` CLI, costs tokens). Runs are debounced: one run drains all pending orders; selections
-that arrive mid-run trigger exactly one follow-up. Implement and Add still only **stage** a diff — the
-approval gate is never bypassed.
+`medprotocol overlay --serve` is **automatic** whenever the `claude` CLI is on PATH: on each selection
+it spawns a **headless Claude Code run** (`claude -p "<process the queue>" --permission-mode acceptEdits`)
+in the project directory, which drains the order, runs the matching skill, and writes the result back —
+so the overlay's spinner turns into a viewable report with no terminal step. It runs Claude unattended
+and costs tokens; the server says so at startup. Runs are debounced: one run drains all pending orders;
+selections that arrive mid-run trigger exactly one follow-up. Implement and Add still only **stage** a
+diff — the approval gate is never bypassed.
+
+**Manual mode** — `--serve --manual`, or the fallback when `claude` is not found — only **records**
+intent. The marker sits in the slate "queued — needs drain" state (the client learns there's no
+processor from `/status`'s `auto: false`) until the doctor runs `/medical-protocol:overlay` in Claude Code.
 
 ## Queue location
 
@@ -132,7 +134,8 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 
 1. **Record** — overlay writes a `pending` work order.
 2. **Drain** — `medprotocol overlay --drain` claims each `pending` order (sets `processing`) and
-   emits a dispatch plan naming the skill to run. A Claude Code hook or the doctor runs it.
+   emits a dispatch plan naming the skill to run. `--action <name>` claims only that action's orders,
+   which is how each skill drains: the rest stay `pending` for their own skill.
 3. **Act** — the matching skill processes the order:
    - **Audit** → classify the selection, locate it in source, **report findings** (read-only), mark `done`.
    - **Implement** → classify, locate, stage a diff (lease/apply); land it only on approval, then mark `done`.
@@ -158,7 +161,7 @@ The doctor selects a region and types a **free-text brief** (`prompt`) of a comp
 *"a chronic kidney disease anemia tracker"*. The selection is the **placement anchor**, not the thing
 being replaced. Classify the brief against `classification.md` → registry component(s), **confirm the
 plan in chat**, locate the anchor in source, then **stage a diff** that inserts the newly composed
-component there. Same approval gate as Implement. With `--auto`, a headless Claude run builds it
+component there. Same approval gate as Implement. In automatic mode, a headless Claude run builds it
 unattended (still staging-only). Skill: `/medical-protocol:overlay-add`. **Add builds new capability;
 Implement retrofits existing markup.**
 
@@ -184,8 +187,8 @@ recommendations **actionable** instead of copy-paste:
   ```
 
 Clicking either kind `POST`s to `/run`, which mints a `skill` work order on the **same selection**. The
-loop is identical to the rest of the overlay: with `--auto` a headless run processes it; otherwise the
-doctor runs the overlay queue in Claude Code. Skills that build/edit files still **stage** a diff behind
+loop is identical to the rest of the overlay: in automatic mode a headless run processes it; otherwise the
+doctor runs `/medical-protocol:overlay` in Claude Code. Skills that build/edit files still **stage** a diff behind
 the approval gate — the panel shows an **Apply** button for a staged `skill` result just like `implement`/`add`.
 
 ## Why a queue (not a direct call)

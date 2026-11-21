@@ -35,14 +35,14 @@ When the doctor's request is simple enough for the quick calculator, offer it as
 `medprotocol overlay` is a developer tool, not a clinical calculator — keep it out of the table
 above. It serves the overlay used to **retrofit medical protocol into any app** (hover any element →
 Audit or Implement) and drains the resulting work-order queue (`.medprotocol/queue/`), emitting a
-dispatch plan naming the skill to run for each selection (`/medical-protocol:overlay-audit` or
-`overlay-implement`). See `context/overlay.md` for the queue schema and the Audit/Implement semantics.
+dispatch plan naming the skill to run for each selection (`/medical-protocol:overlay-audit`,
+`overlay-implement` or `overlay-add`). In Claude Code, `/medical-protocol:overlay` is the one entry point. See `context/overlay.md` for the queue schema and the Audit/Implement semantics.
 
 ```bash
-medprotocol overlay --serve    # serve overlay.js + accept browser selections (add the printed <script> tag, dev only)
-medprotocol overlay --serve --auto  # …and auto-process each selection via a headless Claude run (opt-in, needs `claude` CLI)
+medprotocol overlay --serve    # serve overlay.js + accept browser selections; auto-processes each one via a headless Claude run when the `claude` CLI is found
+medprotocol overlay --serve --manual  # only queue selections; process them with /medical-protocol:overlay
 medprotocol overlay --list     # show pending selections
-medprotocol overlay --drain    # claim pending selections, print dispatch plan
+medprotocol overlay --drain    # claim pending selections, print dispatch plan (--action <name> claims one action only)
 medprotocol overlay --watch    # live-report new selections
 medprotocol overlay --clear    # remove completed work orders
 ```

@@ -51,14 +51,15 @@ fragments, and classify the requested concept from `prompt` via `classification.
 ## Lifecycle
 
 1. Overlay writes a `pending` order.
-2. `medprotocol overlay --drain --json` claims pending orders → sets `processing` and prints the
+2. `medprotocol overlay --drain --action add --json` claims pending orders → sets `processing` and prints the
    dispatch plan. **Always drain via the CLI** — do not hand-scan the directory.
 3. This skill processes each `processing` order, then sets it to `done`.
 4. `medprotocol overlay --clear` removes `done` orders.
 
 ## Claiming and closing orders
 
-- **Claim:** run `medprotocol overlay --drain --json`, parse the JSON array, filter to `add`.
+- **Claim:** run `medprotocol overlay --drain --action add --json`, parse the JSON array — it holds
+  only `add` orders; other actions stay queued.
 - **Close:** after finishing an order, edit the file in `.medprotocol/queue/` whose `ts` matches:
   set `"status": "done"` **and** write the full findings into `"result"` (`{ report }`). The
   overlay polls `/status`, sees `hasResult`, and turns the spinner into a clickable "✓ — view" pill
@@ -70,7 +71,7 @@ fragments, and classify the requested concept from `prompt` via `classification.
 ```bash
 medprotocol overlay --serve         # serve overlay.js + accept browser selections
 medprotocol overlay --list          # show pending orders, no changes
-medprotocol overlay --drain --json  # claim pending orders, emit dispatch plan
+medprotocol overlay --drain --action add --json  # claim pending orders, emit dispatch plan
 medprotocol overlay --watch         # live-report new orders as they arrive
 medprotocol overlay --clear         # remove completed orders
 ```

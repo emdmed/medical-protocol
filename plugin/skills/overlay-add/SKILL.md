@@ -2,7 +2,7 @@
 name: overlay-add
 description: Build a NEW medical-protocol component from a free-text brief the doctor typed in the dev overlay, and place it into the region they selected — drains an "add" work order, reads its `prompt`, classifies the requested clinical concept, builds a screen on the right medprotocol module(s), and stages a diff that inserts it at the selected anchor. For adding capability to an app, not retrofitting existing markup.
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md
@@ -21,8 +21,8 @@ component there from the `prompt`. Lease/apply: nothing lands until the doctor a
 
 ## Phase 1: Drain the queue
 
-1. Run `medprotocol overlay --drain --json` to claim pending work orders.
-2. Keep only orders with `"action": "add"`. If none, tell the doctor to select a region in their app,
+1. Run `medprotocol overlay --drain --action add --json` to claim pending `add` orders (other actions stay queued for their own skill).
+2. If none, tell the doctor to select a region in their app,
    choose "Add a component here…", and type what to build, then stop.
 3. **Apply fast-path:** if a drained order has `"approved": true` **and** a staged shadow already
    exists under `.medprotocol/staged/` (the doctor clicked **Apply** in the overlay), skip Phases 2–4

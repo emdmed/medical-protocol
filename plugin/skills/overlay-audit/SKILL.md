@@ -2,7 +2,7 @@
 name: overlay-audit
 description: Audit a region the doctor selected in the dev overlay against medical-protocol guidance — drains an "audit" work order, classifies the selected UI, locates it in source, and reports findings. Read-only. Works on any app, tagged or not.
 allowed-tools: Read, Grep, Glob, Bash
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md
@@ -19,8 +19,8 @@ against the relevant protocol guidance. Static and read-only — it never modifi
 
 ## Phase 1: Drain the queue
 
-1. Run `medprotocol overlay --drain --json` to claim pending work orders.
-2. Keep only orders with `"action": "audit"`. If none, tell the doctor to select a region in their
+1. Run `medprotocol overlay --drain --action audit --json` to claim pending `audit` orders (other actions stay queued for their own skill).
+2. If none, tell the doctor to select a region in their
    app and choose Audit, then stop.
 
 ## Phase 2: Classify the selection

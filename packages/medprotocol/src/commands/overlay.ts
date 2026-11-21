@@ -2,7 +2,7 @@ import { parseArgs } from "node:util";
 import { readdirSync, readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync, watch } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import { createServer } from "node:http";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { OVERLAY_CLIENT_JS } from "../overlay-client";
 
 const USAGE = `Usage: medprotocol overlay [options]
@@ -12,18 +12,23 @@ selections from the browser, and drains the resulting work-order queue
 (.medprotocol/queue/) into a dispatch plan naming the skill to run for each
 selection — /medical-protocol:overlay-audit, overlay-implement, or overlay-add
 (the doctor selects a region, types a brief, and Add builds a new component there).
+In Claude Code, /medical-protocol:overlay is the one entry point: it sets the overlay
+up and processes whatever is queued.
 
 Options:
   --serve                Serve the overlay client (GET /overlay.js) and accept
                          selections (POST /queue). Add the printed <script> tag
-                         to your app in dev. Ctrl-C to stop.
+                         to your app in dev. Ctrl-C to stop. When the 'claude' CLI
+                         is on PATH, each selection spawns a headless Claude Code
+                         run (claude -p) that processes the order, so the result
+                         appears with no terminal step (runs unattended, uses tokens).
   --port <number>        Port for --serve (default: 7331)
-  --auto                 With --serve: on each selection, spawn a headless Claude
-                         Code run (claude -p) to process the order automatically —
-                         closing the loop so the result appears with no terminal
-                         step. Requires the 'claude' CLI; opt-in (runs unattended).
+  --manual               With --serve: only queue selections; process them yourself
+                         with /medical-protocol:overlay in Claude Code
   --list                 List pending work orders without changing them
   --drain                Claim pending orders (mark "processing") and print a dispatch plan
+  --action <name>        With --list/--drain: only orders with this action
+                         (audit | implement | add | skill)
   --watch                Watch the queue and report new orders as they arrive (Ctrl-C to stop)
   --clear                Remove completed orders (status "done")
   --dir <path>           Queue directory (default: .medprotocol/queue)
@@ -33,8 +38,10 @@ Options:
 Examples:
   medprotocol overlay --serve
   medprotocol overlay --serve --port 8080
+  medprotocol overlay --serve --manual
   medprotocol overlay --list
   medprotocol overlay --drain
+  medprotocol overlay --drain --action audit
   medprotocol overlay --watch
   medprotocol overlay --clear`;
 
@@ -197,7 +204,7 @@ const makeDispatcher = (cwd: string) => {
     child.on("error", (err: NodeJS.ErrnoException) => {
       busy = false;
       if (err.code === "ENOENT") {
-        process.stderr.write("✗ --auto needs the 'claude' CLI on PATH (https://claude.com/claude-code). Auto-dispatch disabled for this selection.\n");
+        process.stderr.write("✗ automatic processing needs the 'claude' CLI on PATH (https://claude.com/claude-code). Auto-dispatch disabled for this selection.\n");
       } else {
         process.stderr.write(`✗ headless Claude failed: ${err.message}\n`);
       }
@@ -247,7 +254,7 @@ const serve = (dir: string, port: number, auto: boolean): void => {
     }
 
     // Every other endpoint either accepts selection data or hands it back. A real website the doctor
-    // has open could POST here (CORS blocks the response, not the request) and, under --auto, drive a
+    // has open could POST here (CORS blocks the response, not the request) and, in auto mode, drive a
     // headless Claude run with write/exec. Refuse anything that isn't a loopback origin.
     if (!localOrigin) {
       res.writeHead(403, JSON_HEADER);
@@ -302,7 +309,7 @@ const serve = (dir: string, port: number, auto: boolean): void => {
 
     // Approve a staged add/implement order from the overlay's "Apply" button. Marks the order
     // approved and re-queues it (status → pending) so the matching skill lands the staged diff.
-    // With --auto, this also kicks the dispatcher to apply it immediately.
+    // In auto mode, this also kicks the dispatcher to apply it immediately.
     if (req.method === "POST" && path === "/approve") {
       let body = "";
       req.on("data", (chunk) => {
@@ -357,7 +364,7 @@ const serve = (dir: string, port: number, auto: boolean): void => {
 
     // Trigger a skill the report recommended, from the result panel. Reads the originating order,
     // inherits its selection anchor, and mints a "skill" work order that re-processes that same
-    // region with the named skill. With --auto, the dispatcher runs it immediately.
+    // region with the named skill. In auto mode, the dispatcher runs it immediately.
     if (req.method === "POST" && path === "/run") {
       let body = "";
       req.on("data", (chunk) => {
@@ -499,7 +506,7 @@ const serve = (dir: string, port: number, auto: boolean): void => {
     process.exitCode = 1;
   });
 
-  // Bind to loopback only — never expose the bridge (which can spawn write/exec under --auto) on the LAN.
+  // Bind to loopback only — never expose the bridge (which can spawn write/exec in auto mode) on the LAN.
   server.listen(port, "127.0.0.1", () => {
     process.stdout.write(`medprotocol overlay server → http://localhost:${port}\n`);
     process.stdout.write(`Queue dir: ${dir}\n\n`);
@@ -508,11 +515,11 @@ const serve = (dir: string, port: number, auto: boolean): void => {
     process.stdout.write(`    <script src="http://localhost:${port}/overlay.js" async />\n`);
     process.stdout.write(`  )}\n\n`);
     if (auto) {
-      process.stdout.write(`Auto mode ON: each selection spawns a headless Claude run (claude -p) to process it. Ctrl-C to stop.\n`);
+      process.stdout.write(`Auto mode ON: each selection spawns a headless Claude run (claude -p) to process it — unattended, uses tokens.\n`);
+      process.stdout.write(`Restart with --manual to only queue selections. Ctrl-C to stop.\n`);
     } else {
-      process.stdout.write(`Auto mode OFF — selections are only QUEUED, not processed: the overlay will show "queued — needs drain".\n`);
-      process.stdout.write(`Process them in Claude Code with /medical-protocol:overlay-audit | overlay-implement | overlay-add,\n`);
-      process.stdout.write(`or restart with --auto to process every selection automatically. Ctrl-C to stop.\n`);
+      process.stdout.write(`Manual mode — selections are only QUEUED, not processed: the overlay will show "queued — needs drain".\n`);
+      process.stdout.write(`Process them in Claude Code with /medical-protocol:overlay. Ctrl-C to stop.\n`);
     }
   });
 };
@@ -523,7 +530,9 @@ export const run = (argv: string[]): void => {
     options: {
       serve: { type: "boolean", default: false },
       port: { type: "string" },
-      auto: { type: "boolean", default: false },
+      auto: { type: "boolean", default: false }, // accepted for old commands; auto is now the default
+      manual: { type: "boolean", default: false },
+      action: { type: "string" },
       list: { type: "boolean", default: false },
       drain: { type: "boolean", default: false },
       watch: { type: "boolean", default: false },
@@ -542,6 +551,11 @@ export const run = (argv: string[]): void => {
 
   const dir = resolve(values.dir ?? join(".medprotocol", "queue"));
   const json = values.json!;
+  // --action narrows --list/--drain so a skill claims only its own orders and leaves the rest queued.
+  const pendingOrders = (): QueueEntry[] =>
+    readQueue(dir).filter(
+      (e) => statusOf(e.order) === "pending" && (!values.action || e.order.action === values.action),
+    );
 
   if (values.serve) {
     const port = Number.parseInt(values.port ?? "7331", 10);
@@ -550,7 +564,12 @@ export const run = (argv: string[]): void => {
       process.exitCode = 1;
       return;
     }
-    serve(dir, port, values.auto!);
+    // Automatic unless --manual, and only when a headless Claude can actually be spawned.
+    const hasClaude = !spawnSync("claude", ["--version"], { stdio: "ignore" }).error;
+    if (!values.manual && !hasClaude) {
+      process.stderr.write("'claude' CLI not found on PATH — falling back to manual mode.\n");
+    }
+    serve(dir, port, !values.manual && hasClaude);
     return;
   }
 
@@ -584,7 +603,7 @@ export const run = (argv: string[]): void => {
   }
 
   if (values.drain) {
-    const pending = readQueue(dir).filter((e) => statusOf(e.order) === "pending");
+    const pending = pendingOrders();
     for (const { file, order } of pending) {
       writeFileSync(file, JSON.stringify({ ...order, status: "processing" }, null, 2) + "\n");
     }
@@ -593,6 +612,5 @@ export const run = (argv: string[]): void => {
   }
 
   // default / --list
-  const pending = readQueue(dir).filter((e) => statusOf(e.order) === "pending");
-  printOrders(pending, json, "Pending work orders");
+  printOrders(pendingOrders(), json, "Pending work orders");
 };

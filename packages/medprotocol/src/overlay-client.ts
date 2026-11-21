@@ -440,15 +440,9 @@ export const OVERLAY_CLIENT_JS = `(function () {
     return { queued: 'queued implement…', ing: 'implementing…', done: 'implemented' };
   }
 
-  // The skill that drains each action, named so the doctor knows exactly what to run.
-  function drainHint(action) {
-    var skill = action === 'audit' ? '/medical-protocol:overlay-audit'
-      : action === 'add' ? '/medical-protocol:overlay-add'
-      : action === 'skill' ? 'the overlay queue'
-      : '/medical-protocol:overlay-implement';
-    return 'Queued, but no processor is attached — nothing will run on its own. Process it in Claude Code ('
-      + skill + '), or restart the server with --auto.';
-  }
+  // Shown when no processor is attached: one skill drains every action.
+  var DRAIN_HINT = 'Queued, but no processor is attached — nothing will run on its own. '
+    + 'Run /medical-protocol:overlay in Claude Code, or restart the server without --manual.';
 
   // (Re)build a pill as an active spinner with the given label. Used for queued (auto) and processing.
   function spinnerPill(t, text) {
@@ -515,7 +509,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
         t.pill.innerHTML = svgIcon(ICONS.clock, 12);
         var w = document.createElement('span'); w.textContent = 'queued — needs drain';
         t.pill.appendChild(w);
-        t.pill.onclick = function () { toast(drainHint(t.action), '#f59e0b'); };
+        t.pill.onclick = function () { toast(DRAIN_HINT, '#f59e0b'); };
       }
       return;
     }
@@ -632,7 +626,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
     panelBody.appendChild(wrap);
   }
 
-  // Trigger a recommended skill against this same selection (POST /run). Records intent; with --auto
+  // Trigger a recommended skill against this same selection (POST /run). Records intent; in auto mode
   // a headless run processes it. Re-uses the order's anchor server-side, so we only send the file ref.
   function runSkill(t, skill, prompt) {
     if (!t || !skill) return;
@@ -649,7 +643,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
     }).catch(function (err) { toast('Trigger failed: ' + err.message, '#ef4444'); });
   }
 
-  // Approve a staged add/implement order → the server re-queues it and (in --auto) the agent lands the diff.
+  // Approve a staged add/implement order → the server re-queues it and (in auto mode) the agent lands the diff.
   function applyOrder(t) {
     panelApply.disabled = true;
     panelApply.innerHTML = svgIcon(ICONS.check, 13) + '<span>Applying…</span>';

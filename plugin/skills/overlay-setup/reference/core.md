@@ -5,18 +5,16 @@ Idempotent, dev-gated, reversible. The agent does the edit; the CLI only serves.
 
 ## 1. Start the server
 
-First decide how selections get processed (ask the doctor — see SKILL.md Phase 1):
-
 ```bash
-medprotocol overlay --serve --auto     # AUTONOMOUS: each selection runs end-to-end (needs the `claude` CLI)
-medprotocol overlay --serve            # MANUAL: selections only queue; drain them yourself
-medprotocol overlay --serve --auto --port 8080  # if 7331 is taken (CLI prints EADDRINUSE)
+medprotocol overlay --serve              # AUTOMATIC (default): each selection runs end-to-end via a headless Claude run
+medprotocol overlay --serve --port 8080  # if 7331 is taken (CLI prints EADDRINUSE)
+medprotocol overlay --serve --manual     # only when the doctor asks: selections queue until /medical-protocol:overlay runs
 ```
 
-**Default to `--auto`** — it closes the loop so results appear in the overlay with no terminal step.
-Without it, the overlay shows each selection as "queued — needs drain" and nothing happens until you
-run an overlay-* skill. `--auto` requires the `claude` CLI on PATH and runs unattended (it can stage
-diffs), so confirm the doctor is comfortable with that before enabling it.
+Do not ask which mode to use. Automatic closes the loop so results appear in the overlay with no
+terminal step; it runs unattended, uses tokens, and only **stages** diffs. If the `claude` CLI is not
+on PATH the server says so and falls back to manual: the overlay shows "queued — needs drain" until
+the doctor runs `/medical-protocol:overlay`. Tell the doctor which mode came up.
 
 Run it in the background and read the port from the first stdout line:
 `medprotocol overlay server → http://localhost:<port>`. Use `<port>` in the injected tag.

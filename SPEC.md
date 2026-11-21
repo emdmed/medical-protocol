@@ -250,7 +250,7 @@ Each skill is a directory under `plugin/skills/<name>/` with a `SKILL.md`
 `Clinical logic source:` (the plugin's `lib/` folder). Skills: `start`, `bmi`,
 `acid-base`, `vital-signs`, `water-balance`, `pafi`, `dka`, `dashboard`,
 `modify`, `troubleshoot`, `calc`, `calc-audit`, `preferences`,
-`protocol-audit`, `overlay-setup`, `overlay-audit`, `overlay-implement`,
+`protocol-audit`, `overlay`, `overlay-setup`, `overlay-audit`, `overlay-implement`,
 `overlay-add`.
 (`start` is the entry router; `nephrology`/`cardiology`/`sepsis`/`diabetes`
 domains route to workflow files inside `start/reference/` rather than their own

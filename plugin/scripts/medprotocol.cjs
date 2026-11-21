@@ -4928,15 +4928,9 @@ var init_overlay_client = __esm({
     return { queued: 'queued implement\u2026', ing: 'implementing\u2026', done: 'implemented' };
   }
 
-  // The skill that drains each action, named so the doctor knows exactly what to run.
-  function drainHint(action) {
-    var skill = action === 'audit' ? '/medical-protocol:overlay-audit'
-      : action === 'add' ? '/medical-protocol:overlay-add'
-      : action === 'skill' ? 'the overlay queue'
-      : '/medical-protocol:overlay-implement';
-    return 'Queued, but no processor is attached \u2014 nothing will run on its own. Process it in Claude Code ('
-      + skill + '), or restart the server with --auto.';
-  }
+  // Shown when no processor is attached: one skill drains every action.
+  var DRAIN_HINT = 'Queued, but no processor is attached \u2014 nothing will run on its own. '
+    + 'Run /medical-protocol:overlay in Claude Code, or restart the server without --manual.';
 
   // (Re)build a pill as an active spinner with the given label. Used for queued (auto) and processing.
   function spinnerPill(t, text) {
@@ -5003,7 +4997,7 @@ var init_overlay_client = __esm({
         t.pill.innerHTML = svgIcon(ICONS.clock, 12);
         var w = document.createElement('span'); w.textContent = 'queued \u2014 needs drain';
         t.pill.appendChild(w);
-        t.pill.onclick = function () { toast(drainHint(t.action), '#f59e0b'); };
+        t.pill.onclick = function () { toast(DRAIN_HINT, '#f59e0b'); };
       }
       return;
     }
@@ -5120,7 +5114,7 @@ var init_overlay_client = __esm({
     panelBody.appendChild(wrap);
   }
 
-  // Trigger a recommended skill against this same selection (POST /run). Records intent; with --auto
+  // Trigger a recommended skill against this same selection (POST /run). Records intent; in auto mode
   // a headless run processes it. Re-uses the order's anchor server-side, so we only send the file ref.
   function runSkill(t, skill, prompt) {
     if (!t || !skill) return;
@@ -5137,7 +5131,7 @@ var init_overlay_client = __esm({
     }).catch(function (err) { toast('Trigger failed: ' + err.message, '#ef4444'); });
   }
 
-  // Approve a staged add/implement order \u2192 the server re-queues it and (in --auto) the agent lands the diff.
+  // Approve a staged add/implement order \u2192 the server re-queues it and (in auto mode) the agent lands the diff.
   function applyOrder(t) {
     panelApply.disabled = true;
     panelApply.innerHTML = svgIcon(ICONS.check, 13) + '<span>Applying\u2026</span>';
@@ -5244,18 +5238,23 @@ selections from the browser, and drains the resulting work-order queue
 (.medprotocol/queue/) into a dispatch plan naming the skill to run for each
 selection \u2014 /medical-protocol:overlay-audit, overlay-implement, or overlay-add
 (the doctor selects a region, types a brief, and Add builds a new component there).
+In Claude Code, /medical-protocol:overlay is the one entry point: it sets the overlay
+up and processes whatever is queued.
 
 Options:
   --serve                Serve the overlay client (GET /overlay.js) and accept
                          selections (POST /queue). Add the printed <script> tag
-                         to your app in dev. Ctrl-C to stop.
+                         to your app in dev. Ctrl-C to stop. When the 'claude' CLI
+                         is on PATH, each selection spawns a headless Claude Code
+                         run (claude -p) that processes the order, so the result
+                         appears with no terminal step (runs unattended, uses tokens).
   --port <number>        Port for --serve (default: 7331)
-  --auto                 With --serve: on each selection, spawn a headless Claude
-                         Code run (claude -p) to process the order automatically \u2014
-                         closing the loop so the result appears with no terminal
-                         step. Requires the 'claude' CLI; opt-in (runs unattended).
+  --manual               With --serve: only queue selections; process them yourself
+                         with /medical-protocol:overlay in Claude Code
   --list                 List pending work orders without changing them
   --drain                Claim pending orders (mark "processing") and print a dispatch plan
+  --action <name>        With --list/--drain: only orders with this action
+                         (audit | implement | add | skill)
   --watch                Watch the queue and report new orders as they arrive (Ctrl-C to stop)
   --clear                Remove completed orders (status "done")
   --dir <path>           Queue directory (default: .medprotocol/queue)
@@ -5265,8 +5264,10 @@ Options:
 Examples:
   medprotocol overlay --serve
   medprotocol overlay --serve --port 8080
+  medprotocol overlay --serve --manual
   medprotocol overlay --list
   medprotocol overlay --drain
+  medprotocol overlay --drain --action audit
   medprotocol overlay --watch
   medprotocol overlay --clear`;
     SKILL_BY_ACTION = {
@@ -5350,7 +5351,7 @@ Examples:
         child.on("error", (err) => {
           busy = false;
           if (err.code === "ENOENT") {
-            process.stderr.write("\u2717 --auto needs the 'claude' CLI on PATH (https://claude.com/claude-code). Auto-dispatch disabled for this selection.\n");
+            process.stderr.write("\u2717 automatic processing needs the 'claude' CLI on PATH (https://claude.com/claude-code). Auto-dispatch disabled for this selection.\n");
           } else {
             process.stderr.write(`\u2717 headless Claude failed: ${err.message}
 `);
@@ -5646,14 +5647,14 @@ Examples:
 
 `);
         if (auto) {
-          process.stdout.write(`Auto mode ON: each selection spawns a headless Claude run (claude -p) to process it. Ctrl-C to stop.
+          process.stdout.write(`Auto mode ON: each selection spawns a headless Claude run (claude -p) to process it \u2014 unattended, uses tokens.
+`);
+          process.stdout.write(`Restart with --manual to only queue selections. Ctrl-C to stop.
 `);
         } else {
-          process.stdout.write(`Auto mode OFF \u2014 selections are only QUEUED, not processed: the overlay will show "queued \u2014 needs drain".
+          process.stdout.write(`Manual mode \u2014 selections are only QUEUED, not processed: the overlay will show "queued \u2014 needs drain".
 `);
-          process.stdout.write(`Process them in Claude Code with /medical-protocol:overlay-audit | overlay-implement | overlay-add,
-`);
-          process.stdout.write(`or restart with --auto to process every selection automatically. Ctrl-C to stop.
+          process.stdout.write(`Process them in Claude Code with /medical-protocol:overlay. Ctrl-C to stop.
 `);
         }
       });
@@ -5665,6 +5666,9 @@ Examples:
           serve: { type: "boolean", default: false },
           port: { type: "string" },
           auto: { type: "boolean", default: false },
+          // accepted for old commands; auto is now the default
+          manual: { type: "boolean", default: false },
+          action: { type: "string" },
           list: { type: "boolean", default: false },
           drain: { type: "boolean", default: false },
           watch: { type: "boolean", default: false },
@@ -5681,6 +5685,9 @@ Examples:
       }
       const dir = (0, import_node_path2.resolve)(values.dir ?? (0, import_node_path2.join)(".medprotocol", "queue"));
       const json = values.json;
+      const pendingOrders = () => readQueue(dir).filter(
+        (e) => statusOf(e.order) === "pending" && (!values.action || e.order.action === values.action)
+      );
       if (values.serve) {
         const port = Number.parseInt(values.port ?? "7331", 10);
         if (Number.isNaN(port) || port < 1 || port > 65535) {
@@ -5688,7 +5695,11 @@ Examples:
           process.exitCode = 1;
           return;
         }
-        serve(dir, port, values.auto);
+        const hasClaude = !(0, import_node_child_process.spawnSync)("claude", ["--version"], { stdio: "ignore" }).error;
+        if (!values.manual && !hasClaude) {
+          process.stderr.write("'claude' CLI not found on PATH \u2014 falling back to manual mode.\n");
+        }
+        serve(dir, port, !values.manual && hasClaude);
         return;
       }
       if (values.clear) {
@@ -5724,15 +5735,14 @@ Waiting for the overlay to create it\u2026
         return;
       }
       if (values.drain) {
-        const pending2 = readQueue(dir).filter((e) => statusOf(e.order) === "pending");
-        for (const { file, order } of pending2) {
+        const pending = pendingOrders();
+        for (const { file, order } of pending) {
           (0, import_node_fs2.writeFileSync)(file, JSON.stringify({ ...order, status: "processing" }, null, 2) + "\n");
         }
-        printOrders(pending2, json, "Dispatch plan \u2014 claimed pending work orders");
+        printOrders(pending, json, "Dispatch plan \u2014 claimed pending work orders");
         return;
       }
-      const pending = readQueue(dir).filter((e) => statusOf(e.order) === "pending");
-      printOrders(pending, json, "Pending work orders");
+      printOrders(pendingOrders(), json, "Pending work orders");
     };
   }
 });

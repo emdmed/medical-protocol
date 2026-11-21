@@ -2,7 +2,7 @@
 name: overlay-setup
 description: Turn on the dev overlay in the doctor's app — start the queue server and inject the dev-only overlay <script> tag into the right mount point, idempotently and reversibly. Use when the doctor wants to enable, install, wire up, or start the medical-protocol overlay / hover-to-audit tool.
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md
@@ -18,18 +18,14 @@ The agent does the React-aware edit; the `medprotocol` CLI stays a framework-agn
 
 ## Phase 1: Start the queue server
 
-1. **Ask the doctor how selections should be processed** (this decides whether the loop closes by
-   itself) before starting the server:
-   - **Automatic (`--auto`)** — every selection spawns a headless Claude run (`claude -p`) that
-     processes the order end-to-end, so the result appears in the overlay with no terminal step.
-     Requires the `claude` CLI on PATH and runs unattended (it can stage diffs). **Recommend this** —
-     without it, selections only queue and the overlay shows "queued — needs drain" until you act.
-   - **Manual drain** — `--serve` only captures selections; you process them by running
-     `/medical-protocol:overlay-audit | overlay-implement | overlay-add` in Claude Code.
-2. Run the server in the background. Default port `7331` — use `--port` if taken (`EADDRINUSE`):
-   - Automatic: `medprotocol overlay --serve --auto`
-   - Manual: `medprotocol overlay --serve`
-3. Capture the port from the server's first line (`medprotocol overlay server → http://localhost:<port>`).
+1. Run `medprotocol overlay --serve` in the background. Default port `7331` — use `--port` if taken
+   (`EADDRINUSE`). Do not ask how to process selections: the server is **automatic by default** — each
+   selection spawns a headless Claude run (`claude -p`) that processes it end-to-end, so the result
+   appears in the overlay with no terminal step. Edits are only staged; nothing lands without Apply.
+2. Capture the port from the server's first line (`medprotocol overlay server → http://localhost:<port>`).
+3. Tell the doctor in one line which mode came up (the server prints it): automatic runs unattended
+   and uses tokens; if the `claude` CLI is missing it falls back to manual, where selections wait until
+   they run `/medical-protocol:overlay`. Use `--manual` only if the doctor asks to process by hand.
 
 ## Phase 2: Find the mount point
 
@@ -57,8 +53,7 @@ If none can be found with confidence, **do not edit** — print the manual snipp
    (bottom-right) and pick a component.
 2. Give the teardown: remove the `data-medprotocol-overlay` block from the mount file, and stop the
    `--serve` process. The tag is dev-gated, but teardown keeps the source clean.
-3. Point them onward: selections drain via `/medical-protocol:overlay-audit`,
-   `/medical-protocol:overlay-implement`, and `/medical-protocol:overlay-add`.
+3. Point them onward: `/medical-protocol:overlay` processes anything still queued (manual mode).
 
 **Manual fallback** (when Phase 2 finds no mount point): show the snippet the server printed —
 `<script src="http://localhost:<port>/overlay.js" async></script>`, dev-gated — and ask the doctor
