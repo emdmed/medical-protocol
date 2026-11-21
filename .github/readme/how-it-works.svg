@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 330" width="1200" height="330" role="img" aria-labelledby="t d" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif">
+<title id="t">How Medical Protocol works</title>
+<desc id="d">Four steps: you describe the tool, the tested clinical logic is copied into your project, the agent builds the screen, and the agent checks the screen with made-up patient cases.</desc>
+<rect width="1200" height="330" rx="14" fill="#fdf5ee"/>
+<text x="30" y="44" font-size="20" font-weight="700" fill="#2b2320">From a sentence to a checked screen</text>
+<rect x="30" y="74" width="252" height="190" rx="10" fill="#ffffff" stroke="#2b2320" stroke-width="1.5"/>
+<circle cx="60" cy="108" r="15" fill="#c2452d"/><text x="60" y="114" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="48" y="158" font-size="17" font-weight="700" fill="#2b2320">You describe it</text>
+<text x="48" y="188" font-size="15" fill="#5c4f48">“A vital signs monitor</text>
+<text x="48" y="211" font-size="15" fill="#5c4f48">with fluid balance,</text>
+<text x="48" y="234" font-size="15" fill="#5c4f48">for teaching cases.”</text>
+<path d="M290 169.0 h22 m-8 -7 l8 7 l-8 7" fill="none" stroke="#c2452d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="326" y="74" width="252" height="190" rx="10" fill="#ffffff" stroke="#2b2320" stroke-width="1.5"/>
+<circle cx="356" cy="108" r="15" fill="#c2452d"/><text x="356" y="114" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<text x="344" y="158" font-size="17" font-weight="700" fill="#2b2320">Tested logic is copied in</text>
+<text x="344" y="188" font-size="15" fill="#5c4f48">The clinical library lands</text>
+<text x="344" y="211" font-size="15" fill="#5c4f48">in lib/medprotocol/.</text>
+<text x="344" y="234" font-size="15" fill="#5c4f48">Over 1,000 tests cover it.</text>
+<path d="M586 169.0 h22 m-8 -7 l8 7 l-8 7" fill="none" stroke="#c2452d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="622" y="74" width="252" height="190" rx="10" fill="#ffffff" stroke="#2b2320" stroke-width="1.5"/>
+<circle cx="652" cy="108" r="15" fill="#c2452d"/><text x="652" y="114" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<text x="640" y="158" font-size="17" font-weight="700" fill="#2b2320">The agent builds it</text>
+<text x="640" y="188" font-size="15" fill="#5c4f48">React, Next.js and UI SDK,</text>
+<text x="640" y="211" font-size="15" fill="#5c4f48">styled to match</text>
+<text x="640" y="234" font-size="15" fill="#5c4f48">your project.</text>
+<path d="M882 169.0 h22 m-8 -7 l8 7 l-8 7" fill="none" stroke="#c2452d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="918" y="74" width="252" height="190" rx="10" fill="#ffffff" stroke="#2b2320" stroke-width="1.5"/>
+<circle cx="948" cy="108" r="15" fill="#c2452d"/><text x="948" y="114" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<text x="936" y="158" font-size="17" font-weight="700" fill="#2b2320">It checks its own work</text>
+<text x="936" y="188" font-size="15" fill="#5c4f48">Made-up patient cases</text>
+<text x="936" y="211" font-size="15" fill="#5c4f48">run in the browser against</text>
+<text x="936" y="234" font-size="15" fill="#5c4f48">the library's answers.</text>
+<text x="600.0" y="306" font-size="16" fill="#2b2320" text-anchor="middle">The math comes from the library, never from the model.</text>
+</svg>
