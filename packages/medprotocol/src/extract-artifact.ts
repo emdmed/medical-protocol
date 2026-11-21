@@ -39,8 +39,8 @@ export const EXTRACT_ARTIFACT_HTML = String.raw`<!doctype html>
   --rev:#f2a48f; --rev-t:#5a3a31; --rev-i:#f6c0b0;
   --cur:#8fc9a6; --cur-t:#2e4a3a; --cur-i:#b4e2c6;
   --his:#b3a4e6; --his-t:#3d3658; --his-i:#d3c9f5; color-scheme:dark}
-*{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.55 var(--text);font-variant-numeric:tabular-nums;caret-color:var(--spot)}
+*{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--ink-3) transparent}
+body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh;overflow:hidden;margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.55 var(--text);font-variant-numeric:tabular-nums;caret-color:var(--spot)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
 ::selection{background:var(--t2);color:var(--ink)}
 :focus-visible{outline:2px solid var(--spot);outline-offset:3px}
@@ -50,7 +50,7 @@ p{margin:0}
 @media (min-width:700px){.wrap{padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(32px,env(safe-area-inset-right,0px))}}
 
 /* running head */
-.run{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;min-height:var(--runh);padding-block:8px;flex-wrap:wrap;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;align-items:center;gap:20px}
+.run{position:relative;margin-top:env(safe-area-inset-top,0px);min-height:var(--runh);padding-block:8px;flex-wrap:wrap;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;align-items:center;gap:20px}
 .brand{display:flex;align-items:center;gap:10px;font:700 14px/1 var(--head);font-stretch:80%;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
 .brand svg{width:20px;height:20px;flex:none}
 h1{font:800 22px/1 var(--head);font-stretch:70%;letter-spacing:-.005em;overflow-wrap:anywhere;min-width:0;padding-left:20px;border-left:1px solid var(--rule)}
@@ -63,65 +63,79 @@ h1{font:800 22px/1 var(--head);font-stretch:70%;letter-spacing:-.005em;overflow-
 .copy:hover{background:var(--ink);color:var(--paper)}
 .copy:focus-visible{outline:2px solid var(--spot);outline-offset:2px}
 
-/* two panes */
-.panes{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(20px,2.5vw,40px);align-items:start;padding-block:20px 32px}
-.label{font:700 12px/1.2 var(--head);font-stretch:80%;letter-spacing:.14em;text-transform:uppercase;color:var(--spot-ink)}
-.sheet{position:sticky;top:calc(var(--runh) + 16px + env(safe-area-inset-top,0px));display:grid;grid-template-rows:auto minmax(0,1fr);max-height:calc(100vh - var(--runh) - 32px);background:var(--sheet);border:1px solid var(--ink);box-shadow:0 1px 2px rgba(58,46,42,.06),0 14px 28px -14px var(--shadow);min-width:0}
-.sheet-head{display:flex;justify-content:space-between;gap:16px;padding:11px 20px;border-bottom:1px solid var(--ink);background:var(--t1);font:500 12px/1.2 var(--mono);color:var(--ink-2)}
-.note{margin:0;padding:16px 20px 20px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:400 15.5px/1.7 var(--text);color:var(--ink)}
-.key{display:flex;flex-wrap:wrap;gap:6px 16px;padding:10px 20px 12px;border-top:1px solid var(--rule);font-size:13.5px;color:var(--ink-2)}
+/* two panes: the page stays put, the note and the list each scroll */
+main{min-height:0}
+.panes{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);grid-template-rows:minmax(0,1fr);gap:clamp(20px,2.5vw,40px);height:100%;padding-block:20px}
+.sheet{position:relative;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:var(--sheet);border:1px solid var(--ink);box-shadow:0 1px 2px rgba(58,46,42,.06),0 14px 28px -14px var(--shadow);min-width:0;min-height:0}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:38px;padding:5px 20px;border-bottom:1px solid var(--ink);background:var(--t1);font:500 12px/1.2 var(--mono);color:var(--ink-2)}
+.note{margin:0;padding:16px 20px 20px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:400 15.5px/1.8 var(--text);color:var(--ink-2)}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;padding:10px 20px 12px;border-top:1px solid var(--ink);font-size:13.5px;color:var(--ink-2)}
 .key span{display:inline-flex;align-items:center;gap:6px}
-.key mark{display:inline-block;width:22px;height:12px;padding:0}
+.key mark{display:inline-block;width:24px;height:14px;padding:0}
 
-/* highlights take their group's colour: current filled, history outlined, needs review dashed or, if the value is not in the quote, outlined in alarm */
+/* highlights say how far to trust them: a filled span with a solid rule is a quote found word for word (double rule for history),
+   a dashed rule is a close match, an alarm frame with a wavy rule is a quote that is missing or does not state the value */
 .g-rev{--g:var(--rev);--gt:var(--rev-t);--gi:var(--rev-i)}
 .g-cur{--g:var(--cur);--gt:var(--cur-t);--gi:var(--cur-i)}
 .g-his{--g:var(--his);--gt:var(--his-t);--gi:var(--his-i)}
-mark{color:inherit;background:var(--gt);padding:1px 0;border-radius:1px;-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:default;transition:background-color .2s,box-shadow .2s}
-mark.g-his{box-shadow:inset 0 0 0 1.5px var(--g)}
-mark.g-rev{border-bottom:2px dashed var(--gi)}
-mark.bad{border-bottom:0;box-shadow:inset 0 0 0 1.5px var(--alarm)}
-.note mark.on,.key mark.on{background:var(--g);color:#3a2e2a;border-bottom-color:transparent;box-shadow:inset 0 0 0 1.5px var(--ink)}
+mark{color:var(--ink);background:var(--gt);padding:1px 3px;border-bottom:2px solid var(--g);border-radius:2px;-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:pointer;transition:background-color .2s,box-shadow .2s}
+mark.g-his{border-bottom:3px double var(--g)}
+mark.g-rev{background:transparent;border-bottom:2px dashed var(--gi)}
+mark.bad{border-bottom:0;box-shadow:inset 0 0 0 1.5px var(--alarm);text-decoration:underline wavy var(--alarm);text-underline-offset:3px}
+.note mark.on{background:var(--g);color:#3a2e2a;border-bottom-color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
 @media (prefers-reduced-motion:no-preference){
   .note mark{animation:swipe .7s cubic-bezier(.16,1,.3,1) .15s both}
   @keyframes swipe{from{background-color:transparent}}
 }
 
-/* the extraction list */
-.list{display:grid;gap:18px;min-width:0}
-.group{display:grid;gap:0}
-.group h2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 14px 7px;background:var(--gt);border-bottom:2px solid var(--g);color:var(--gi);font:800 19px/1 var(--head);font-stretch:74%}
-.group h2 span{font:600 13px/1 var(--mono);color:var(--gi)}
+/* the extraction list: one framed block per group, its band stays in view while its rows scroll */
+.list{display:grid;gap:24px;align-content:start;min-width:0;min-height:0;overflow-y:auto;padding-right:10px;scrollbar-gutter:stable}
+.group{background:var(--sheet);border:1px solid var(--g)}
+/* one line, the same height as the note's head */
+.gh{position:sticky;top:0;z-index:1;display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px;min-height:38px;padding:5px 14px;background:var(--g);color:#3a2e2a}
+.gh h2{font:800 17px/1 var(--head);font-stretch:74%}
+.gh b{order:1;margin-left:auto;font:600 13px/1 var(--mono)}
+.gh p{font-size:13px;line-height:1.3}
 .group ol{margin:0;padding:0;list-style:none}
-.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 16px;padding:8px 14px 9px;border-bottom:1px solid var(--rule);cursor:default;transition:background-color .2s}
+.row{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:3px 12px;padding:10px 14px 11px;border-bottom:1px solid var(--rule);scroll-margin-top:46px;cursor:default;transition:background-color .2s}
+.row:last-child{border-bottom:0}
 .row:hover,.row:focus-visible,.row.on{background:var(--gt)}
 .row:focus-visible{outline-offset:-2px}
+/* trust mark: filled tick = found word for word, dashed = close match, alarm = missing or wrong */
+.tr{grid-row:1/3;display:grid;place-items:center;width:22px;height:22px;margin-top:1px}
+.tr svg{width:14px;height:14px;fill:none;stroke-width:2.2;stroke-linecap:square}
+.tr.ok{background:var(--g);stroke:#3a2e2a}
+.tr.close{border:1.5px dashed var(--gi);stroke:var(--gi)}
+.tr.warn{background:var(--alarm);stroke:var(--paper)}
 .field{font:700 16.5px/1.25 var(--head);font-stretch:80%;color:var(--ink)}
 .val{font:600 14px/1.3 var(--mono);color:var(--ink);text-align:right;overflow-wrap:anywhere}
 .val small{font-weight:400;font-size:12.5px;color:var(--ink-2)}
-.meta{grid-column:2;grid-row:2;justify-content:flex-end;display:flex;flex-wrap:wrap;gap:2px 12px;font:700 11px/1.6 var(--head);font-stretch:82%;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.row.warn .val,.row.warn .val small{color:var(--alarm)}
+.meta{grid-column:3;grid-row:2;justify-content:flex-end;align-items:center;display:flex;flex-wrap:wrap;gap:2px 12px;font:700 11px/1.6 var(--head);font-stretch:82%;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
 .meta .st{color:var(--ink-2)}
-.meta .st.warn{color:var(--alarm)}
-.meta .st.close{color:var(--rev-i)}
-.meta .ep{color:var(--gi)}
-.meta .ep::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;background:var(--g);vertical-align:0}
-.quote{grid-column:1;grid-row:2;font-size:14.5px;line-height:1.45;color:var(--ink-2);font-style:italic;min-width:0}
-.says{grid-column:1/-1;font-size:13.5px;line-height:1.45;color:var(--ink-2)}
+.meta .st.warn{padding:0 6px;background:var(--alarm);color:var(--paper)}
+.meta .st.close{padding:0 5px;border:1px dashed var(--gi);color:var(--gi)}
+.meta .ep{color:var(--ink-2)}
+.quote{grid-column:2;grid-row:2;font-size:14.5px;line-height:1.45;color:var(--ink-2);font-style:italic;min-width:0}
+.says{grid-column:2/-1;font-size:13.5px;line-height:1.45;color:var(--ink-2)}
 .quote q{quotes:"\201C" "\201D"}
 .says b{font:700 11.5px/1 var(--head);font-stretch:82%;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-right:6px}
 .empty{padding:14px 0;font-style:italic;color:var(--ink-3)}
 
-footer{border-top:1px solid var(--ink);padding-block:14px 28px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;font-size:14px;color:var(--ink-3)}
-footer code{font:500 12.5px var(--mono)}
+footer{border-top:1px solid var(--ink);padding-block:8px 10px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 24px;font-size:13px;line-height:1.4;color:var(--ink-3)}
+footer code{font:500 12px var(--mono)}
 
+/* narrow screens: one column, and the page scrolls again */
 @media (max-width:860px){
-  .panes{grid-template-columns:1fr}
-  .sheet{position:relative;top:auto;max-height:60vh}
+  body{display:block;height:auto;overflow:visible}
+  .panes{grid-template-columns:1fr;grid-template-rows:none;height:auto}
+  .sheet{max-height:60vh}
+  .list{overflow:visible;padding-right:0}
+  footer{padding-block:14px 28px}
 }
 @media (max-width:640px){
-  .run{position:relative}
   .tally{margin-left:0;flex-basis:100%}
-  .meta,.quote{grid-column:1/-1;grid-row:auto;justify-content:flex-start}
+  .meta,.quote{grid-column:2/-1;grid-row:auto;justify-content:flex-start}
 }
 @media (max-width:480px){
   h1{padding-left:0;border-left:0;flex-basis:100%}
@@ -143,20 +157,20 @@ footer code{font:500 12.5px var(--mono)}
       <div class="sheet-head"><span>Note, as written</span><span id="len"></span></div>
       <pre class="note" id="note" tabindex="0"></pre>
       <div class="key" aria-hidden="true">
-        <span><mark class="g-cur"></mark>Current illness</span>
-        <span><mark class="g-his"></mark>History</span>
-        <span><mark class="g-rev"></mark>Needs review</span>
-        <span><mark class="g-rev bad"></mark>Value not in quote</span>
+        <span><mark class="g-cur"></mark>Found word for word</span>
+        <span><mark class="g-his"></mark>Found, history</span>
+        <span><mark class="g-rev"></mark>Close match</span>
+        <span><mark class="g-rev bad"></mark>Quote doesn't state the value</span>
       </div>
     </section>
     <div class="list" id="list"></div>
   </div>
+</main>
 
-  <footer>
+<footer class="wrap">
     <span>Values copied from the note, each with the words it came from. Extraction only: no ranges, scores or interpretation. Checked with <code>medprotocol extract</code>.</span>
     <span id="when"></span>
-  </footer>
-</main>
+</footer>
 
 <script type="application/json" id="data">__DATA__</script>
 <script>
@@ -173,6 +187,11 @@ footer code{font:500 12.5px var(--mono)}
     unverified: "Not found in note",
     none: "No quote"
   };
+  var ICON = {
+    ok: '<svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5"/></svg>',
+    close: '<svg viewBox="0 0 16 16"><path d="M3 6.5q2.5-3 5 0t5 0M3 11.5q2.5-3 5 0t5 0"/></svg>',
+    warn: '<svg viewBox="0 0 16 16"><path d="M8 2.5V9M8 12.5v1"/></svg>'
+  };
   function el(tag, cls, txt) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -188,7 +207,8 @@ footer code{font:500 12.5px var(--mono)}
   document.getElementById("t").textContent = data.name;
   document.getElementById("when").textContent = data.checkedAt ? "Checked " + data.checkedAt : "";
   var found = items.filter(function (i) { return i.status === "quoted"; }).length;
-  document.getElementById("len").textContent = text.split("\n").length + " lines";
+  var lines = text.split("\n").length;
+  document.getElementById("len").textContent = lines + (lines === 1 ? " line" : " lines");
 
   var tally = document.getElementById("tally");
 
@@ -231,16 +251,19 @@ footer code{font:500 12.5px var(--mono)}
 
   var rows = [];
   function row(it, n) {
-    var li = el("li", "row g-" + group(it));
+    var tr = it.status === "quoted" ? "ok" : CLOSE[it.status] ? "close" : "warn";
+    var li = el("li", "row g-" + group(it) + " " + tr);
     li.tabIndex = 0;
+    var ic = el("span", "tr " + tr); ic.setAttribute("aria-hidden", "true"); ic.innerHTML = ICON[tr]; li.appendChild(ic);
     li.appendChild(el("span", "field", it.field));
     var v = el("span", "val", it.value);
     if (it.unit) { v.appendChild(document.createTextNode(" ")); v.appendChild(el("small", "", it.unit)); }
     li.appendChild(v);
     var meta = el("div", "meta");
-    meta.appendChild(el("span", "ep g-" + (it.episode === "history" ? "his" : "cur"), it.episode === "history" ? "History" : "Current illness"));
+    // verified rows sit under their episode's band; only the review group mixes episodes
+    if (tr !== "ok") meta.appendChild(el("span", "ep", it.episode === "history" ? "History" : "Current illness"));
     if (it.time) meta.appendChild(el("span", "", it.time));
-    var st = el("span", "st " + (it.status === "quoted" ? "ok" : CLOSE[it.status] ? "close" : "warn"), status(it));
+    var st = el("span", "st " + tr, status(it));
     meta.appendChild(st);
     if (it.ambiguous) meta.appendChild(el("span", "", "Appears more than once: first occurrence marked"));
     li.appendChild(meta);
@@ -278,10 +301,17 @@ footer code{font:500 12.5px var(--mono)}
     });
   });
   note.addEventListener("mouseleave", clear);
+  note.addEventListener("click", function (e) {
+    var m = e.target.closest("mark");
+    var r = m && rows[m.dataset.items.split(" ")[0]];
+    if (r) r.scrollIntoView({ block: "nearest" });
+  });
 
   var list = document.getElementById("list");
   var groups = [
-    ["rev", "Needs review"], ["cur", "Current illness"], ["his", "History"]
+    ["rev", "Needs review", "The quote is missing, inexact, or doesn't state the value. Check each against the note."],
+    ["cur", "Current illness", "Each quote was found word for word in the note."],
+    ["his", "History", "Each quote was found word for word in the note."]
   ];
   groups.forEach(function (g) {
     var idx = [];
@@ -290,7 +320,7 @@ footer code{font:500 12.5px var(--mono)}
     if (g[0] === "his") { var f = el("li", "found"); f.appendChild(el("b", "", found + "/" + items.length)); f.appendChild(el("span", "", "found in note")); tally.appendChild(f); }
     if (!idx.length) return;
     var sec = el("section", "group g-" + g[0]);
-    var h = el("h2", "", g[1]); h.appendChild(el("span", "", String(idx.length))); sec.appendChild(h);
+    var h = el("header", "gh"); h.appendChild(el("h2", "", g[1])); h.appendChild(el("b", "", String(idx.length))); h.appendChild(el("p", "", g[2])); sec.appendChild(h);
     var ol = el("ol");
     idx.forEach(function (n) { ol.appendChild(row(items[n], n)); });
     sec.appendChild(ol);
