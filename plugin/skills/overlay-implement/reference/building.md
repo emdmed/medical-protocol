@@ -40,6 +40,11 @@ UI SDK components are unstyled. Style them with the project's existing styles (T
 
 - One folder per tool: `components/medprotocol/<module>/`. Main file `<module>.tsx`.
 - Build from UI SDK parts. Useful ones: Field, Label, Number Input, Input, Select, Segmented Control, Radio, Checkbox, Switch, Tabs, Meter, Progress, Timeline, Dialog, Toast, Tooltip, Date Input.
+- Two-part inputs (blood pressure, feet + inches): `FieldSet` + `FieldLegend` + `FieldGroup`, one `Field` per part.
+- Units: plain text beside the control, in the field's `FieldDescription` so it is read with the label. Do not put clinical units in Number Input's `format`: it accepts only the browser's built-in units and throws on the rest (mmHg, mg/dL, mEq/L).
+- A new alert or a severity change: call `announce()` from `@ui-sdk/core` so screen readers hear it. Not on every keystroke.
+- Click-to-edit cards: plain state is enough. For edit-in-place lists, `createInlineEdit` (see `docs/core.md`).
+- No UI SDK part exists for an elapsed timer (text in an element with `role="timer"`) or for linked text highlights (`<mark>` plus hover/focus handlers, see `extraction.md`). Build them plainly.
 - Start with one working version, then refine.
 - Follow the module's **Screen spec** in `{module}.md`: inputs with units, outputs, display rules.
 - Pass data between screens with props as shown in `composition.md`.
@@ -50,6 +55,7 @@ UI SDK components are unstyled. Style them with the project's existing styles (T
 - **Never compute a clinical value in the UI.** Every number, category, severity, and recommendation on screen comes from a `lib/medprotocol` function.
 - **Never edit `lib/medprotocol/`.** If the logic seems wrong, tell the doctor. Do not patch it locally.
 - **Never copy thresholds into the UI** (for example coloring BP red above 140). Use the severity/category the lib returns.
+- **Never let an input correct a clinical value.** Do not pass a clinical range as `min`/`max` to Number Input: it clamps a typed value to the bound on commit (400 becomes 350). Leave the bounds off, check the range yourself (the lib's `validate*` function where one exists, otherwise the Screen spec's accepted range), show the error, and do not save.
 - Pass inputs in the form the function expects. Most take strings and parse them internally.
 - Always show units next to values, and the guideline source when the lib provides one (`lib/medprotocol/sources.ts`).
 - Every input has a visible label. Everything works by keyboard. UI SDK gives you focus and keyboard behavior; don't remove it.
