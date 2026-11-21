@@ -1,14 +1,14 @@
 # Medical Protocol
 
-**Clinical skills for Claude Code. For learning, not patient care.**
+**Clinical skills for Claude Code. For learning and prototyping, not patient care.**
 
-An open-source educational plugin. It gives Claude Code a tested clinical library, so you can study calculations, practise on made-up cases and prototype clinical screens by describing them in clinical language. The agent writes the screens. The math comes from the library, never from the model. Privacy-first, 989 tests.
+An open-source educational plugin. It gives Claude Code a tested clinical library, so you can study calculations, practise on made-up cases and quickly prototype medical ideas by describing them in clinical language. The agent writes the screens. The math comes from the library, never from the model. Privacy-first, 989 tests.
 
 > *"I need a vital signs monitor with fluid balance tracking, to practise on teaching cases"* — the agent sets up the project, builds the screen and checks it in the browser.
 
 ## Medical disclaimer
 
-Medical Protocol is an open-source educational project. It and the tools it generates are for learning and experimentation only and must not be used for real patient care, diagnosis or treatment decisions. They are not certified medical devices and do not replace professional clinical judgment. The authors make no warranty about accuracy and accept no liability for any use of this software.
+Medical Protocol is an open-source educational project. It and the tools it generates are for learning, prototyping and experimentation only and must not be used for real patient care, diagnosis or treatment decisions. They are not certified medical devices and do not replace professional clinical judgment. The authors make no warranty about accuracy and accept no liability for any use of this software.
 
 ## Install
 

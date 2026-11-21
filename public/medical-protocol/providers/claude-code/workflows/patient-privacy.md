@@ -2,9 +2,9 @@
 
 > **This system is designed to run locally on your computer. No patient data leaves your machine unless you explicitly configure it to do so.**
 
-## The interfaces are fully functional
+## The interfaces are working prototypes
 
-The interfaces you build are ready to use with real clinical data. All data is stored locally in the doctor's browser. Do not describe them as "demos", "prototypes", or "sample projects" — they are working tools.
+The interfaces you build work fully, and all data is stored locally in the doctor's browser. They are for learning and for quickly prototyping medical ideas, not for real patient care. Describe them as prototypes or learning tools, never as tools ready for patients.
 
 Components should ship with empty forms ready for data entry, not pre-filled fictional patient data. Use placeholder labels (e.g., "Patient Name", "DOB") in empty states. If the component needs sample data to demonstrate layout or navigation (e.g., a patient list sidebar), use obviously generic placeholders like "Sample Patient" that the doctor can replace — never realistic-looking fake records.
 
