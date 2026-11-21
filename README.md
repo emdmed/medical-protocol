@@ -2,7 +2,7 @@
 
 **Clinical skills for Claude Code. For learning and prototyping, not patient care.**
 
-Tell Claude Code what you want in clinical language, and it builds a working screen for you. The numbers on that screen come from a tested clinical library, so the model never does the math.
+Tell Claude Code what you want in clinical language, and it builds a working screen for you. The numbers on that screen come from a tested clinical library, so the model never does the math. It can also read a clinical note and pull out the values, each with the exact words it came from.
 
 ![Four steps: you describe the tool, the tested clinical logic is copied into your project, the agent builds the screen, and the agent checks it with made-up patient cases](.github/readme/how-it-works.svg)
 
@@ -13,7 +13,7 @@ Medical Protocol is open source and made for studying calculations, practising o
 - *"I need a vital signs monitor with fluid balance tracking, to practise on teaching cases."*
 - *"Build me a DKA tracker with hourly glucose and ketones."*
 - *"What's the anion gap for Na 140, Cl 100, HCO3 12?"*
-- *"Pull the values out of this admission note. It's not real data."*
+- *"Pull the values out of `notes/admission.md`. It's a made-up note."*
 
 The agent sets up the project, builds the screen and checks it in the browser.
 
@@ -54,7 +54,11 @@ The calculations in your app are the same code the tests cover: more than 1,000 
 
 ## Reading a clinical note
 
-Paste a note (a made-up one, please) and ask for the values. Each value comes back with the exact words it was taken from, a second agent re-checks the first pass, and you get a page with the note on one side and the values on the other. Anything that doesn't match the note word for word is flagged for you to review.
+Save a made-up or de-identified note as a file and ask for the values. Each value comes back with the exact words it was taken from, a second agent re-checks the first pass, and you get a page with the note on one side and the values on the other. Anything that doesn't match the note word for word is flagged for you to review.
+
+![Four steps: you give a made-up or de-identified note, the values are pulled out with the exact words they came from, a second agent re-checks them, and you review a page with the note beside the values](.github/readme/how-extraction-works.svg)
+
+This is what the page looks like:
 
 ![The extraction page: a fictional admission note on the left with the quoted words highlighted, and the extracted values on the right, grouped into needs review, current illness and history](.github/readme/extraction-page.png)
 
