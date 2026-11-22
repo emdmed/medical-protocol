@@ -60,4 +60,4 @@ medprotocol bmi --weight 70 --height-m 1.75 --metric
 
 ## Guideline Reference
 
-WHO BMI classification (2000). Metric: kg/m². Imperial: (lb/in²)×703.
+WHO BMI classification (2000). Metric: kg/m². Imperial: (lb/in²)×703. Citation: `sources.WHO_BMI_2000`.

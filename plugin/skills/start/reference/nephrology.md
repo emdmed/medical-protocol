@@ -14,14 +14,14 @@ Ask the doctor about their CKD evaluation needs:
 
 - "Are you using this for initial CKD screening (eGFR + staging) or full monitoring with progression tracking?" (Default: full monitoring)
 - "Do you need KFRE kidney failure risk prediction with referral recommendations?" (Default: yes)
-- "Do you want the treatment eligibility checker (RASi, SGLT2i, finerenone)?" (Default: yes)
-- "Do you need CKD anemia monitoring (hemoglobin, iron status, ESA eligibility)?" (Default: yes for nephrology, no for primary care)
+- "Do you want the guideline criteria checker (RASi, SGLT2i, finerenone)?" (Default: yes)
+- "Do you need CKD anemia monitoring (hemoglobin, iron status, ESA criteria)?" (Default: yes for nephrology, no for primary care)
 - "Do you need CKD-MBD monitoring (phosphate, calcium, PTH, vitamin D)?" (Default: yes for nephrology, no for primary care)
 
 ### Setting-Aware Questions (based on Initial Clarification)
 
 - If **primary care/screening**: Route to CGA staging view with eGFR + albuminuria + risk color. Skip anemia/MBD unless explicitly requested.
-- If **nephrology clinic**: Include KFRE tracking, progression monitoring (eGFR slope), treatment eligibility, anemia monitoring, and CKD-MBD monitoring
+- If **nephrology clinic**: Include KFRE tracking, progression monitoring (eGFR slope), guideline criteria, anemia monitoring, and CKD-MBD monitoring
 - If **multiple patients**: Route to the dashboard workflow instead, offering CKD evaluation as one of the dashboard widgets
 
 Do NOT ask about eGFR formula choice, KDIGO staging thresholds, KFRE coefficients, display preferences, or technical preferences.
@@ -96,7 +96,7 @@ const gfrCategory = latestReading?.gfrCategory;
 ```
 
 **Important wiring:**
-- Pass `sex` from CKDPatientData to `<Anemia>` for sex-specific Hb thresholds and ESA eligibility. Without it, the component shows a sex select in the form and uses generic thresholds.
+- Pass `sex` from CKDPatientData to `<Anemia>` for sex-specific Hb thresholds and ESA criteria. Without it, the component shows a sex select in the form and uses generic thresholds.
 - Pass `gfrCategory` from the latest CKD reading to `<PhosphoCalcic>` for stage-aware PTH targets (2–9× UNL for G4-G5) and monitoring frequency footer.
 
 ---
@@ -104,9 +104,9 @@ const gfrCategory = latestReading?.gfrCategory;
 ## Phase 4: Quality & Preview
 
 Follow **After Any Workflow Completes** from the main protocol.
-Tell the doctor: "Your CKD evaluation dashboard is ready. Enter the patient's creatinine, age, sex, and urine ACR. It calculates eGFR using the CKD-EPI 2021 equation, stages CKD using the KDIGO GFR and albuminuria categories, shows the risk heatmap color, predicts kidney failure risk with the 4-variable KFRE, recommends referral pathways, checks treatment eligibility for RASi, SGLT2i, and finerenone, and monitors eGFR progression over time."
+Tell the doctor: "Your CKD evaluation dashboard is ready. Enter the patient's creatinine, age, sex, and urine ACR. It calculates eGFR using the CKD-EPI 2021 equation, stages CKD using the KDIGO GFR and albuminuria categories, shows the risk heatmap color, predicts kidney failure risk with the 4-variable KFRE, recommends referral pathways, checks guideline criteria for RASi, SGLT2i, and finerenone, and monitors eGFR progression over time."
 
-If anemia monitoring was included: "The anemia panel uses sex-specific hemoglobin thresholds, tracks iron status (ferritin/TSAT), indicates when iron supplementation is needed, and shows ESA eligibility when Hb drops below 10 g/dL with adequate iron stores."
+If anemia monitoring was included: "The anemia panel uses sex-specific hemoglobin thresholds, tracks iron status (ferritin/TSAT), indicates when iron supplementation is needed, and shows ESA criteria when Hb drops below 10 g/dL with adequate iron stores."
 
 If CKD-MBD was included: "The phospho-calcic panel monitors calcium, phosphorus, PTH, and vitamin D with stage-specific recommendations. It shows corrected calcium, Ca×P product, and the recommended monitoring frequency for the patient's GFR category."
 

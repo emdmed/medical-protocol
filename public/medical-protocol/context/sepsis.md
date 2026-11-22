@@ -112,4 +112,4 @@ medprotocol sepsis lactate --initial 4.2 --repeat 2.1
 
 ## Guideline Reference
 
-Sepsis-3 (JAMA 2016, `sources.SEPSIS_3_2016`). SSC 2026 guidelines. Chunked docs in `docs/sepsis-guidelines/01-08` — load only the section matching the current task. Do not build UI for guideline recommendations lacking backing functions in `lib/medprotocol/sepsis.ts`.
+Sepsis-3 (JAMA 2016, `sources.SEPSIS_3_2016`). SOFA-2 (`sources.SOFA_2_2025`), SSC 2026 guidelines (`sources.SSC_2026`); no DOI found for these two. Chunked docs in `docs/sepsis-guidelines/01-08` — load only the section matching the current task. Do not build UI for guideline recommendations lacking backing functions in `lib/medprotocol/sepsis.ts`.

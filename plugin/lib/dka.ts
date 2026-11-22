@@ -3,9 +3,10 @@
  *
  * Clinical references:
  * - Resolution criteria: Umpierrez et al., Hyperglycemic Crises in Adults consensus, Diabetes Care 2024
- * - Glucose targets: Kitabchi et al., Diabetes Care 2009
+ * - Glucose fall target (3 mmol/L/h) and insulin increase: JBDS 2021 (Dhatariya, Diabet Med 2022)
  * - Ketone clearance: Joint British Diabetes Societies (JBDS) Inpatient Care Group, 2023
- * - Insulin adjustment: Savage et al., Diabet Med 2011
+ * - Dextrose and insulin reduction below 14 mmol/L: JBDS 2021 (2024 consensus: 13.9 mmol/L, 250 mg/dL)
+ * - Subcutaneous transition, basal 1–2 h before stopping IV: 2024 consensus
  */
 
 import { safeParseFloat } from "./utils/safeParseFloat";
@@ -18,7 +19,7 @@ const GLUCOSE_TARGET_RATE = { MMOL: 3.0, MGDL: 54 } as const;
 /** Glucose level for the subcutaneous-insulin prompt (Kitabchi et al., Diabetes Care 2009) */
 const GLUCOSE_RESOLUTION = { MMOL: 11.1, MGDL: 200 } as const;
 
-/** Glucose threshold for considering insulin dose reduction */
+/** Glucose threshold for dextrose and insulin rate reduction (JBDS 2021) */
 const GLUCOSE_REDUCTION_THRESHOLD = { MMOL: 14, MGDL: 252 } as const;
 
 /** Ketone thresholds (JBDS 2023) */
@@ -254,15 +255,15 @@ export const suggestInsulinAdjustment = (
   const targetThreshold = unit === "mmol" ? GLUCOSE_RESOLUTION.MMOL : GLUCOSE_RESOLUTION.MGDL;
 
   if (dkaResolved) {
-    return "DKA resolved: transition to subcutaneous insulin once eating (basal 1–2 h before stopping IV)";
+    return "DKA resolution criteria met: 2024 consensus pathway is transition to subcutaneous insulin, basal 1–2 h before stopping IV";
   }
 
   if (glu < targetThreshold) {
-    return "Continue IV insulin with dextrose until DKA resolves; do not switch on glucose alone";
+    return "Glucose below 11.1 mmol/L (200 mg/dL), DKA not resolved: 2024 consensus continues IV insulin with dextrose (glucose alone is not a switch criterion)";
   }
 
   if (glu < lowThreshold) {
-    return "Consider reducing insulin rate and adding dextrose";
+    return "Glucose below 14 mmol/L (252 mg/dL): JBDS 2021 criterion for adding dextrose and reducing insulin rate met";
   }
 
   // Check reduction rate
@@ -271,10 +272,10 @@ export const suggestInsulinAdjustment = (
     if (!isNaN(r)) {
       const targetRate = unit === "mmol" ? GLUCOSE_TARGET_RATE.MMOL : GLUCOSE_TARGET_RATE.MGDL;
       if (r < targetRate) {
-        return "Consider increasing insulin rate";
+        return "Glucose fall below 3 mmol/L/h (54 mg/dL/h): JBDS 2021 criterion for increasing insulin rate met";
       }
     }
   }
 
-  return "Maintain current insulin rate";
+  return "Glucose fall on target (JBDS 2021, ≥3 mmol/L/h): no criterion for changing insulin rate met";
 };

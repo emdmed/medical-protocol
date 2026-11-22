@@ -162,24 +162,24 @@ export function getMASLDTreatmentRecommendation(
 ): TreatmentRecommendation {
   if (referral || severity === "critical") {
     return {
-      obesity: "Weight loss ≥10% (lifestyle ± GLP-1 RA ± metabolic surgery)",
-      diabetes: "Prefer pioglitazone or GLP-1 RA for glycemic management",
-      mash: "Consider resmetirom (thyroid hormone receptor-beta agonist) if biopsy-confirmed MASH with F2–F3 fibrosis",
+      obesity: "ADA Fig 4.3: weight loss ≥10% (lifestyle ± GLP-1 RA ± metabolic surgery)",
+      diabetes: "ADA Fig 4.3: pioglitazone or GLP-1 RA preferred for glycemic management",
+      mash: "ADA Fig 4.3: resmetirom (thyroid hormone receptor-beta agonist) may be considered if biopsy-confirmed MASH with F2–F3 fibrosis",
     };
   }
 
   if (severity === "warning") {
     return {
-      obesity: "Weight loss ≥5–7% through lifestyle modification",
-      diabetes: "Optimize glycemic control; consider GLP-1 RA",
-      mash: "Monitor; obtain LSM or ELF to clarify risk",
+      obesity: "ADA Fig 4.3: weight loss ≥5–7% through lifestyle modification",
+      diabetes: "ADA Fig 4.3: optimize glycemic control; GLP-1 RA may be considered",
+      mash: "ADA Fig 4.3: monitor; LSM or ELF to clarify risk",
     };
   }
 
   return {
-    obesity: "Maintain healthy weight",
-    diabetes: "Standard glycemic management",
-    mash: "Routine monitoring per screening interval",
+    obesity: "ADA Fig 4.3: maintain healthy weight",
+    diabetes: "ADA Fig 4.3: standard glycemic management",
+    mash: "ADA Fig 4.3: routine monitoring per screening interval",
   };
 }
 

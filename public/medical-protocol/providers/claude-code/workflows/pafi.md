@@ -28,7 +28,7 @@ Follow **Building a Screen** from the main protocol (building.md) for the `pafi`
 
 **Clinical logic:** The PaFi screen imports these from `@/lib/medprotocol/pafi` (copied from the plugin — never reimplement or edit them):
 - `calculatePaFi(paO2, fiO2)` — PaO2 / (FiO2 / 100), returns rounded number or null
-- `getPaFiClassification(ratio)` — "Normal", "Mild ARDS", "Moderate ARDS", "Severe ARDS"
+- `getPaFiClassification(ratio)` — "Normal", "Berlin mild range", "Berlin moderate range", "Berlin severe range"
 - `getPaFiSeverity(ratio)` — "normal", "mild", "moderate", "severe" (for badge styling)
 
 ---
@@ -44,7 +44,7 @@ Update `app/page.tsx` with a link to `/pafi`.
 ## Phase 4: Quality & Preview
 
 Follow **After Any Workflow Completes** from the main protocol.
-Tell the doctor: "Your PaFi calculator is ready. Enter PaO2 and FiO2 values (with quick presets for common oxygen concentrations) to see the PaO2/FiO2 ratio and ARDS classification. View it at http://localhost:3000/pafi"
+Tell the doctor: "Your PaFi calculator is ready. Enter PaO2 and FiO2 values (with quick presets for common oxygen concentrations) to see the PaO2/FiO2 ratio and its Berlin oxygenation range. View it at http://localhost:3000/pafi"
 Ask: "Would you like to adjust anything about the calculator?"
 
 ---

@@ -90,6 +90,41 @@ describe('calculateEGFR', () => {
     expect(calculateEGFR('1.0', '0', 'male')).toBe(0);
   });
 
+  // External reference: NKF "Example request or ticket to the IT team to implement the CKD-EPI 2021
+  // equation", table "Age, sex and creatinine combinations to use for testing" (whole numbers).
+  // https://kidney.org/sites/default/files/example_it_ticket-implement_2021_ckd-epi_equation_to_calculate_egfr_from_creatinine_1.pdf
+  it.each([
+    ['18', 'male', '0.90', 127],
+    ['18', 'male', '0.91', 125],
+    ['18', 'female', '0.70', 128],
+    ['18', 'female', '0.71', 126],
+    ['90', 'male', '0.50', 97],
+    ['90', 'male', '1.50', 44],
+    ['90', 'female', '0.50', 89],
+    ['90', 'female', '1.50', 33],
+  ])('matches the NKF test value: age %s, %s, Scr %s → %i', (age, sex, scr, expected) => {
+    expect(calculateEGFR(scr, age, sex)).toBe(expected);
+  });
+
+  // External reference: MDCalc "CKD-EPI Equations for GFR", 2021 CKD-EPI Creatinine, mg/dL, read 2026-11-22.
+  // https://www.mdcalc.com/calc/3939/ckd-epi-equations-glomerular-filtration-rate-gfr
+  it.each([
+    ['55', 'male', '1.2', 71],
+    ['40', 'female', '0.8', 95],
+    ['70', 'male', '2.0', 35],
+    ['50', 'female', '1.0', 69],
+    ['30', 'male', '0.9', 118],
+    ['65', 'female', '0.7', 96],
+    ['80', 'female', '3.5', 13],
+    ['45', 'male', '0.6', 121],
+  ])('matches MDCalc: age %s, %s, Scr %s → %i', (age, sex, scr, expected) => {
+    expect(calculateEGFR(scr, age, sex)).toBe(expected);
+  });
+
+  it('does not calculate under 18 (NKF: "do not calculate")', () => {
+    expect(calculateEGFR('0.8', '17', 'male')).toBe(0);
+  });
+
   it('handles boundary Scr at kappa for male (0.9)', () => {
     const egfr = calculateEGFR('0.9', '50', 'male');
     // Scr/κ = 1.0 exactly → min=1^α=1, max=1^-1.2=1
@@ -250,6 +285,25 @@ describe('getMonitoringFrequency', () => {
 // ─── calculateKFRE ──────────────────────────────────────────────────
 
 describe('calculateKFRE', () => {
+  // External reference: https://kidneyfailurerisk.com calculator, 4-variable, region "Non-North America",
+  // ACR in mg/g. Values read from the site on 2026-11-22 (it shows two decimals, the lib one).
+  it.each([
+    ['65', 'female', '35', '300', 2.39, 8.95],
+    ['60', 'male', '20', '1000', 27.13, 70.65],
+    ['70', 'male', '45', '30', 0.32, 1.24],
+    ['50', 'female', '15', '2000', 52.06, 94.2],
+    ['40', 'male', '30', '300', 8.95, 30.46],
+    ['80', 'female', '25', '150', 3.8, 13.95],
+    ['55', 'male', '10', '3000', 82.9, 99.89],
+    ['75', 'female', '55', '50', 0.09, 0.36],
+    ['45', 'male', '40', '500', 3.41, 12.59],
+    ['85', 'male', '18', '800', 18.64, 55.01],
+  ])('matches kidneyfailurerisk.com: age %s, %s, eGFR %s, ACR %s → %f / %f', (age, sex, egfr, acr, twoYear, fiveYear) => {
+    const result = calculateKFRE(age, sex, egfr, acr);
+    expect(Math.abs(result.twoYear - twoYear)).toBeLessThan(0.06);
+    expect(Math.abs(result.fiveYear - fiveYear)).toBeLessThan(0.06);
+  });
+
   it('returns risk percentages for typical CKD patient', () => {
     // 65-year-old female, eGFR 35, ACR 300
     const result = calculateKFRE('65', 'female', '35', '300');
@@ -677,7 +731,7 @@ describe('checkESAEligibility', () => {
   it('returns not eligible when iron deficient', () => {
     const result = checkESAEligibility('8', '50', '15', 'male');
     expect(result.eligible).toBe(false);
-    expect(result.reason).toContain('iron');
+    expect(result.reason).toContain('Iron deficient');
   });
 
   it('respects sex-specific thresholds', () => {
@@ -704,7 +758,7 @@ describe('assessPhosphate', () => {
   it('returns high for phosphate > 4.5 with advanced CKD', () => {
     const result = assessPhosphate('5.0', 'G4');
     expect(result.status).toBe('high');
-    expect(result.recommendation).toContain('binder');
+    expect(result.recommendation).toContain('above target range');
   });
 
   it('returns low for phosphate < 2.5 with advanced CKD', () => {
@@ -775,7 +829,7 @@ describe('assessPTH', () => {
   it('returns high for PTH above 9x UNL in G4-G5', () => {
     const result = assessPTH('600', 'G5');
     expect(result.status).toBe('high');
-    expect(result.recommendation).toContain('calcimimetics');
+    expect(result.recommendation).toContain('>9× UNL');
   });
 
   it('handles invalid input', () => {
@@ -788,7 +842,7 @@ describe('assessPTH', () => {
 describe('assessVitaminD', () => {
   it('returns deficient for 25-OH-D < 20', () => {
     expect(assessVitaminD('15').status).toBe('deficient');
-    expect(assessVitaminD('10').recommendation).toContain('cholecalciferol');
+    expect(assessVitaminD('10').recommendation).toContain('<20 ng/mL');
   });
 
   it('returns insufficient for 25-OH-D 20-29', () => {

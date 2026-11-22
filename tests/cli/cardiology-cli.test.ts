@@ -160,7 +160,7 @@ describe('medprotocol cardiology chadsvasc', () => {
 
   it('shows anticoagulation guidance', () => {
     run(['chadsvasc', '--hypertension', '--age75', '--stroke']);
-    expect(stdout).toContain('Anticoagulation recommended');
+    expect(stdout).toContain('Guideline threshold for anticoagulation met');
   });
 
   it('age75 takes priority over age65', () => {

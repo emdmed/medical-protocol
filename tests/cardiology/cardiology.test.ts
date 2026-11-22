@@ -54,6 +54,42 @@ const baseCHADS: CHADSVAScInputs = {
 // ── ASCVD ──────────────────────────────────────────────
 
 describe("calculateASCVD", () => {
+  // External reference: Goff et al. 2013 ACC/AHA risk guideline, worked example for White men
+  // (age 55, TC 213, HDL 50, untreated SBP 120, nonsmoker, no diabetes) → 5.3%.
+  // The paper rounds the individual sum to 60.69 before exponentiating; unrounded it gives 5.4, hence ±0.1.
+  it("matches the Goff 2013 worked example for White men within rounding", () => {
+    expect(Math.abs(parseFloat(calculateASCVD(baseASCVD)!) - 5.3)).toBeLessThan(0.11);
+  });
+
+  // External reference: MDCalc "ASCVD 2013 Risk Calculator from AHA/ACC", mg/dL, read 2026-11-22.
+  // https://www.mdcalc.com/calc/3398/ascvd-atherosclerotic-cardiovascular-disease-2013-risk-calculator-aha-acc
+  // The first four rows are the Goff 2013 worked example. Some rows differ by 0.1 here: we use the paper's
+  // two-decimal means (e.g. -29.18) and MDCalc behaves as if it used slightly more precise ones, which it
+  // does not publish. Hence ±0.1.
+  // race, sex, age, TC, HDL, SBP, BP treatment, diabetes, smoker, MDCalc %
+  it.each([
+    ["white", "female", "55", "213", "50", "120", false, false, false, 2.1],
+    ["white", "male", "55", "213", "50", "120", false, false, false, 5.4],
+    ["aa", "female", "55", "213", "50", "120", false, false, false, 3.0],
+    ["aa", "male", "55", "213", "50", "120", false, false, false, 6.1],
+    ["aa", "female", "65", "250", "40", "160", true, true, true, 65.2],
+    ["white", "male", "60", "240", "35", "150", true, false, true, 29.9],
+    ["white", "female", "70", "200", "60", "140", true, true, false, 26.5],
+    ["aa", "male", "45", "180", "45", "130", false, false, true, 7.2],
+    ["other", "female", "62", "220", "55", "135", false, true, false, 9.1],
+    ["white", "male", "48", "190", "38", "128", true, true, false, 7.8],
+    ["white", "male", "48", "190", "38", "146", true, true, true, 22.3],
+    ["aa", "male", "48", "190", "38", "128", false, false, false, 5.1],
+    ["aa", "male", "48", "190", "38", "128", true, false, true, 14.2],
+    ["aa", "male", "48", "190", "38", "128", true, true, false, 15.6],
+  ] as const)(
+    "matches MDCalc: %s %s, age %s, TC %s, HDL %s, SBP %s, treated %s, diabetes %s, smoker %s → %f",
+    (race, sex, age, totalCholesterol, hdlCholesterol, systolicBP, bpTreatment, diabetes, smoker, expected) => {
+      const inputs: ASCVDInputs = { race, sex, age, totalCholesterol, hdlCholesterol, systolicBP, bpTreatment, diabetes, smoker };
+      expect(Math.abs(parseFloat(calculateASCVD(inputs)!) - expected)).toBeLessThan(0.11);
+    },
+  );
+
   it("returns a numeric string for valid white male inputs", () => {
     const result = calculateASCVD(baseASCVD);
     expect(result).not.toBeNull();
@@ -248,15 +284,15 @@ describe("getHEARTCategory", () => {
 
 describe("getHEARTAction", () => {
   it("returns discharge recommendation for low score", () => {
-    expect(getHEARTAction(2)).toContain("Discharge");
+    expect(getHEARTAction(2)).toContain("discharge");
   });
 
   it("returns observation recommendation for moderate score", () => {
-    expect(getHEARTAction(5)).toContain("Observation");
+    expect(getHEARTAction(5)).toContain("observation");
   });
 
   it("returns urgent recommendation for high score", () => {
-    expect(getHEARTAction(8)).toContain("Urgent");
+    expect(getHEARTAction(8)).toContain("invasive strategy");
   });
 });
 
@@ -358,27 +394,27 @@ describe("getCHADSVAScCategory", () => {
 
 describe("getCHADSVAScAction", () => {
   it("returns no anticoagulation for male score 0", () => {
-    expect(getCHADSVAScAction(0, false)).toContain("No anticoagulation");
+    expect(getCHADSVAScAction(0, false)).toContain("not met");
   });
 
   it("returns consider for male score 1", () => {
-    expect(getCHADSVAScAction(1, false)).toContain("Consider");
+    expect(getCHADSVAScAction(1, false)).toContain("may be considered");
   });
 
   it("returns recommended for male score >= 2", () => {
-    expect(getCHADSVAScAction(2, false)).toContain("recommended");
+    expect(getCHADSVAScAction(2, false)).toContain("threshold for anticoagulation met");
   });
 
   it("returns no anticoagulation for female score <= 1", () => {
-    expect(getCHADSVAScAction(1, true)).toContain("No anticoagulation");
+    expect(getCHADSVAScAction(1, true)).toContain("not met");
   });
 
   it("returns consider for female score 2", () => {
-    expect(getCHADSVAScAction(2, true)).toContain("Consider");
+    expect(getCHADSVAScAction(2, true)).toContain("may be considered");
   });
 
   it("returns recommended for female score >= 3", () => {
-    expect(getCHADSVAScAction(3, true)).toContain("recommended");
+    expect(getCHADSVAScAction(3, true)).toContain("threshold for anticoagulation met");
   });
 });
 

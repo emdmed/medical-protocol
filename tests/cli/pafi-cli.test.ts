@@ -50,29 +50,29 @@ describe('medprotocol pafi', () => {
     expect(result.severity).toBe('normal');
   });
 
-  it('classifies Mild ARDS (200-300)', () => {
+  it('classifies Berlin mild range (201-300)', () => {
     run(['--pao2', '70', '--fio2', '30', '--json']);
     const result = JSON.parse(stdout);
     // 70 / 0.30 = 233
     expect(result.paFi).toBeGreaterThanOrEqual(200);
     expect(result.paFi).toBeLessThanOrEqual(300);
-    expect(result.classification).toBe('Mild ARDS');
+    expect(result.classification).toBe('Berlin mild range');
   });
 
-  it('classifies Moderate ARDS (100-200)', () => {
+  it('classifies Berlin moderate range (101-200)', () => {
     run(['--pao2', '60', '--fio2', '40', '--json']);
     const result = JSON.parse(stdout);
     // 60 / 0.40 = 150
     expect(result.paFi).toBe(150);
-    expect(result.classification).toBe('Moderate ARDS');
+    expect(result.classification).toBe('Berlin moderate range');
   });
 
-  it('classifies Severe ARDS (<100)', () => {
+  it('classifies Berlin severe range (≤100)', () => {
     run(['--pao2', '50', '--fio2', '80', '--json']);
     const result = JSON.parse(stdout);
     // 50 / 0.80 = 62.5 → 63
     expect(result.paFi).toBeLessThan(100);
-    expect(result.classification).toBe('Severe ARDS');
+    expect(result.classification).toBe('Berlin severe range');
   });
 
   it('errors for FiO2 < 21', () => {

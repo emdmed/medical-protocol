@@ -78,8 +78,8 @@ interface MasldScreeningReading {
 - Neither available → "Obtain LSM or ELF"
 
 **Treatment** (ADA Fig 4.3):
-- Referral / critical: weight loss ≥10% (lifestyle ± GLP-1 RA ± metabolic surgery); prefer pioglitazone or GLP-1 RA; consider resmetirom if biopsy-confirmed MASH with F2–F3 fibrosis
-- Warning: weight loss ≥5–7% through lifestyle; optimize glycemia, consider GLP-1 RA; obtain LSM or ELF
+- Referral / critical: weight loss ≥10% (lifestyle ± GLP-1 RA ± metabolic surgery); pioglitazone or GLP-1 RA preferred; resmetirom may be considered if biopsy-confirmed MASH with F2–F3 fibrosis
+- Warning: weight loss ≥5–7% through lifestyle; optimize glycemia, GLP-1 RA may be considered; LSM or ELF to clarify risk
 - Normal: maintain healthy weight, standard glycemic management, routine monitoring
 
 ---
@@ -101,4 +101,4 @@ interface MasldScreeningReading {
 
 ## Guideline Reference
 
-ADA Standards of Care 2026, Chapter 4, Figure 4.3 — MASLD/MASH algorithm (`sources.ADA_2026_FIG_4_3`).
+ADA Standards of Care 2026, Chapter 4, Figure 4.3 — MASLD/MASH algorithm (`sources.ADA_2026_FIG_4_3`). FIB-4 formula: `sources.FIB4_2006`.

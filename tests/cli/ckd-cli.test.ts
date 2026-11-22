@@ -146,7 +146,7 @@ describe('medprotocol ckd kfre', () => {
 describe('medprotocol ckd treatment', () => {
   it('shows treatment eligibility for valid inputs', () => {
     run(['treatment', '--egfr', '35', '--acr', '300', '--diabetes']);
-    expect(stdout).toContain('Treatment Eligibility');
+    expect(stdout).toContain('Guideline Criteria');
     expect(stdout).toContain('RASi');
     expect(stdout).toContain('SGLT2i');
     expect(stdout).toContain('Finerenone');

@@ -22,7 +22,7 @@ import { formatHeader, formatTable, printResult, formatError } from "../../../..
 const USAGE = `Usage: medprotocol cardiology <sub-command> [options]
 
 Sub-commands:
-  ascvd        10-year ASCVD risk (Pooled Cohort Equations)
+  ascvd        10-year ASCVD risk (Pooled Cohort Equations 2013, superseded by PREVENT)
   heart        HEART Score for chest pain triage
   chadsvasc    CHA₂DS₂-VASc stroke risk in atrial fibrillation
 
@@ -144,7 +144,7 @@ const runASCVD = (argv: string[], json: boolean): void => {
 
   printResult(data, json, () => {
     return [
-      formatHeader("ASCVD 10-Year Risk"),
+      formatHeader("ASCVD 10-Year Risk (Pooled Cohort Equations 2013, superseded by PREVENT)"),
       formatTable([
         ["Risk", `${risk}%`],
         ["Category", category],
@@ -231,7 +231,7 @@ const runHEART = (argv: string[], json: boolean): void => {
       formatTable([
         ["Score", `${score}/10`],
         ["Category", category],
-        ["Action", action],
+        ["Guideline", action],
         ["History", `${inputs.history}`],
         ["ECG", `${inputs.ecg}`],
         ["Age", `${inputs.age}`],
@@ -300,7 +300,7 @@ const runCHADSVASc = (argv: string[], json: boolean): void => {
       formatTable([
         ["Score", `${score}/9`],
         ["Category", category],
-        ["Action", action],
+        ["Guideline", action],
         ["Factors", factors || "None"],
       ]),
     ].join("\n");

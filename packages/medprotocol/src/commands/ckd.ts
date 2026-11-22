@@ -30,8 +30,8 @@ Sub-commands:
   egfr         Calculate eGFR (CKD-EPI 2021)
   stage        Full CGA staging (eGFR + albuminuria + risk)
   kfre         Kidney Failure Risk Equation (4-variable)
-  treatment    Treatment eligibility (RASi, SGLT2i, finerenone)
-  anemia       CKD anemia assessment (Hb, iron, ESA eligibility)
+  treatment    Guideline criteria met (RASi, SGLT2i, finerenone)
+  anemia       CKD anemia assessment (Hb, iron, ESA criteria)
   mbd          CKD-MBD assessment (phosphate, calcium, PTH, vitamin D)
 
 eGFR options:
@@ -82,6 +82,14 @@ Examples:
   medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
   medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4`;
 
+// calculateEGFR returns 0 when it cannot calculate; staging that 0 would report G5.
+const failNotCalculated = (): void => {
+  process.stderr.write(
+    formatError("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0") + "\n",
+  );
+  process.exitCode = 1;
+};
+
 const runEGFR = (argv: string[], json: boolean): void => {
   const { values } = parseArgs({
     args: argv,
@@ -114,6 +122,7 @@ const runEGFR = (argv: string[], json: boolean): void => {
   }
 
   const egfr = calculateEGFR(values.creatinine!, values.age!, values.sex!);
+  if (egfr === 0) return failNotCalculated();
   const gfrCategory = classifyGFRCategory(String(egfr));
   const gfrLabel = getGFRCategoryLabel(gfrCategory);
   const severity = getCKDSeverity(gfrCategory);
@@ -166,6 +175,7 @@ const runStage = (argv: string[], json: boolean): void => {
   }
 
   const egfr = calculateEGFR(values.creatinine!, values.age!, values.sex!);
+  if (egfr === 0) return failNotCalculated();
   const gfrCategory = classifyGFRCategory(String(egfr));
   const gfrLabel = getGFRCategoryLabel(gfrCategory);
   const albCategory = classifyAlbuminuriaCategory(values.acr!);
@@ -299,11 +309,11 @@ const runTreatment = (argv: string[], json: boolean): void => {
   };
 
   const eligible = (r: { eligible: boolean; grade: string }) =>
-    r.eligible ? `Yes (Grade ${r.grade})` : "No";
+    r.eligible ? `Criteria met (Grade ${r.grade})` : "Criteria not met";
 
   printResult(data, json, () => {
     return [
-      formatHeader("CKD Treatment Eligibility"),
+      formatHeader("CKD Guideline Criteria"),
       formatTable([
         ["GFR Category", gfrCategory],
         ["Albuminuria", albCategory],
@@ -363,10 +373,10 @@ const runAnemia = (argv: string[], json: boolean): void => {
     ];
     if (iron) {
       rows.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
-      rows.push(["Iron Recommendation", iron.recommendation]);
+      rows.push(["Iron Criteria", iron.recommendation]);
     }
     if (esa) {
-      rows.push(["ESA Eligible", esa.eligible ? "Yes" : "No"]);
+      rows.push(["ESA Criteria", esa.eligible ? "Met" : "Not met"]);
       rows.push(["ESA Reason", esa.reason]);
     }
     return [

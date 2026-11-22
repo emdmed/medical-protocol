@@ -137,11 +137,11 @@ export function getStatinIndication(input: StatinIndicationInput): {
   const { age, gfrCategory } = input;
   if (input.onDialysis) {
     return input.alreadyOnStatin
-      ? { indicated: true, recommendation: "On dialysis and already on a statin: continue", grade: "2C" }
-      : { indicated: false, recommendation: "On dialysis: do not initiate a statin", grade: "2A" };
+      ? { indicated: true, recommendation: "On dialysis and already on a statin: KDIGO criterion to continue met", grade: "2C" }
+      : { indicated: false, recommendation: "On dialysis, not on a statin: KDIGO criterion to start a statin not met", grade: "2A" };
   }
   if (input.kidneyTransplant) {
-    return { indicated: true, recommendation: "Kidney transplant recipient: statin suggested", grade: "2B" };
+    return { indicated: true, recommendation: "Kidney transplant recipient: meets KDIGO statin criterion", grade: "2B" };
   }
   if (age === null || age < 18) {
     return { indicated: false, recommendation: "Adult criteria only (age ≥18 required)", grade: "" };
@@ -152,8 +152,8 @@ export function getStatinIndication(input: StatinIndicationInput): {
   const below60 = ["G3a", "G3b", "G4", "G5"].includes(gfrCategory);
   if (age >= 50) {
     return below60
-      ? { indicated: true, recommendation: "Age ≥50 with eGFR <60: statin or statin/ezetimibe", grade: "1A" }
-      : { indicated: true, recommendation: "Age ≥50 with eGFR ≥60: statin", grade: "1B" };
+      ? { indicated: true, recommendation: "Age ≥50 with eGFR <60: meets KDIGO criterion for statin or statin/ezetimibe", grade: "1A" }
+      : { indicated: true, recommendation: "Age ≥50 with eGFR ≥60: meets KDIGO statin criterion", grade: "1B" };
   }
   const factors = [
     input.coronaryDisease && "coronary disease",
@@ -162,9 +162,9 @@ export function getStatinIndication(input: StatinIndicationInput): {
     input.tenYearCoronaryRiskOver10 && "10-y coronary risk >10%",
   ].filter(Boolean);
   if (factors.length > 0) {
-    return { indicated: true, recommendation: `Age 18–49 with ${factors.join(", ")}: statin suggested`, grade: "2A" };
+    return { indicated: true, recommendation: `Age 18–49 with ${factors.join(", ")}: meets KDIGO statin criterion`, grade: "2A" };
   }
-  return { indicated: false, recommendation: "Age 18–49 without high-risk factors: statin not indicated", grade: "" };
+  return { indicated: false, recommendation: "Age 18–49 without high-risk factors: KDIGO statin criterion not met", grade: "" };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -223,7 +223,7 @@ export function classifyPTH(pth: string, gfrCategory?: string): {
   if (gfrCategory === "G4" || gfrCategory === "G5") {
     if (v > 585) return { label: "Very high (>9× ULN)", severity: "critical" };
     if (v >= 130) return { label: "Within target (2–9× ULN)", severity: "normal" };
-    return { label: "Below target — avoid over-suppression", severity: "warning" };
+    return { label: "Below target (<2× ULN)", severity: "warning" };
   }
   if (v > 65) return { label: "Elevated", severity: "warning" };
   if (v < 15) return { label: "Low", severity: "warning" };
@@ -307,13 +307,13 @@ export function needsIronSupplementation(
   const f = sf(ferritin);
   const t = sf(tsat);
   if (f === 0 && t === 0) return { needed: false, reason: "" };
-  if (f > 500) return { needed: false, reason: "Ferritin >500 ng/mL; iron not routinely recommended" };
+  if (f > 500) return { needed: false, reason: "Ferritin >500 ng/mL; above KDIGO iron criteria" };
   if ((f > 0 && f < 100) || (t > 0 && t < 20)) {
     return { needed: true, reason: "Absolute or functional iron deficiency" };
   }
   if (f === 0 || t === 0) return { needed: false, reason: "Both ferritin and TSAT are needed" };
   if (t <= 30) {
-    return { needed: true, reason: "TSAT ≤30% and ferritin ≤500 ng/mL: trial of iron if a higher Hb is desired" };
+    return { needed: true, reason: "TSAT ≤30% and ferritin ≤500 ng/mL: meets KDIGO criterion for a trial of iron" };
   }
   return { needed: false, reason: "Adequate iron stores" };
 }

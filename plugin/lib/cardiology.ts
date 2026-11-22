@@ -12,6 +12,8 @@ import type {
 import { safeParseFloat } from "./utils/safeParseFloat";
 
 // ── ASCVD (Pooled Cohort Equations 2013) ───────────────
+// Superseded: the ACC estimator now defaults to PREVENT and marks the pooled cohort equations as
+// "no longer supported by ACC clinical policy or guidelines" (2026 ACC/AHA dyslipidemia guideline).
 
 /**
  * Coefficient sets for the 4 race/sex groups.
@@ -189,9 +191,9 @@ export const getHEARTCategory = (score: number): string => {
 };
 
 export const getHEARTAction = (score: number): string => {
-  if (score <= 3) return "Discharge with outpatient follow-up; consider stress testing";
-  if (score <= 6) return "Observation, serial troponins, and non-invasive testing";
-  return "Urgent invasive strategy; early cardiology consultation";
+  if (score <= 3) return "HEART low-risk band (0–3): pathway is early discharge with outpatient follow-up";
+  if (score <= 6) return "HEART moderate-risk band (4–6): pathway is observation, serial troponins and non-invasive testing";
+  return "HEART high-risk band (7–10): pathway is early invasive strategy with cardiology consultation";
 };
 
 export const getHEARTSeverity = (score: number): string => {
@@ -230,13 +232,13 @@ export const getCHADSVAScCategory = (score: number, isFemale: boolean): string =
 
 export const getCHADSVAScAction = (score: number, isFemale: boolean): string => {
   if (isFemale) {
-    if (score <= 1) return "No anticoagulation needed";
-    if (score === 2) return "Consider anticoagulation";
-    return "Anticoagulation recommended";
+    if (score <= 1) return "Guideline threshold for anticoagulation not met";
+    if (score === 2) return "Guideline: anticoagulation may be considered";
+    return "Guideline threshold for anticoagulation met";
   }
-  if (score === 0) return "No anticoagulation needed";
-  if (score === 1) return "Consider anticoagulation";
-  return "Anticoagulation recommended";
+  if (score === 0) return "Guideline threshold for anticoagulation not met";
+  if (score === 1) return "Guideline: anticoagulation may be considered";
+  return "Guideline threshold for anticoagulation met";
 };
 
 export const getCHADSVAScSeverity = (score: number, isFemale: boolean): string => {

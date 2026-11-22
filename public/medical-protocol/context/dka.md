@@ -67,7 +67,7 @@ interface DKAPatientData { weight: string; glucoseUnit: "mmol" | "mgdl"; reading
 - `calculateUrineOutputRate(volume, weight, hours)` → mL/kg/hr; `isUrineOutputOnTarget(rate)` — ≥0.5
 - `classifyGCS(value)` → Normal (15) / Mild (13–14) / Moderate (9–12) / Severe (<9) / Invalid / Unknown; `isGCSDecreasing(current, previous)` — drop ≥2
 - `assessDKAResolution(ketones, bicarbonate, pH)` → `{ resolved, criteria: { ketones, bicarbonate, pH } }`. Ketones = blood β-hydroxybutyrate (mmol/L), not urine ketones.
-- `suggestInsulinAdjustment(glucose, rate, insulinRate, unit, dkaResolved = false)` → action text. Pass `assessDKAResolution(...).resolved`; subcutaneous transition is suggested only once DKA has resolved, never on glucose alone.
+- `suggestInsulinAdjustment(glucose, rate, insulinRate, unit, dkaResolved = false)` → guideline criterion text. Pass `assessDKAResolution(...).resolved`; subcutaneous transition is suggested only once DKA has resolved, never on glucose alone.
 
 Blood gas: `analyze({ values: { pH, pCO2, HCO3: bicarbonate, Na: sodium, Cl: chloride, Albumin: albumin }, isChronic: false })` from `acid-base`.
 
@@ -101,4 +101,4 @@ medprotocol dka --glucose 200 --ketones 0.4 --bicarb 18 --ph 7.35 --unit mgdl
 
 ## Guideline Reference
 
-JBDS-IP DKA guidelines: glucose 3-5 mmol/L/hr (54-90 mg/dL/hr), ketone clearance >0.5 mmol/L/hr, bicarb recovery >3 mmol/L/hr, potassium: hold insulin and replace if K⁺ <3.5, add K⁺ to fluids if 3.5–5.0, none if >5.0. Resolution thresholds: Hyperglycemic Crises in Adults consensus, Diabetes Care 2024 (`sources.ADA_DKA_2024`). Insulin adjustment: Savage et al., Diabet Med 2011.
+JBDS-IP DKA guidelines: glucose 3-5 mmol/L/hr (54-90 mg/dL/hr), ketone clearance >0.5 mmol/L/hr, bicarb recovery >3 mmol/L/hr, potassium: hold insulin and replace if K⁺ <3.5, add K⁺ to fluids if 3.5–5.0, none if >5.0. Resolution thresholds: Hyperglycemic Crises in Adults consensus, Diabetes Care 2024 (`sources.ADA_DKA_2024`). Insulin adjustment: increase when glucose falls <3 mmol/L/hr, dextrose and rate reduction below 14 mmol/L (JBDS 2021, `sources.JBDS_2021`; the 2024 consensus uses 13.9 mmol/L, 250 mg/dL); subcutaneous transition with basal 1–2 h before stopping IV (2024 consensus). Citations with DOI: `sources.ADA_DKA_2024`, `KITABCHI_2009`, `JBDS_2021`, `JBDS_SAVAGE_2011`.

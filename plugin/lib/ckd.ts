@@ -11,6 +11,7 @@ import { safeParseFloat } from "./utils/safeParseFloat";
  * CKD-EPI 2021 race-free equation.
  * 142 × min(Scr/κ, 1)^α × max(Scr/κ, 1)^-1.2 × 0.9938^age × 1.012 [if female]
  * Female: κ=0.7, α=-0.241; Male: κ=0.9, α=-0.302
+ * Whole number, adults only (NKF lab guidance); returns 0 when it cannot be calculated.
  */
 export const calculateEGFR = (
   creatinine: string,
@@ -19,7 +20,7 @@ export const calculateEGFR = (
 ): number => {
   const scr = safeParseFloat(creatinine);
   const ageVal = safeParseFloat(age);
-  if (scr <= 0 || ageVal <= 0) return 0;
+  if (scr <= 0 || ageVal < 18) return 0;
 
   const isFemale = sex.toLowerCase() === "female" || sex.toLowerCase() === "f";
   const kappa = isFemale ? 0.7 : 0.9;
@@ -32,7 +33,7 @@ export const calculateEGFR = (
   const sexFactor = isFemale ? 1.012 : 1;
 
   const egfr = 142 * minTerm * maxTerm * ageTerm * sexFactor;
-  return Math.round(egfr * 10) / 10;
+  return Math.round(egfr);
 };
 
 // ─── GFR Category ───────────────────────────────────────────────────
@@ -137,7 +138,8 @@ export const getMonitoringFrequency = (
 // ─── KFRE (Kidney Failure Risk Equation) ────────────────────────────
 
 /**
- * 4-variable KFRE (Tangri et al.).
+ * 4-variable KFRE (Tangri et al.), non-North American calibration (Tangri 2016).
+ * North American calibration uses S0(2yr) = 0.9750, S0(5yr) = 0.9240 and gives higher risks.
  * LP = −0.2201×(age/10−7.036) + 0.2467×(male−0.5642) − 0.5567×(eGFR/5−7.222) + 0.4510×(lnACR−5.137)
  * Risk = 1 − S0^exp(LP)
  * S0(2yr) = 0.9832, S0(5yr) = 0.9365
@@ -203,7 +205,7 @@ export const getReferralLabel = (referral: string): string => {
   return labels[referral] ?? "Unknown";
 };
 
-// ─── Treatment Eligibility ──────────────────────────────────────────
+// ─── Guideline Criteria ────────────────────────────────────────────
 
 /**
  * ACEi/ARB (RASi) eligibility: albuminuria A2+ or diabetic CKD.
@@ -390,12 +392,12 @@ export const assessIronStatus = (
   if (ferritinVal < 100 || tsatVal < 20) {
     return {
       ironDeficient: true,
-      recommendation: "Iron supplementation recommended before considering ESA therapy",
+      recommendation: "Meets KDIGO iron deficiency criteria (ferritin <100 ng/mL or TSAT <20%)",
     };
   }
   return {
     ironDeficient: false,
-    recommendation: "Iron stores adequate; reassess periodically",
+    recommendation: "KDIGO iron deficiency criteria not met",
   };
 };
 
@@ -416,12 +418,12 @@ export const checkESAEligibility = (
   const isFemale = sex.toLowerCase() === "female" || sex.toLowerCase() === "f";
   const threshold = isFemale ? 12 : 13;
 
-  if (hb >= threshold) return { eligible: false, reason: "Not anemic; ESA not indicated" };
-  if (hb >= 10) return { eligible: false, reason: "Hb ≥10 g/dL; ESA not yet indicated" };
+  if (hb >= threshold) return { eligible: false, reason: "Not anemic; KDIGO ESA criteria not met" };
+  if (hb >= 10) return { eligible: false, reason: "Hb ≥10 g/dL; KDIGO ESA criteria not met" };
   if (ferritinVal < 100 || tsatVal < 20) {
-    return { eligible: false, reason: "Iron deficient; replete iron before ESA" };
+    return { eligible: false, reason: "Iron deficient; KDIGO ESA criteria not met" };
   }
-  return { eligible: true, reason: "Hb <10 g/dL with adequate iron stores; ESA may be considered" };
+  return { eligible: true, reason: "Hb <10 g/dL with adequate iron stores; meets KDIGO ESA criteria" };
 };
 
 // ─── CKD-MBD (KDIGO 2017 CKD-MBD) ─────────────────────────────────
@@ -453,7 +455,7 @@ export const assessPhosphate = (
 
   if (phos < 2.5) return { status: "low", recommendation: "Phosphate below target; evaluate cause" };
   if (phos <= 4.5) return { status: "normal", recommendation: "Phosphate within target range (2.5–4.5 mg/dL)" };
-  return { status: "high", recommendation: "Phosphate elevated; consider dietary restriction and phosphate binders" };
+  return { status: "high", recommendation: "Phosphate above target range (2.5–4.5 mg/dL)" };
 };
 
 /**
@@ -487,9 +489,9 @@ export const assessPTH = (
   if (gfrCategory === "G4" || gfrCategory === "G5") {
     const lower = 2 * UNL;  // 130
     const upper = 9 * UNL;  // 585
-    if (pthVal < lower) return { status: "low", recommendation: "PTH below 2× UNL; avoid over-suppression" };
+    if (pthVal < lower) return { status: "low", recommendation: "PTH below KDIGO acceptable range (<2× UNL)" };
     if (pthVal <= upper) return { status: "acceptable", recommendation: `PTH within acceptable range for ${gfrCategory} (2–9× UNL)` };
-    return { status: "high", recommendation: "PTH exceeds 9× UNL; consider active vitamin D or calcimimetics" };
+    return { status: "high", recommendation: "PTH above KDIGO acceptable range (>9× UNL)" };
   }
 
   // G1-G3b: normal range
@@ -507,9 +509,9 @@ export const assessVitaminD = (
   const vd = safeParseFloat(vitaminD25OH);
   if (vd <= 0) return { status: "unknown", recommendation: "Invalid vitamin D value" };
 
-  if (vd < 20) return { status: "deficient", recommendation: "Vitamin D deficient; supplement with cholecalciferol" };
-  if (vd < 30) return { status: "insufficient", recommendation: "Vitamin D insufficient; consider supplementation" };
-  return { status: "sufficient", recommendation: "Vitamin D sufficient; maintain current intake" };
+  if (vd < 20) return { status: "deficient", recommendation: "Vitamin D deficient (<20 ng/mL)" };
+  if (vd < 30) return { status: "insufficient", recommendation: "Vitamin D insufficient (20–29 ng/mL)" };
+  return { status: "sufficient", recommendation: "Vitamin D sufficient (≥30 ng/mL)" };
 };
 
 /**

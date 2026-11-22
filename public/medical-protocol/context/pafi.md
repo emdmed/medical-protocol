@@ -1,6 +1,6 @@
 # PaFi Module Context
 
-PaO2/FiO2 ratio with Berlin criteria ARDS classification and FiO2 presets for oxygen delivery devices.
+PaO2/FiO2 ratio with its Berlin oxygenation range and FiO2 presets for oxygen delivery devices.
 
 Logic: `lib/medprotocol/pafi.ts` — import from `@/lib/medprotocol/pafi`. Build: see `building.md`.
 
@@ -8,7 +8,7 @@ Logic: `lib/medprotocol/pafi.ts` — import from `@/lib/medprotocol/pafi`. Build
 
 ## Screen spec
 
-**Shows:** PaFi ratio and ARDS classification badge, inline below the inputs.
+**Shows:** PaFi ratio and Berlin oxygenation range badge, inline below the inputs. The badge is a range for the ratio, not an ARDS diagnosis: never label it "ARDS".
 
 **Inputs** (strings):
 
@@ -32,7 +32,7 @@ Logic: `lib/medprotocol/pafi.ts` — import from `@/lib/medprotocol/pafi`. Build
 ## Lib Functions
 
 - `calculatePaFi(paO2, fiO2)` → `string | null` (integer). Null if PaO2 ≤0 or FiO2 outside 21–100.
-- `getPaFiClassification(paFi)` → `"Normal"` (>300) | `"Mild ARDS"` (200–300) | `"Moderate ARDS"` (100–199) | `"Severe ARDS"` (<100) | `"Unknown"`.
+- `getPaFiClassification(paFi)` → `"Normal"` (>300) | `"Berlin mild range"` (201–300) | `"Berlin moderate range"` (101–200) | `"Berlin severe range"` (≤100) | `"Unknown"`.
 - `getPaFiSeverity(paFi)` → `"normal"` | `"mild"` | `"moderate"` | `"severe"` | `"default"`.
 
 FiO2 entered as percentage (21-100), not fraction. All inputs `string`.
@@ -62,4 +62,4 @@ medprotocol pafi --pao2 60 --fio2 40
 
 ## Guideline Reference
 
-Berlin Definition of ARDS (2012): PaO2/FiO2 with PEEP ≥5 cmH2O. Mild 200-300, Moderate 100-200, Severe <100.
+Berlin Definition of ARDS (2012): PaO2/FiO2 with PEEP ≥5 cmH2O. Mild 201–300, Moderate 101–200, Severe ≤100 (JAMA 2012;307:2526-2533). The ratio alone is not a diagnosis. Citation with DOI: `sources.BERLIN_2012`.

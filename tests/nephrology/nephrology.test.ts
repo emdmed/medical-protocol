@@ -94,7 +94,7 @@ describe("phospho-calcic calculations", () => {
     expect(classifyPTH("200", "G5").severity).toBe("normal");
     expect(classifyPTH("600", "G5").severity).toBe("critical");
     expect(classifyPTH("100", "G5").severity).toBe("warning");
-    expect(classifyPTH("100", "G5").label).toMatch(/over-suppression/);
+    expect(classifyPTH("100", "G5").label).toMatch(/Below target/);
   });
 
   it("vitamin D and Ca x P product", () => {

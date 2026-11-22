@@ -11,7 +11,7 @@ Commands:
   abg              Analyze arterial blood gas
   water-balance    Calculate fluid balance
   vitals           Evaluate vital signs
-  pafi             Calculate PaO2/FiO2 ratio (ARDS classification)
+  pafi             Calculate PaO2/FiO2 ratio (Berlin oxygenation range)
   dka              Assess DKA parameters and resolution
   cardiology       Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
   sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)
