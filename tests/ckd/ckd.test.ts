@@ -106,6 +106,21 @@ describe('calculateEGFR', () => {
     expect(calculateEGFR(scr, age, sex)).toBe(expected);
   });
 
+  // External reference: MDCalc "CKD-EPI Equations for GFR", 2021 CKD-EPI Creatinine, mg/dL, read 2026-11-22.
+  // https://www.mdcalc.com/calc/3939/ckd-epi-equations-glomerular-filtration-rate-gfr
+  it.each([
+    ['55', 'male', '1.2', 71],
+    ['40', 'female', '0.8', 95],
+    ['70', 'male', '2.0', 35],
+    ['50', 'female', '1.0', 69],
+    ['30', 'male', '0.9', 118],
+    ['65', 'female', '0.7', 96],
+    ['80', 'female', '3.5', 13],
+    ['45', 'male', '0.6', 121],
+  ])('matches MDCalc: age %s, %s, Scr %s → %i', (age, sex, scr, expected) => {
+    expect(calculateEGFR(scr, age, sex)).toBe(expected);
+  });
+
   it('does not calculate under 18 (NKF: "do not calculate")', () => {
     expect(calculateEGFR('0.8', '17', 'male')).toBe(0);
   });

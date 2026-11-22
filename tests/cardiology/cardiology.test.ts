@@ -61,6 +61,35 @@ describe("calculateASCVD", () => {
     expect(Math.abs(parseFloat(calculateASCVD(baseASCVD)!) - 5.3)).toBeLessThan(0.11);
   });
 
+  // External reference: MDCalc "ASCVD 2013 Risk Calculator from AHA/ACC", mg/dL, read 2026-11-22.
+  // https://www.mdcalc.com/calc/3398/ascvd-atherosclerotic-cardiovascular-disease-2013-risk-calculator-aha-acc
+  // The first four rows are the Goff 2013 worked example. Some rows differ by 0.1 here: we use the paper's
+  // two-decimal means (e.g. -29.18) and MDCalc behaves as if it used slightly more precise ones, which it
+  // does not publish. Hence ±0.1.
+  // race, sex, age, TC, HDL, SBP, BP treatment, diabetes, smoker, MDCalc %
+  it.each([
+    ["white", "female", "55", "213", "50", "120", false, false, false, 2.1],
+    ["white", "male", "55", "213", "50", "120", false, false, false, 5.4],
+    ["aa", "female", "55", "213", "50", "120", false, false, false, 3.0],
+    ["aa", "male", "55", "213", "50", "120", false, false, false, 6.1],
+    ["aa", "female", "65", "250", "40", "160", true, true, true, 65.2],
+    ["white", "male", "60", "240", "35", "150", true, false, true, 29.9],
+    ["white", "female", "70", "200", "60", "140", true, true, false, 26.5],
+    ["aa", "male", "45", "180", "45", "130", false, false, true, 7.2],
+    ["other", "female", "62", "220", "55", "135", false, true, false, 9.1],
+    ["white", "male", "48", "190", "38", "128", true, true, false, 7.8],
+    ["white", "male", "48", "190", "38", "146", true, true, true, 22.3],
+    ["aa", "male", "48", "190", "38", "128", false, false, false, 5.1],
+    ["aa", "male", "48", "190", "38", "128", true, false, true, 14.2],
+    ["aa", "male", "48", "190", "38", "128", true, true, false, 15.6],
+  ] as const)(
+    "matches MDCalc: %s %s, age %s, TC %s, HDL %s, SBP %s, treated %s, diabetes %s, smoker %s → %f",
+    (race, sex, age, totalCholesterol, hdlCholesterol, systolicBP, bpTreatment, diabetes, smoker, expected) => {
+      const inputs: ASCVDInputs = { race, sex, age, totalCholesterol, hdlCholesterol, systolicBP, bpTreatment, diabetes, smoker };
+      expect(Math.abs(parseFloat(calculateASCVD(inputs)!) - expected)).toBeLessThan(0.11);
+    },
+  );
+
   it("returns a numeric string for valid white male inputs", () => {
     const result = calculateASCVD(baseASCVD);
     expect(result).not.toBeNull();
