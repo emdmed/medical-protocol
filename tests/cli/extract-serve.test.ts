@@ -276,3 +276,57 @@ describe('POST /api/notes and the model job', () => {
     expect(fake).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('POST /api/extractions/<hash>/decisions', () => {
+  const file = (name: string) => JSON.parse(readFileSync(join(DIR, name), 'utf8'));
+  const decide = async (body: unknown) => {
+    const res = await get(`/api/extractions/${HASH}/decisions`, {}, JSON.stringify(body));
+    return { status: res.status, body: JSON.parse(res.text) };
+  };
+  const reviewed = () => {
+    put('extraction.json', [bp, wrong]);
+    put('verify.json', { findings: [{ index: 1, problem: 'digits swapped', correction: creat }, { index: 0, problem: 'not this patient', correction: null }] });
+    put('corrected.json', [creat]);
+  };
+
+  it('state becomes done once every finding is decided', async () => {
+    reviewed();
+    expect(await decide({ finding: 0, decision: 'accepted' })).toMatchObject({ status: 200, body: { id: HASH, state: 'review', error: null } });
+    const res = await decide({ finding: 1, decision: 'accepted' });
+    expect(res.body).toMatchObject({ state: 'done', findings: [{ decision: 'accepted' }, { decision: 'accepted' }] });
+    expect(res.body.items.map((i: { value: string }) => i.value)).toEqual(['1.4']);
+  });
+
+  it('rejecting puts the first-pass item back; accepting again restores the correction', async () => {
+    reviewed();
+    await decide({ finding: 0, decision: 'rejected' });
+    expect(file('corrected.json')).toEqual([wrong]);
+    expect(file('decisions.json')).toEqual({ 0: 'rejected' });
+    await decide({ finding: 1, decision: 'rejected' });
+    expect(file('corrected.json')).toEqual([bp, wrong]);
+    await decide({ finding: 0, decision: 'accepted' });
+    expect(file('corrected.json')).toEqual([bp, creat]);
+    expect(file('decisions.json')).toEqual({ 0: 'accepted', 1: 'rejected' });
+  });
+
+  it('before verify.json → 409, nothing written', async () => {
+    put('extraction.json', [bp, wrong]);
+    expect((await decide({ finding: 0, decision: 'accepted' })).status).toBe(409);
+    expect(existsSync(join(DIR, 'decisions.json'))).toBe(false);
+  });
+
+  it('a bad finding position, decision or body → 400, nothing written', async () => {
+    reviewed();
+    for (const body of [{ finding: 2, decision: 'accepted' }, { finding: -1, decision: 'accepted' }, { finding: '0', decision: 'accepted' }, { finding: 0, decision: 'maybe' }, null]) {
+      expect((await decide(body)).status).toBe(400);
+    }
+    expect((await get(`/api/extractions/${HASH}/decisions`, {}, 'not json')).status).toBe(400);
+    expect(existsSync(join(DIR, 'decisions.json'))).toBe(false);
+    expect(file('corrected.json')).toEqual([creat]);
+  });
+
+  it('404 for a note that is not saved, and for GET', async () => {
+    expect((await get('/api/extractions/000000000000/decisions', {}, '{}')).status).toBe(404);
+    expect((await get(`/api/extractions/${HASH}/decisions`)).status).toBe(404);
+  });
+});

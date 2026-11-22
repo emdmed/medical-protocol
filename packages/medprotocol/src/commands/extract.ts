@@ -263,9 +263,32 @@ export const serve = (port: number, askModel: AskModel = askClaude): Server => {
         return send(200, { id: basename(dir) });
       }
 
-      const hash = /^\/api\/extractions\/([0-9a-f]{12})$/.exec(path)?.[1];
+      const [, hash, decisions] = /^\/api\/extractions\/([0-9a-f]{12})(\/decisions)?$/.exec(path) ?? [];
       const dir = hash && join("extractions", hash);
-      if (req.method === "GET" && dir && existsSync(join(dir, "note.md"))) {
+      if (req.method === "GET" && !decisions && dir && existsSync(join(dir, "note.md"))) {
+        return send(200, { ...stateOf(dir, running.has(dir)), error: errors.get(dir) ?? null });
+      }
+
+      if (req.method === "POST" && decisions && dir && existsSync(join(dir, "note.md"))) {
+        const verify: { findings: Finding[] } | undefined = readJson(join(dir, "verify.json"));
+        if (!verify) return send(409, { error: "this note has no findings to decide yet" });
+        let body: any;
+        try {
+          body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        } catch {
+          return send(400, { error: "the body must be JSON" });
+        }
+        if (!Number.isInteger(body?.finding) || body.finding < 0 || body.finding >= verify.findings.length) {
+          return send(400, { error: "finding must be the position of a finding" });
+        }
+        if (body.decision !== "accepted" && body.decision !== "rejected") {
+          return send(400, { error: 'decision must be "accepted" or "rejected"' });
+        }
+        const decided: Record<string, string> = { ...readJson(join(dir, "decisions.json")), [body.finding]: body.decision };
+        writeFileSync(join(dir, "decisions.json"), JSON.stringify(decided, null, 2));
+        // a finding nobody decided on yet stays applied
+        const rejected = new Set(Object.keys(decided).filter((n) => decided[n] === "rejected").map(Number));
+        writeFileSync(join(dir, "corrected.json"), JSON.stringify(applyFindings(readJson(join(dir, "extraction.json")) ?? [], verify.findings, rejected), null, 2));
         return send(200, { ...stateOf(dir, running.has(dir)), error: errors.get(dir) ?? null });
       }
       send(404, { error: "not found" });
