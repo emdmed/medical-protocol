@@ -75,7 +75,7 @@ describe("getMASLDTreatmentRecommendation", () => {
   });
 
   it("routine guidance otherwise", () => {
-    expect(getMASLDTreatmentRecommendation(false, "normal").mash).toContain("Routine");
+    expect(getMASLDTreatmentRecommendation(false, "normal").mash).toContain("routine");
   });
 });
 

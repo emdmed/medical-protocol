@@ -124,7 +124,7 @@ export const run = (argv: string[]): void => {
     );
 
     rows.push(["Insulin rate", `${values["insulin-rate"]} U/hr`]);
-    rows.push(["Suggestion", suggestion]);
+    rows.push(["Guideline", suggestion]);
     data.insulinRate = parseFloat(values["insulin-rate"]!);
     data.insulinSuggestion = suggestion;
   }

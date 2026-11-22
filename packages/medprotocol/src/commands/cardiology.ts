@@ -231,7 +231,7 @@ const runHEART = (argv: string[], json: boolean): void => {
       formatTable([
         ["Score", `${score}/10`],
         ["Category", category],
-        ["Action", action],
+        ["Guideline", action],
         ["History", `${inputs.history}`],
         ["ECG", `${inputs.ecg}`],
         ["Age", `${inputs.age}`],
@@ -300,7 +300,7 @@ const runCHADSVASc = (argv: string[], json: boolean): void => {
       formatTable([
         ["Score", `${score}/9`],
         ["Category", category],
-        ["Action", action],
+        ["Guideline", action],
         ["Factors", factors || "None"],
       ]),
     ].join("\n");

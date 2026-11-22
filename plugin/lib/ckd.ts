@@ -205,7 +205,7 @@ export const getReferralLabel = (referral: string): string => {
   return labels[referral] ?? "Unknown";
 };
 
-// ─── Treatment Eligibility ──────────────────────────────────────────
+// ─── Guideline Criteria ────────────────────────────────────────────
 
 /**
  * ACEi/ARB (RASi) eligibility: albuminuria A2+ or diabetic CKD.
@@ -392,12 +392,12 @@ export const assessIronStatus = (
   if (ferritinVal < 100 || tsatVal < 20) {
     return {
       ironDeficient: true,
-      recommendation: "Iron supplementation recommended before considering ESA therapy",
+      recommendation: "Meets KDIGO iron deficiency criteria (ferritin <100 ng/mL or TSAT <20%)",
     };
   }
   return {
     ironDeficient: false,
-    recommendation: "Iron stores adequate; reassess periodically",
+    recommendation: "KDIGO iron deficiency criteria not met",
   };
 };
 
@@ -418,12 +418,12 @@ export const checkESAEligibility = (
   const isFemale = sex.toLowerCase() === "female" || sex.toLowerCase() === "f";
   const threshold = isFemale ? 12 : 13;
 
-  if (hb >= threshold) return { eligible: false, reason: "Not anemic; ESA not indicated" };
-  if (hb >= 10) return { eligible: false, reason: "Hb ≥10 g/dL; ESA not yet indicated" };
+  if (hb >= threshold) return { eligible: false, reason: "Not anemic; KDIGO ESA criteria not met" };
+  if (hb >= 10) return { eligible: false, reason: "Hb ≥10 g/dL; KDIGO ESA criteria not met" };
   if (ferritinVal < 100 || tsatVal < 20) {
-    return { eligible: false, reason: "Iron deficient; replete iron before ESA" };
+    return { eligible: false, reason: "Iron deficient; KDIGO ESA criteria not met" };
   }
-  return { eligible: true, reason: "Hb <10 g/dL with adequate iron stores; ESA may be considered" };
+  return { eligible: true, reason: "Hb <10 g/dL with adequate iron stores; meets KDIGO ESA criteria" };
 };
 
 // ─── CKD-MBD (KDIGO 2017 CKD-MBD) ─────────────────────────────────
@@ -455,7 +455,7 @@ export const assessPhosphate = (
 
   if (phos < 2.5) return { status: "low", recommendation: "Phosphate below target; evaluate cause" };
   if (phos <= 4.5) return { status: "normal", recommendation: "Phosphate within target range (2.5–4.5 mg/dL)" };
-  return { status: "high", recommendation: "Phosphate elevated; consider dietary restriction and phosphate binders" };
+  return { status: "high", recommendation: "Phosphate above target range (2.5–4.5 mg/dL)" };
 };
 
 /**
@@ -489,9 +489,9 @@ export const assessPTH = (
   if (gfrCategory === "G4" || gfrCategory === "G5") {
     const lower = 2 * UNL;  // 130
     const upper = 9 * UNL;  // 585
-    if (pthVal < lower) return { status: "low", recommendation: "PTH below 2× UNL; avoid over-suppression" };
+    if (pthVal < lower) return { status: "low", recommendation: "PTH below KDIGO acceptable range (<2× UNL)" };
     if (pthVal <= upper) return { status: "acceptable", recommendation: `PTH within acceptable range for ${gfrCategory} (2–9× UNL)` };
-    return { status: "high", recommendation: "PTH exceeds 9× UNL; consider active vitamin D or calcimimetics" };
+    return { status: "high", recommendation: "PTH above KDIGO acceptable range (>9× UNL)" };
   }
 
   // G1-G3b: normal range
@@ -509,9 +509,9 @@ export const assessVitaminD = (
   const vd = safeParseFloat(vitaminD25OH);
   if (vd <= 0) return { status: "unknown", recommendation: "Invalid vitamin D value" };
 
-  if (vd < 20) return { status: "deficient", recommendation: "Vitamin D deficient; supplement with cholecalciferol" };
-  if (vd < 30) return { status: "insufficient", recommendation: "Vitamin D insufficient; consider supplementation" };
-  return { status: "sufficient", recommendation: "Vitamin D sufficient; maintain current intake" };
+  if (vd < 20) return { status: "deficient", recommendation: "Vitamin D deficient (<20 ng/mL)" };
+  if (vd < 30) return { status: "insufficient", recommendation: "Vitamin D insufficient (20–29 ng/mL)" };
+  return { status: "sufficient", recommendation: "Vitamin D sufficient (≥30 ng/mL)" };
 };
 
 /**

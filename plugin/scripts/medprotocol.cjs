@@ -1369,24 +1369,24 @@ var init_dka = __esm({
       const lowThreshold = unit === "mmol" ? GLUCOSE_REDUCTION_THRESHOLD.MMOL : GLUCOSE_REDUCTION_THRESHOLD.MGDL;
       const targetThreshold = unit === "mmol" ? GLUCOSE_RESOLUTION.MMOL : GLUCOSE_RESOLUTION.MGDL;
       if (dkaResolved) {
-        return "DKA resolved: transition to subcutaneous insulin once eating (basal 1\u20132 h before stopping IV)";
+        return "DKA resolution criteria met: 2024 consensus pathway is transition to subcutaneous insulin, basal 1\u20132 h before stopping IV";
       }
       if (glu < targetThreshold) {
-        return "Continue IV insulin with dextrose until DKA resolves; do not switch on glucose alone";
+        return "Glucose below 11.1 mmol/L (200 mg/dL), DKA not resolved: 2024 consensus continues IV insulin with dextrose (glucose alone is not a switch criterion)";
       }
       if (glu < lowThreshold) {
-        return "Consider reducing insulin rate and adding dextrose";
+        return "Glucose below 14 mmol/L (252 mg/dL): JBDS 2021 criterion for adding dextrose and reducing insulin rate met";
       }
       if (rate) {
         const r = parseFloat(rate);
         if (!isNaN(r)) {
           const targetRate = unit === "mmol" ? GLUCOSE_TARGET_RATE.MMOL : GLUCOSE_TARGET_RATE.MGDL;
           if (r < targetRate) {
-            return "Consider increasing insulin rate";
+            return "Glucose fall below 3 mmol/L/h (54 mg/dL/h): JBDS 2021 criterion for increasing insulin rate met";
           }
         }
       }
-      return "Maintain current insulin rate";
+      return "Glucose fall on target (JBDS 2021, \u22653 mmol/L/h): no criterion for changing insulin rate met";
     };
   }
 });
@@ -1501,7 +1501,7 @@ Examples:
           dkaResolved
         );
         rows.push(["Insulin rate", `${values["insulin-rate"]} U/hr`]);
-        rows.push(["Suggestion", suggestion]);
+        rows.push(["Guideline", suggestion]);
         data.insulinRate = parseFloat(values["insulin-rate"]);
         data.insulinSuggestion = suggestion;
       }
@@ -1650,9 +1650,9 @@ var init_cardiology = __esm({
       return "High";
     };
     getHEARTAction = (score) => {
-      if (score <= 3) return "Discharge with outpatient follow-up; consider stress testing";
-      if (score <= 6) return "Observation, serial troponins, and non-invasive testing";
-      return "Urgent invasive strategy; early cardiology consultation";
+      if (score <= 3) return "HEART low-risk band (0\u20133): pathway is early discharge with outpatient follow-up";
+      if (score <= 6) return "HEART moderate-risk band (4\u20136): pathway is observation, serial troponins and non-invasive testing";
+      return "HEART high-risk band (7\u201310): pathway is early invasive strategy with cardiology consultation";
     };
     getHEARTSeverity = (score) => {
       if (score <= 3) return "low";
@@ -1683,13 +1683,13 @@ var init_cardiology = __esm({
     };
     getCHADSVAScAction = (score, isFemale) => {
       if (isFemale) {
-        if (score <= 1) return "No anticoagulation needed";
-        if (score === 2) return "Consider anticoagulation";
-        return "Anticoagulation recommended";
+        if (score <= 1) return "Guideline threshold for anticoagulation not met";
+        if (score === 2) return "Guideline: anticoagulation may be considered";
+        return "Guideline threshold for anticoagulation met";
       }
-      if (score === 0) return "No anticoagulation needed";
-      if (score === 1) return "Consider anticoagulation";
-      return "Anticoagulation recommended";
+      if (score === 0) return "Guideline threshold for anticoagulation not met";
+      if (score === 1) return "Guideline: anticoagulation may be considered";
+      return "Guideline threshold for anticoagulation met";
     };
     getCHADSVAScSeverity = (score, isFemale) => {
       if (isFemale) {
@@ -1909,7 +1909,7 @@ Examples:
           formatTable([
             ["Score", `${score}/10`],
             ["Category", category],
-            ["Action", action],
+            ["Guideline", action],
             ["History", `${inputs.history}`],
             ["ECG", `${inputs.ecg}`],
             ["Age", `${inputs.age}`],
@@ -1968,7 +1968,7 @@ Examples:
           formatTable([
             ["Score", `${score}/9`],
             ["Category", category],
-            ["Action", action],
+            ["Guideline", action],
             ["Factors", factors || "None"]
           ])
         ].join("\n");
@@ -2642,12 +2642,12 @@ var init_ckd = __esm({
       if (ferritinVal < 100 || tsatVal < 20) {
         return {
           ironDeficient: true,
-          recommendation: "Iron supplementation recommended before considering ESA therapy"
+          recommendation: "Meets KDIGO iron deficiency criteria (ferritin <100 ng/mL or TSAT <20%)"
         };
       }
       return {
         ironDeficient: false,
-        recommendation: "Iron stores adequate; reassess periodically"
+        recommendation: "KDIGO iron deficiency criteria not met"
       };
     };
     checkESAEligibility = (hemoglobin, ferritin, tsat, sex) => {
@@ -2657,12 +2657,12 @@ var init_ckd = __esm({
       if (hb <= 0) return { eligible: false, reason: "Invalid hemoglobin value" };
       const isFemale = sex.toLowerCase() === "female" || sex.toLowerCase() === "f";
       const threshold = isFemale ? 12 : 13;
-      if (hb >= threshold) return { eligible: false, reason: "Not anemic; ESA not indicated" };
-      if (hb >= 10) return { eligible: false, reason: "Hb \u226510 g/dL; ESA not yet indicated" };
+      if (hb >= threshold) return { eligible: false, reason: "Not anemic; KDIGO ESA criteria not met" };
+      if (hb >= 10) return { eligible: false, reason: "Hb \u226510 g/dL; KDIGO ESA criteria not met" };
       if (ferritinVal < 100 || tsatVal < 20) {
-        return { eligible: false, reason: "Iron deficient; replete iron before ESA" };
+        return { eligible: false, reason: "Iron deficient; KDIGO ESA criteria not met" };
       }
-      return { eligible: true, reason: "Hb <10 g/dL with adequate iron stores; ESA may be considered" };
+      return { eligible: true, reason: "Hb <10 g/dL with adequate iron stores; meets KDIGO ESA criteria" };
     };
     assessPhosphate = (phosphate, gfrCategory) => {
       const phos = safeParseFloat(phosphate);
@@ -2679,7 +2679,7 @@ var init_ckd = __esm({
       }
       if (phos < 2.5) return { status: "low", recommendation: "Phosphate below target; evaluate cause" };
       if (phos <= 4.5) return { status: "normal", recommendation: "Phosphate within target range (2.5\u20134.5 mg/dL)" };
-      return { status: "high", recommendation: "Phosphate elevated; consider dietary restriction and phosphate binders" };
+      return { status: "high", recommendation: "Phosphate above target range (2.5\u20134.5 mg/dL)" };
     };
     correctCalcium = (calcium, albumin) => {
       const ca = safeParseFloat(calcium);
@@ -2695,9 +2695,9 @@ var init_ckd = __esm({
       if (gfrCategory === "G4" || gfrCategory === "G5") {
         const lower = 2 * UNL;
         const upper = 9 * UNL;
-        if (pthVal < lower) return { status: "low", recommendation: "PTH below 2\xD7 UNL; avoid over-suppression" };
+        if (pthVal < lower) return { status: "low", recommendation: "PTH below KDIGO acceptable range (<2\xD7 UNL)" };
         if (pthVal <= upper) return { status: "acceptable", recommendation: `PTH within acceptable range for ${gfrCategory} (2\u20139\xD7 UNL)` };
-        return { status: "high", recommendation: "PTH exceeds 9\xD7 UNL; consider active vitamin D or calcimimetics" };
+        return { status: "high", recommendation: "PTH above KDIGO acceptable range (>9\xD7 UNL)" };
       }
       if (pthVal <= UNL) return { status: "normal", recommendation: "PTH within normal range" };
       return { status: "high", recommendation: "PTH elevated; evaluate for secondary hyperparathyroidism" };
@@ -2705,9 +2705,9 @@ var init_ckd = __esm({
     assessVitaminD = (vitaminD25OH) => {
       const vd = safeParseFloat(vitaminD25OH);
       if (vd <= 0) return { status: "unknown", recommendation: "Invalid vitamin D value" };
-      if (vd < 20) return { status: "deficient", recommendation: "Vitamin D deficient; supplement with cholecalciferol" };
-      if (vd < 30) return { status: "insufficient", recommendation: "Vitamin D insufficient; consider supplementation" };
-      return { status: "sufficient", recommendation: "Vitamin D sufficient; maintain current intake" };
+      if (vd < 20) return { status: "deficient", recommendation: "Vitamin D deficient (<20 ng/mL)" };
+      if (vd < 30) return { status: "insufficient", recommendation: "Vitamin D insufficient (20\u201329 ng/mL)" };
+      return { status: "sufficient", recommendation: "Vitamin D sufficient (\u226530 ng/mL)" };
     };
     getCKDMBDMonitoring = (gfrCategory) => {
       if (gfrCategory === "G5") {
@@ -2767,8 +2767,8 @@ Sub-commands:
   egfr         Calculate eGFR (CKD-EPI 2021)
   stage        Full CGA staging (eGFR + albuminuria + risk)
   kfre         Kidney Failure Risk Equation (4-variable)
-  treatment    Treatment eligibility (RASi, SGLT2i, finerenone)
-  anemia       CKD anemia assessment (Hb, iron, ESA eligibility)
+  treatment    Guideline criteria met (RASi, SGLT2i, finerenone)
+  anemia       CKD anemia assessment (Hb, iron, ESA criteria)
   mbd          CKD-MBD assessment (phosphate, calcium, PTH, vitamin D)
 
 eGFR options:
@@ -3026,10 +3026,10 @@ Examples:
         sglt2i,
         finerenone
       };
-      const eligible = (r) => r.eligible ? `Yes (Grade ${r.grade})` : "No";
+      const eligible = (r) => r.eligible ? `Criteria met (Grade ${r.grade})` : "Criteria not met";
       printResult(data, json, () => {
         return [
-          formatHeader("CKD Treatment Eligibility"),
+          formatHeader("CKD Guideline Criteria"),
           formatTable([
             ["GFR Category", gfrCategory],
             ["Albuminuria", albCategory],
@@ -3078,10 +3078,10 @@ Examples:
         ];
         if (iron) {
           rows.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
-          rows.push(["Iron Recommendation", iron.recommendation]);
+          rows.push(["Iron Criteria", iron.recommendation]);
         }
         if (esa) {
-          rows.push(["ESA Eligible", esa.eligible ? "Yes" : "No"]);
+          rows.push(["ESA Criteria", esa.eligible ? "Met" : "Not met"]);
           rows.push(["ESA Reason", esa.reason]);
         }
         return [

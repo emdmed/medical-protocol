@@ -255,15 +255,15 @@ describe("getHEARTCategory", () => {
 
 describe("getHEARTAction", () => {
   it("returns discharge recommendation for low score", () => {
-    expect(getHEARTAction(2)).toContain("Discharge");
+    expect(getHEARTAction(2)).toContain("discharge");
   });
 
   it("returns observation recommendation for moderate score", () => {
-    expect(getHEARTAction(5)).toContain("Observation");
+    expect(getHEARTAction(5)).toContain("observation");
   });
 
   it("returns urgent recommendation for high score", () => {
-    expect(getHEARTAction(8)).toContain("Urgent");
+    expect(getHEARTAction(8)).toContain("invasive strategy");
   });
 });
 
@@ -365,27 +365,27 @@ describe("getCHADSVAScCategory", () => {
 
 describe("getCHADSVAScAction", () => {
   it("returns no anticoagulation for male score 0", () => {
-    expect(getCHADSVAScAction(0, false)).toContain("No anticoagulation");
+    expect(getCHADSVAScAction(0, false)).toContain("not met");
   });
 
   it("returns consider for male score 1", () => {
-    expect(getCHADSVAScAction(1, false)).toContain("Consider");
+    expect(getCHADSVAScAction(1, false)).toContain("may be considered");
   });
 
   it("returns recommended for male score >= 2", () => {
-    expect(getCHADSVAScAction(2, false)).toContain("recommended");
+    expect(getCHADSVAScAction(2, false)).toContain("threshold for anticoagulation met");
   });
 
   it("returns no anticoagulation for female score <= 1", () => {
-    expect(getCHADSVAScAction(1, true)).toContain("No anticoagulation");
+    expect(getCHADSVAScAction(1, true)).toContain("not met");
   });
 
   it("returns consider for female score 2", () => {
-    expect(getCHADSVAScAction(2, true)).toContain("Consider");
+    expect(getCHADSVAScAction(2, true)).toContain("may be considered");
   });
 
   it("returns recommended for female score >= 3", () => {
-    expect(getCHADSVAScAction(3, true)).toContain("recommended");
+    expect(getCHADSVAScAction(3, true)).toContain("threshold for anticoagulation met");
   });
 });
 

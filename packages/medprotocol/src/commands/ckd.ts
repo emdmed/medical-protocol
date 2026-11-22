@@ -30,8 +30,8 @@ Sub-commands:
   egfr         Calculate eGFR (CKD-EPI 2021)
   stage        Full CGA staging (eGFR + albuminuria + risk)
   kfre         Kidney Failure Risk Equation (4-variable)
-  treatment    Treatment eligibility (RASi, SGLT2i, finerenone)
-  anemia       CKD anemia assessment (Hb, iron, ESA eligibility)
+  treatment    Guideline criteria met (RASi, SGLT2i, finerenone)
+  anemia       CKD anemia assessment (Hb, iron, ESA criteria)
   mbd          CKD-MBD assessment (phosphate, calcium, PTH, vitamin D)
 
 eGFR options:
@@ -309,11 +309,11 @@ const runTreatment = (argv: string[], json: boolean): void => {
   };
 
   const eligible = (r: { eligible: boolean; grade: string }) =>
-    r.eligible ? `Yes (Grade ${r.grade})` : "No";
+    r.eligible ? `Criteria met (Grade ${r.grade})` : "Criteria not met";
 
   printResult(data, json, () => {
     return [
-      formatHeader("CKD Treatment Eligibility"),
+      formatHeader("CKD Guideline Criteria"),
       formatTable([
         ["GFR Category", gfrCategory],
         ["Albuminuria", albCategory],
@@ -373,10 +373,10 @@ const runAnemia = (argv: string[], json: boolean): void => {
     ];
     if (iron) {
       rows.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
-      rows.push(["Iron Recommendation", iron.recommendation]);
+      rows.push(["Iron Criteria", iron.recommendation]);
     }
     if (esa) {
-      rows.push(["ESA Eligible", esa.eligible ? "Yes" : "No"]);
+      rows.push(["ESA Criteria", esa.eligible ? "Met" : "Not met"]);
       rows.push(["ESA Reason", esa.reason]);
     }
     return [

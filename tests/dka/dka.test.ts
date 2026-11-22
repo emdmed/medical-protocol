@@ -354,7 +354,7 @@ describe('assessDKAResolution (2024 consensus)', () => {
 
 describe('suggestInsulinAdjustment', () => {
   it('does not switch to subcutaneous on low glucose alone', () => {
-    expect(suggestInsulinAdjustment('180', '60', '5', 'mgdl')).toMatch(/Continue IV insulin with dextrose/);
+    expect(suggestInsulinAdjustment('180', '60', '5', 'mgdl')).toMatch(/continues IV insulin with dextrose/);
   });
 
   it('suggests subcutaneous transition once DKA is resolved', () => {
@@ -363,30 +363,30 @@ describe('suggestInsulinAdjustment', () => {
   });
 
   it('keeps IV insulin below 11.1 mmol/L while DKA is unresolved', () => {
-    expect(suggestInsulinAdjustment('10.0', '4.0', '5', 'mmol')).toMatch(/Continue IV insulin/);
+    expect(suggestInsulinAdjustment('10.0', '4.0', '5', 'mmol')).toMatch(/continues IV insulin/);
   });
 
   it('suggests reducing rate and adding dextrose when glucose < 252 mg/dL', () => {
     expect(suggestInsulinAdjustment('220', '60', '5', 'mgdl')).toBe(
-      'Consider reducing insulin rate and adding dextrose'
+      'Glucose below 14 mmol/L (252 mg/dL): JBDS 2021 criterion for adding dextrose and reducing insulin rate met'
     );
   });
 
   it('suggests reducing rate when glucose < 14 mmol/L', () => {
     expect(suggestInsulinAdjustment('13.0', '4.0', '5', 'mmol')).toBe(
-      'Consider reducing insulin rate and adding dextrose'
+      'Glucose below 14 mmol/L (252 mg/dL): JBDS 2021 criterion for adding dextrose and reducing insulin rate met'
     );
   });
 
   it('suggests increasing rate when glucose high but rate below target', () => {
     expect(suggestInsulinAdjustment('300', '40', '5', 'mgdl')).toBe(
-      'Consider increasing insulin rate'
+      'Glucose fall below 3 mmol/L/h (54 mg/dL/h): JBDS 2021 criterion for increasing insulin rate met'
     );
   });
 
   it('suggests maintaining rate when glucose high and rate on target', () => {
     expect(suggestInsulinAdjustment('300', '60', '5', 'mgdl')).toBe(
-      'Maintain current insulin rate'
+      'Glucose fall on target (JBDS 2021, ≥3 mmol/L/h): no criterion for changing insulin rate met'
     );
   });
 

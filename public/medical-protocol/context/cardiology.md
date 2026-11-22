@@ -8,7 +8,7 @@ Logic: `lib/medprotocol/cardiology.ts` + `cardiology-types.ts` — import from `
 
 ## Screen spec
 
-**Shows:** Tabs: ASCVD | HEART | CHA₂DS₂-VASc. Each tab is its own calculator with result, category badge and (HEART, CHA₂DS₂-VASc) recommended action.
+**Shows:** Tabs: ASCVD | HEART | CHA₂DS₂-VASc. Each tab is its own calculator with result, category badge and (HEART, CHA₂DS₂-VASc) guideline criterion.
 
 **Interaction:** each tab: click to enter edit mode, edit, save or cancel. Results inline below inputs.
 
@@ -57,8 +57,8 @@ Outputs: score 0–9, category, action, color (all sex-aware).
 Types in `cardiology-types.ts`: `ASCVDInputs`, `HEARTInputs` (each field `0 | 1 | 2`), `CHADSVAScInputs`.
 
 - **ASCVD:** `calculateASCVD(inputs: ASCVDInputs)` → `string | null` (% risk, 1 decimal; null outside age 40-79 or missing labs). `getASCVDCategory(risk)` → Low (<5) / Borderline (5–7.4) / Intermediate (7.5–19.9) / High (≥20) / Unknown. `getASCVDSeverity(risk)` → low / borderline / intermediate / high / default.
-- **HEART:** `calculateHEARTScore(inputs)` → 0-10. `getHEARTCategory(score)` → Low (0–3) / Moderate (4–6) / High (7–10). `getHEARTAction(score)` → clinical action. `getHEARTSeverity(score)` → low / moderate / high.
-- **CHA2DS2-VASc:** `calculateCHADSVASc(inputs)` → 0-9. `getCHADSVAScCategory(score, isFemale)` → Low / Low-Moderate / Moderate-High. `getCHADSVAScAction(score, isFemale)` → anticoagulation recommendation. `getCHADSVAScSeverity(score, isFemale)`.
+- **HEART:** `calculateHEARTScore(inputs)` → 0-10. `getHEARTCategory(score)` → Low (0–3) / Moderate (4–6) / High (7–10). `getHEARTAction(score)` → HEART pathway text for the risk band. `getHEARTSeverity(score)` → low / moderate / high.
+- **CHA2DS2-VASc:** `calculateCHADSVASc(inputs)` → 0-9. `getCHADSVAScCategory(score, isFemale)` → Low / Low-Moderate / Moderate-High. `getCHADSVAScAction(score, isFemale)` → anticoagulation guideline criterion. `getCHADSVAScSeverity(score, isFemale)`.
 
 ASCVD numeric inputs are `string` (parsed via `safeParseFloat`). `race: "other"` uses white coefficients.
 

@@ -716,7 +716,7 @@ describe('checkESAEligibility', () => {
   it('returns not eligible when iron deficient', () => {
     const result = checkESAEligibility('8', '50', '15', 'male');
     expect(result.eligible).toBe(false);
-    expect(result.reason).toContain('iron');
+    expect(result.reason).toContain('Iron deficient');
   });
 
   it('respects sex-specific thresholds', () => {
@@ -743,7 +743,7 @@ describe('assessPhosphate', () => {
   it('returns high for phosphate > 4.5 with advanced CKD', () => {
     const result = assessPhosphate('5.0', 'G4');
     expect(result.status).toBe('high');
-    expect(result.recommendation).toContain('binder');
+    expect(result.recommendation).toContain('above target range');
   });
 
   it('returns low for phosphate < 2.5 with advanced CKD', () => {
@@ -814,7 +814,7 @@ describe('assessPTH', () => {
   it('returns high for PTH above 9x UNL in G4-G5', () => {
     const result = assessPTH('600', 'G5');
     expect(result.status).toBe('high');
-    expect(result.recommendation).toContain('calcimimetics');
+    expect(result.recommendation).toContain('>9× UNL');
   });
 
   it('handles invalid input', () => {
@@ -827,7 +827,7 @@ describe('assessPTH', () => {
 describe('assessVitaminD', () => {
   it('returns deficient for 25-OH-D < 20', () => {
     expect(assessVitaminD('15').status).toBe('deficient');
-    expect(assessVitaminD('10').recommendation).toContain('cholecalciferol');
+    expect(assessVitaminD('10').recommendation).toContain('<20 ng/mL');
   });
 
   it('returns insufficient for 25-OH-D 20-29', () => {

@@ -19,6 +19,7 @@ export const SOFA_2_2025 = "Ranzani et al. Development and Validation of the SOF
 export const SSC_2026 = "Surviving Sepsis Campaign 2026 International Guidelines (Crit Care Med 2026)";
 export const ADA_DKA_2024 = "Hyperglycemic Crises in Adults With Diabetes: A Consensus Report (Diabetes Care 2024;47:1257-1275, doi:10.2337/dci24-0032)";
 export const KITABCHI_2009 = "Kitabchi et al. Hyperglycemic Crises in Adult Patients With Diabetes (Diabetes Care 2009;32:1335-1343, doi:10.2337/dc09-9032)";
+export const JBDS_2021 = "Dhatariya. The management of diabetic ketoacidosis in adults: an updated guideline from the Joint British Diabetes Society for Inpatient Care (Diabet Med 2022;39:e14788, doi:10.1111/dme.14788)";
 export const JBDS_SAVAGE_2011 = "Savage et al. Joint British Diabetes Societies guideline for the management of diabetic ketoacidosis (Diabet Med 2011;28:508-515, doi:10.1111/j.1464-5491.2011.03246.x)";
 
 // Equations
