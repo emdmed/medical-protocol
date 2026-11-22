@@ -103,7 +103,7 @@ const within = (dir: string, p: string): boolean => p === dir || p.startsWith(di
 // (the request reaches us even when CORS blocks the *response*). So we gate state-changing and
 // data endpoints on the Origin header: requests from a real website are refused, while the local
 // dev app (http://localhost:3000, 127.0.0.1, *.localhost) and non-browser callers (no Origin) pass.
-const isLocalOrigin = (origin: string | undefined): boolean => {
+export const isLocalOrigin = (origin: string | undefined): boolean => {
   if (!origin) return true; // curl / same-process callers send no Origin; only loopback can reach us
   try {
     const host = new URL(origin).hostname;

@@ -8,6 +8,7 @@ import { EXTRACT_ARTIFACT_HTML } from "../extract-artifact";
 
 const USAGE = `Usage: medprotocol extract --note <file> --items <file> [options]
        medprotocol extract --save <file>
+       medprotocol extract --serve [--port <number>]
 
 Checks an extraction against its note: is each quote in the note verbatim, and does it state the value?
 No clinical interpretation.
@@ -21,8 +22,10 @@ Options:
   --items <file>    JSON array of { field, value, unit?, quote, episode, key?, time? }
                     episode: "current" (this illness) or "history" (before it)
   --artifact <file> Also write a page showing the note beside the extraction (HTML)
+  --serve           Start the local extraction page server. Takes no other option but --port.
+  --port <number>   Port for --serve (default 7332)
   --json            Output as JSON
-  --help            Show this help
+  --help           Show this help
 
 Output: each item's status, plus "inputs" (verified numbers by key, for the calculators) and
 "review" (keyed items held back, with the reason). Keys: ${Object.keys(FIELDS).join(", ")}
@@ -34,10 +37,45 @@ Statuses: quoted (exact) · edited (case/accents differ) · approximate (within 
 Example:
   medprotocol extract --note note.txt --items extraction.json --json`;
 
+/** Stores a raw note as extractions/<hash>/note.md, once. */
+export const saveNote = (raw: Buffer): { dir: string; existed: boolean } => {
+  // CRLF vs LF or a trailing newline must not split one note into two folders; note.md keeps the raw bytes
+  const canonical = raw.toString("utf8").replace(/^﻿/, "").replace(/\r\n?/g, "\n").trimEnd();
+  const dir = join("extractions", createHash("sha256").update(canonical).digest("hex").slice(0, 12));
+  const existed = existsSync(join(dir, "note.md"));
+  if (!existed) {
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "note.md"), raw);
+  }
+  return { dir, existed };
+};
+
+/** Why `items` is not a usable extraction, or null when it is. */
+export const itemsError = (items: unknown): string | null => {
+  if (!Array.isArray(items) || items.some((i) => typeof i?.field !== "string" || typeof i?.value !== "string" || typeof i?.quote !== "string")) {
+    return "--items must be a JSON array of { field, value, unit?, quote } strings";
+  }
+  const badEpisode = items.find((i) => !(EPISODES as readonly string[]).includes(i.episode));
+  if (badEpisode) return `"${badEpisode.field}" needs episode "current" or "history"`;
+  const badKey = items.find((i) => i.key !== undefined && !Object.hasOwn(FIELDS, i.key));
+  if (badKey) return `unknown key "${badKey.key}" — use one of: ${Object.keys(FIELDS).join(", ")}`;
+  return null;
+};
+
+/** The data block the extraction page renders. `items` are already checked against `note`. */
+export const pageData = (name: string, note: string, items: ReturnType<typeof checkExtraction>) => ({
+  name,
+  checkedAt: new Date().toLocaleDateString("sv"),
+  items,
+  segments: noteSegments(note, items),
+});
+
 export const run = (argv: string[]): void => {
   const { values } = parseArgs({
     args: argv,
     options: {
+      serve: { type: "boolean", default: false },
+      port: { type: "string", default: "7332" },
       save: { type: "string" },
       note: { type: "string" },
       items: { type: "string" },
@@ -50,6 +88,19 @@ export const run = (argv: string[]): void => {
 
   if (values.help) {
     process.stdout.write(USAGE + "\n");
+    return;
+  }
+
+  if (values.serve) {
+    const port = Number(values.port);
+    if (values.save || values.note || values.items || values.artifact || values.json) {
+      process.stderr.write(formatError("--serve takes no other options but --port") + "\n");
+    } else if (!Number.isInteger(port) || port < 0 || port > 65535) {
+      process.stderr.write(formatError("--port must be a number from 0 to 65535") + "\n");
+    } else {
+      process.stderr.write(formatError("--serve is not implemented yet") + "\n");
+    }
+    process.exitCode = 1;
     return;
   }
 
@@ -67,14 +118,7 @@ export const run = (argv: string[]): void => {
       process.exitCode = 1;
       return;
     }
-    // CRLF vs LF or a trailing newline must not split one note into two folders; note.md keeps the raw bytes
-    const canonical = raw.toString("utf8").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").trimEnd();
-    const dir = join("extractions", createHash("sha256").update(canonical).digest("hex").slice(0, 12));
-    const existed = existsSync(join(dir, "note.md"));
-    if (!existed) {
-      mkdirSync(dir, { recursive: true });
-      writeFileSync(join(dir, "note.md"), raw);
-    }
+    const { dir, existed } = saveNote(raw);
     // a pasted note staged at extractions/<file> is patient data; don't leave it behind
     if (dirname(resolve(values.save)) === resolve("extractions")) rmSync(values.save);
     printResult({ dir, existed }, values.json!, () => dir + (existed ? "  (already saved)" : ""));
@@ -98,22 +142,9 @@ export const run = (argv: string[]): void => {
     return;
   }
 
-  if (!Array.isArray(items) || items.some((i) => typeof i?.field !== "string" || typeof i?.value !== "string" || typeof i?.quote !== "string")) {
-    process.stderr.write(formatError("--items must be a JSON array of { field, value, unit?, quote } strings") + "\n");
-    process.exitCode = 1;
-    return;
-  }
-
-  const badEpisode = items.find((i) => !(EPISODES as readonly string[]).includes(i.episode));
-  if (badEpisode) {
-    process.stderr.write(formatError(`"${badEpisode.field}" needs episode "current" or "history"`) + "\n");
-    process.exitCode = 1;
-    return;
-  }
-
-  const badKey = items.find((i) => i.key !== undefined && !Object.hasOwn(FIELDS, i.key));
-  if (badKey) {
-    process.stderr.write(formatError(`unknown key "${badKey.key}" — use one of: ${Object.keys(FIELDS).join(", ")}`) + "\n");
+  const bad = itemsError(items);
+  if (bad) {
+    process.stderr.write(formatError(bad) + "\n");
     process.exitCode = 1;
     return;
   }
@@ -128,7 +159,7 @@ export const run = (argv: string[]): void => {
   if (values.artifact) {
     // extractions/<hash>/note.md is named by its folder
     const name = basename(values.note) === "note.md" ? basename(dirname(resolve(values.note))) : basename(values.note, extname(values.note));
-    const data = { name, checkedAt: new Date().toLocaleDateString("sv"), items: checked, segments: noteSegments(note, checked) };
+    const data = pageData(name, note, checked);
     // \u003c keeps "</script>" in a note from closing the data block
     const html = EXTRACT_ARTIFACT_HTML.replace("__TITLE__", () => `${name.replace(/[<&]/g, "")} extraction`).replace("__DATA__", () => JSON.stringify(data).replace(/</g, "\\u003c"));
     try {

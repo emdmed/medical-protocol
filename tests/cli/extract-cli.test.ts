@@ -128,6 +128,12 @@ describe('medprotocol extract', () => {
     expect(process.exitCode).toBe(1);
   });
 
+  it('refuses --serve with --note', () => {
+    run(['--serve', '--note', notePath]);
+    expect(process.exitCode).toBe(1);
+    expect(stderr).toContain('--serve takes no other options but --port');
+  });
+
   it('reports an unwritable --artifact path instead of crashing', () => {
     run(['--note', notePath, '--items', itemsPath, '--artifact', join(dir, 'missing', 'a.html')]);
     expect(process.exitCode).toBe(1);
