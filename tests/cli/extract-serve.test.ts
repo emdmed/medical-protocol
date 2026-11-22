@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, existsSync, rmSync } from 'node:fs';
 import { request, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { once } from 'node:events';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { serve, stateOf } from '../../packages/medprotocol/src/commands/extract';
+import { serve, stateOf, type AskModel } from '../../packages/medprotocol/src/commands/extract';
 
 const NOTE = 'BP 120/80 on admission. Creatinine 1.4 mg/dL.';
 const HASH = '3f9a1c07b2e4';
@@ -18,6 +19,8 @@ let cwd: string;
 let tmp: string;
 let server: Server;
 let port: number;
+let ask: AskModel;
+const argv1 = process.argv[1];
 
 const put = (file: string, data: unknown) => writeFileSync(join(DIR, file), JSON.stringify(data));
 
@@ -38,7 +41,10 @@ beforeEach(async () => {
   cwd = process.cwd();
   tmp = mkdtempSync(join(tmpdir(), 'mpx-serve-'));
   process.chdir(tmp);
-  server = serve(0, () => Promise.reject(new Error('not asked in these tests')));
+  // the job reads extraction.md from beside the built CLI
+  process.argv[1] = join(cwd, 'plugin/scripts/medprotocol.cjs');
+  ask = () => Promise.reject(new Error('not asked in this test'));
+  server = serve(0, (prompt) => ask(prompt));
   await once(server, 'listening');
   port = (server.address() as AddressInfo).port;
   mkdirSync(DIR);
@@ -49,6 +55,7 @@ afterEach(async () => {
   server.close();
   await once(server, 'close');
   process.chdir(cwd);
+  process.argv[1] = argv1;
   vi.restoreAllMocks();
   rmSync(tmp, { recursive: true, force: true });
 });
@@ -146,5 +153,126 @@ describe('medprotocol extract --serve', () => {
   it('413 for a body over 1 MB', async () => {
     const res = await get('/api/notes', { 'Content-Type': 'application/json' }, 'x'.repeat(1_000_001));
     expect(res.status).toBe(413);
+  });
+});
+
+describe('POST /api/notes and the model job', () => {
+  // NOTE has no line endings to even out, so this is the --save hash
+  const ID = createHash('sha256').update(NOTE).digest('hex').slice(0, 12);
+  const dir = join('extractions', ID);
+  const file = (name: string) => JSON.parse(readFileSync(join(dir, name), 'utf8'));
+  const post = (body: unknown) => get('/api/notes', {}, JSON.stringify(body));
+  const state = async () => JSON.parse((await get(`/api/extractions/${ID}`)).text);
+  const settled = async () => {
+    for (;;) {
+      const s = await state();
+      if (s.state !== 'extracting' && s.state !== 'verifying') return s;
+      await new Promise((r) => setTimeout(r, 5));
+    }
+  };
+  /** A model that gives these replies in order. */
+  const replies = (...texts: string[]) => {
+    const fake = vi.fn(async () => texts.shift() ?? 'no reply left');
+    ask = fake;
+    return fake;
+  };
+  const fix = { findings: [{ index: 1, problem: 'digits swapped', correction: creat }] };
+
+  it('without consent or without a note → 400 and nothing written', async () => {
+    expect((await post({ note: NOTE })).status).toBe(400);
+    expect((await post({ note: NOTE, consent: 'yes' })).status).toBe(400);
+    expect((await post({ note: '  \n', consent: true })).status).toBe(400);
+    expect((await get('/api/notes', {}, 'not json')).status).toBe(400);
+    expect(readdirSync('extractions')).toEqual([HASH]);
+  });
+
+  it('with consent: saves the note under the --save hash, then extracting → verifying → review', async () => {
+    const asked: { prompt: string; reply: (text: string) => void }[] = [];
+    ask = (prompt) => new Promise((reply) => asked.push({ prompt, reply }));
+    const res = await post({ note: NOTE, consent: true });
+    expect(res.status).toBe(200);
+    expect(JSON.parse(res.text)).toEqual({ id: ID });
+    expect(readFileSync(join(dir, 'note.md'), 'utf8')).toBe(NOTE);
+    expect(new Date(readFileSync(join(dir, '.consent'), 'utf8').trim()).getTime()).not.toBeNaN();
+    expect(process.stdout.write).toHaveBeenCalledWith(`http://localhost:${port}/#${ID}\n`);
+
+    expect((await state()).state).toBe('extracting');
+    expect(asked[0].prompt).toContain('# Extraction Module Context');
+    expect(asked[0].prompt).toContain(NOTE);
+    asked[0].reply(JSON.stringify([bp, wrong]));
+    await vi.waitFor(() => expect(asked).toHaveLength(2));
+    expect((await state()).state).toBe('verifying');
+    expect(asked[1].prompt).toContain('"status": "mismatched"');
+    asked[1].reply(JSON.stringify(fix));
+
+    const s = await settled();
+    expect(s).toMatchObject({ state: 'review', error: null, findings: [{ index: 1, before: wrong }] });
+    expect(file('extraction.json')).toEqual([bp, wrong]);
+    expect(file('verify.json')).toEqual(fix);
+    expect(file('corrected.json')).toEqual([bp, creat]);
+  });
+
+  it('reads a reply wrapped in a code fence', async () => {
+    replies('```json\n' + JSON.stringify([bp, creat]) + '\n```', '```\n{"findings":[]}\n```\n');
+    await post({ note: NOTE, consent: true });
+    expect((await settled()).state).toBe('done');
+    expect(file('extraction.json')).toEqual([bp, creat]);
+  });
+
+  it('an unknown key in the first pass → failed, no extraction.json', async () => {
+    replies(JSON.stringify([{ ...bp, key: 'blood_pressure' }]));
+    await post({ note: NOTE, consent: true });
+    const s = await settled();
+    expect(s.state).toBe('failed');
+    expect(s.error).toMatch(/^The model's answer was not valid: unknown key "blood_pressure"/);
+    expect(existsSync(join(dir, 'extraction.json'))).toBe(false);
+  });
+
+  it('a reply that is not JSON → failed; posting the note again reruns', async () => {
+    const fake = replies('Here are the items you asked for.', JSON.stringify([bp, creat]), '{"findings":[]}');
+    await post({ note: NOTE, consent: true });
+    expect(await settled()).toMatchObject({ state: 'failed', error: "The model's answer was not valid: not JSON" });
+    await post({ note: NOTE, consent: true });
+    expect(await settled()).toMatchObject({ state: 'done', error: null });
+    expect(fake).toHaveBeenCalledTimes(3);
+  });
+
+  it('a correction that is not in the note word for word is kept as a remark', async () => {
+    const made = { ...creat, quote: 'Creatinine of 1.4 mg/dL' };
+    replies(JSON.stringify([bp, wrong]), JSON.stringify({ findings: [{ index: 1, problem: 'digits swapped', correction: made }] }));
+    await post({ note: NOTE, consent: true });
+    expect((await settled()).state).toBe('done');
+    expect(file('verify.json')).toEqual({ findings: [{ problem: 'digits swapped (no verbatim quote found)', correction: null }] });
+    expect(file('corrected.json')).toEqual([bp, wrong]);
+  });
+
+  it('a finding about an item outside the first pass → failed, nothing written', async () => {
+    replies(JSON.stringify([bp, wrong]), JSON.stringify({ findings: [{ index: 2, problem: 'not in the note', correction: null }] }));
+    await post({ note: NOTE, consent: true });
+    const s = await settled();
+    expect(s.state).toBe('failed');
+    expect(s.error).toBe("The model's answer was not valid: index 2 is not in the first pass");
+    expect(existsSync(join(dir, 'verify.json'))).toBe(false);
+    expect(existsSync(join(dir, 'corrected.json'))).toBe(false);
+  });
+
+  it('an existing extraction.json is not rewritten: only the check is asked for', async () => {
+    mkdirSync(dir);
+    writeFileSync(join(dir, 'note.md'), NOTE);
+    writeFileSync(join(dir, 'extraction.json'), JSON.stringify([bp, wrong]));
+    const fake = replies(JSON.stringify(fix));
+    await post({ note: NOTE, consent: true });
+    expect((await settled()).state).toBe('review');
+    expect(fake).toHaveBeenCalledTimes(1);
+    expect(readFileSync(join(dir, 'extraction.json'), 'utf8')).toBe(JSON.stringify([bp, wrong]));
+  });
+
+  it('a finished note posted again does not ask the model', async () => {
+    const fake = replies(JSON.stringify([bp, creat]), '{"findings":[]}');
+    await post({ note: NOTE, consent: true });
+    await settled();
+    expect((await post({ note: NOTE + '\r\n', consent: true })).text).toBe(JSON.stringify({ id: ID }));
+    expect((await settled()).state).toBe('done');
+    expect(fake).toHaveBeenCalledTimes(2);
   });
 });
