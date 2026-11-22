@@ -120,7 +120,7 @@ mark.bad{border-bottom:0;box-shadow:inset 0 0 0 1.5px var(--alarm);text-decorati
 .meta .ep{color:var(--ink-2)}
 .quote{grid-column:2;grid-row:2;font-size:14.5px;line-height:1.45;color:var(--ink-2);font-style:italic;min-width:0}
 .says{grid-column:2/-1;font-size:13.5px;line-height:1.45;color:var(--ink-2)}
-.quote q{quotes:"\201C" "\201D"}
+.quote q,.says q{quotes:"\201C" "\201D"}
 .says b{font:700 11.5px/1 var(--head);font-stretch:82%;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-right:6px}
 .empty{padding:14px 0;font-style:italic;color:var(--ink-3)}
 
@@ -136,6 +136,14 @@ textarea.note{display:block;width:100%;min-height:240px;border:0;resize:none;bac
 .row[aria-current]{background:var(--gt)}
 .box{display:grid;justify-items:start;gap:10px;padding:14px}
 pre.says{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:400 12.5px/1.5 var(--mono)}
+/* the corrections block: what the second check would change, with the doctor's answer on each */
+.g-fix{--g:var(--ink);--gt:var(--t1);--gi:var(--ink-2)}
+.g-fix .gh{color:var(--paper)}
+.fix{grid-template-columns:minmax(0,1fr)}
+.fix>*{grid-column:1}
+.fix .go{margin-top:4px}
+.copy[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.tally[hidden]~#new{margin-left:auto}
 
 footer{border-top:1px solid var(--ink);padding-block:8px 10px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 24px;font-size:13px;line-height:1.4;color:var(--ink-3)}
 footer code{font:500 12px var(--mono)}
@@ -164,6 +172,7 @@ footer code{font:500 12px var(--mono)}
   <h1 id="t"></h1>
   <ul class="tally" id="tally" aria-label="Counts"></ul>
   <button class="copy" id="copy" type="button">Copy extraction JSON</button>
+  <a class="copy" id="new" href="#" hidden>New note</a>
   <p class="conn" id="conn" role="alert" hidden>Lost the connection to the local server. Start it again with medprotocol extract --serve.</p>
 </header>
 
@@ -390,7 +399,7 @@ footer code{font:500 12px var(--mono)}
     title.textContent = "Note extraction";
     var busy = s.state === "extracting" || s.state === "verifying";
     tally.hidden = copyBtn.hidden = busy || s.state === "failed";
-    if (!tally.hidden) return;
+    if (!tally.hidden) { corrections(s); return; }
     list.textContent = ""; when.textContent = "";
     var sec = el("section", "group g-" + (busy ? "cur" : "rev")), box = el("div", "box");
     if (busy) {
@@ -427,6 +436,72 @@ footer code{font:500 12px var(--mono)}
     list.appendChild(sec);
   }
 
+  // one line of a finding: the label, then the item and its quote
+  function says(label, it) {
+    var p = el("p", "says");
+    p.appendChild(el("b", "", label));
+    if (!it) return p;
+    p.appendChild(document.createTextNode(it.field + ": " + it.value + (it.unit ? " " + it.unit : "") + " "));
+    if (it.quote) p.appendChild(el("q", "", it.quote));
+    return p;
+  }
+
+  function decide(s, n, decision) {
+    fetch("/api/extractions/" + s.id + "/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ finding: n, decision: decision }) })
+      .then(function (r) {
+        return r.text().then(function (body) {
+          conn.hidden = true;
+          if (!r.ok) { last = null; load(); return; }
+          // the redraw empties both panes: keep where the doctor was reading and the pressed button
+          var a = list.scrollTop, b = note.scrollTop;
+          last = body; draw(JSON.parse(body));
+          list.scrollTop = a; note.scrollTop = b;
+          var btn = list.querySelector('[data-f="' + n + '"][data-d="' + decision + '"]');
+          if (btn) btn.focus();
+        });
+      }, function () { conn.hidden = false; });
+  }
+
+  // review and done: the findings of the second check above the groups, each with its two answers
+  function corrections(s) {
+    if (!s.findings.length) return;
+    var open = s.findings.filter(function (f) { return (f.correction || f.index != null) && !f.decision; }).length;
+    if (open) { var t = el("li", "found"); t.appendChild(el("b", "", String(open))); t.appendChild(el("span", "", "to decide")); tally.appendChild(t); }
+    var sec = el("section", "group g-fix");
+    var h = el("header", "gh"); h.appendChild(el("h2", "", "Corrections")); h.appendChild(el("b", "", String(s.findings.length)));
+    h.appendChild(el("p", "", "The second check re-read the note. Accept each change or keep the original.")); sec.appendChild(h);
+    var ol = el("ol");
+    s.findings.forEach(function (f, n) {
+      var li = el("li", "row fix");
+      li.appendChild(el("p", "field", f.problem));
+      ol.appendChild(li);
+      // a remark changes no item: a plain line
+      if (!f.correction && f.index == null) return;
+      var add = f.index == null;
+      if (f.before) li.appendChild(says("Was", f.before));
+      li.appendChild(add ? says("Add this item", f.correction) : f.correction ? says("Now", f.correction) : says("Remove this item"));
+      var go = el("div", "go"); go.setAttribute("role", "group"); go.setAttribute("aria-label", "Your answer");
+      [["accepted", add ? "Add" : "Accept"], ["rejected", add ? "Don't add" : "Keep the original"]].forEach(function (d) {
+        var b = el("button", "copy", d[1]); b.type = "button";
+        b.dataset.f = n; b.dataset.d = d[0];
+        b.setAttribute("aria-pressed", String(f.decision === d[0]));
+        b.addEventListener("click", function () { if (f.decision !== d[0]) decide(s, n, d[0]); });
+        go.appendChild(b);
+      });
+      li.appendChild(go);
+      // the item this finding leaves on the page, found by its content; a removed item has no quote to light
+      var shown = f.decision === "rejected" ? f.before : f.correction, at = -1;
+      if (shown) items.some(function (it, i) { return it.field === shown.field && it.value === shown.value && it.quote === shown.quote && (at = i, true); });
+      if (at < 0) return;
+      li.addEventListener("mouseenter", function () { light(at, true); });
+      li.addEventListener("focusin", function () { light(at, true); });
+      li.addEventListener("mouseleave", clear);
+      li.addEventListener("focusout", clear);
+    });
+    sec.appendChild(ol);
+    list.insertBefore(sec, list.firstChild);
+  }
+
   function load() {
     clearTimeout(timer);
     var mine = ++seq;
@@ -454,6 +529,7 @@ footer code{font:500 12px var(--mono)}
     id = m && m[1];
     intake.hidden = !!id; panes.hidden = !id;
     tally.hidden = copyBtn.hidden = true;
+    document.getElementById("new").hidden = !id;
     title.textContent = "Note extraction"; when.textContent = "";
     if (id) { note.textContent = ""; list.textContent = ""; load(); }
   }
