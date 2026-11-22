@@ -73,4 +73,4 @@ medprotocol abg --ph 7.30 --pco2 25 --hco3 12 --na 140 --cl 105 --albumin 4.0
 
 ## Guideline Reference
 
-Winter's formula, AG = Na-(Cl+HCO3) corrected for albumin, delta-delta ratio, Henderson-Hasselbalch (tolerance 0.08, Emmett & Narins, AJKD 2001). Disorders: metabolic/respiratory acidosis/alkalosis.
+Winter's formula, AG = Na-(Cl+HCO3) corrected for albumin, delta-delta ratio, Henderson-Hasselbalch (tolerance 0.08, Emmett & Narins, AJKD 2001). Disorders: metabolic/respiratory acidosis/alkalosis. Citation with DOI for Winters' formula: `sources.WINTERS_1967`.

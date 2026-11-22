@@ -10,7 +10,7 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 | `abg` | Analyzes arterial blood gas values (pH, pCO2, HCO3) and classifies the disturbance | `medprotocol abg --ph 7.25 --pco2 29 --hco3 14` |
 | `water-balance` | Calculates fluid balance from intake and output values | `medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2` |
 | `vitals` | Evaluates vital signs and flags abnormal values | `medprotocol vitals --bp 120/80 --hr 72 --temp 37.0` |
-| `pafi` | Calculates PaO2/FiO2 ratio and classifies ARDS severity | `medprotocol pafi --pao2 60 --fio2 40` |
+| `pafi` | Calculates PaO2/FiO2 ratio and gives its Berlin oxygenation range | `medprotocol pafi --pao2 60 --fio2 40` |
 | `dka` | Evaluates DKA parameters: glucose reduction rate, resolution criteria | `medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl` |
 | `cardiology` | Cardiology risk scores (ASCVD, HEART, CHA2DS2-VASc) | `medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120` |
 | `sepsis` | Sepsis assessment (SOFA-2, qSOFA, lactate clearance) | `medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13` |

@@ -138,4 +138,4 @@ medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vita
 
 ## Guideline Reference
 
-KDIGO 2024 (CKD), KDIGO 2012 (Anemia), KDIGO 2017 (CKD-MBD), KDIGO 2013 (Lipids), KDIGO 2021 (BP): CKD-EPI 2021 race-free eGFR, CGA staging (Cause + GFR G1-G5 + Albuminuria A1-A3), KFRE (Tangri 2016, non-North American calibration), RASi/SGLT2i/Finerenone eligibility, eGFR slope, sex-specific Hb, iron/ESA, Ca/P/PTH/VitD monitoring, Lp(a)/ApoB/Non-HDL, statin indication by age + CKD stage. Citation strings in `lib/medprotocol/sources.ts`.
+KDIGO 2024 (CKD), KDIGO 2012 (Anemia), KDIGO 2017 (CKD-MBD), KDIGO 2013 (Lipids), KDIGO 2021 (BP): CKD-EPI 2021 race-free eGFR, CGA staging (Cause + GFR G1-G5 + Albuminuria A1-A3), KFRE (Tangri 2016, non-North American calibration), RASi/SGLT2i/Finerenone eligibility, eGFR slope, sex-specific Hb, iron/ESA, Ca/P/PTH/VitD monitoring, Lp(a)/ApoB/Non-HDL, statin indication by age + CKD stage. Citation strings with DOI in `lib/medprotocol/sources.ts` (`KDIGO_2024_CKD`, `CKD_EPI_2021`, `KFRE_TANGRI`, `KDIGO_2012_ANEMIA`, `KDIGO_CKD_MBD_2017`, `KDIGO_2013_LIPID`, `KDIGO_2021_BP`).

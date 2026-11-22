@@ -101,4 +101,4 @@ medprotocol dka --glucose 200 --ketones 0.4 --bicarb 18 --ph 7.35 --unit mgdl
 
 ## Guideline Reference
 
-JBDS-IP DKA guidelines: glucose 3-5 mmol/L/hr (54-90 mg/dL/hr), ketone clearance >0.5 mmol/L/hr, bicarb recovery >3 mmol/L/hr, potassium: hold insulin and replace if K⁺ <3.5, add K⁺ to fluids if 3.5–5.0, none if >5.0. Resolution thresholds: Hyperglycemic Crises in Adults consensus, Diabetes Care 2024 (`sources.ADA_DKA_2024`). Insulin adjustment: Savage et al., Diabet Med 2011.
+JBDS-IP DKA guidelines: glucose 3-5 mmol/L/hr (54-90 mg/dL/hr), ketone clearance >0.5 mmol/L/hr, bicarb recovery >3 mmol/L/hr, potassium: hold insulin and replace if K⁺ <3.5, add K⁺ to fluids if 3.5–5.0, none if >5.0. Resolution thresholds: Hyperglycemic Crises in Adults consensus, Diabetes Care 2024 (`sources.ADA_DKA_2024`). Insulin adjustment: Savage et al., Diabet Med 2011. Citations with DOI: `sources.ADA_DKA_2024`, `KITABCHI_2009`, `JBDS_SAVAGE_2011`.

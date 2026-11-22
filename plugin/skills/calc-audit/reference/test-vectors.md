@@ -38,7 +38,7 @@ Canonical test inputs and expected outputs for each module. These are the single
 | Field | Expected |
 |-------|----------|
 | paFi | 150 |
-| classification | "Moderate ARDS" |
+| classification | "Berlin moderate range" |
 
 ## Vital Signs
 
@@ -94,6 +94,6 @@ Canonical test inputs and expected outputs for each module. These are the single
 
 | Field | Expected |
 |-------|----------|
-| egfr | 71.4 |
+| egfr | 71 |
 | gfrCategory | "G2" |
 | gfrLabel | "Mildly decreased" |

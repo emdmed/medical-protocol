@@ -9,7 +9,7 @@
 | acid-base | Arterial blood gas analysis with anion gap |
 | water-balance | Fluid intake/output tracking |
 | bmi | Body mass index calculator |
-| pafi | PaO2/FiO2 ratio with ARDS classification |
+| pafi | PaO2/FiO2 ratio with Berlin oxygenation range |
 | dka | DKA monitoring (glucose, ketones, K+, GCS) |
 | cardiology | ASCVD, HEART Score, CHA2DS2-VASc |
 | ckd | eGFR, KDIGO staging, KFRE risk prediction |

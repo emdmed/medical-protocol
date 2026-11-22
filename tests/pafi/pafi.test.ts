@@ -95,22 +95,24 @@ describe('getPaFiClassification', () => {
     expect(getPaFiClassification('500')).toBe('Normal');
   });
 
-  it('returns Mild ARDS for PaFi 200-300', () => {
-    expect(getPaFiClassification('300')).toBe('Mild ARDS');
-    expect(getPaFiClassification('250')).toBe('Mild ARDS');
-    expect(getPaFiClassification('200')).toBe('Mild ARDS');
+  // Cutoffs: Berlin Definition (JAMA 2012;307:2526-2533): mild 201–300, moderate 101–200, severe ≤100.
+  it('returns Berlin mild range for PaFi 201-300', () => {
+    expect(getPaFiClassification('300')).toBe('Berlin mild range');
+    expect(getPaFiClassification('250')).toBe('Berlin mild range');
+    expect(getPaFiClassification('201')).toBe('Berlin mild range');
   });
 
-  it('returns Moderate ARDS for PaFi 100-199', () => {
-    expect(getPaFiClassification('199')).toBe('Moderate ARDS');
-    expect(getPaFiClassification('150')).toBe('Moderate ARDS');
-    expect(getPaFiClassification('100')).toBe('Moderate ARDS');
+  it('returns Berlin moderate range for PaFi 101-200', () => {
+    expect(getPaFiClassification('200')).toBe('Berlin moderate range');
+    expect(getPaFiClassification('150')).toBe('Berlin moderate range');
+    expect(getPaFiClassification('101')).toBe('Berlin moderate range');
   });
 
-  it('returns Severe ARDS for PaFi < 100', () => {
-    expect(getPaFiClassification('99')).toBe('Severe ARDS');
-    expect(getPaFiClassification('50')).toBe('Severe ARDS');
-    expect(getPaFiClassification('0')).toBe('Severe ARDS');
+  it('returns Berlin severe range for PaFi ≤ 100', () => {
+    expect(getPaFiClassification('100')).toBe('Berlin severe range');
+    expect(getPaFiClassification('99')).toBe('Berlin severe range');
+    expect(getPaFiClassification('50')).toBe('Berlin severe range');
+    expect(getPaFiClassification('0')).toBe('Berlin severe range');
   });
 
   it('returns Unknown for null', () => {
@@ -135,7 +137,9 @@ describe('getPaFiSeverity', () => {
     expect(getPaFiSeverity('150')).toBe('moderate');
   });
 
-  it('returns severe for PaFi < 100', () => {
+  it('returns severe for PaFi ≤ 100', () => {
+    expect(getPaFiSeverity('100')).toBe('severe');
+    expect(getPaFiSeverity('200')).toBe('moderate');
     expect(getPaFiSeverity('50')).toBe('severe');
   });
 

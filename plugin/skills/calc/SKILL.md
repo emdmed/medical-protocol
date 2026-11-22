@@ -93,7 +93,7 @@ Translate the JSON output into clear clinical language:
 - **ABG**: State the primary disturbance, compensation status, and anion gap if calculated (e.g., "This shows a metabolic acidosis with respiratory compensation. The anion gap is elevated at 18.")
 - **Water Balance**: State the net balance and whether the patient is positive or negative (e.g., "The fluid balance is +300 mL — the patient is slightly positive for the day")
 - **Vitals**: State which values are normal and flag any abnormal readings (e.g., "Blood pressure and heart rate are within normal limits. Temperature is elevated at 38.5°C — low-grade fever.")
-- **PaFi**: State the PaFi ratio and ARDS classification (e.g., "The PaFi ratio is 150 — moderate ARDS. This indicates significant oxygenation impairment.")
+- **PaFi**: State the PaFi ratio and its Berlin oxygenation range, never an ARDS diagnosis (e.g., "The PaFi ratio is 150 — in the Berlin moderate range. This indicates significant oxygenation impairment.")
 - **DKA**: State the glucose reduction rate and whether on target, resolution criteria status, and insulin suggestion if applicable (e.g., "Glucose is dropping at 30 mg/dL/hr — below the target of 54 mg/dL/hr. DKA not yet resolved: ketones and pH still abnormal.")
 
 After presenting results, offer two options:

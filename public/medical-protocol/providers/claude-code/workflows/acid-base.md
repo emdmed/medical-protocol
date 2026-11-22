@@ -51,6 +51,6 @@ Ask: "Would you like to adjust anything about the analysis display?"
 Based on clinical context, the doctor may also benefit from:
 - **/medical-protocol:dka** — If metabolic acidosis with elevated anion gap suggests diabetic ketoacidosis
 - **/medical-protocol:sepsis** — If lactic acidosis or sepsis-related gas derangements are suspected
-- **/medical-protocol:pafi** — If respiratory component needs PaO2/FiO2 ratio and ARDS classification
+- **/medical-protocol:pafi** — If respiratory component needs PaO2/FiO2 ratio and Berlin oxygenation range
 
 Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.

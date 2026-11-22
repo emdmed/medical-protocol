@@ -55,7 +55,7 @@ Ask: "Would you like to adjust which vital signs are shown, or change how any of
 
 Based on clinical context, the doctor may also benefit from:
 - **/medical-protocol:sepsis** — If abnormal vitals suggest infection, screen with qSOFA and full SOFA scoring
-- **/medical-protocol:pafi** — If SpO2 is low, calculate PaO2/FiO2 ratio for ARDS classification
+- **/medical-protocol:pafi** — If SpO2 is low, calculate PaO2/FiO2 ratio for Berlin oxygenation range
 - **/medical-protocol:cardiology** — If BP or heart rate abnormalities warrant cardiovascular risk assessment
 
 Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.

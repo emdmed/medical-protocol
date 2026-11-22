@@ -10,7 +10,7 @@ Present the available building blocks by category and ask which they'd like:
 
   **Monitoring** — Vital signs (BP, HR, RR, Temp, SpO2)
 
-  **Calculators** — Blood gas / acid-base analyzer · BMI calculator · Fluid balance (water balance / I&O) · PaFi calculator (PaO2/FiO2 ratio with ARDS classification) · Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
+  **Calculators** — Blood gas / acid-base analyzer · BMI calculator · Fluid balance (water balance / I&O) · PaFi calculator (PaO2/FiO2 ratio with Berlin oxygenation range) · Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
 
   **Critical Care** — DKA monitoring (hourly glucose, ketones, potassium, insulin, GCS tracking) · Sepsis assessment (SOFA, qSOFA, lactate clearance)
 

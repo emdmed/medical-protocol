@@ -16,14 +16,16 @@ export const calculatePaFi = (paO2: string, fiO2: string): string | null => {
   return ratio.toFixed(0);
 };
 
+// Berlin Definition (JAMA 2012;307:2526-2533) oxygenation ranges: mild 201–300, moderate 101–200, severe ≤100.
+// The ratio alone is not an ARDS diagnosis: Berlin also needs timing, imaging, origin of edema and PEEP ≥5.
 export const getPaFiClassification = (paFi: string | null): string => {
   if (!paFi) return "Unknown";
   const value = parseFloat(paFi);
   if (isNaN(value)) return "Unknown";
   if (value > 300) return "Normal";
-  if (value >= 200) return "Mild ARDS";
-  if (value >= 100) return "Moderate ARDS";
-  return "Severe ARDS";
+  if (value > 200) return "Berlin mild range";
+  if (value > 100) return "Berlin moderate range";
+  return "Berlin severe range";
 };
 
 export const getPaFiSeverity = (paFi: string | null): string => {
@@ -31,7 +33,7 @@ export const getPaFiSeverity = (paFi: string | null): string => {
   const value = parseFloat(paFi);
   if (isNaN(value)) return "default";
   if (value > 300) return "normal";
-  if (value >= 200) return "mild";
-  if (value >= 100) return "moderate";
+  if (value > 200) return "mild";
+  if (value > 100) return "moderate";
   return "severe";
 };

@@ -108,4 +108,4 @@ medprotocol vitals --bp 90/60 --hr 110 --rr 24 --temp 38.5 --spo2 92 --fio2 40
 
 ## Guideline Reference
 
-AHA/ACC 2017 (BP), standard adult reference ranges (HR, RR, Temp), SpO2 ≥95% normal / <90% critical. Critical cutoffs are common adult reference values that drive display emphasis only; review them against local protocol.
+AHA/ACC 2017 (BP), standard adult reference ranges (HR, RR, Temp), SpO2 ≥95% normal / <90% critical. Critical cutoffs are common adult reference values that drive display emphasis only; review them against local protocol. Citation with DOI: `sources.ACC_AHA_2017_BP`.

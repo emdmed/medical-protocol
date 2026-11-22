@@ -91,4 +91,4 @@ medprotocol cardiology chadsvasc --chf --htn --age75 --diabetes --stroke
 
 ## Guideline Reference
 
-ACC/AHA 2013 Pooled Cohort (ASCVD; superseded by PREVENT in the 2026 ACC/AHA dyslipidemia guideline), Six et al. 2008 (HEART), Lip et al. 2010 / ESC 2020 (CHA2DS2-VASc).
+ACC/AHA 2013 Pooled Cohort (ASCVD; superseded by PREVENT in the 2026 ACC/AHA dyslipidemia guideline), Six et al. 2008 (HEART), Lip et al. 2010 / ESC 2020 (CHA2DS2-VASc). Citations with DOI: `sources.PCE_2013`, `HEART_2008`, `CHADSVASC_2010`.

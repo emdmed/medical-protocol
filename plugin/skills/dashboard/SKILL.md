@@ -31,7 +31,7 @@ Present the available building blocks by category:
 
   **Monitoring** — Vital signs (BP, HR, RR, Temp, SpO2)
 
-  **Calculators** — Blood gas / acid-base analyzer · BMI calculator · Fluid balance (water balance / I&O) · PaFi calculator (PaO2/FiO2 ratio with ARDS classification) · Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
+  **Calculators** — Blood gas / acid-base analyzer · BMI calculator · Fluid balance (water balance / I&O) · PaFi calculator (PaO2/FiO2 ratio with Berlin oxygenation range) · Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
 
   **Nephrology** — CKD evaluator (eGFR, KDIGO staging, KFRE, progression) · Nephrology companion (anemia, CKD-MBD, cardio-metabolic)
 

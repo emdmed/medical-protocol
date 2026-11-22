@@ -1223,17 +1223,17 @@ var init_pafi = __esm({
       const value = parseFloat(paFi);
       if (isNaN(value)) return "Unknown";
       if (value > 300) return "Normal";
-      if (value >= 200) return "Mild ARDS";
-      if (value >= 100) return "Moderate ARDS";
-      return "Severe ARDS";
+      if (value > 200) return "Berlin mild range";
+      if (value > 100) return "Berlin moderate range";
+      return "Berlin severe range";
     };
     getPaFiSeverity = (paFi) => {
       if (!paFi) return "default";
       const value = parseFloat(paFi);
       if (isNaN(value)) return "default";
       if (value > 300) return "normal";
-      if (value >= 200) return "mild";
-      if (value >= 100) return "moderate";
+      if (value > 200) return "mild";
+      if (value > 100) return "moderate";
       return "severe";
     };
   }
@@ -5768,7 +5768,7 @@ Commands:
   abg              Analyze arterial blood gas
   water-balance    Calculate fluid balance
   vitals           Evaluate vital signs
-  pafi             Calculate PaO2/FiO2 ratio (ARDS classification)
+  pafi             Calculate PaO2/FiO2 ratio (Berlin oxygenation range)
   dka              Assess DKA parameters and resolution
   cardiology       Cardiology risk scores (ASCVD, HEART, CHA\u2082DS\u2082-VASc)
   sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)

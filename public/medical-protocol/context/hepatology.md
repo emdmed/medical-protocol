@@ -101,4 +101,4 @@ interface MasldScreeningReading {
 
 ## Guideline Reference
 
-ADA Standards of Care 2026, Chapter 4, Figure 4.3 — MASLD/MASH algorithm (`sources.ADA_2026_FIG_4_3`).
+ADA Standards of Care 2026, Chapter 4, Figure 4.3 — MASLD/MASH algorithm (`sources.ADA_2026_FIG_4_3`). FIB-4 formula: `sources.FIB4_2006`.
