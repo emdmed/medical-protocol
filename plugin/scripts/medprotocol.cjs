@@ -1719,7 +1719,7 @@ var init_cardiology2 = __esm({
     USAGE7 = `Usage: medprotocol cardiology <sub-command> [options]
 
 Sub-commands:
-  ascvd        10-year ASCVD risk (Pooled Cohort Equations)
+  ascvd        10-year ASCVD risk (Pooled Cohort Equations 2013, superseded by PREVENT)
   heart        HEART Score for chest pain triage
   chadsvasc    CHA\u2082DS\u2082-VASc stroke risk in atrial fibrillation
 
@@ -1831,7 +1831,7 @@ Examples:
       };
       printResult(data, json, () => {
         return [
-          formatHeader("ASCVD 10-Year Risk"),
+          formatHeader("ASCVD 10-Year Risk (Pooled Cohort Equations 2013, superseded by PREVENT)"),
           formatTable([
             ["Risk", `${risk}%`],
             ["Category", category],
@@ -2503,7 +2503,7 @@ var init_ckd = __esm({
     calculateEGFR = (creatinine, age, sex) => {
       const scr = safeParseFloat(creatinine);
       const ageVal = safeParseFloat(age);
-      if (scr <= 0 || ageVal <= 0) return 0;
+      if (scr <= 0 || ageVal < 18) return 0;
       const isFemale = sex.toLowerCase() === "female" || sex.toLowerCase() === "f";
       const kappa = isFemale ? 0.7 : 0.9;
       const alpha = isFemale ? -0.241 : -0.302;
@@ -2513,7 +2513,7 @@ var init_ckd = __esm({
       const ageTerm = Math.pow(0.9938, ageVal);
       const sexFactor = isFemale ? 1.012 : 1;
       const egfr = 142 * minTerm * maxTerm * ageTerm * sexFactor;
-      return Math.round(egfr * 10) / 10;
+      return Math.round(egfr);
     };
     classifyGFRCategory = (egfr) => {
       const val = safeParseFloat(egfr);
@@ -2754,7 +2754,7 @@ var ckd_exports = {};
 __export(ckd_exports, {
   run: () => run9
 });
-var import_node_util9, USAGE9, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run9;
+var import_node_util9, USAGE9, failNotCalculated, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run9;
 var init_ckd2 = __esm({
   "src/commands/ckd.ts"() {
     "use strict";
@@ -2818,6 +2818,12 @@ Examples:
   medprotocol ckd treatment --egfr 35 --acr 300 --diabetes
   medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
   medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4`;
+    failNotCalculated = () => {
+      process.stderr.write(
+        formatError("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0") + "\n"
+      );
+      process.exitCode = 1;
+    };
     runEGFR = (argv, json) => {
       const { values } = (0, import_node_util9.parseArgs)({
         args: argv,
@@ -2846,6 +2852,7 @@ Examples:
         return;
       }
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
+      if (egfr === 0) return failNotCalculated();
       const gfrCategory = classifyGFRCategory(String(egfr));
       const gfrLabel = getGFRCategoryLabel(gfrCategory);
       const severity = getCKDSeverity(gfrCategory);
@@ -2891,6 +2898,7 @@ Examples:
         return;
       }
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
+      if (egfr === 0) return failNotCalculated();
       const gfrCategory = classifyGFRCategory(String(egfr));
       const gfrLabel = getGFRCategoryLabel(gfrCategory);
       const albCategory = classifyAlbuminuriaCategory(values.acr);

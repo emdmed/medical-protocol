@@ -114,6 +114,8 @@ Non-HDL: `classifyNonHDL(calculateNonHDL(tc, hdl) ?? 0)`. Do not subtract in the
 - **No circular loops.** Guard `onData` → `data` flows with `useRef` + serialized comparison
 - **Inbound sync required.** CKD and every nephrology panel must sync the `data` prop into local state after mount — otherwise parent updates (age/sex from Patient) are ignored
 - **KFRE requires eGFR, not creatinine.** Calculate eGFR first
+- **`calculateEGFR` returns a whole number, and 0 when it cannot calculate** (age under 18, creatinine missing or ≤ 0). On 0 show "not calculated" and do not stage: `classifyGFRCategory("0")` would say G5
+- **KFRE uses the non-North American calibration** (Tangri 2016). The kidneyfailurerisk.com calculator set to North America gives higher risks
 - **`calculateEGFRSlope` takes a JSON string**, not an array; `isRapidDecline` takes the slope as a string
 - **Wire `sex` to Anemia** — without it, falls back to generic classification
 - **Wire `gfrCategory` to PhosphoCalcic** — without it, PTH uses generic ranges
@@ -136,4 +138,4 @@ medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vita
 
 ## Guideline Reference
 
-KDIGO 2024 (CKD), KDIGO 2012 (Anemia), KDIGO 2017 (CKD-MBD), KDIGO 2013 (Lipids), KDIGO 2021 (BP): CKD-EPI 2021 race-free eGFR, CGA staging (Cause + GFR G1-G5 + Albuminuria A1-A3), KFRE (Tangri), RASi/SGLT2i/Finerenone eligibility, eGFR slope, sex-specific Hb, iron/ESA, Ca/P/PTH/VitD monitoring, Lp(a)/ApoB/Non-HDL, statin indication by age + CKD stage. Citation strings in `lib/medprotocol/sources.ts`.
+KDIGO 2024 (CKD), KDIGO 2012 (Anemia), KDIGO 2017 (CKD-MBD), KDIGO 2013 (Lipids), KDIGO 2021 (BP): CKD-EPI 2021 race-free eGFR, CGA staging (Cause + GFR G1-G5 + Albuminuria A1-A3), KFRE (Tangri 2016, non-North American calibration), RASi/SGLT2i/Finerenone eligibility, eGFR slope, sex-specific Hb, iron/ESA, Ca/P/PTH/VitD monitoring, Lp(a)/ApoB/Non-HDL, statin indication by age + CKD stage. Citation strings in `lib/medprotocol/sources.ts`.

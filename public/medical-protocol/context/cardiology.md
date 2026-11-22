@@ -1,6 +1,6 @@
 # Cardiology Module Context
 
-Three cardiovascular risk calculators: ASCVD 10-year risk (Pooled Cohort Equations), HEART Score (chest pain triage), CHA2DS2-VASc (AF stroke risk).
+Three cardiovascular risk calculators: ASCVD 10-year risk (Pooled Cohort Equations 2013, superseded by PREVENT), HEART Score (chest pain triage), CHA2DS2-VASc (AF stroke risk).
 
 Logic: `lib/medprotocol/cardiology.ts` + `cardiology-types.ts` — import from `@/lib/medprotocol/cardiology` and `@/lib/medprotocol/cardiology-types`. Build: see `building.md`.
 
@@ -26,7 +26,7 @@ Logic: `lib/medprotocol/cardiology.ts` + `cardiology-types.ts` — import from `
 | Diabetes | toggle | off |
 | Smoker | toggle | off |
 
-Outputs: 10-year risk % (`calculateASCVD`), category (`getASCVDCategory`), color (`getASCVDSeverity`). Show "Unknown" when age is outside 40–79.
+Outputs: 10-year risk % (`calculateASCVD`), category (`getASCVDCategory`), color (`getASCVDSeverity`). Show "Unknown" when age is outside 40–79. Label the result "Pooled Cohort Equations 2013 (superseded by PREVENT)".
 
 ### HEART
 
@@ -74,6 +74,7 @@ ASCVD numeric inputs are `string` (parsed via `safeParseFloat`). `race: "other"`
 ## Gotchas
 
 - **ASCVD age range:** 40-79 only, returns `null` outside
+- **ASCVD model is superseded.** `calculateASCVD` is the 2013 Pooled Cohort Equations. The ACC estimator now defaults to PREVENT and marks the pooled cohort equations as no longer supported (2026 ACC/AHA dyslipidemia guideline). PREVENT is not in the lib; say so on the screen
 - **CHA2DS2-VASc sex:** female sex adds 1 point; thresholds are sex-specific (female score 1 = Low, male score 1 = Low-Moderate). Always pass `isFemale`
 
 ---
@@ -90,4 +91,4 @@ medprotocol cardiology chadsvasc --chf --htn --age75 --diabetes --stroke
 
 ## Guideline Reference
 
-ACC/AHA 2013 Pooled Cohort (ASCVD), Six et al. 2008 (HEART), Lip et al. 2010 / ESC 2020 (CHA2DS2-VASc).
+ACC/AHA 2013 Pooled Cohort (ASCVD; superseded by PREVENT in the 2026 ACC/AHA dyslipidemia guideline), Six et al. 2008 (HEART), Lip et al. 2010 / ESC 2020 (CHA2DS2-VASc).

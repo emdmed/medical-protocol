@@ -11,6 +11,7 @@ import { safeParseFloat } from "./utils/safeParseFloat";
  * CKD-EPI 2021 race-free equation.
  * 142 × min(Scr/κ, 1)^α × max(Scr/κ, 1)^-1.2 × 0.9938^age × 1.012 [if female]
  * Female: κ=0.7, α=-0.241; Male: κ=0.9, α=-0.302
+ * Whole number, adults only (NKF lab guidance); returns 0 when it cannot be calculated.
  */
 export const calculateEGFR = (
   creatinine: string,
@@ -19,7 +20,7 @@ export const calculateEGFR = (
 ): number => {
   const scr = safeParseFloat(creatinine);
   const ageVal = safeParseFloat(age);
-  if (scr <= 0 || ageVal <= 0) return 0;
+  if (scr <= 0 || ageVal < 18) return 0;
 
   const isFemale = sex.toLowerCase() === "female" || sex.toLowerCase() === "f";
   const kappa = isFemale ? 0.7 : 0.9;
@@ -32,7 +33,7 @@ export const calculateEGFR = (
   const sexFactor = isFemale ? 1.012 : 1;
 
   const egfr = 142 * minTerm * maxTerm * ageTerm * sexFactor;
-  return Math.round(egfr * 10) / 10;
+  return Math.round(egfr);
 };
 
 // ─── GFR Category ───────────────────────────────────────────────────
@@ -137,7 +138,8 @@ export const getMonitoringFrequency = (
 // ─── KFRE (Kidney Failure Risk Equation) ────────────────────────────
 
 /**
- * 4-variable KFRE (Tangri et al.).
+ * 4-variable KFRE (Tangri et al.), non-North American calibration (Tangri 2016).
+ * North American calibration uses S0(2yr) = 0.9750, S0(5yr) = 0.9240 and gives higher risks.
  * LP = −0.2201×(age/10−7.036) + 0.2467×(male−0.5642) − 0.5567×(eGFR/5−7.222) + 0.4510×(lnACR−5.137)
  * Risk = 1 − S0^exp(LP)
  * S0(2yr) = 0.9832, S0(5yr) = 0.9365

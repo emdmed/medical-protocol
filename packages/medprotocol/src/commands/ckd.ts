@@ -82,6 +82,14 @@ Examples:
   medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
   medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4`;
 
+// calculateEGFR returns 0 when it cannot calculate; staging that 0 would report G5.
+const failNotCalculated = (): void => {
+  process.stderr.write(
+    formatError("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0") + "\n",
+  );
+  process.exitCode = 1;
+};
+
 const runEGFR = (argv: string[], json: boolean): void => {
   const { values } = parseArgs({
     args: argv,
@@ -114,6 +122,7 @@ const runEGFR = (argv: string[], json: boolean): void => {
   }
 
   const egfr = calculateEGFR(values.creatinine!, values.age!, values.sex!);
+  if (egfr === 0) return failNotCalculated();
   const gfrCategory = classifyGFRCategory(String(egfr));
   const gfrLabel = getGFRCategoryLabel(gfrCategory);
   const severity = getCKDSeverity(gfrCategory);
@@ -166,6 +175,7 @@ const runStage = (argv: string[], json: boolean): void => {
   }
 
   const egfr = calculateEGFR(values.creatinine!, values.age!, values.sex!);
+  if (egfr === 0) return failNotCalculated();
   const gfrCategory = classifyGFRCategory(String(egfr));
   const gfrLabel = getGFRCategoryLabel(gfrCategory);
   const albCategory = classifyAlbuminuriaCategory(values.acr!);

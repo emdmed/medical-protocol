@@ -54,6 +54,13 @@ const baseCHADS: CHADSVAScInputs = {
 // ── ASCVD ──────────────────────────────────────────────
 
 describe("calculateASCVD", () => {
+  // External reference: Goff et al. 2013 ACC/AHA risk guideline, worked example for White men
+  // (age 55, TC 213, HDL 50, untreated SBP 120, nonsmoker, no diabetes) → 5.3%.
+  // The paper rounds the individual sum to 60.69 before exponentiating; unrounded it gives 5.4, hence ±0.1.
+  it("matches the Goff 2013 worked example for White men within rounding", () => {
+    expect(Math.abs(parseFloat(calculateASCVD(baseASCVD)!) - 5.3)).toBeLessThan(0.11);
+  });
+
   it("returns a numeric string for valid white male inputs", () => {
     const result = calculateASCVD(baseASCVD);
     expect(result).not.toBeNull();

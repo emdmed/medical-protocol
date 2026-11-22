@@ -12,6 +12,8 @@ import type {
 import { safeParseFloat } from "./utils/safeParseFloat";
 
 // ── ASCVD (Pooled Cohort Equations 2013) ───────────────
+// Superseded: the ACC estimator now defaults to PREVENT and marks the pooled cohort equations as
+// "no longer supported by ACC clinical policy or guidelines" (2026 ACC/AHA dyslipidemia guideline).
 
 /**
  * Coefficient sets for the 4 race/sex groups.

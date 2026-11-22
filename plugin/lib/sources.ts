@@ -20,7 +20,7 @@ export const ADA_DKA_2024 = "Hyperglycemic Crises in Adults With Diabetes: A Con
 
 // Equations
 export const CKD_EPI_2021 = "CKD-EPI 2021 Creatinine Equation";
-export const KFRE_TANGRI = "Tangri et al. Kidney Failure Risk Equation (JAMA 2011)";
+export const KFRE_TANGRI = "Tangri et al. Kidney Failure Risk Equation, 4-variable, non-North American calibration (JAMA 2016;315:164-174, doi:10.1001/jama.2015.18202)";
 
 // GDM
 export const IADPSG_2010 = "IADPSG 2010 Consensus Panel: GDM One-Step Criteria";
