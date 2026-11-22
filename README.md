@@ -54,7 +54,7 @@ The calculations in your app are the same code the tests cover: more than 1,000 
 
 ## Reading a clinical note
 
-Save a made-up or de-identified note as a file and ask for the values. Each value comes back with the exact words it was taken from, a second agent re-checks the first pass, and you get a page with the note on one side and the values on the other. Anything that doesn't match the note word for word is flagged for you to review.
+Ask for a note extraction and you get a page in your browser, served from your own computer. Paste a made-up or de-identified note there. Each value comes back with the exact words it was taken from, a second model run re-checks the first pass, and the page shows the note on one side and the values on the other. Anything that doesn't match the note word for word is flagged for you to review, and you accept or reject each proposed correction with a button.
 
 ![Four steps: you give a made-up or de-identified note, the values are pulled out with the exact words they came from, a second agent re-checks them, and you review a page with the note beside the values](.github/readme/how-extraction-works.svg)
 
@@ -62,7 +62,7 @@ This is what the page looks like:
 
 ![The extraction page: a fictional admission note on the left with the quoted words highlighted, and the extracted values on the right, grouped into needs review, current illness and history](.github/readme/extraction-page.png)
 
-The page is a local file. It is never published, and the note only reaches the model after you confirm it is not real patient data.
+The page runs on your computer only (`medprotocol extract --serve`) and can be saved as a local file. It is never published, and the note only reaches the model after you confirm it is not real patient data.
 
 ## Point at your app
 
@@ -139,7 +139,7 @@ Quick SOFA (qSOFA)
   GCS               13
 ```
 
-Commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `ckd`, `diabetes`, `extract`, `overlay`. Add `--json` to any command, `--help` for its options.
+Commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `ckd`, `diabetes`, `extract`, `overlay`. Add `--json` to any command, `--help` for its options. `medprotocol extract --serve` starts the local extraction page (`--port <number>` to change the port).
 
 ## Repository layout
 

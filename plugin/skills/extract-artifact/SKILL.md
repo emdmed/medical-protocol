@@ -12,6 +12,8 @@ hooks:
 
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever this file says `medprotocol`
 
+This skill is the static export: one file of a finished extraction. The live page, where the doctor pastes a note and accepts or rejects corrections, is `medprotocol extract --serve` (`/medical-protocol:extract`).
+
 One page per extraction. Extraction only: the page shows what the note says and how each quote checked, never an interpretation.
 
 ## Steps
@@ -25,7 +27,7 @@ One page per extraction. Extraction only: the page shows what the note says and 
 3. **Tell the doctor where it is:** "The page is saved at <dir>/artifact.html. Open it in your browser; it stays on this computer."
 
 ## NEVER
-- Publish, upload or host the page anywhere (the Artifact tool, a gist, a web server): it holds the full note and stays a local file. The `note-consent` hook denies the Artifact tool for it
+- Publish, upload or host the page anywhere (the Artifact tool, a gist, any other web server, a tunnel): it holds the full note and stays on this computer. The only server allowed is the local `medprotocol extract --serve`, which listens on this computer only. The `note-consent` hook denies the Artifact tool for both pages
 - Write, edit or restyle the page's HTML, or build a page some other way
 - Add ranges, flags, scores or comments on the values to the page or to your reply
 - Change `<dir>/note.md` or `<dir>/extraction.json` (the `extraction-guard` hook blocks it anyway)

@@ -82,5 +82,8 @@ describe("note-consent hook", () => {
     expect(decision("Artifact", { file_path: "docs/page.html" })).toBeUndefined();
     writeFileSync(join(dir, "other/copy.html"), EXTRACT_ARTIFACT_HTML);
     expect(denies("Artifact", { file_path: "other/copy.html" })).toBe(true);
+    // the live page as `extract --serve` sends it
+    writeFileSync(join(dir, "other/live.html"), EXTRACT_ARTIFACT_HTML.replace("__TITLE__", "Note extraction").replace("__DATA__", '{"live":true}'));
+    expect(denies("Artifact", { file_path: "other/live.html" })).toBe(true);
   });
 });

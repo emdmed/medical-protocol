@@ -13,7 +13,10 @@
 //   command asks while a note is pending, since a shell command can read it in too many ways to parse; a
 //   yes to one naming the folder writes <hash>/.consent and later reads (the verifier, the page) go through;
 // - publishing an extraction page with the Artifact tool is always denied, wherever the page was copied
-//   to: the page holds the full note and stays a local file.
+//   to: the page holds the full note and stays a local file. The live page (`medprotocol extract --serve`)
+//   is the same template, so a saved copy of it is denied too.
+// The live page does not go through this hook: the doctor ticks a consent box there and the server writes
+// the same <hash>/.consent, so later reads of that folder in the chat go through.
 // shortcut: pasted notes are spotted by vitals/units/ID patterns; @-attached files and images are not seen,
 // and a note file the doctor gives is unguarded until `extract --save` copies it into extractions/.
 // Widen the patterns if notes slip through.

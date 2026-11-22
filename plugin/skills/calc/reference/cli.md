@@ -14,7 +14,7 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 | `dka` | Evaluates DKA parameters: glucose reduction rate, resolution criteria | `medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl` |
 | `cardiology` | Cardiology risk scores (ASCVD, HEART, CHA2DS2-VASc) | `medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120` |
 | `sepsis` | Sepsis assessment (SOFA-2, qSOFA, lactate clearance) | `medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13` |
-| `extract` | Checks extracted values against the note they came from (quote in note, value in quote) — no interpretation; `--save <file>` stores a note in `extractions/<hash>/`, `--artifact <file>` writes a page of it | `medprotocol extract --note note.txt --items extraction.json` |
+| `extract` | Checks extracted values against the note they came from (quote in note, value in quote) — no interpretation; `--save <file>` stores a note in `extractions/<hash>/`, `--artifact <file>` writes a page of it, `--serve` (with `--port <number>`, default 7332) starts the local extraction page | `medprotocol extract --note note.txt --items extraction.json` |
 | `ckd` | CKD evaluation (eGFR, KDIGO staging, KFRE) | `medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male` |
 
 ## When to Suggest Calculator vs Full Interface

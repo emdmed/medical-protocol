@@ -20,7 +20,7 @@ const file = path.resolve(projectDir, (input.tool_input && input.tool_input.file
 // Only <project>/extractions/<hash>/, not data/extractions/.
 const inFolder = path.dirname(path.dirname(file)) === path.resolve(projectDir, "extractions");
 const name = path.basename(file);
-// .consent is written only by the note-consent hook, after the doctor said yes
+// .consent is written only by the note-consent hook or the `extract --serve` server, after the doctor said yes
 if (!inFolder || !(name === "note.md" || name === ".consent" || (name === "extraction.json" && fs.existsSync(file)))) process.exit(0);
 
 process.stdout.write(

@@ -8,7 +8,10 @@ Logic: `lib/medprotocol/extraction.ts` — import from `@/lib/medprotocol/extrac
 
 ## Who extracts
 
-The agent does, in the terminal — the doctor's app has no model. The lib only checks.
+The agent does — the doctor's app has no model. The lib only checks. There are two ways in, and both leave the same files in the same folder:
+
+- **In the page** (the default) — `medprotocol extract --serve` starts a local server and prints the page's address. The doctor pastes the note there and ticks the box confirming it is made up or de-identified. The server then does steps 1–4 below with plain code: it saves the note, asks the model for the first pass and for the verification (two separate `claude -p` runs, each given only the note and these rules; the model has no tools, so it reads and writes no files — it replies with JSON and the server checks it and writes the files), and applies the doctor's accept/reject clicks. Step 5 and the screen are still done in the chat.
+- **In the chat** — the agent runs the steps itself. Use it when the `claude` command is not on PATH, which the page needs.
 
 Run these steps in this order, every time. Each note gets its own folder, `extractions/<hash>/`, named by the first 12 hex characters of the SHA-256 of the note (line endings and trailing whitespace evened out, so the same note pasted twice lands in the same folder). `medprotocol extract --save` computes it; never make one up. Everything about that note lives in that folder:
 
@@ -18,6 +21,8 @@ Run these steps in this order, every time. Each note gets its own folder, `extra
 | `extraction.json` | step 2 — the first pass | **never changed** — the `extraction-guard` hook blocks any Write/Edit to it once it exists, and to `note.md` always |
 | `verify.json` | step 3 — the mistakes found | |
 | `corrected.json` | step 3 — the first pass with every proposed correction applied | step 4, if the doctor rejects a correction |
+| `decisions.json` | step 4, in the page only — `{ "<position in findings>": "accepted" \| "rejected" }` | each time the doctor decides a finding |
+| `.consent` | the doctor's yes to this note being read: the `note-consent` hook (chat) or the server (page) — the date | |
 | `artifact.html` | `/medical-protocol:extract-artifact` — the page | |
 
 Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
@@ -37,7 +42,7 @@ Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
    - A family member's values, a target ("keep MAP > 65") or a negation ("no fever") are not readings of this patient — leave them out.
    - Not in the note → leave the item out. Never guess, never fill "normal".
 3. **Verify.** Start the `extraction-verifier` agent (Agent tool, `subagent_type: "medical-protocol:extraction-verifier"`, or `"extraction-verifier"` if that is the name your agent list shows) with a prompt naming the files and the tools, the full paths filled in: `Verify <dir>. Rules: <path to this extraction.md>. CLI: node <path to medprotocol.cjs>`. Always a fresh-context subagent: it sees only the two files, never this chat, so it can't repeat your mistakes. Never verify in this chat yourself; if the agent can't be started, tell the doctor verification didn't run and stop before step 4. Verification never edits the first pass. It writes `<dir>/verify.json` and `<dir>/corrected.json` (§ Verification).
-4. Show the doctor each finding in `<dir>/verify.json`: what is wrong, and the proposed correction. The doctor accepts or rejects each one; remove each rejected correction from `<dir>/corrected.json` (put the first-pass item back), then run `medprotocol extract` on it again. With no findings, skip this step.
+4. Show the doctor each finding in `<dir>/verify.json`: what is wrong, and the proposed correction. The doctor accepts or rejects each one; remove each rejected correction from `<dir>/corrected.json` (put the first-pass item back), then run `medprotocol extract` on it again. With no findings, skip this step. In the page the doctor presses Accept or Reject on each finding instead: the server records it in `<dir>/decisions.json` and rewrites `<dir>/corrected.json` itself — never edit either by hand while the page is in use.
 5. Save `{ note, items }` to `data/extractions/<hash>.json` in the project (git-ignored — it is patient data), with `note` from `<dir>/note.md` and `items` from `<dir>/corrected.json`, and pass it to the screen.
 
 ### Verification
@@ -58,9 +63,9 @@ The verifier re-reads `<dir>/note.md` on its own, then:
 }
 ```
 
-   - `index` is the item's position in the first pass (from 0). No `index` means a missed item; `correction: null` means remove the item.
+   - `index` is the item's position in the first pass (from 0). No `index` means a missed item; `correction: null` means remove the item. Neither (no `index`, `correction: null`) is a remark: it changes nothing in `corrected.json`.
    - `problem` is one plain line saying what is wrong. Mistakes only; no clinical comment.
-   - Every `correction` follows the step 2 rules and must check `quoted`. A correction that can't be found verbatim in the note is not offered: keep the finding, with `correction: null` and "no verbatim quote found" in `problem`.
+   - Every `correction` follows the step 2 rules and must check `quoted`. A correction that can't be found verbatim in the note is not offered: it becomes a remark — drop the `index`, set `correction: null` and put "no verbatim quote found" in `problem` — so the first-pass item stays as it was.
 4. Writes `<dir>/corrected.json`: the first pass with every correction applied (replace by `index`, remove the nulls, add the missed items at the end), and runs `medprotocol extract` on it.
 5. Reports the findings, one line each. No findings → `findings: []`, and `corrected.json` is a copy of the first pass.
 
@@ -168,12 +173,13 @@ It does not catch added or dropped words ("via a Venturi mask" vs "via Venturi m
 ## CLI
 
 ```bash
+medprotocol extract --serve                     # the live page → http://localhost:7332 (--port <number> for another)
 medprotocol extract --save note.txt --json      # → { "dir": "extractions/<hash>", "existed": false }
 medprotocol extract --note extractions/<hash>/note.md --items extractions/<hash>/extraction.json --json
 medprotocol extract --note extractions/<hash>/note.md --items extractions/<hash>/corrected.json --artifact extractions/<hash>/artifact.html
 ```
 
-`--artifact` also writes a standalone page of the extraction (note beside items, same display rules as the Screen spec), for `/medical-protocol:extract-artifact`.
+`--serve` runs until stopped (Ctrl-C), listens on this computer only, and starts a `claude -p` run for each note pasted in the page (unattended, uses tokens). `--artifact` also writes a standalone page of the extraction (note beside items, same display rules as the Screen spec), for `/medical-protocol:extract-artifact`.
 
 ---
 
