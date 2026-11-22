@@ -2,6 +2,8 @@
 // each quote highlighted, the items on the right. Same paper, faces and peach spot as the website.
 // A standalone local file: it holds the full note and is never published.
 // __TITLE__ and __DATA__ are filled by the CLI. Kept as String.raw with no backticks or `${`.
+// `medprotocol extract --serve` serves the same page with __DATA__ = {"live":true}: it then takes the
+// note in a form, asks the local server for the state of #<hash> and draws that.
 
 export const EXTRACT_ARTIFACT_HTML = String.raw`<!doctype html>
 <meta charset="utf-8">
@@ -122,6 +124,19 @@ mark.bad{border-bottom:0;box-shadow:inset 0 0 0 1.5px var(--alarm);text-decorati
 .says b{font:700 11.5px/1 var(--head);font-stretch:82%;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-right:6px}
 .empty{padding:14px 0;font-style:italic;color:var(--ink-3)}
 
+/* live mode only (extract --serve): the intake form, the working and failed boxes */
+[hidden]{display:none!important}
+.conn{flex-basis:100%;font-size:14px;color:var(--alarm)}
+.intake{display:grid;grid-template-rows:minmax(0,1fr) auto auto;gap:14px;height:100%;max-width:820px;margin-inline:auto;padding-block:20px}
+textarea.note{display:block;width:100%;min-height:240px;border:0;resize:none;background:transparent}
+.agree{display:flex;align-items:baseline;gap:10px;font-size:15.5px;line-height:1.45;color:var(--ink-2)}
+.agree input{flex:none;accent-color:var(--spot-ink)}
+.go{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14.5px;color:var(--ink-2)}
+.copy:disabled,.copy:disabled:hover{background:transparent;border-color:var(--ink-3);color:var(--ink-3);cursor:default}
+.row[aria-current]{background:var(--gt)}
+.box{display:grid;justify-items:start;gap:10px;padding:14px}
+pre.says{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:400 12.5px/1.5 var(--mono)}
+
 footer{border-top:1px solid var(--ink);padding-block:8px 10px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 24px;font-size:13px;line-height:1.4;color:var(--ink-3)}
 footer code{font:500 12px var(--mono)}
 
@@ -149,10 +164,19 @@ footer code{font:500 12px var(--mono)}
   <h1 id="t"></h1>
   <ul class="tally" id="tally" aria-label="Counts"></ul>
   <button class="copy" id="copy" type="button">Copy extraction JSON</button>
+  <p class="conn" id="conn" role="alert" hidden>Lost the connection to the local server. Start it again with medprotocol extract --serve.</p>
 </header>
 
 <main class="wrap">
-  <div class="panes">
+  <form class="intake" id="intake" hidden>
+    <div class="sheet">
+      <div class="sheet-head"><label for="paste">Paste the note here</label></div>
+      <textarea class="note" id="paste" required></textarea>
+    </div>
+    <label class="agree"><input type="checkbox" id="agree" required><span>This note is sent to the AI model, which runs on external servers. I confirm it is made up or de-identified: no names, record numbers, addresses or dates.</span></label>
+    <p class="go"><button class="copy" id="go" type="submit" aria-describedby="why" disabled>Extract</button><span id="why"></span></p>
+  </form>
+  <div class="panes" id="panes">
     <section class="sheet" aria-label="The note">
       <div class="sheet-head"><span>Note, as written</span><span id="len"></span></div>
       <pre class="note" id="note" tabindex="0"></pre>
@@ -176,8 +200,6 @@ footer code{font:500 12px var(--mono)}
 <script>
 (function () {
   var data = JSON.parse(document.getElementById("data").textContent);
-  var items = data.items, segs = data.segments;
-  var text = segs.map(function (s) { return s.text; }).join("");
   var CLOSE = { edited: 1, approximate: 1, reordered: 1 };
   var LABEL = {
     quoted: "Found in note",
@@ -204,21 +226,14 @@ footer code{font:500 12px var(--mono)}
     return LABEL[it.status] || it.status;
   }
 
-  document.getElementById("t").textContent = data.name;
-  document.getElementById("when").textContent = data.checkedAt ? "Checked " + data.checkedAt : "";
-  var found = items.filter(function (i) { return i.status === "quoted"; }).length;
-  var lines = text.split("\n").length;
-  document.getElementById("len").textContent = lines + (lines === 1 ? " line" : " lines");
-
+  var title = document.getElementById("t");
   var tally = document.getElementById("tally");
-
-  // copies the items as extracted; status and offsets are computed, never stored
   var copyBtn = document.getElementById("copy");
-  var json = JSON.stringify(items.map(function (i) {
-    var o = {};
-    ["field", "key", "value", "unit", "quote", "episode", "time"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
-    return o;
-  }), null, 2);
+  var note = document.getElementById("note");
+  var list = document.getElementById("list");
+  // what the last render drew; the listeners below work on these
+  var items = [], text = "", json = "[]", marksOf = [], rows = [];
+
   function copied(ok) {
     copyBtn.textContent = ok ? "Copied" : "Copy failed";
     setTimeout(function () { copyBtn.textContent = "Copy extraction JSON"; }, 1800);
@@ -234,22 +249,6 @@ footer code{font:500 12px var(--mono)}
     else fallback();
   });
 
-  // the note, only from its segments; each mark knows the rows it belongs to
-  var note = document.getElementById("note");
-  var marksOf = items.map(function () { return []; });
-  segs.forEach(function (s) {
-    if (!s.items.length) { note.appendChild(document.createTextNode(s.text)); return; }
-    var its = s.items.map(function (n) { return items[n]; });
-    var cls = "g-" + group(its[0]);
-    if (its.some(function (i) { return i.status === "mismatched"; })) cls = "g-rev bad";
-    else if (its.some(function (i) { return i.status !== "quoted"; })) cls = "g-rev";
-    var m = el("mark", cls, s.text);
-    m.dataset.items = s.items.join(" ");
-    s.items.forEach(function (n) { marksOf[n].push(m); });
-    note.appendChild(m);
-  });
-
-  var rows = [];
   function row(it, n) {
     var tr = it.status === "quoted" ? "ok" : CLOSE[it.status] ? "close" : "warn";
     var li = el("li", "row g-" + group(it) + " " + tr);
@@ -307,26 +306,176 @@ footer code{font:500 12px var(--mono)}
     if (r) r.scrollIntoView({ block: "nearest" });
   });
 
-  var list = document.getElementById("list");
   var groups = [
     ["rev", "Needs review", "The quote is missing, inexact, or doesn't state the value. Check each against the note."],
     ["cur", "Current illness", "Each quote was found word for word in the note."],
     ["his", "History", "Each quote was found word for word in the note."]
   ];
-  groups.forEach(function (g) {
-    var idx = [];
-    items.forEach(function (it, n) { if (group(it) === g[0]) idx.push(n); });
-    var li = el("li", "g-" + g[0]); li.appendChild(el("b", "", String(idx.length))); li.appendChild(el("span", "", g[1])); tally.appendChild(li);
-    if (g[0] === "his") { var f = el("li", "found"); f.appendChild(el("b", "", found + "/" + items.length)); f.appendChild(el("span", "", "found in note")); tally.appendChild(f); }
-    if (!idx.length) return;
-    var sec = el("section", "group g-" + g[0]);
-    var h = el("header", "gh"); h.appendChild(el("h2", "", g[1])); h.appendChild(el("b", "", String(idx.length))); h.appendChild(el("p", "", g[2])); sec.appendChild(h);
-    var ol = el("ol");
-    idx.forEach(function (n) { ol.appendChild(row(items[n], n)); });
-    sec.appendChild(ol);
+
+  // draws one extraction from scratch: the head, the note and the list
+  function render(data) {
+    var segs = data.segments;
+    items = data.items;
+    text = segs.map(function (s) { return s.text; }).join("");
+    note.textContent = ""; list.textContent = ""; tally.textContent = "";
+
+    title.textContent = data.name;
+    document.getElementById("when").textContent = data.checkedAt ? "Checked " + data.checkedAt : "";
+    var found = items.filter(function (i) { return i.status === "quoted"; }).length;
+    var lines = text.split("\n").length;
+    document.getElementById("len").textContent = lines + (lines === 1 ? " line" : " lines");
+
+    // copies the items as extracted; status and offsets are computed, never stored
+    json = JSON.stringify(items.map(function (i) {
+      var o = {};
+      ["field", "key", "value", "unit", "quote", "episode", "time"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
+      return o;
+    }), null, 2);
+
+    // the note, only from its segments; each mark knows the rows it belongs to
+    marksOf = items.map(function () { return []; });
+    segs.forEach(function (s) {
+      if (!s.items.length) { note.appendChild(document.createTextNode(s.text)); return; }
+      var its = s.items.map(function (n) { return items[n]; });
+      var cls = "g-" + group(its[0]);
+      if (its.some(function (i) { return i.status === "mismatched"; })) cls = "g-rev bad";
+      else if (its.some(function (i) { return i.status !== "quoted"; })) cls = "g-rev";
+      var m = el("mark", cls, s.text);
+      m.dataset.items = s.items.join(" ");
+      s.items.forEach(function (n) { marksOf[n].push(m); });
+      note.appendChild(m);
+    });
+
+    rows = [];
+    groups.forEach(function (g) {
+      var idx = [];
+      items.forEach(function (it, n) { if (group(it) === g[0]) idx.push(n); });
+      var li = el("li", "g-" + g[0]); li.appendChild(el("b", "", String(idx.length))); li.appendChild(el("span", "", g[1])); tally.appendChild(li);
+      if (g[0] === "his") { var f = el("li", "found"); f.appendChild(el("b", "", found + "/" + items.length)); f.appendChild(el("span", "", "found in note")); tally.appendChild(f); }
+      if (!idx.length) return;
+      var sec = el("section", "group g-" + g[0]);
+      var h = el("header", "gh"); h.appendChild(el("h2", "", g[1])); h.appendChild(el("b", "", String(idx.length))); h.appendChild(el("p", "", g[2])); sec.appendChild(h);
+      var ol = el("ol");
+      idx.forEach(function (n) { ol.appendChild(row(items[n], n)); });
+      sec.appendChild(ol);
+      list.appendChild(sec);
+    });
+    if (!items.length) list.appendChild(el("p", "empty", "Nothing was extracted from this note."));
+  }
+
+  if (!data.live) { render(data); return; }
+
+  // live mode: the address holds the note's id as #<hash>; no hash is the intake form
+  var panes = document.getElementById("panes");
+  var intake = document.getElementById("intake");
+  var paste = document.getElementById("paste");
+  var agree = document.getElementById("agree");
+  var go = document.getElementById("go");
+  var why = document.getElementById("why");
+  var conn = document.getElementById("conn");
+  // one node for every state, so a change of its text is announced
+  var statusLine = el("p", "field"); statusLine.setAttribute("role", "status");
+  var when = document.getElementById("when");
+  when.parentNode.insertBefore(el("span", "", "This page runs on this computer. The note is sent to the AI model only after you tick the box."), when);
+  // last: the response text already drawn. seq: answers to an older request are dropped
+  var id = null, last = null, timer = 0, seq = 0;
+
+  function send(noteText) {
+    return fetch("/api/notes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: noteText, consent: true }) })
+      .then(function (r) { return r.json(); });
+  }
+
+  function draw(s) {
+    render(s);
+    title.textContent = "Note extraction";
+    var busy = s.state === "extracting" || s.state === "verifying";
+    tally.hidden = copyBtn.hidden = busy || s.state === "failed";
+    if (!tally.hidden) return;
+    list.textContent = ""; when.textContent = "";
+    var sec = el("section", "group g-" + (busy ? "cur" : "rev")), box = el("div", "box");
+    if (busy) {
+      var at = s.state === "verifying" ? 1 : 0;
+      var ol = el("ol");
+      ["1. Pulling out the values", "2. A second check re-reads the note"].forEach(function (label, n) {
+        var li = el("li", "row"), ic = el("span", n < at ? "tr ok" : "tr");
+        ic.setAttribute("aria-hidden", "true");
+        if (n < at) ic.innerHTML = ICON.ok;
+        if (n === at) li.setAttribute("aria-current", "step");
+        li.appendChild(ic); li.appendChild(el("span", "field", label));
+        ol.appendChild(li);
+      });
+      sec.appendChild(ol);
+      statusLine.textContent = at ? "Step 2 of 2: the second check is re-reading the note." : "Step 1 of 2: pulling out the values.";
+      box.appendChild(statusLine);
+      box.appendChild(el("p", "says", "This usually takes a minute or two."));
+    } else {
+      statusLine.textContent = "The extraction did not finish.";
+      box.appendChild(statusLine);
+      if (s.error && s.error.indexOf("'claude' command was not found") >= 0) box.appendChild(el("p", "says", "This page needs the Claude Code command line tool. You can also run the extraction from the chat with /medical-protocol:extract."));
+      else if (s.error) box.appendChild(el("pre", "says", s.error));
+      var again = el("button", "copy", "Try again"); again.type = "button";
+      // the doctor already confirmed this note
+      again.addEventListener("click", function () {
+        again.disabled = true;
+        // drawn again even when the run fails the same way, so the button comes back
+        last = null;
+        send(s.note).then(load, function () { again.disabled = false; conn.hidden = false; });
+      });
+      box.appendChild(again);
+    }
+    sec.appendChild(box);
     list.appendChild(sec);
+  }
+
+  function load() {
+    clearTimeout(timer);
+    var mine = ++seq;
+    fetch("/api/extractions/" + id).then(function (r) {
+      return r.text().then(function (body) {
+        if (mine !== seq) return;
+        conn.hidden = true;
+        // an address for a note this folder does not hold: back to the intake form
+        if (!r.ok) { location.hash = ""; return; }
+        var s = JSON.parse(body);
+        // an unchanged answer is not drawn again, so the note keeps its scroll position
+        if (body !== last) { last = body; draw(s); }
+        if (s.state === "extracting" || s.state === "verifying") timer = setTimeout(load, 1500);
+      });
+    }, function () {
+      if (mine !== seq) return;
+      conn.hidden = false;
+      timer = setTimeout(load, 1500);
+    });
+  }
+
+  function route() {
+    clearTimeout(timer); seq++; last = null;
+    var m = /^#([0-9a-f]{12})$/.exec(location.hash);
+    id = m && m[1];
+    intake.hidden = !!id; panes.hidden = !id;
+    tally.hidden = copyBtn.hidden = true;
+    title.textContent = "Note extraction"; when.textContent = "";
+    if (id) { note.textContent = ""; list.textContent = ""; load(); }
+  }
+
+  function sync() {
+    var need = !paste.value.trim() ? "Paste the note to continue" : !agree.checked ? "Tick the box to continue" : "";
+    go.disabled = !!need; why.textContent = need;
+  }
+  paste.addEventListener("input", sync);
+  agree.addEventListener("change", sync);
+  intake.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (go.disabled) return;
+    go.disabled = true;
+    send(paste.value).then(function (r) {
+      if (!r.id) { sync(); why.textContent = "The note could not be sent: " + r.error; return; }
+      conn.hidden = true; intake.reset(); sync();
+      location.hash = r.id;
+    }, function () { sync(); conn.hidden = false; });
   });
-  if (!items.length) list.appendChild(el("p", "empty", "Nothing was extracted from this note."));
+  window.addEventListener("hashchange", route);
+  sync(); route();
 })();
 </script>
 `;

@@ -125,6 +125,9 @@ describe('medprotocol extract --serve', () => {
     expect(res.headers['access-control-allow-origin']).toBeUndefined();
     expect(res.text).toContain('<script type="application/json" id="data">{"live":true}</script>');
     expect(res.text).toContain('<title>Note extraction</title>');
+    expect(res.text).toContain('Paste the note here');
+    // the page script at least parses; what it draws is checked by hand in a browser
+    expect(() => new Function(res.text.match(/<script>([\s\S]*)<\/script>/)![1])).not.toThrow();
   });
 
   it('refuses a Host that is not this server', async () => {
