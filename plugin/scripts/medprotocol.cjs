@@ -4034,292 +4034,253 @@ var init_extract_artifact = __esm({
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,500..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Martian+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Schibsted+Grotesk:wght@400;500;700;800&family=Red+Hat+Mono:wght@500;700&display=swap">
 <style>
-/* the note as a sheet on the desk at left, the extraction as a handbook list at right */
 :root{
-  --paper:#fdf6ee; --sheet:#fff; --ink:#3a2e2a; --ink-2:#5e4f48; --ink-3:#7f6d64; --rule:#e8d6c8;
-  --spot:#f2a48f; --spot-ink:#a24f3c; --alarm:#c0432c;
-  --t1:#fcebe3; --t2:#f8d5c8; --t3:#f2b8a6;
-  --shadow:rgba(58,46,42,.28);
-  --rev:#f2a48f; --rev-t:#fde4da; --rev-i:#a24f3c;
-  --cur:#9fd3b4; --cur-t:#e2f3e8; --cur-i:#2f6b48;
-  --his:#c2b4ec; --his-t:#ede8fa; --his-i:#5b479c;
-  --head:"Archivo","Arial Narrow",sans-serif;
-  --text:"Source Serif 4",Georgia,serif;
-  --mono:"Martian Mono",ui-monospace,Menlo,monospace;
-  --runh:52px;
+  --ground:#eceef1; --sheet:#fff; --ink:#14171f; --ink-2:#565d6b; --line:#c6cbd3;
+  --hl:#ffee8c; --hl-on:#ffd61f; --hl-line:#14171f;
+  --bad:#c81e30; --bad-t:#fbe3e5; --close:#0b7a55;
+  --bar:#14171f; --bar-close:#7fe0bb; --bar-bad:#ff8e99;
+  --ui:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;
+  --text:"Literata",Georgia,serif;
+  --mono:"Red Hat Mono",ui-monospace,Menlo,monospace;
+  --gut:max(16px,env(safe-area-inset-left,0px)); --lh:29px; --mw:35rem;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#2b221e; --sheet:#3a2e2a; --ink:#f5ebe3; --ink-2:#dfcdc1; --ink-3:#b9a69b; --rule:#54453e;
-  --spot:#f2a48f; --spot-ink:#f2b8a6; --alarm:#f0846c;
-  --t1:#3f322c; --t2:#6b4a3f; --t3:#8a5a4a; --shadow:rgba(0,0,0,.6);
-  --rev:#f2a48f; --rev-t:#5a3a31; --rev-i:#f6c0b0;
-  --cur:#8fc9a6; --cur-t:#2e4a3a; --cur-i:#b4e2c6;
-  --his:#b3a4e6; --his-t:#3d3658; --his-i:#d3c9f5; color-scheme:dark}}
+  --ground:#14171f; --sheet:#1d212b; --ink:#eceef1; --ink-2:#a6aebb; --line:#3a404d;
+  --hl:#5a4f0e; --hl-on:#8a7912; --hl-line:#ffee8c;
+  --bad:#ff7c88; --bad-t:#4a1c22; --close:#5ad6a6; --bar:#0b0d12; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --paper:#2b221e; --sheet:#3a2e2a; --ink:#f5ebe3; --ink-2:#dfcdc1; --ink-3:#b9a69b; --rule:#54453e;
-  --spot:#f2a48f; --spot-ink:#f2b8a6; --alarm:#f0846c;
-  --t1:#3f322c; --t2:#6b4a3f; --t3:#8a5a4a; --shadow:rgba(0,0,0,.6);
-  --rev:#f2a48f; --rev-t:#5a3a31; --rev-i:#f6c0b0;
-  --cur:#8fc9a6; --cur-t:#2e4a3a; --cur-i:#b4e2c6;
-  --his:#b3a4e6; --his-t:#3d3658; --his-i:#d3c9f5; color-scheme:dark}
-*{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--ink-3) transparent}
-body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh;overflow:hidden;margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.55 var(--text);font-variant-numeric:tabular-nums;caret-color:var(--spot)}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
-::selection{background:var(--t2);color:var(--ink)}
-:focus-visible{outline:2px solid var(--spot);outline-offset:3px}
-h1,h2{margin:0;font-family:var(--head);text-wrap:balance}
-p{margin:0}
-.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-@media (min-width:700px){.wrap{padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(32px,env(safe-area-inset-right,0px))}}
-
-/* running head */
-.run{position:relative;margin-top:env(safe-area-inset-top,0px);min-height:var(--runh);padding-block:8px;flex-wrap:wrap;background:var(--paper);border-bottom:1px solid var(--ink);display:flex;align-items:center;gap:20px}
-.brand{display:flex;align-items:center;gap:10px;font:700 14px/1 var(--head);font-stretch:80%;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
-.brand svg{width:20px;height:20px;flex:none}
-h1{font:800 22px/1 var(--head);font-stretch:70%;letter-spacing:-.005em;overflow-wrap:anywhere;min-width:0;padding-left:20px;border-left:1px solid var(--rule)}
-
-.tally{margin:0 0 0 auto;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
-.tally li{display:flex;align-items:baseline;gap:7px;padding:5px 10px 4px;background:var(--gt);border:1px solid var(--g);font:700 11.5px/1 var(--head);font-stretch:82%;letter-spacing:.09em;text-transform:uppercase;color:var(--gi)}
-.tally b{font:600 13px/1 var(--mono);letter-spacing:0}
-.tally .found{background:transparent;border-color:var(--rule);color:var(--ink-2)}
-.copy{all:unset;cursor:pointer;padding:6px 12px 5px;border:1px solid var(--ink);font:700 11.5px/1 var(--head);font-stretch:82%;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);white-space:nowrap;transition:background-color .2s,color .2s}
-.copy:hover{background:var(--ink);color:var(--paper)}
-.copy:focus-visible{outline:2px solid var(--spot);outline-offset:2px}
-
-/* two panes: the page stays put, the note and the list each scroll */
-main{min-height:0}
-.panes{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);grid-template-rows:minmax(0,1fr);gap:clamp(20px,2.5vw,40px);height:100%;padding-block:20px}
-.sheet{position:relative;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:var(--sheet);border:1px solid var(--ink);box-shadow:0 1px 2px rgba(58,46,42,.06),0 14px 28px -14px var(--shadow);min-width:0;min-height:0}
-.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:38px;padding:5px 20px;border-bottom:1px solid var(--ink);background:var(--t1);font:500 12px/1.2 var(--mono);color:var(--ink-2)}
-.note{margin:0;padding:16px 20px 20px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:400 15.5px/1.8 var(--text);color:var(--ink-2)}
-.key{display:flex;flex-wrap:wrap;gap:6px 16px;padding:10px 20px 12px;border-top:1px solid var(--ink);font-size:13.5px;color:var(--ink-2)}
-.key span{display:inline-flex;align-items:center;gap:6px}
-.key mark{display:inline-block;width:24px;height:14px;padding:0}
-
-/* highlights say how far to trust them: a filled span with a solid rule is a quote found word for word (double rule for history),
-   a dashed rule is a close match, an alarm frame with a wavy rule is a quote that is missing or does not state the value */
-.g-rev{--g:var(--rev);--gt:var(--rev-t);--gi:var(--rev-i)}
-.g-cur{--g:var(--cur);--gt:var(--cur-t);--gi:var(--cur-i)}
-.g-his{--g:var(--his);--gt:var(--his-t);--gi:var(--his-i)}
-mark{color:var(--ink);background:var(--gt);padding:1px 3px;border-bottom:2px solid var(--g);border-radius:2px;-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:pointer;transition:background-color .2s,box-shadow .2s}
-mark.g-his{border-bottom:3px double var(--g)}
-mark.g-rev{background:transparent;border-bottom:2px dashed var(--gi)}
-mark.bad{border-bottom:0;box-shadow:inset 0 0 0 1.5px var(--alarm);text-decoration:underline wavy var(--alarm);text-underline-offset:3px}
-.note mark.on{background:var(--g);color:#3a2e2a;border-bottom-color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
-@media (prefers-reduced-motion:no-preference){
-  .note.fresh mark{animation:swipe .7s cubic-bezier(.16,1,.3,1) .15s both}
-  @keyframes swipe{from{background-color:transparent}}
-}
-
-/* the extraction list: one framed block per group, its band stays in view while its rows scroll */
-.list{display:grid;gap:24px;align-content:start;min-width:0;min-height:0;overflow-y:auto;padding-right:10px;scrollbar-gutter:stable}
-.group{background:var(--sheet);border:1px solid var(--g)}
-/* one line, the same height as the note's head */
-.gh{position:sticky;top:0;z-index:1;display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px;min-height:38px;padding:5px 14px;background:var(--g);color:#3a2e2a}
-.gh h2{font:800 17px/1 var(--head);font-stretch:74%}
-.gh b{order:1;margin-left:auto;font:600 13px/1 var(--mono)}
-.gh p{font-size:13px;line-height:1.3}
-.group ol{margin:0;padding:0;list-style:none}
-.row{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:3px 12px;padding:10px 14px 11px;border-bottom:1px solid var(--rule);scroll-margin-top:46px;cursor:default;transition:background-color .2s}
-.row:last-child{border-bottom:0}
-.row:hover,.row:focus-visible,.row.on{background:var(--gt)}
-.row:focus-visible{outline-offset:-2px}
-/* trust mark: filled tick = found word for word, dashed = close match, alarm = missing or wrong */
-.tr{grid-row:1/3;display:grid;place-items:center;width:22px;height:22px;margin-top:1px}
-.tr svg{width:14px;height:14px;fill:none;stroke-width:2.2;stroke-linecap:square}
-.tr.ok{background:var(--g);stroke:#3a2e2a}
-.tr.close{border:1.5px dashed var(--gi);stroke:var(--gi)}
-.tr.warn{background:var(--alarm);stroke:var(--paper)}
-.field{font:700 16.5px/1.25 var(--head);font-stretch:80%;color:var(--ink)}
-.val{font:600 14px/1.3 var(--mono);color:var(--ink);text-align:right;overflow-wrap:anywhere}
-.val small{font-weight:400;font-size:12.5px;color:var(--ink-2)}
-.row.warn .val,.row.warn .val small{color:var(--alarm)}
-.meta{grid-column:3;grid-row:2;justify-content:flex-end;align-items:center;display:flex;flex-wrap:wrap;gap:2px 12px;font:700 11px/1.6 var(--head);font-stretch:82%;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
-.meta .st{color:var(--ink-2)}
-.meta .st.warn{padding:0 6px;background:var(--alarm);color:var(--paper)}
-.meta .st.close{padding:0 5px;border:1px dashed var(--gi);color:var(--gi)}
-.meta .ep{color:var(--ink-2)}
-.quote{grid-column:2;grid-row:2;font-size:14.5px;line-height:1.45;color:var(--ink-2);font-style:italic;min-width:0}
-.says{grid-column:2/-1;font-size:13.5px;line-height:1.45;color:var(--ink-2)}
-.quote q,.says q{quotes:"\201C" "\201D"}
-.says b{font:700 11.5px/1 var(--head);font-stretch:82%;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-right:6px}
-/* lab results are listed apart inside their group */
-.sub{display:flex;justify-content:space-between;align-items:baseline;margin:0;padding:7px 14px 6px;background:var(--gt);border-block:1px solid var(--g);font:700 11.5px/1 var(--head);font-stretch:82%;letter-spacing:.1em;text-transform:uppercase;color:var(--gi)}
-.sub b{font:600 12px/1 var(--mono);letter-spacing:0}
-.empty{padding:14px 0;font-style:italic;color:var(--ink-3)}
-/* an item row. A verified one shows only its mark, field and value; the mark alone says it was found.
-   The words it came from are lit in the note when the row is pointed at. A row with more to say (a quote
-   that is not the value, a time) has a caret and folds that out under it */
-.list{container-type:inline-size}
-.item{grid-template-columns:22px minmax(0,1fr);gap:2px 12px}
-.item>*{grid-column:2;grid-row:auto}
-.item .tr{grid-column:1;grid-row:1/3}
-.item .val{text-align:left}
-.item .meta{justify-content:flex-start}
-/* words are set as text; mono is kept for measurements */
-.val.txt{font:600 15px/1.4 var(--text)}
-/* the quote is the value, word for word: shown once */
-.quote.same{font-style:normal;font-size:15.5px;color:var(--ink)}
-.item.ok{grid-template-columns:22px minmax(0,1fr) minmax(0,1.3fr) 12px;align-items:baseline;align-content:start;padding-block:8px 9px}
-.item.fold{cursor:pointer}
-.item.ok>*{grid-row:1}
-.item.ok>.tr{grid-row:1;align-self:start}
-.item.ok>.val,.item.ok>.quote{grid-column:3}
-.item.ok>.caret{grid-column:4;align-self:center;display:grid}
-.caret svg{width:12px;height:12px;fill:none;stroke:var(--ink-3);stroke-width:1.8;stroke-linecap:square;transition:transform .2s cubic-bezier(.16,1,.3,1)}
-.open .caret svg{transform:rotate(.5turn)}
-.more{display:none}
-.item.open>.more{display:block;grid-column:2/-1;grid-row:2;padding-top:3px}
-@container (min-width:640px){
-  /* a row to review stays open: value and quote side by side, then its status, then the note's words */
-  .item:not(.ok){grid-template-columns:22px minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:4px 14px;align-items:baseline}
-  .item:not(.ok)>*{grid-row:1}
-  .item:not(.ok)>.tr{align-self:start}
-  .item:not(.ok)>.val{grid-column:3}
-  .item:not(.ok)>.quote{grid-column:4}
-  .item:not(.ok)>.quote.same{grid-column:3/5}
-  .item:not(.ok)>.meta{grid-column:2/-1;grid-row:2}
-  .item:not(.ok)>.says{grid-column:2/-1;grid-row:3}
-}
-@container (min-width:860px){
-  /* verified rows are short: two across, read left to right */
-  .ok-rows{display:grid;grid-template-columns:1fr 1fr}
-  .ok-rows .item:nth-child(odd){border-right:1px solid var(--rule)}
-  .ok-rows .item:nth-last-child(2):nth-child(odd){border-bottom:0}
-}
-
-/* live mode only (extract --serve): the intake form, the working and failed boxes */
+  --ground:#14171f; --sheet:#1d212b; --ink:#eceef1; --ink-2:#a6aebb; --line:#3a404d;
+  --hl:#5a4f0e; --hl-on:#8a7912; --hl-line:#ffee8c;
+  --bad:#ff7c88; --bad-t:#4a1c22; --close:#5ad6a6; --bar:#0b0d12; color-scheme:dark}
+@media (min-width:700px){:root{--gut:max(28px,env(safe-area-inset-left,0px))}}
+*{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--ink-2) transparent}
+body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh;overflow:hidden;margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.4 var(--ui);caret-color:var(--ink)}
+::selection{background:var(--hl);color:var(--ink)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+h1,h2,h3,p,ol,ul{margin:0;padding:0}
+ol,ul{list-style:none}
 [hidden]{display:none!important}
-.conn{flex-basis:100%;font-size:14px;color:var(--alarm)}
-/* the intake form sits in the same two panes: the sheet the note is pasted on stays where the note will be read */
-.side{display:grid;gap:20px;align-content:start;min-width:0;min-height:0;overflow-y:auto;padding-right:10px;scrollbar-gutter:stable}
-.side>*{max-width:600px}
-textarea.note{display:block;width:100%;min-height:240px;border:0;resize:none;background:transparent;color:var(--ink)}
-textarea.note::placeholder{color:var(--ink-3);font-style:italic}
-/* the ring goes round the sheet, not inside it */
-textarea.note:focus-visible{outline:0}
-.sheet:has(textarea:focus-visible){outline:2px solid var(--spot);outline-offset:3px}
-.agree{display:flex;align-items:flex-start;gap:12px;font-size:15.5px;line-height:1.45;color:var(--ink-2);cursor:pointer}
-/* a square in a frame, like the trust marks */
-.agree input{appearance:none;flex:none;width:18px;height:18px;margin:3px 0 0;border:1.5px solid var(--ink);background:var(--sheet);cursor:pointer;transition:background-color .15s}
-.agree input:checked{background:var(--ink);box-shadow:inset 0 0 0 3px var(--sheet)}
-.go{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14.5px;color:var(--ink-2)}
-/* the one filled button of a view */
-.copy.main{padding:9px 18px 8px;background:var(--ink);color:var(--paper);font-size:13px}
-.copy.main:hover{background:var(--spot-ink);border-color:var(--spot-ink)}
-/* waiting: a square whose filled quarter steps round; in a button it stands before the label */
-.spin,.copy[aria-busy="true"]::before{content:"";display:inline-block;flex:none;width:16px;height:16px;border:2px solid var(--ink);background:conic-gradient(var(--spot-ink) 25%,transparent 0)}
-.copy[aria-busy="true"]::before{width:10px;height:10px;margin-right:8px;border:1.5px solid currentColor;vertical-align:-1px;background:conic-gradient(currentColor 25%,transparent 0)}
-.busy .sheet-head{position:relative}
-.busy .sheet-head::after{content:"";position:absolute;left:0;bottom:-2px;width:28%;height:3px;background:var(--spot-ink)}
-/* no values on the page yet, so no legend */
-.bare .key{display:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-/* the steps: done is a tick, now is the spinner, next is its number */
-.tr.num{border:1.5px solid var(--ink-3);font:600 11px/1 var(--mono);color:var(--ink-2)}
-.g-fix .tr.ok{background:var(--cur)}
-.step.next .field{color:var(--ink-3)}
-.step:not([aria-current]):hover,.ghost .row:hover{background:transparent}
-/* where the values will be */
-.ghost{--g:var(--rule)}
-.ghost .gh{background:var(--t1);color:var(--ink-2)}
-.ghost .tr{border:1.5px solid var(--rule)}
-.sk{height:11px;margin-block:5px;background:var(--t2)}
-.sk.a{width:38%}
-.sk.b{width:64px;justify-self:end}
-.sk.c{grid-column:2;width:72%;background:var(--t1)}
-.ghost li:nth-child(2) .a{width:54%}
-.ghost li:nth-child(2) .c{width:46%}
-.ghost li:nth-child(3) .a{width:30%}
-.ghost li:nth-child(4) .c{width:60%}
-@media (prefers-reduced-motion:no-preference){
-  .spin,.copy[aria-busy="true"]::before{animation:turn 1s steps(4) infinite}
-  @keyframes turn{to{transform:rotate(1turn)}}
-  .busy .sheet-head::after{animation:read 1.5s cubic-bezier(.65,0,.35,1) infinite alternate}
-  @keyframes read{to{transform:translateX(257.2%)}}
-  .ghost li{animation:wait 1.2s ease-in-out infinite alternate}
-  .ghost li:nth-child(2){animation-delay:.15s}
-  .ghost li:nth-child(3){animation-delay:.3s}
-  .ghost li:nth-child(4){animation-delay:.45s}
-  @keyframes wait{to{opacity:.4}}
-}
-.copy:disabled,.copy:disabled:hover{background:transparent;border-color:var(--ink-3);color:var(--ink-3);cursor:default}
-.row[aria-current]{background:var(--gt)}
-.box{display:grid;justify-items:start;gap:14px;padding:14px}
-pre.says{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:400 12.5px/1.5 var(--mono)}
-/* the corrections block: what the second check would change, with the doctor's answer on each */
-.g-fix{--g:var(--ink);--gt:var(--t1);--gi:var(--ink-2)}
-.g-fix .gh{color:var(--paper)}
-.fix{grid-template-columns:minmax(0,1fr)}
-.fix>*{grid-column:1}
-.fix .go{margin-top:4px}
-.copy[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
-.tally[hidden]~#new{margin-left:auto}
 
-footer{border-top:1px solid var(--ink);padding-block:8px 10px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 24px;font-size:13px;line-height:1.4;color:var(--ink-3)}
+/* top bar */
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;min-height:56px;padding:8px var(--gut);padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--bar);color:#fff}
+.run :focus-visible{outline-color:#fff}
+.brand{font:800 14px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+h1{font:700 21px/1.1 var(--ui);text-wrap:balance;overflow-wrap:anywhere;min-width:0;padding-left:24px;border-left:1px solid rgba(255,255,255,.35)}
+.tally{margin-left:auto;display:flex;flex-wrap:wrap;gap:4px 18px;font-weight:500;font-size:14px}
+.tally li{display:flex;align-items:center;gap:7px}
+.tally b{font:700 14px/1 var(--mono)}
+.tally[hidden]~#new,.tally[hidden]~#new[hidden]~#theme{margin-left:auto}
+/* live mode: the saved notes of this folder, in a dialog */
+dialog{width:min(960px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:0;border:1.5px solid var(--ink);background:var(--ground);color:var(--ink)}
+dialog[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+dialog::backdrop{background:rgba(20,23,31,.55)}
+dialog h2{margin:20px 20px 0}
+dialog ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));align-content:start;overflow-y:auto;overscroll-behavior:contain}
+dialog li{min-width:0}
+dialog a{display:grid;gap:3px;padding:12px 20px;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;transition:background-color .15s}
+dialog a:hover,dialog a[aria-current]{background:var(--sheet)}
+dialog a:focus-visible{outline-offset:-2px}
+.first{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:400 16px/1.5 var(--text)}
+dialog a span+span{font-size:13px;color:var(--ink-2)}
+dialog form{display:flex;justify-content:flex-end;padding:14px 20px}
+.conn{flex-basis:100%;font-size:14px;color:var(--bar-bad)}
+
+.btn{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 14px;border:1.5px solid var(--ink);font:700 14px/1.2 var(--ui);color:var(--ink);white-space:nowrap;transition:background-color .15s,color .15s}
+.btn:hover{background:var(--line)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btn.fill{background:var(--ink);color:var(--ground)}
+.btn.fill:hover{background:var(--ink-2);border-color:var(--ink-2)}
+.btn:disabled,.btn:disabled:hover{background:transparent;border-color:var(--ink-2);color:var(--ink-2);cursor:default}
+.run .btn{background:#fff;border-color:#fff;color:#14171f}
+.run .btn:hover{background:#dfe2e7}
+.run a.btn,.run #theme,.run #pick{background:transparent;color:#fff}
+.run a.btn:hover,.run #theme:hover,.run #pick:hover{background:rgba(255,255,255,.16)}
+
+/* the one ramp of marks, the same in the bar, the rail and the margin:
+   filled = found word for word, double = the same in the history, dashed = close match, ring = missing or not stated */
+.m{display:inline-block;flex:none;width:14px;height:14px;background:var(--ink)}
+.m.his{background:none;border:4px double var(--ink)}
+.m.close{background:none;border:2px dashed var(--close)}
+.m.bad{background:none;border:2.5px solid var(--bad);border-radius:50%}
+.run .m{background:#fff}
+.run .m.close{background:none;border-color:var(--bar-close)}
+.run .m.bad{background:none;border-color:var(--bar-bad)}
+
+/* rail at left: what is left to do. The proof at right scrolls by itself */
+main{min-height:0}
+.shell{display:grid;grid-template-columns:316px minmax(0,1fr);height:100%}
+.rail{min-height:0;overflow-y:auto;padding:22px 20px 22px var(--gut);border-right:1px solid var(--line)}
+h2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:10px;border-bottom:2px solid var(--ink);font:800 12.5px/1.3 var(--ui);letter-spacing:.1em;text-transform:uppercase}
+h2 span,h2 b{font:500 12.5px/1.3 var(--ui);letter-spacing:0;text-transform:none;color:var(--ink-2)}
+h2 b{font:700 12px/1.3 var(--mono);color:var(--ink)}
+.rail *+h2,.rail *+div>h2{margin-top:30px}
+.lead{padding-top:10px;font-size:14px;color:var(--ink-2)}
+.empty{font-style:italic;color:var(--ink-2)}
+.card{margin-inline:-12px;padding:14px 12px 16px;border-bottom:1px solid var(--line);transition:background-color .15s}
+.card:hover,.card:focus-visible,.card:focus-within,.card.on{background:var(--sheet)}
+.card:focus-visible{outline-offset:-2px}
+h3{display:flex;align-items:start;gap:10px;font:700 16px/1.25 var(--ui)}
+h3 .m{margin-top:3px}
+/* an answered correction steps back: its answer in words, and one button to change it */
+.card.done h3{font-weight:500}
+.card.done .st{color:var(--ink)}
+.card p{margin-top:5px;font-size:14px;color:var(--ink-2)}
+.card .st{font-weight:700}
+.card.bad .st{color:var(--bad)}
+.card.close .st{color:var(--close)}
+.k{margin-right:7px;font:800 11.5px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase}
+/* the extracted value and the note's own numbers are set alike, to compare digit by digit */
+.n{font:700 15px/1.3 var(--mono);color:var(--ink)}
+.n.x,.card.bad .cmp:first-of-type .n{color:var(--bad)}
+q{quotes:"\201C" "\201D";font-family:var(--text);color:var(--ink)}
+/* the two answers stand apart, so neither is pressed by accident */
+.acts{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:12px}
+.key{display:grid;gap:9px;padding-top:12px;font-size:14px;color:var(--ink-2)}
+.key li{display:grid;grid-template-columns:14px auto 1fr;align-items:baseline;gap:9px}
+.key .m{align-self:start;margin-top:3px}
+.key b{font:700 14px/1 var(--mono);color:var(--ink)}
+
+/* the proof: one row per line of the note; each value sits in the margin beside its words */
+.proof{display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0;min-height:0;padding:22px var(--gut) 0 0}
+.ph{margin-left:46px}
+#note{display:grid;grid-template-columns:46px minmax(0,var(--mw)) minmax(240px,1fr);align-content:start;overflow-y:auto;padding-bottom:22px;--ry:19px}
+.ln{padding:5px 12px 0 0;font:500 12px/var(--lh) var(--mono);color:var(--ink-2);text-align:right;user-select:none}
+.l{min-height:calc(var(--lh) + 10px);padding:5px 22px;background:var(--sheet);font:400 17px/var(--lh) var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
+.mg{display:flex;flex-wrap:wrap;align-content:start;gap:0 4px;padding:5px 0 5px 10px}
+.mg:not(:empty){background:linear-gradient(var(--line),var(--line)) 0 var(--ry)/100% 1px no-repeat}
+#note>:nth-child(-n+3){padding-top:14px;--ry:28px}
+#note>.l:nth-last-child(2){padding-bottom:14px}
+mark{color:var(--ink);background:linear-gradient(var(--hl),var(--hl)) 0 0/100% 100% no-repeat;padding:2px 3px;border-bottom:2px solid var(--hl-line);-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:pointer}
+mark.his{border-bottom:4px double var(--hl-line)}
+mark.close{background:none;border-bottom:2px dashed var(--close)}
+mark.bad{--hl:var(--bad-t);border-bottom:0;box-shadow:inset 0 0 0 2px var(--bad)}
+mark.on{--hl:var(--hl-on);outline:2px solid var(--ink);outline-offset:1px}
+.e{display:flex;flex-wrap:wrap;align-items:center;gap:0 5px;min-height:var(--lh);max-width:100%;padding:0 5px;background:var(--ground);font-size:12px;font-weight:500;color:var(--ink-2);cursor:default;transition:background-color .15s}
+.e:hover,.e:focus-visible,.e.on{background:var(--hl);color:var(--ink)}
+.e:focus-visible{outline-offset:-2px}
+/* the figure is the largest thing in an entry */
+.v{font:700 16px/var(--lh) var(--mono);color:var(--ink)}
+.v.txt{font:700 14px/var(--lh) var(--ui)}
+.e small{font-size:12px}
+.e.bad,.e.bad .v{color:var(--bad)}
+.e.close .why{color:var(--close)}
+.e:hover.bad,.e.on.bad{background:var(--bad-t)}
+@media (prefers-reduced-motion:no-preference){
+  /* the highlighter is drawn across each quote once, when the note first appears */
+  .fresh mark{animation:stroke .6s cubic-bezier(.16,1,.3,1) .1s both}
+  @keyframes stroke{from{background-size:0 100%}}
+}
+
+/* live mode only (extract --serve): the intake form, the steps, the failed box */
+.in .proof{grid-template-rows:auto minmax(160px,1fr) auto}
+textarea{display:block;max-width:var(--mw);margin-left:46px;width:calc(100% - 46px);padding:14px 22px;border:1px solid var(--line);resize:none;background:var(--sheet);color:var(--ink);font:400 17px/var(--lh) var(--text)}
+textarea:focus-visible{outline-offset:0}
+textarea::placeholder{color:var(--ink-2);font-style:italic}
+.send{display:grid;gap:16px;max-width:calc(var(--mw) + 46px);padding:18px 0 22px 46px}
+.agree{display:flex;align-items:flex-start;gap:12px;color:var(--ink-2);cursor:pointer}
+/* a square in a frame, like the marks */
+.agree input{appearance:none;flex:none;width:18px;height:18px;margin:2px 0 0;border:1.5px solid var(--ink);background:var(--sheet);cursor:pointer;transition:background-color .15s}
+.agree input:checked{background:var(--ink);box-shadow:inset 0 0 0 3px var(--sheet)}
+.go{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14px;color:var(--ink-2)}
+.go .btn{padding:10px 20px}
+/* the steps: done is a tick, now is the spinner, next is its number */
+.step{display:grid;grid-template-columns:22px minmax(0,1fr);gap:2px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.step b{font:700 16px/1.25 var(--ui)}
+.step p{grid-column:2;font-size:14px;color:var(--ink-2)}
+.step.next b{color:var(--ink-2)}
+.tr{display:grid;place-items:center;width:22px;height:22px;border:1.5px solid var(--ink-2);font:700 11px/1 var(--mono);color:var(--ink-2)}
+.tr.ok{border-color:var(--ink);background:var(--ink)}
+.tr svg{width:14px;height:14px;fill:none;stroke:var(--ground);stroke-width:2.2;stroke-linecap:square}
+.tr.now{border:0}
+/* waiting: a square whose filled quarter steps round; in a button it stands before the label */
+.spin,.btn[aria-busy="true"]::before{content:"";display:inline-block;flex:none;width:16px;height:16px;border:2px solid var(--ink);background:conic-gradient(var(--ink) 25%,transparent 0)}
+.btn[aria-busy="true"]::before{width:10px;height:10px;margin-right:8px;border:1.5px solid currentColor;vertical-align:-1px;background:conic-gradient(currentColor 25%,transparent 0)}
+.busy .ph{position:relative}
+.busy .ph::after{content:"";position:absolute;left:0;bottom:-2px;width:28%;height:2px;background:var(--hl-on)}
+pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/1.5 var(--mono);color:var(--ink-2)}
+.box{display:grid;justify-items:start;gap:14px;padding-top:4px}
+@media (prefers-reduced-motion:no-preference){
+  .spin,.btn[aria-busy="true"]::before{animation:turn 1s steps(4) infinite}
+  @keyframes turn{to{transform:rotate(1turn)}}
+  .busy .ph::after{animation:read 1.5s cubic-bezier(.65,0,.35,1) infinite alternate}
+  @keyframes read{to{transform:translateX(257.2%)}}
+}
+
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 24px;padding:9px var(--gut) calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);font-size:13px;color:var(--ink-2)}
 footer code{font:500 12px var(--mono)}
 
-/* narrow screens: one column, and the page scrolls again */
-@media (max-width:860px){
+/* narrow screens: one column, the page scrolls, and each value drops under its line */
+@media (max-width:900px){
   body{display:block;height:auto;overflow:visible}
-  .panes{grid-template-columns:1fr;grid-template-rows:none;height:auto}
-  .sheet{max-height:60vh}
-  .list,.side{overflow:visible;padding-right:0}
-  /* working or failed: what is going on comes before the note */
-  .bare .list{order:-1}
+  .shell{display:flex;flex-direction:column;height:auto}
+  .rail{overflow:visible;padding:22px var(--gut);border-right:0}
+  /* the note is pasted first; what happens next comes after it */
+  .in .rail{order:1}
+  .proof{padding:10px var(--gut) 22px}
+  .ph,textarea{margin-left:0;width:100%}
+  .send{padding-left:0}
+  textarea{min-height:240px}
+  #note{grid-template-columns:30px minmax(0,1fr);overflow:visible;padding-bottom:0}
+  .ln{padding-right:8px}
+  .l{padding-inline:14px}
+  .mg,.mg:not(:empty){grid-column:2;padding:0 8px 8px;background:var(--sheet)}
+  .mg:empty{display:none}
+  #note>.mg:nth-child(3){padding-top:0}
+  .e{background:var(--ground)}
   footer{padding-block:14px 28px}
 }
 @media (max-width:640px){
   .tally{margin-left:0;flex-basis:100%}
-}
-@media (max-width:480px){
-  h1{padding-left:0;border-left:0;flex-basis:100%}
-  .sheet-head,.key{padding-inline:14px}
-  .note{padding:16px 14px 20px;font-size:16px}
+  .run{column-gap:14px}
+  h1{padding-left:14px}
 }
 </style>
 
-<header class="run wrap">
-  <span class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8.5 6 L2.5 16 L8.5 26 M23.5 6 L29.5 16 L23.5 26" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"/><rect x="9.5" y="13.75" width="13" height="4.5" fill="#e8907a"/><rect x="13.75" y="9.5" width="4.5" height="13" fill="#e8907a"/></svg>Medical Protocol</span>
+<header class="run">
+  <span class="brand">Medical Protocol</span>
   <h1 id="t"></h1>
+  <button class="btn" id="pick" type="button" hidden>Saved notes</button>
   <ul class="tally" id="tally" aria-label="Counts"></ul>
-  <button class="copy" id="copy" type="button">Copy extraction JSON</button>
-  <a class="copy" id="new" href="#" hidden>New note</a>
+  <button class="btn" id="copy" type="button">Copy extraction JSON</button>
+  <a class="btn" id="new" href="#" hidden>New note</a>
+  <button class="btn" id="theme" type="button">Dark mode</button>
   <p class="conn" id="conn" role="alert" hidden>Lost the connection to the local server. Start it again with medprotocol extract --serve.</p>
 </header>
 
-<main class="wrap">
-  <form class="panes" id="intake" hidden>
-    <div class="sheet">
-      <div class="sheet-head"><label for="paste">Paste the note here</label><span id="plen"></span></div>
-      <textarea class="note" id="paste" required placeholder="A made-up or de-identified note. Nothing is sent until you press Extract."></textarea>
-    </div>
-    <div class="side">
-      <section class="group g-fix" id="plan">
-        <header class="gh"><h2>What happens next</h2><p>It usually takes a minute or two.</p></header>
-      </section>
-      <label class="agree"><input type="checkbox" id="agree" required><span>This note is sent to the AI model, which runs on external servers. I confirm it is made up or de-identified: no names, record numbers, addresses or dates.</span></label>
-      <p class="go"><button class="copy main" id="go" type="submit" aria-describedby="why" disabled>Extract</button><span id="why"></span></p>
-    </div>
-  </form>
-  <div class="panes" id="panes">
-    <section class="sheet" aria-label="The note">
-      <div class="sheet-head"><span>Note, as written</span><span id="len"></span></div>
-      <pre class="note fresh" id="note" tabindex="0"></pre>
-      <div class="key" aria-hidden="true">
-        <span><mark class="g-cur"></mark>Found word for word</span>
-        <span><mark class="g-his"></mark>Found, history</span>
-        <span><mark class="g-rev"></mark>Close match</span>
-        <span><mark class="g-rev bad"></mark>Quote doesn't state the value</span>
+<dialog id="notes" aria-labelledby="nh">
+  <h2 id="nh">Saved notes<b id="ncount"></b></h2>
+  <ol id="nlist"></ol>
+  <form method="dialog"><button class="btn">Close</button></form>
+</dialog>
+
+<main>
+  <form class="shell in" id="intake" hidden>
+    <aside class="rail" id="plan">
+      <h2>What happens next</h2>
+      <p class="lead">It usually takes a minute or two.</p>
+    </aside>
+    <section class="proof">
+      <h2 class="ph"><label for="paste">Paste the note here</label><span id="plen"></span></h2>
+      <textarea id="paste" required placeholder="A made-up or de-identified note. Nothing is sent until you press Extract."></textarea>
+      <div class="send">
+        <label class="agree"><input type="checkbox" id="agree" required><span>This note is sent to the AI model, which runs on external servers. I confirm it is made up or de-identified: no names, record numbers, addresses or dates.</span></label>
+        <p class="go"><button class="btn fill" id="go" type="submit" aria-describedby="why" disabled>Extract</button><span id="why"></span></p>
       </div>
     </section>
-    <div class="list" id="list"></div>
+  </form>
+  <div class="shell" id="panes">
+    <aside class="rail" id="rail" aria-label="To review"></aside>
+    <section class="proof" aria-label="The note">
+      <h2 class="ph">Note, as written<span id="len"></span></h2>
+      <div class="fresh" id="note" tabindex="0"></div>
+    </section>
   </div>
 </main>
 
-<footer class="wrap">
+<footer>
     <span>Values copied from the note, each with the words it came from. Extraction only: no ranges, scores or interpretation. Checked with <code>medprotocol extract</code>.</span>
     <span id="when"></span>
 </footer>
@@ -4337,34 +4298,53 @@ footer code{font:500 12px var(--mono)}
     unverified: "Not found in note",
     none: "No quote"
   };
-  var ICON = {
-    ok: '<svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5"/></svg>',
-    close: '<svg viewBox="0 0 16 16"><path d="M3 6.5q2.5-3 5 0t5 0M3 11.5q2.5-3 5 0t5 0"/></svg>',
-    warn: '<svg viewBox="0 0 16 16"><path d="M8 2.5V9M8 12.5v1"/></svg>'
-  };
+  var TICK = '<svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5"/></svg>';
   function el(tag, cls, txt) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
     if (txt != null) e.textContent = txt;
     return e;
   }
-  function group(it) { return it.status !== "quoted" ? "rev" : it.episode === "history" ? "his" : "cur"; }
+  // how far to trust an item: "" found word for word (the words are there, not "this is right"),
+  // "his" the same in the history, "close" a close match, "bad" missing or not stated
+  function kind(it) { return it.status !== "quoted" ? (CLOSE[it.status] ? "close" : "bad") : it.episode === "history" ? "his" : ""; }
   function status(it) {
     if (it.status === "approximate") return "Close match: " + it.distance + (it.distance === 1 ? " character" : " characters") + " off";
     return LABEL[it.status] || it.status;
   }
+  function mk(k) { var i = el("i", "m " + k); i.setAttribute("aria-hidden", "true"); return i; }
+  function head(txt, count) { var h = el("h2", "", txt); if (count != null) h.appendChild(el("b", "", String(count))); return h; }
+  // a labelled line of a card
+  function line(label, cls) { var p = el("p", cls); p.appendChild(el("b", "k", label)); return p; }
+
+  // light or dark: the system's choice until the button is pressed, then the one chosen, kept for next time
+  var themeBtn = document.getElementById("theme"), root = document.documentElement;
+  function theme(t) {
+    if (t === "light" || t === "dark") root.dataset.theme = t;
+    var dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    themeBtn.textContent = dark ? "Light mode" : "Dark mode";
+    return dark;
+  }
+  try { theme(localStorage.getItem("theme")); } catch (e) { theme(); }
+  themeBtn.addEventListener("click", function () {
+    var t = theme() ? "light" : "dark";
+    theme(t);
+    try { localStorage.setItem("theme", t); } catch (e) {}
+  });
 
   var title = document.getElementById("t");
   var tally = document.getElementById("tally");
   var copyBtn = document.getElementById("copy");
   var note = document.getElementById("note");
-  var list = document.getElementById("list");
-  // what the last render drew; the listeners below work on these
-  var items = [], text = "", json = "[]", marksOf = [], rows = [];
+  var rail = document.getElementById("rail");
+  var len = document.getElementById("len");
+  // what the last render drew; the listeners below work on these. rows[n]: the margin entry and the rail card of item n
+  var items = [], text = "", json = "[]", marksOf = [], rows = [], flagged = 0;
 
   function copied(ok) {
-    copyBtn.textContent = ok ? "Copied" : "Copy failed";
-    setTimeout(function () { copyBtn.textContent = "Copy extraction JSON"; }, 1800);
+    // the JSON carries no status, so say here that some of it is not verified
+    copyBtn.textContent = !ok ? "Copy failed" : flagged ? "Copied, " + flagged + (flagged === 1 ? " needs review" : " need review") : "Copied";
+    setTimeout(function () { copyBtn.textContent = "Copy extraction JSON"; }, flagged ? 3500 : 1800);
   }
   copyBtn.addEventListener("click", function () {
     function fallback() {
@@ -4377,71 +4357,33 @@ footer code{font:500 12px var(--mono)}
     else fallback();
   });
 
-  function row(it, n) {
-    var tr = it.status === "quoted" ? "ok" : CLOSE[it.status] ? "close" : "warn";
-    var li = el("li", "row item g-" + group(it) + " " + tr);
-    li.tabIndex = 0;
-    var ic = el("span", "tr " + tr); ic.setAttribute("aria-hidden", "true"); ic.innerHTML = ICON[tr]; li.appendChild(ic);
-    li.appendChild(el("span", "field", it.field));
-    var same = !it.unit && it.quote && it.quote.trim().toLowerCase() === String(it.value).trim().toLowerCase();
-    var v = el("span", /\d/.test(it.value) ? "val" : "val txt", it.value);
-    if (it.unit) { v.appendChild(document.createTextNode(" ")); v.appendChild(el("small", "", it.unit)); }
-    if (!same) li.appendChild(v);
-    var ok = tr === "ok", more = ok ? el("div", "more") : li;
-    var meta = el("div", "meta");
-    // verified rows sit under their episode's band; only the review group mixes episodes
-    if (!ok) meta.appendChild(el("span", "ep", it.episode === "history" ? "History" : "Current illness"));
-    if (it.time) meta.appendChild(el("span", "", it.time));
-    if (!ok) meta.appendChild(el("span", "st " + tr, status(it)));
-    if (it.ambiguous) meta.appendChild(el("span", "", "Appears more than once: first occurrence marked"));
-    var q = it.quote && el("p", same ? "quote same" : "quote");
-    if (q) q.appendChild(el("q", "", it.quote));
-    if (ok) {
-      // the mark is the status: named on hover and to a screen reader
-      ic.title = status(it); li.appendChild(el("span", "sr", status(it)));
-      if (q) (same ? li : more).appendChild(q);
-      if (meta.firstChild) more.appendChild(meta);
-      // nothing more to say: no caret, nothing to open
-      if (more.firstChild) {
-        var c = el("span", "caret"); c.setAttribute("aria-hidden", "true"); c.innerHTML = '<svg viewBox="0 0 12 12"><path d="M2 4.5 6 8.5 10 4.5"/></svg>';
-        li.appendChild(c); li.appendChild(more); li.classList.add("fold");
-        var flip = function () { li.classList.toggle("open"); };
-        li.addEventListener("click", flip);
-        li.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
-      }
-    } else {
-      li.appendChild(meta);
-      if (q) li.appendChild(q);
-    }
-    if (CLOSE[it.status] && it.start != null) {
-      var s = el("p", "says"); s.appendChild(el("b", "", "Note says")); s.appendChild(document.createTextNode(text.slice(it.start, it.end))); li.appendChild(s);
-    }
-    li.addEventListener("mouseenter", function () { light(n, true); });
-    li.addEventListener("focus", function () { light(n, true); });
-    li.addEventListener("mouseleave", clear);
-    li.addEventListener("blur", clear);
-    rows[n] = li;
-    return li;
-  }
   function clear() {
     document.querySelectorAll(".on").forEach(function (e) { e.classList.remove("on"); });
   }
   function light(n, scroll) {
     clear();
-    rows[n] && rows[n].classList.add("on");
+    rows[n].forEach(function (r) { r.classList.add("on"); });
     marksOf[n].forEach(function (m) { m.classList.add("on"); });
     var m = marksOf[n][0];
     if (scroll && m) {
-      var top = m.offsetTop - note.offsetTop;
-      if (top < note.scrollTop || top > note.scrollTop + note.clientHeight - 40) note.scrollTo({ top: top - note.clientHeight / 3, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      // only where the note scrolls by itself; on a narrow screen the page is left where it is
+      var a = m.getBoundingClientRect(), b = note.getBoundingClientRect();
+      if (a.top < b.top || a.bottom > b.bottom - 40) note.scrollTo({ top: note.scrollTop + a.top - b.top - note.clientHeight / 3, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     }
+  }
+  // pointing at (or focusing) e lights item n in the note
+  function point(e, n) {
+    e.addEventListener("mouseenter", function () { light(n, true); });
+    e.addEventListener("focusin", function () { light(n, true); });
+    e.addEventListener("mouseleave", clear);
+    e.addEventListener("focusout", clear);
   }
   note.addEventListener("mouseover", function (e) {
     var m = e.target.closest("mark");
     if (!m) return;
     clear();
     m.dataset.items.split(" ").forEach(function (n) {
-      rows[n] && rows[n].classList.add("on");
+      rows[n].forEach(function (r) { r.classList.add("on"); });
       marksOf[n].forEach(function (x) { x.classList.add("on"); });
     });
   });
@@ -4449,27 +4391,77 @@ footer code{font:500 12px var(--mono)}
   note.addEventListener("click", function (e) {
     var m = e.target.closest("mark");
     var r = m && rows[m.dataset.items.split(" ")[0]];
-    if (r) r.scrollIntoView({ block: "nearest" });
+    if (r && r.length) r[r.length - 1].scrollIntoView({ block: "nearest" });
   });
 
-  var groups = [
-    ["rev", "Needs review", "The quote is missing, inexact, or doesn't state the value. Check each against the note."],
-    ["cur", "Current illness", "Each quote was found word for word in the note."],
-    ["his", "History", "Each quote was found word for word in the note."]
-  ];
+  // the margin entry of an item: its mark, field and value. The words it came from are lit on its line
+  function entry(it, n) {
+    var k = kind(it), li = el("li", "e " + k);
+    li.tabIndex = 0;
+    li.appendChild(mk(k));
+    li.appendChild(el("span", "", it.field));
+    // the quote is the value, word for word: it is already on the line
+    var same = !it.unit && it.quote && it.quote.trim().toLowerCase() === String(it.value).trim().toLowerCase();
+    if (!same) {
+      // figures are set in mono; words are set as text
+      li.appendChild(el("b", /^[-+<>]?\d[\d.,\/]*$/.test(it.value) ? "v" : "v txt", it.value));
+      if (it.unit) li.appendChild(el("small", "", it.unit));
+    }
+    if (it.lab === true) li.appendChild(el("small", "", "lab"));
+    // when it was taken: the one thing the check cannot verify, so it is always shown
+    if (it.time) li.appendChild(el("small", "", it.time));
+    if (k === "close" || k === "bad") li.appendChild(el("span", "why", k === "close" ? "close match" : "not stated"));
+    if (it.ambiguous) li.appendChild(el("small", "", "first of several"));
+    li.title = status(it); li.appendChild(el("span", "sr", status(it)));
+    point(li, n); rows[n].push(li);
+    return li;
+  }
 
-  // draws one extraction from scratch: the head, the note and the list
+  // the rail card of an item to review: its status in words, the value, and what the note says
+  function card(it, n) {
+    var k = kind(it), bad = it.status === "mismatched", li = el("li", "card " + k);
+    li.tabIndex = 0;
+    var h = el("h3"); h.appendChild(mk(k)); h.appendChild(document.createTextNode(it.field)); li.appendChild(h);
+    li.appendChild(el("p", "st", status(it)));
+    var v = line(bad ? "Extracted" : "Value", "cmp");
+    v.appendChild(el("span", "n", it.value));
+    if (it.unit) v.appendChild(document.createTextNode(" " + it.unit));
+    li.appendChild(v);
+    if (it.quote && bad) {
+      var q = line("Note says", "cmp");
+      (it.start != null ? text.slice(it.start, it.end) : it.quote).split(/(\d[\d.,\/]*)/).forEach(function (part, i) {
+        q.appendChild(i % 2 ? el("span", "n x", part) : document.createTextNode(part));
+      });
+      li.appendChild(q);
+    } else if (it.quote) {
+      var p = line("Quote"); p.appendChild(el("q", "", it.quote)); li.appendChild(p);
+    }
+    if (CLOSE[it.status] && it.start != null) {
+      var s = line("Note says"); s.appendChild(document.createTextNode(text.slice(it.start, it.end))); li.appendChild(s);
+    }
+    var meta = [it.episode === "history" ? "History" : "Current illness"];
+    if (it.time) meta.push(it.time);
+    if (it.ambiguous) meta.push("Appears more than once: first occurrence marked");
+    li.appendChild(el("p", "", meta.join(" · ")));
+    // on a narrow screen the note is further down the page
+    li.addEventListener("click", function () { var m = marksOf[n][0]; if (m) m.scrollIntoView({ block: "nearest" }); });
+    point(li, n); rows[n].push(li);
+    return li;
+  }
+
+  // draws one extraction from scratch: the bar, the rail and the proof
   function render(data) {
     var segs = data.segments;
     items = data.items;
     text = segs.map(function (s) { return s.text; }).join("");
-    note.textContent = ""; list.textContent = ""; tally.textContent = "";
+    note.textContent = ""; rail.textContent = ""; tally.textContent = "";
 
     title.textContent = data.name;
     document.getElementById("when").textContent = data.checkedAt ? "Checked " + data.checkedAt : "";
-    var found = items.filter(function (i) { return i.status === "quoted"; }).length;
-    var lines = text.split("\n").length;
-    document.getElementById("len").textContent = lines + (lines === 1 ? " line" : " lines");
+    var count = { "": 0, his: 0, close: 0, bad: 0 };
+    items.forEach(function (i) { count[kind(i)]++; });
+    var found = count[""] + count.his;
+    flagged = items.length - found;
 
     // copies the items as extracted; status and offsets are computed, never stored
     json = JSON.stringify(items.map(function (i) {
@@ -4478,41 +4470,60 @@ footer code{font:500 12px var(--mono)}
       return o;
     }), null, 2);
 
-    // the note, only from its segments; each mark knows the rows it belongs to
+    // the note, only from its segments, one row per line: its number, its words, its margin.
+    // Each mark knows its items; an item's entry goes in the margin of the line its quote starts on
     marksOf = items.map(function () { return []; });
+    rows = items.map(function () { return []; });
+    var no = 0, cur;
+    function row() {
+      var num = el("div", "ln", String(++no)); num.setAttribute("aria-hidden", "true");
+      cur = { l: el("div", "l"), mg: el("ul", "mg") };
+      note.appendChild(num); note.appendChild(cur.l); note.appendChild(cur.mg);
+    }
+    row();
     segs.forEach(function (s) {
-      if (!s.items.length) { note.appendChild(document.createTextNode(s.text)); return; }
-      var its = s.items.map(function (n) { return items[n]; });
-      var cls = "g-" + group(its[0]);
-      if (its.some(function (i) { return i.status === "mismatched"; })) cls = "g-rev bad";
-      else if (its.some(function (i) { return i.status !== "quoted"; })) cls = "g-rev";
-      var m = el("mark", cls, s.text);
-      m.dataset.items = s.items.join(" ");
-      s.items.forEach(function (n) { marksOf[n].push(m); });
-      note.appendChild(m);
+      var ks = s.items.map(function (n) { return kind(items[n]); });
+      var cls = ks.indexOf("bad") >= 0 ? "bad" : ks.indexOf("close") >= 0 ? "close" : ks[0];
+      s.text.split("\n").forEach(function (part, i) {
+        if (i) row();
+        if (!part) return;
+        if (!s.items.length) { cur.l.appendChild(document.createTextNode(part)); return; }
+        var m = el("mark", cls, part);
+        m.dataset.items = s.items.join(" ");
+        s.items.forEach(function (n) {
+          if (!marksOf[n].length) cur.mg.appendChild(entry(items[n], n));
+          marksOf[n].push(m);
+        });
+        cur.l.appendChild(m);
+      });
     });
 
-    rows = [];
-    groups.forEach(function (g) {
-      var idx = [];
-      items.forEach(function (it, n) { if (group(it) === g[0]) idx.push(n); });
-      var li = el("li", "g-" + g[0]); li.appendChild(el("b", "", String(idx.length))); li.appendChild(el("span", "", g[1])); tally.appendChild(li);
-      if (g[0] === "his") { var f = el("li", "found"); f.appendChild(el("b", "", found + "/" + items.length)); f.appendChild(el("span", "", "found in note")); tally.appendChild(f); }
-      if (!idx.length) return;
-      var sec = el("section", "group g-" + g[0]);
-      var h = el("header", "gh"); h.appendChild(el("h2", "", g[1])); h.appendChild(el("b", "", String(idx.length))); h.appendChild(el("p", "", g[2])); sec.appendChild(h);
-      // verified groups list lab results apart, after the rest; the review group stays in note order
-      var labs = g[0] === "rev" ? [] : idx.filter(function (n) { return items[n].lab === true; });
-      [idx.filter(function (n) { return labs.indexOf(n) < 0; }), labs].forEach(function (part, lab) {
-        if (!part.length) return;
-        if (lab) { var sh = el("h3", "sub", "Labs"); sh.appendChild(el("b", "", String(part.length))); sec.appendChild(sh); }
-        var ol = el("ol", g[0] === "rev" ? "" : "ok-rows");
-        part.forEach(function (n) { ol.appendChild(row(items[n], n)); });
-        sec.appendChild(ol);
-      });
-      list.appendChild(sec);
+    // a note that ends in a line break has no last line to number
+    if (no > 1 && !cur.l.firstChild) { note.removeChild(cur.mg); note.removeChild(cur.l); note.removeChild(note.lastChild); no--; }
+    len.textContent = no + (no === 1 ? " line" : " lines") + (items.length ? " · each value sits beside its line" : "");
+
+    // the bar: what to distrust first
+    [["bad", "missing or not stated"], ["close", count.close === 1 ? "close match" : "close matches"]].forEach(function (g) {
+      if (!count[g[0]]) return;
+      var li = el("li"); li.appendChild(mk(g[0])); li.appendChild(el("b", "", String(count[g[0]]))); li.appendChild(el("span", "", g[1])); tally.appendChild(li);
     });
-    if (!items.length) list.appendChild(el("p", "empty", "Nothing was extracted from this note."));
+    var f = el("li"); f.appendChild(mk("")); f.appendChild(el("b", "", found + "/" + items.length)); f.appendChild(el("span", "", "found word for word")); tally.appendChild(f);
+
+    // the rail: every item that is not found word for word, in note order; one with no words in the note is only here
+    if (!items.length) { rail.appendChild(el("p", "empty", "Nothing was extracted from this note.")); return; }
+    rail.appendChild(head(flagged ? "Needs review" : "Nothing to review", flagged || null));
+    rail.appendChild(el("p", "lead", flagged ? "The quote is missing, inexact, or doesn't state the value. Check each against the note." : "Every quote was found word for word in the note."));
+    var ol = el("ol");
+    items.forEach(function (it, n) { if (it.status !== "quoted") ol.appendChild(card(it, n)); });
+    rail.appendChild(ol);
+    // the counts by mark, which is also the legend
+    rail.appendChild(head("In this note", items.length));
+    var key = el("ul", "key");
+    [["", "current illness, found word for word"], ["his", "history, found word for word"], ["close", "close match"], ["bad", "missing, or the quote doesn't state the value"]].forEach(function (g) {
+      if (!count[g[0]]) return;
+      var li = el("li"); li.appendChild(mk(g[0])); li.appendChild(el("b", "", String(count[g[0]]))); li.appendChild(el("span", "", g[1])); key.appendChild(li);
+    });
+    rail.appendChild(key);
   }
 
   if (!data.live) { render(data); return; }
@@ -4532,6 +4543,30 @@ footer code{font:500 12px var(--mono)}
   // last: the response text already drawn. seq: answers to an older request are dropped
   var id = null, last = null, timer = 0, seq = 0, tick = 0;
 
+  // the saved notes of this folder, newest first; asked for again each time the note on the page changes
+  var pick = document.getElementById("pick"), dlg = document.getElementById("notes"), nlist = document.getElementById("nlist");
+  var STATE = { extracting: "Working", verifying: "Working", failed: "Did not finish", review: "To review", done: "Done" };
+  function notes() {
+    fetch("/api/extractions").then(function (r) { return r.json(); }).then(function (list) {
+      if (!Array.isArray(list)) return;
+      pick.textContent = "Saved notes (" + list.length + ")";
+      pick.hidden = !list.length;
+      document.getElementById("ncount").textContent = String(list.length);
+      nlist.textContent = "";
+      list.forEach(function (n) {
+        var li = el("li"), a = el("a");
+        a.href = "#" + n.id;
+        if (n.id === id) a.setAttribute("aria-current", "true");
+        a.appendChild(el("span", "first", n.first));
+        a.appendChild(el("span", "", (n.id === id ? "Open now · " : "") + STATE[n.state] + " · saved " + new Date(n.saved).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })));
+        li.appendChild(a); nlist.appendChild(li);
+      });
+    }, function () {});
+  }
+  pick.addEventListener("click", function () { dlg.showModal(); });
+  // a link opens its note through the address; the dialog only has to get out of the way
+  nlist.addEventListener("click", function (e) { if (e.target.closest("a")) dlg.close(); });
+
   var STEPS = [
     ["Pull out the values", "Each value is copied with the exact words it came from."],
     ["Second check", "A second run re-reads the note and proposes corrections."],
@@ -4542,12 +4577,12 @@ footer code{font:500 12px var(--mono)}
     var ol = el("ol");
     STEPS.forEach(function (s, n) {
       var done = n < at, now = n === at;
-      var li = el("li", "row step" + (at >= 0 && n > at ? " next" : ""));
-      var ic = el("span", done ? "tr ok" : now ? "tr" : "tr num", done || now ? null : String(n + 1));
+      var li = el("li", "step" + (at >= 0 && n > at ? " next" : ""));
+      var ic = el("span", done ? "tr ok" : now ? "tr now" : "tr", done || now ? null : String(n + 1));
       ic.setAttribute("aria-hidden", "true");
-      if (done) ic.innerHTML = ICON.ok;
+      if (done) ic.innerHTML = TICK;
       if (now) { ic.appendChild(el("span", "spin")); li.setAttribute("aria-current", "step"); }
-      li.appendChild(ic); li.appendChild(el("span", "field", s[0])); li.appendChild(el("p", "says", s[1]));
+      li.appendChild(ic); li.appendChild(el("b", "", s[0])); li.appendChild(el("p", "", s[1]));
       ol.appendChild(li);
     });
     return ol;
@@ -4559,20 +4594,6 @@ footer code{font:500 12px var(--mono)}
     var t = Date.now();
     try { t = +sessionStorage.getItem("t" + id) || t; sessionStorage.setItem("t" + id, t); } catch (e) {}
     return t;
-  }
-
-  // the shape of the list to come
-  function ghost() {
-    var sec = el("section", "group ghost"), h = el("header", "gh"), ol = el("ol");
-    h.appendChild(el("h2", "", "Values from the note")); h.appendChild(el("p", "", "They appear here when both steps finish."));
-    ol.setAttribute("aria-hidden", "true");
-    for (var n = 0; n < 4; n++) {
-      var li = el("li", "row");
-      ["tr", "sk a", "sk b", "sk c"].forEach(function (c) { li.appendChild(el("span", c)); });
-      ol.appendChild(li);
-    }
-    sec.appendChild(h); sec.appendChild(ol);
-    return sec;
   }
 
   function send(noteText) {
@@ -4587,53 +4608,51 @@ footer code{font:500 12px var(--mono)}
     clearInterval(tick);
     panes.classList.toggle("busy", busy);
     tally.hidden = copyBtn.hidden = busy || s.state === "failed";
-    panes.classList.toggle("bare", tally.hidden);
     if (!tally.hidden) { corrections(s); return; }
-    list.textContent = ""; when.textContent = "";
-    var sec = el("section", "group g-" + (busy ? "fix" : "rev")), h = el("header", "gh"), box = el("div", "box");
-    sec.appendChild(h);
+    rail.textContent = ""; when.textContent = "";
     if (busy) {
       var at = s.state === "verifying" ? 1 : 0, clock = el("b"), from = started(s.id);
       var show = function () {
         var t = Math.max(0, Math.floor((Date.now() - from) / 1000));
         clock.textContent = Math.floor(t / 60) + ":" + ("0" + t % 60).slice(-2);
       };
-      h.appendChild(el("h2", "", "Working on your note")); h.appendChild(clock);
-      h.appendChild(el("p", "", "It usually takes a minute or two. This page updates by itself."));
+      var h = head("Working on your note"); h.appendChild(clock); rail.appendChild(h);
+      rail.appendChild(el("p", "lead", "It usually takes a minute or two. This page updates by itself."));
       show(); tick = setInterval(show, 1000);
-      sec.appendChild(stepList(at));
+      rail.appendChild(stepList(at));
+      len.textContent = "The values appear beside their lines when both steps finish";
       statusLine.textContent = at ? "Step 2 of 3: the second check is re-reading the note." : "Step 1 of 3: pulling out the values.";
-      sec.appendChild(statusLine);
-      list.appendChild(sec); list.appendChild(ghost());
+      rail.appendChild(statusLine);
       return;
-    } else {
-      try { sessionStorage.removeItem("t" + s.id); } catch (e) {}
-      h.appendChild(el("h2", "", "The extraction did not finish"));
-      h.appendChild(el("p", "", "Your note is still here. Run it again, or start a new note."));
-      statusLine.textContent = "The extraction did not finish.";
-      box.appendChild(statusLine);
-      if (s.error && s.error.indexOf("'claude' command was not found") >= 0) box.appendChild(el("p", "says", "This page needs the Claude Code command line tool. You can also run the extraction from the chat with /medical-protocol:extract."));
-      else if (s.error) box.appendChild(el("pre", "says", s.error));
-      var again = el("button", "copy main", "Try again"); again.type = "button";
-      // the doctor already confirmed this note
-      again.addEventListener("click", function () {
-        again.disabled = true; again.setAttribute("aria-busy", "true");
-        // drawn again even when the run fails the same way, so the button comes back
-        last = null;
-        send(s.note).then(load, function () { again.disabled = false; again.removeAttribute("aria-busy"); conn.hidden = false; });
-      });
-      box.appendChild(again);
     }
-    sec.appendChild(box);
-    list.appendChild(sec);
+    try { sessionStorage.removeItem("t" + s.id); } catch (e) {}
+    var box = el("div", "box");
+    rail.appendChild(head("The extraction did not finish"));
+    rail.appendChild(el("p", "lead", "Your note is still here. Run it again, or start a new note."));
+    statusLine.textContent = "The extraction did not finish.";
+    box.appendChild(statusLine);
+    if (s.error && s.error.indexOf("'claude' command was not found") >= 0) box.appendChild(el("p", "lead", "This page needs the Claude Code command line tool. You can also run the extraction from the chat with /medical-protocol:extract."));
+    else if (s.error) box.appendChild(el("pre", "", s.error));
+    var again = el("button", "btn fill", "Try again"); again.type = "button";
+    // the doctor already confirmed this note
+    again.addEventListener("click", function () {
+      again.disabled = true; again.setAttribute("aria-busy", "true");
+      // drawn again even when the run fails the same way, so the button comes back
+      last = null;
+      send(s.note).then(load, function () { again.disabled = false; again.removeAttribute("aria-busy"); conn.hidden = false; });
+    });
+    box.appendChild(again);
+    rail.appendChild(box);
   }
 
   // one line of a finding: the label, then the item and its quote
-  function says(label, it) {
-    var p = el("p", "says");
-    p.appendChild(el("b", "", label));
+  // old: the value being replaced, set in the alarm colour
+  function says(label, it, old) {
+    var p = line(label);
     if (!it) return p;
-    p.appendChild(document.createTextNode(it.field + ": " + it.value + (it.unit ? " " + it.unit : "") + " "));
+    p.appendChild(document.createTextNode(it.field + " "));
+    p.appendChild(el("span", old ? "n x" : "n", it.value));
+    p.appendChild(document.createTextNode((it.unit ? " " + it.unit : "") + " "));
     if (it.quote) p.appendChild(el("q", "", it.quote));
     return p;
   }
@@ -4651,56 +4670,60 @@ footer code{font:500 12px var(--mono)}
         return r.text().then(function (body) {
           conn.hidden = true;
           if (!r.ok) { last = null; load(); return; }
-          // the redraw empties both panes: keep where the doctor was reading and the pressed button
-          var a = list.scrollTop, b = note.scrollTop;
-          // the highlights are already on the page: don't swipe them in again
+          // the redraw empties the rail and the note: keep where the doctor was reading and the pressed button
+          var a = rail.scrollTop, b = note.scrollTop;
+          // the highlights are already on the page: don't draw them in again
           note.classList.remove("fresh");
           last = body; draw(JSON.parse(body));
-          list.scrollTop = a; note.scrollTop = b;
-          var btn = list.querySelector('[data-f="' + n + '"][data-d="' + decision + '"]');
+          rail.scrollTop = a; note.scrollTop = b;
+          var btn = rail.querySelector('[data-f="' + n + '"]');
           if (btn) btn.focus();
         });
       }, function () { wait(false); conn.hidden = false; });
   }
 
-  // review and done: the findings of the second check above the groups, each with its two answers
+  // review and done: the findings of the second check at the top of the rail, each with its two answers
   function corrections(s) {
     if (!s.findings.length) return;
     var open = s.findings.filter(function (f) { return (f.correction || f.index != null) && !f.decision; }).length;
-    if (open) { var t = el("li", "found"); t.appendChild(el("b", "", String(open))); t.appendChild(el("span", "", "to decide")); tally.appendChild(t); }
-    var sec = el("section", "group g-fix");
-    var h = el("header", "gh"); h.appendChild(el("h2", "", "Corrections")); h.appendChild(el("b", "", String(s.findings.length)));
-    h.appendChild(el("p", "", "The second check re-read the note. Accept each change or keep the original.")); sec.appendChild(h);
+    if (open) { var t = el("li"); t.appendChild(el("b", "", String(open))); t.appendChild(el("span", "", "to decide")); tally.insertBefore(t, tally.firstChild); }
+    var sec = el("div");
+    sec.appendChild(head("Corrections", s.findings.length));
+    sec.appendChild(el("p", "lead", "The second check re-read the note. Accept each change or keep the original."));
     var ol = el("ol");
     s.findings.forEach(function (f, n) {
-      var li = el("li", "row fix");
-      li.appendChild(el("p", "field", f.problem));
+      var li = el("li", "card");
+      li.appendChild(el("h3", "", f.problem));
       ol.appendChild(li);
       // a remark changes no item: a plain line
       if (!f.correction && f.index == null) return;
       var add = f.index == null;
-      if (f.before) li.appendChild(says("Was", f.before));
+      // the answer already given, in words: a filled button alone reads as something to press
+      if (f.decision) li.classList.add("done");
+      if (f.decision) li.appendChild(el("p", "st", f.decision === "rejected" ? (add ? "Not added" : "Kept the original") : add ? "Added" : f.correction ? "Accepted" : "Removed"));
+      // a changed figure is named in both answers
+      var fig = f.before && f.correction && f.before.value !== f.correction.value;
+      if (f.before) li.appendChild(says("Was", f.before, fig));
       li.appendChild(add ? says("Add this item", f.correction) : f.correction ? says("Now", f.correction) : says("Remove this item"));
-      var go = el("div", "go"); go.setAttribute("role", "group"); go.setAttribute("aria-label", "Your answer");
-      [["accepted", add ? "Add" : "Accept"], ["rejected", add ? "Don't add" : "Keep the original"]].forEach(function (d) {
-        var b = el("button", "copy", d[1]); b.type = "button";
-        b.dataset.f = n; b.dataset.d = d[0];
-        b.setAttribute("aria-pressed", String(f.decision === d[0]));
-        b.addEventListener("click", function () { if (f.decision !== d[0]) decide(s, n, d[0], b); });
+      var go = el("div", "acts"); go.setAttribute("role", "group"); go.setAttribute("aria-label", "Your answer");
+      // neither answer is filled; once one is chosen only the other is offered, to change it
+      [["accepted", add ? "Add" : fig ? "Accept " + f.correction.value : "Accept"], ["rejected", add ? "Don't add" : fig ? "Keep " + f.before.value : "Keep the original"]].forEach(function (d) {
+        if (f.decision === d[0]) return;
+        var b = el("button", "btn", d[1]); b.type = "button";
+        b.dataset.f = n;
+        b.addEventListener("click", function () { decide(s, n, d[0], b); });
         go.appendChild(b);
       });
       li.appendChild(go);
       // the item this finding leaves on the page, found by its content; a removed item has no quote to light
       var shown = f.decision === "rejected" ? f.before : f.correction, at = -1;
       if (shown) items.some(function (it, i) { return it.field === shown.field && it.value === shown.value && it.quote === shown.quote && (at = i, true); });
-      if (at < 0) return;
-      li.addEventListener("mouseenter", function () { light(at, true); });
-      li.addEventListener("focusin", function () { light(at, true); });
-      li.addEventListener("mouseleave", clear);
-      li.addEventListener("focusout", clear);
+      // the same mark as the item has in the margin; a removed item has none there
+      li.firstChild.insertBefore(mk(at >= 0 ? kind(items[at]) : "bad"), li.firstChild.firstChild);
+      if (at >= 0) point(li, at);
     });
     sec.appendChild(ol);
-    list.insertBefore(sec, list.firstChild);
+    rail.insertBefore(sec, rail.firstChild);
   }
 
   function load() {
@@ -4733,8 +4756,9 @@ footer code{font:500 12px var(--mono)}
     document.getElementById("new").hidden = !id;
     title.textContent = "Note extraction"; when.textContent = "";
     // the bar under the note's head runs until the first answer
-    panes.classList.toggle("busy", !!id); panes.classList.add("bare");
-    if (id) { note.classList.add("fresh"); note.textContent = ""; list.textContent = ""; load(); }
+    panes.classList.toggle("busy", !!id);
+    notes();
+    if (id) { note.classList.add("fresh"); note.textContent = ""; rail.textContent = ""; len.textContent = ""; load(); }
     else paste.focus();
   }
 
@@ -6255,6 +6279,14 @@ ${check}`));
 `);
             if (!(0, import_node_fs2.existsSync)((0, import_node_path2.join)(dir2, "verify.json"))) startJob(dir2);
             return send(200, { id: (0, import_node_path2.basename)(dir2) });
+          }
+          if (req.method === "GET" && path === "/api/extractions") {
+            const list = (0, import_node_fs2.readdirSync)("extractions").filter((id) => /^[0-9a-f]{12}$/.test(id) && (0, import_node_fs2.existsSync)((0, import_node_path2.join)("extractions", id, "note.md"))).map((id) => {
+              const dir2 = (0, import_node_path2.join)("extractions", id);
+              const { state, note } = stateOf(dir2, running.has(dir2));
+              return { id, state, saved: (0, import_node_fs2.statSync)((0, import_node_path2.join)(dir2, "note.md")).mtime.toISOString(), first: note.trim().split("\n")[0].slice(0, 80) };
+            }).sort((a, b) => b.saved.localeCompare(a.saved));
+            return send(200, list);
           }
           const [, hash, decisions] = /^\/api\/extractions\/([0-9a-f]{12})(\/decisions)?$/.exec(path) ?? [];
           const dir = hash && (0, import_node_path2.join)("extractions", hash);

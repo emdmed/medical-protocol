@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { createHash } from "node:crypto";
-import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { basename, dirname, extname, join, resolve } from "node:path";
@@ -261,6 +261,19 @@ export const serve = (port: number, askModel: AskModel = askClaude): Server => {
         process.stdout.write(`http://localhost:${at}/#${basename(dir)}\n`);
         if (!existsSync(join(dir, "verify.json"))) startJob(dir);
         return send(200, { id: basename(dir) });
+      }
+
+      if (req.method === "GET" && path === "/api/extractions") {
+        // every saved note, newest first, with enough to tell them apart in the page's picker
+        const list = readdirSync("extractions")
+          .filter((id) => /^[0-9a-f]{12}$/.test(id) && existsSync(join("extractions", id, "note.md")))
+          .map((id) => {
+            const dir = join("extractions", id);
+            const { state, note } = stateOf(dir, running.has(dir));
+            return { id, state, saved: statSync(join(dir, "note.md")).mtime.toISOString(), first: note.trim().split("\n")[0].slice(0, 80) };
+          })
+          .sort((a, b) => b.saved.localeCompare(a.saved));
+        return send(200, list);
       }
 
       const [, hash, decisions] = /^\/api\/extractions\/([0-9a-f]{12})(\/decisions)?$/.exec(path) ?? [];

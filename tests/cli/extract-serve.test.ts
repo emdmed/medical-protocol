@@ -147,6 +147,12 @@ describe('medprotocol extract --serve', () => {
     expect(JSON.parse(res.text)).toMatchObject({ id: HASH, state: 'failed', error: null, note: NOTE });
   });
 
+  it('GET /api/extractions lists the saved notes, skipping folders that are not one', async () => {
+    mkdirSync(join('extractions', 'not-a-note'));
+    mkdirSync(join('extractions', '000000000000'));
+    expect(JSON.parse((await get('/api/extractions')).text)).toMatchObject([{ id: HASH, state: 'failed', first: NOTE.trim().split('\n')[0].slice(0, 80) }]);
+  });
+
   it('404 for a hash that is not 12 hex, and for a folder without note.md', async () => {
     expect((await get('/api/extractions/..%2F..%2Fetc')).status).toBe(404);
     expect((await get('/api/extractions/3F9A1C07B2E4')).status).toBe(404);

@@ -11,3 +11,4 @@ sync_check.md
 # Dev overlay work-order queue — holds captured page markup/text (potential PHI). Never commit.
 .medprotocol/
 extractions/
+.impeccable/
