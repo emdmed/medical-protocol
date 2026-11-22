@@ -1,6 +1,6 @@
 {
   "name": "medical-protocol",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "license": "MIT",
   "description": "Educational clinical skills for Claude Code — tested calculators, screen prototyping and browser checks. For learning and quick prototyping of medical ideas, not for patient care",
   "author": {

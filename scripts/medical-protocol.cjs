@@ -3470,7 +3470,7 @@ var require_commander = __commonJS({
 var version;
 var init_package = __esm({
   "packages/medical-protocol/package.json"() {
-    version = "1.2.0";
+    version = "1.3.0";
   }
 });
 
