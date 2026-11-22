@@ -63,6 +63,8 @@ export interface ExtractedItem {
    * results, background medications, allergies.
    */
   episode: Episode;
+  /** A laboratory result (blood, urine, gases, cultures). Only for display: the page lists these apart. */
+  lab?: boolean;
   /** When the note says it was taken, as written ("08:00", "on admission"); needed to tell repeated readings apart. */
   time?: string;
   /** The value as the note states it, e.g. "120/80", "1.4", "500 mg BID". */

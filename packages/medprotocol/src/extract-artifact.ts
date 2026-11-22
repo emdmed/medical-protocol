@@ -86,7 +86,7 @@ mark.g-rev{background:transparent;border-bottom:2px dashed var(--gi)}
 mark.bad{border-bottom:0;box-shadow:inset 0 0 0 1.5px var(--alarm);text-decoration:underline wavy var(--alarm);text-underline-offset:3px}
 .note mark.on{background:var(--g);color:#3a2e2a;border-bottom-color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
 @media (prefers-reduced-motion:no-preference){
-  .note mark{animation:swipe .7s cubic-bezier(.16,1,.3,1) .15s both}
+  .note.fresh mark{animation:swipe .7s cubic-bezier(.16,1,.3,1) .15s both}
   @keyframes swipe{from{background-color:transparent}}
 }
 
@@ -122,19 +122,109 @@ mark.bad{border-bottom:0;box-shadow:inset 0 0 0 1.5px var(--alarm);text-decorati
 .says{grid-column:2/-1;font-size:13.5px;line-height:1.45;color:var(--ink-2)}
 .quote q,.says q{quotes:"\201C" "\201D"}
 .says b{font:700 11.5px/1 var(--head);font-stretch:82%;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-right:6px}
+/* lab results are listed apart inside their group */
+.sub{display:flex;justify-content:space-between;align-items:baseline;margin:0;padding:7px 14px 6px;background:var(--gt);border-block:1px solid var(--g);font:700 11.5px/1 var(--head);font-stretch:82%;letter-spacing:.1em;text-transform:uppercase;color:var(--gi)}
+.sub b{font:600 12px/1 var(--mono);letter-spacing:0}
 .empty{padding:14px 0;font-style:italic;color:var(--ink-3)}
+/* an item row. A verified one shows only its mark, field and value; the mark alone says it was found.
+   The words it came from are lit in the note when the row is pointed at. A row with more to say (a quote
+   that is not the value, a time) has a caret and folds that out under it */
+.list{container-type:inline-size}
+.item{grid-template-columns:22px minmax(0,1fr);gap:2px 12px}
+.item>*{grid-column:2;grid-row:auto}
+.item .tr{grid-column:1;grid-row:1/3}
+.item .val{text-align:left}
+.item .meta{justify-content:flex-start}
+/* words are set as text; mono is kept for measurements */
+.val.txt{font:600 15px/1.4 var(--text)}
+/* the quote is the value, word for word: shown once */
+.quote.same{font-style:normal;font-size:15.5px;color:var(--ink)}
+.item.ok{grid-template-columns:22px minmax(0,1fr) minmax(0,1.3fr) 12px;align-items:baseline;align-content:start;padding-block:8px 9px}
+.item.fold{cursor:pointer}
+.item.ok>*{grid-row:1}
+.item.ok>.tr{grid-row:1;align-self:start}
+.item.ok>.val,.item.ok>.quote{grid-column:3}
+.item.ok>.caret{grid-column:4;align-self:center;display:grid}
+.caret svg{width:12px;height:12px;fill:none;stroke:var(--ink-3);stroke-width:1.8;stroke-linecap:square;transition:transform .2s cubic-bezier(.16,1,.3,1)}
+.open .caret svg{transform:rotate(.5turn)}
+.more{display:none}
+.item.open>.more{display:block;grid-column:2/-1;grid-row:2;padding-top:3px}
+@container (min-width:640px){
+  /* a row to review stays open: value and quote side by side, then its status, then the note's words */
+  .item:not(.ok){grid-template-columns:22px minmax(0,1fr) minmax(0,1fr) minmax(0,1.6fr);gap:4px 14px;align-items:baseline}
+  .item:not(.ok)>*{grid-row:1}
+  .item:not(.ok)>.tr{align-self:start}
+  .item:not(.ok)>.val{grid-column:3}
+  .item:not(.ok)>.quote{grid-column:4}
+  .item:not(.ok)>.quote.same{grid-column:3/5}
+  .item:not(.ok)>.meta{grid-column:2/-1;grid-row:2}
+  .item:not(.ok)>.says{grid-column:2/-1;grid-row:3}
+}
+@container (min-width:860px){
+  /* verified rows are short: two across, read left to right */
+  .ok-rows{display:grid;grid-template-columns:1fr 1fr}
+  .ok-rows .item:nth-child(odd){border-right:1px solid var(--rule)}
+  .ok-rows .item:nth-last-child(2):nth-child(odd){border-bottom:0}
+}
 
 /* live mode only (extract --serve): the intake form, the working and failed boxes */
 [hidden]{display:none!important}
 .conn{flex-basis:100%;font-size:14px;color:var(--alarm)}
-.intake{display:grid;grid-template-rows:minmax(0,1fr) auto auto;gap:14px;height:100%;max-width:820px;margin-inline:auto;padding-block:20px}
-textarea.note{display:block;width:100%;min-height:240px;border:0;resize:none;background:transparent}
-.agree{display:flex;align-items:baseline;gap:10px;font-size:15.5px;line-height:1.45;color:var(--ink-2)}
-.agree input{flex:none;accent-color:var(--spot-ink)}
+/* the intake form sits in the same two panes: the sheet the note is pasted on stays where the note will be read */
+.side{display:grid;gap:20px;align-content:start;min-width:0;min-height:0;overflow-y:auto;padding-right:10px;scrollbar-gutter:stable}
+.side>*{max-width:600px}
+textarea.note{display:block;width:100%;min-height:240px;border:0;resize:none;background:transparent;color:var(--ink)}
+textarea.note::placeholder{color:var(--ink-3);font-style:italic}
+/* the ring goes round the sheet, not inside it */
+textarea.note:focus-visible{outline:0}
+.sheet:has(textarea:focus-visible){outline:2px solid var(--spot);outline-offset:3px}
+.agree{display:flex;align-items:flex-start;gap:12px;font-size:15.5px;line-height:1.45;color:var(--ink-2);cursor:pointer}
+/* a square in a frame, like the trust marks */
+.agree input{appearance:none;flex:none;width:18px;height:18px;margin:3px 0 0;border:1.5px solid var(--ink);background:var(--sheet);cursor:pointer;transition:background-color .15s}
+.agree input:checked{background:var(--ink);box-shadow:inset 0 0 0 3px var(--sheet)}
 .go{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14.5px;color:var(--ink-2)}
+/* the one filled button of a view */
+.copy.main{padding:9px 18px 8px;background:var(--ink);color:var(--paper);font-size:13px}
+.copy.main:hover{background:var(--spot-ink);border-color:var(--spot-ink)}
+/* waiting: a square whose filled quarter steps round; in a button it stands before the label */
+.spin,.copy[aria-busy="true"]::before{content:"";display:inline-block;flex:none;width:16px;height:16px;border:2px solid var(--ink);background:conic-gradient(var(--spot-ink) 25%,transparent 0)}
+.copy[aria-busy="true"]::before{width:10px;height:10px;margin-right:8px;border:1.5px solid currentColor;vertical-align:-1px;background:conic-gradient(currentColor 25%,transparent 0)}
+.busy .sheet-head{position:relative}
+.busy .sheet-head::after{content:"";position:absolute;left:0;bottom:-2px;width:28%;height:3px;background:var(--spot-ink)}
+/* no values on the page yet, so no legend */
+.bare .key{display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+/* the steps: done is a tick, now is the spinner, next is its number */
+.tr.num{border:1.5px solid var(--ink-3);font:600 11px/1 var(--mono);color:var(--ink-2)}
+.g-fix .tr.ok{background:var(--cur)}
+.step.next .field{color:var(--ink-3)}
+.step:not([aria-current]):hover,.ghost .row:hover{background:transparent}
+/* where the values will be */
+.ghost{--g:var(--rule)}
+.ghost .gh{background:var(--t1);color:var(--ink-2)}
+.ghost .tr{border:1.5px solid var(--rule)}
+.sk{height:11px;margin-block:5px;background:var(--t2)}
+.sk.a{width:38%}
+.sk.b{width:64px;justify-self:end}
+.sk.c{grid-column:2;width:72%;background:var(--t1)}
+.ghost li:nth-child(2) .a{width:54%}
+.ghost li:nth-child(2) .c{width:46%}
+.ghost li:nth-child(3) .a{width:30%}
+.ghost li:nth-child(4) .c{width:60%}
+@media (prefers-reduced-motion:no-preference){
+  .spin,.copy[aria-busy="true"]::before{animation:turn 1s steps(4) infinite}
+  @keyframes turn{to{transform:rotate(1turn)}}
+  .busy .sheet-head::after{animation:read 1.5s cubic-bezier(.65,0,.35,1) infinite alternate}
+  @keyframes read{to{transform:translateX(257.2%)}}
+  .ghost li{animation:wait 1.2s ease-in-out infinite alternate}
+  .ghost li:nth-child(2){animation-delay:.15s}
+  .ghost li:nth-child(3){animation-delay:.3s}
+  .ghost li:nth-child(4){animation-delay:.45s}
+  @keyframes wait{to{opacity:.4}}
+}
 .copy:disabled,.copy:disabled:hover{background:transparent;border-color:var(--ink-3);color:var(--ink-3);cursor:default}
 .row[aria-current]{background:var(--gt)}
-.box{display:grid;justify-items:start;gap:10px;padding:14px}
+.box{display:grid;justify-items:start;gap:14px;padding:14px}
 pre.says{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:400 12.5px/1.5 var(--mono)}
 /* the corrections block: what the second check would change, with the doctor's answer on each */
 .g-fix{--g:var(--ink);--gt:var(--t1);--gi:var(--ink-2)}
@@ -153,12 +243,13 @@ footer code{font:500 12px var(--mono)}
   body{display:block;height:auto;overflow:visible}
   .panes{grid-template-columns:1fr;grid-template-rows:none;height:auto}
   .sheet{max-height:60vh}
-  .list{overflow:visible;padding-right:0}
+  .list,.side{overflow:visible;padding-right:0}
+  /* working or failed: what is going on comes before the note */
+  .bare .list{order:-1}
   footer{padding-block:14px 28px}
 }
 @media (max-width:640px){
   .tally{margin-left:0;flex-basis:100%}
-  .meta,.quote{grid-column:2/-1;grid-row:auto;justify-content:flex-start}
 }
 @media (max-width:480px){
   h1{padding-left:0;border-left:0;flex-basis:100%}
@@ -177,18 +268,23 @@ footer code{font:500 12px var(--mono)}
 </header>
 
 <main class="wrap">
-  <form class="intake" id="intake" hidden>
+  <form class="panes" id="intake" hidden>
     <div class="sheet">
-      <div class="sheet-head"><label for="paste">Paste the note here</label></div>
-      <textarea class="note" id="paste" required></textarea>
+      <div class="sheet-head"><label for="paste">Paste the note here</label><span id="plen"></span></div>
+      <textarea class="note" id="paste" required placeholder="A made-up or de-identified note. Nothing is sent until you press Extract."></textarea>
     </div>
-    <label class="agree"><input type="checkbox" id="agree" required><span>This note is sent to the AI model, which runs on external servers. I confirm it is made up or de-identified: no names, record numbers, addresses or dates.</span></label>
-    <p class="go"><button class="copy" id="go" type="submit" aria-describedby="why" disabled>Extract</button><span id="why"></span></p>
+    <div class="side">
+      <section class="group g-fix" id="plan">
+        <header class="gh"><h2>What happens next</h2><p>It usually takes a minute or two.</p></header>
+      </section>
+      <label class="agree"><input type="checkbox" id="agree" required><span>This note is sent to the AI model, which runs on external servers. I confirm it is made up or de-identified: no names, record numbers, addresses or dates.</span></label>
+      <p class="go"><button class="copy main" id="go" type="submit" aria-describedby="why" disabled>Extract</button><span id="why"></span></p>
+    </div>
   </form>
   <div class="panes" id="panes">
     <section class="sheet" aria-label="The note">
       <div class="sheet-head"><span>Note, as written</span><span id="len"></span></div>
-      <pre class="note" id="note" tabindex="0"></pre>
+      <pre class="note fresh" id="note" tabindex="0"></pre>
       <div class="key" aria-hidden="true">
         <span><mark class="g-cur"></mark>Found word for word</span>
         <span><mark class="g-his"></mark>Found, history</span>
@@ -260,22 +356,40 @@ footer code{font:500 12px var(--mono)}
 
   function row(it, n) {
     var tr = it.status === "quoted" ? "ok" : CLOSE[it.status] ? "close" : "warn";
-    var li = el("li", "row g-" + group(it) + " " + tr);
+    var li = el("li", "row item g-" + group(it) + " " + tr);
     li.tabIndex = 0;
     var ic = el("span", "tr " + tr); ic.setAttribute("aria-hidden", "true"); ic.innerHTML = ICON[tr]; li.appendChild(ic);
     li.appendChild(el("span", "field", it.field));
-    var v = el("span", "val", it.value);
+    var same = !it.unit && it.quote && it.quote.trim().toLowerCase() === String(it.value).trim().toLowerCase();
+    var v = el("span", /\d/.test(it.value) ? "val" : "val txt", it.value);
     if (it.unit) { v.appendChild(document.createTextNode(" ")); v.appendChild(el("small", "", it.unit)); }
-    li.appendChild(v);
+    if (!same) li.appendChild(v);
+    var ok = tr === "ok", more = ok ? el("div", "more") : li;
     var meta = el("div", "meta");
     // verified rows sit under their episode's band; only the review group mixes episodes
-    if (tr !== "ok") meta.appendChild(el("span", "ep", it.episode === "history" ? "History" : "Current illness"));
+    if (!ok) meta.appendChild(el("span", "ep", it.episode === "history" ? "History" : "Current illness"));
     if (it.time) meta.appendChild(el("span", "", it.time));
-    var st = el("span", "st " + tr, status(it));
-    meta.appendChild(st);
+    if (!ok) meta.appendChild(el("span", "st " + tr, status(it)));
     if (it.ambiguous) meta.appendChild(el("span", "", "Appears more than once: first occurrence marked"));
-    li.appendChild(meta);
-    if (it.quote) { var q = el("p", "quote"); q.appendChild(el("q", "", it.quote)); li.appendChild(q); }
+    var q = it.quote && el("p", same ? "quote same" : "quote");
+    if (q) q.appendChild(el("q", "", it.quote));
+    if (ok) {
+      // the mark is the status: named on hover and to a screen reader
+      ic.title = status(it); li.appendChild(el("span", "sr", status(it)));
+      if (q) (same ? li : more).appendChild(q);
+      if (meta.firstChild) more.appendChild(meta);
+      // nothing more to say: no caret, nothing to open
+      if (more.firstChild) {
+        var c = el("span", "caret"); c.setAttribute("aria-hidden", "true"); c.innerHTML = '<svg viewBox="0 0 12 12"><path d="M2 4.5 6 8.5 10 4.5"/></svg>';
+        li.appendChild(c); li.appendChild(more); li.classList.add("fold");
+        var flip = function () { li.classList.toggle("open"); };
+        li.addEventListener("click", flip);
+        li.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+      }
+    } else {
+      li.appendChild(meta);
+      if (q) li.appendChild(q);
+    }
     if (CLOSE[it.status] && it.start != null) {
       var s = el("p", "says"); s.appendChild(el("b", "", "Note says")); s.appendChild(document.createTextNode(text.slice(it.start, it.end))); li.appendChild(s);
     }
@@ -337,7 +451,7 @@ footer code{font:500 12px var(--mono)}
     // copies the items as extracted; status and offsets are computed, never stored
     json = JSON.stringify(items.map(function (i) {
       var o = {};
-      ["field", "key", "value", "unit", "quote", "episode", "time"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
+      ["field", "key", "value", "unit", "quote", "episode", "lab", "time"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
       return o;
     }), null, 2);
 
@@ -364,9 +478,15 @@ footer code{font:500 12px var(--mono)}
       if (!idx.length) return;
       var sec = el("section", "group g-" + g[0]);
       var h = el("header", "gh"); h.appendChild(el("h2", "", g[1])); h.appendChild(el("b", "", String(idx.length))); h.appendChild(el("p", "", g[2])); sec.appendChild(h);
-      var ol = el("ol");
-      idx.forEach(function (n) { ol.appendChild(row(items[n], n)); });
-      sec.appendChild(ol);
+      // verified groups list lab results apart, after the rest; the review group stays in note order
+      var labs = g[0] === "rev" ? [] : idx.filter(function (n) { return items[n].lab === true; });
+      [idx.filter(function (n) { return labs.indexOf(n) < 0; }), labs].forEach(function (part, lab) {
+        if (!part.length) return;
+        if (lab) { var sh = el("h3", "sub", "Labs"); sh.appendChild(el("b", "", String(part.length))); sec.appendChild(sh); }
+        var ol = el("ol", g[0] === "rev" ? "" : "ok-rows");
+        part.forEach(function (n) { ol.appendChild(row(items[n], n)); });
+        sec.appendChild(ol);
+      });
       list.appendChild(sec);
     });
     if (!items.length) list.appendChild(el("p", "empty", "Nothing was extracted from this note."));
@@ -383,11 +503,54 @@ footer code{font:500 12px var(--mono)}
   var why = document.getElementById("why");
   var conn = document.getElementById("conn");
   // one node for every state, so a change of its text is announced
-  var statusLine = el("p", "field"); statusLine.setAttribute("role", "status");
+  var statusLine = el("p", "sr"); statusLine.setAttribute("role", "status");
   var when = document.getElementById("when");
   when.parentNode.insertBefore(el("span", "", "This page runs on this computer. The note is sent to the AI model only after you tick the box."), when);
   // last: the response text already drawn. seq: answers to an older request are dropped
-  var id = null, last = null, timer = 0, seq = 0;
+  var id = null, last = null, timer = 0, seq = 0, tick = 0;
+
+  var STEPS = [
+    ["Pull out the values", "Each value is copied with the exact words it came from."],
+    ["Second check", "A second run re-reads the note and proposes corrections."],
+    ["You review", "Accept or reject each correction. Nothing is interpreted."]
+  ];
+  // at: the step running now; -1 before the start
+  function stepList(at) {
+    var ol = el("ol");
+    STEPS.forEach(function (s, n) {
+      var done = n < at, now = n === at;
+      var li = el("li", "row step" + (at >= 0 && n > at ? " next" : ""));
+      var ic = el("span", done ? "tr ok" : now ? "tr" : "tr num", done || now ? null : String(n + 1));
+      ic.setAttribute("aria-hidden", "true");
+      if (done) ic.innerHTML = ICON.ok;
+      if (now) { ic.appendChild(el("span", "spin")); li.setAttribute("aria-current", "step"); }
+      li.appendChild(ic); li.appendChild(el("span", "field", s[0])); li.appendChild(el("p", "says", s[1]));
+      ol.appendChild(li);
+    });
+    return ol;
+  }
+  document.getElementById("plan").appendChild(stepList(-1));
+
+  // when this tab first saw the note being worked on, so a reload keeps the clock
+  function started(id) {
+    var t = Date.now();
+    try { t = +sessionStorage.getItem("t" + id) || t; sessionStorage.setItem("t" + id, t); } catch (e) {}
+    return t;
+  }
+
+  // the shape of the list to come
+  function ghost() {
+    var sec = el("section", "group ghost"), h = el("header", "gh"), ol = el("ol");
+    h.appendChild(el("h2", "", "Values from the note")); h.appendChild(el("p", "", "They appear here when both steps finish."));
+    ol.setAttribute("aria-hidden", "true");
+    for (var n = 0; n < 4; n++) {
+      var li = el("li", "row");
+      ["tr", "sk a", "sk b", "sk c"].forEach(function (c) { li.appendChild(el("span", c)); });
+      ol.appendChild(li);
+    }
+    sec.appendChild(h); sec.appendChild(ol);
+    return sec;
+  }
 
   function send(noteText) {
     return fetch("/api/notes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: noteText, consent: true }) })
@@ -398,37 +561,43 @@ footer code{font:500 12px var(--mono)}
     render(s);
     title.textContent = "Note extraction";
     var busy = s.state === "extracting" || s.state === "verifying";
+    clearInterval(tick);
+    panes.classList.toggle("busy", busy);
     tally.hidden = copyBtn.hidden = busy || s.state === "failed";
+    panes.classList.toggle("bare", tally.hidden);
     if (!tally.hidden) { corrections(s); return; }
     list.textContent = ""; when.textContent = "";
-    var sec = el("section", "group g-" + (busy ? "cur" : "rev")), box = el("div", "box");
+    var sec = el("section", "group g-" + (busy ? "fix" : "rev")), h = el("header", "gh"), box = el("div", "box");
+    sec.appendChild(h);
     if (busy) {
-      var at = s.state === "verifying" ? 1 : 0;
-      var ol = el("ol");
-      ["1. Pulling out the values", "2. A second check re-reads the note"].forEach(function (label, n) {
-        var li = el("li", "row"), ic = el("span", n < at ? "tr ok" : "tr");
-        ic.setAttribute("aria-hidden", "true");
-        if (n < at) ic.innerHTML = ICON.ok;
-        if (n === at) li.setAttribute("aria-current", "step");
-        li.appendChild(ic); li.appendChild(el("span", "field", label));
-        ol.appendChild(li);
-      });
-      sec.appendChild(ol);
-      statusLine.textContent = at ? "Step 2 of 2: the second check is re-reading the note." : "Step 1 of 2: pulling out the values.";
-      box.appendChild(statusLine);
-      box.appendChild(el("p", "says", "This usually takes a minute or two."));
+      var at = s.state === "verifying" ? 1 : 0, clock = el("b"), from = started(s.id);
+      var show = function () {
+        var t = Math.max(0, Math.floor((Date.now() - from) / 1000));
+        clock.textContent = Math.floor(t / 60) + ":" + ("0" + t % 60).slice(-2);
+      };
+      h.appendChild(el("h2", "", "Working on your note")); h.appendChild(clock);
+      h.appendChild(el("p", "", "It usually takes a minute or two. This page updates by itself."));
+      show(); tick = setInterval(show, 1000);
+      sec.appendChild(stepList(at));
+      statusLine.textContent = at ? "Step 2 of 3: the second check is re-reading the note." : "Step 1 of 3: pulling out the values.";
+      sec.appendChild(statusLine);
+      list.appendChild(sec); list.appendChild(ghost());
+      return;
     } else {
+      try { sessionStorage.removeItem("t" + s.id); } catch (e) {}
+      h.appendChild(el("h2", "", "The extraction did not finish"));
+      h.appendChild(el("p", "", "Your note is still here. Run it again, or start a new note."));
       statusLine.textContent = "The extraction did not finish.";
       box.appendChild(statusLine);
       if (s.error && s.error.indexOf("'claude' command was not found") >= 0) box.appendChild(el("p", "says", "This page needs the Claude Code command line tool. You can also run the extraction from the chat with /medical-protocol:extract."));
       else if (s.error) box.appendChild(el("pre", "says", s.error));
-      var again = el("button", "copy", "Try again"); again.type = "button";
+      var again = el("button", "copy main", "Try again"); again.type = "button";
       // the doctor already confirmed this note
       again.addEventListener("click", function () {
-        again.disabled = true;
+        again.disabled = true; again.setAttribute("aria-busy", "true");
         // drawn again even when the run fails the same way, so the button comes back
         last = null;
-        send(s.note).then(load, function () { again.disabled = false; conn.hidden = false; });
+        send(s.note).then(load, function () { again.disabled = false; again.removeAttribute("aria-busy"); conn.hidden = false; });
       });
       box.appendChild(again);
     }
@@ -446,7 +615,14 @@ footer code{font:500 12px var(--mono)}
     return p;
   }
 
-  function decide(s, n, decision) {
+  function decide(s, n, decision, btn) {
+    // both answers wait for the server; the pressed one shows it
+    var both = btn.parentNode.querySelectorAll("button");
+    function wait(on) {
+      both.forEach(function (b) { b.disabled = on; });
+      if (on) btn.setAttribute("aria-busy", "true"); else { btn.removeAttribute("aria-busy"); btn.focus(); }
+    }
+    wait(true);
     fetch("/api/extractions/" + s.id + "/decisions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ finding: n, decision: decision }) })
       .then(function (r) {
         return r.text().then(function (body) {
@@ -454,12 +630,14 @@ footer code{font:500 12px var(--mono)}
           if (!r.ok) { last = null; load(); return; }
           // the redraw empties both panes: keep where the doctor was reading and the pressed button
           var a = list.scrollTop, b = note.scrollTop;
+          // the highlights are already on the page: don't swipe them in again
+          note.classList.remove("fresh");
           last = body; draw(JSON.parse(body));
           list.scrollTop = a; note.scrollTop = b;
           var btn = list.querySelector('[data-f="' + n + '"][data-d="' + decision + '"]');
           if (btn) btn.focus();
         });
-      }, function () { conn.hidden = false; });
+      }, function () { wait(false); conn.hidden = false; });
   }
 
   // review and done: the findings of the second check above the groups, each with its two answers
@@ -485,7 +663,7 @@ footer code{font:500 12px var(--mono)}
         var b = el("button", "copy", d[1]); b.type = "button";
         b.dataset.f = n; b.dataset.d = d[0];
         b.setAttribute("aria-pressed", String(f.decision === d[0]));
-        b.addEventListener("click", function () { if (f.decision !== d[0]) decide(s, n, d[0]); });
+        b.addEventListener("click", function () { if (f.decision !== d[0]) decide(s, n, d[0], b); });
         go.appendChild(b);
       });
       li.appendChild(go);
@@ -524,26 +702,32 @@ footer code{font:500 12px var(--mono)}
   }
 
   function route() {
-    clearTimeout(timer); seq++; last = null;
+    clearTimeout(timer); clearInterval(tick); seq++; last = null;
     var m = /^#([0-9a-f]{12})$/.exec(location.hash);
     id = m && m[1];
     intake.hidden = !!id; panes.hidden = !id;
     tally.hidden = copyBtn.hidden = true;
     document.getElementById("new").hidden = !id;
     title.textContent = "Note extraction"; when.textContent = "";
-    if (id) { note.textContent = ""; list.textContent = ""; load(); }
+    // the bar under the note's head runs until the first answer
+    panes.classList.toggle("busy", !!id); panes.classList.add("bare");
+    if (id) { note.classList.add("fresh"); note.textContent = ""; list.textContent = ""; load(); }
+    else paste.focus();
   }
 
   function sync() {
     var need = !paste.value.trim() ? "Paste the note to continue" : !agree.checked ? "Tick the box to continue" : "";
     go.disabled = !!need; why.textContent = need;
+    go.removeAttribute("aria-busy"); go.textContent = "Extract";
+    var lines = paste.value ? paste.value.split("\n").length : 0;
+    document.getElementById("plen").textContent = lines ? lines + (lines === 1 ? " line" : " lines") : "";
   }
   paste.addEventListener("input", sync);
   agree.addEventListener("change", sync);
   intake.addEventListener("submit", function (e) {
     e.preventDefault();
     if (go.disabled) return;
-    go.disabled = true;
+    go.disabled = true; go.setAttribute("aria-busy", "true"); go.textContent = "Sending"; why.textContent = "";
     send(paste.value).then(function (r) {
       if (!r.id) { sync(); why.textContent = "The note could not be sent: " + r.error; return; }
       conn.hidden = true; intake.reset(); sync();

@@ -12,7 +12,7 @@ hooks:
 
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever this file says `medprotocol`
 
-This skill is the static export: one file of a finished extraction. The live page, where the doctor pastes a note and accepts or rejects corrections, is `medprotocol extract --serve` (`/medical-protocol:extract`).
+This skill is the static export: one file of a finished extraction. The live page, where the doctor pastes a note and accepts or rejects corrections, is `medprotocol extract --serve` (`/medical-protocol:extract-page`).
 
 One page per extraction. Extraction only: the page shows what the note says and how each quote checked, never an interpretation.
 

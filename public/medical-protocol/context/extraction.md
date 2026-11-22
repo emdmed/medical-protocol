@@ -28,11 +28,12 @@ Run these steps in this order, every time. Each note gets its own folder, `extra
 Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
 
 1. The doctor gives a note (pasted or a file). Treat it as patient data (`patient-privacy.md`). Make sure `extractions/` is in the project's `.gitignore` (add the line if missing). A pasted note → write it exactly as pasted to `extractions/pasted.md` first; a file → use it where it is. No cleanup, no reformatting. Don't read the doctor's file yourself: save it first, then read `<dir>/note.md`, the first time with `cat <dir>/note.md` in Bash (the `note-consent` hook asks the doctor there, and refuses Read and Grep until the doctor has said yes). Then run `medprotocol extract --save <that file> --json`: it hashes the note, copies its bytes to `<dir>/note.md`, deletes `extractions/pasted.md` (a staging copy) and prints `{ dir, existed }`. Only `--save` writes `note.md`; the `extraction-guard` hook blocks any Write/Edit to it. `existed: true` means this exact note was saved before: if `<dir>/extraction.json` is there too, tell the doctor it was already extracted and ask whether to reuse it (go on from step 3) — the first pass can't be redone. `<dir>/note.md`, not your memory of the note, is what every quote is checked against.
-2. Read `<dir>/note.md` and write one item per value the doctor asked for: `{ field, value, unit?, quote, episode, key?, time? }`. Save the JSON array to `<dir>/extraction.json`; that is the first pass.
+2. Read `<dir>/note.md` and write one item per value the doctor asked for: `{ field, value, unit?, quote, episode, key?, lab?, time? }`. Save the JSON array to `<dir>/extraction.json`; that is the first pass.
    - `quote` is copied **character for character** from the note (the loose pass is a safety net for slips, not permission to paraphrase) — no fixing typos, case, accents or abbreviations. Quote enough words to be unique in the note.
    - `value` is what the note states, not a conversion or a calculation. No derived values (MAP unless the note writes it, BMI, eGFR, totals). For a keyed item, one number only.
    - `unit` as the note writes it; leave it out if the note gives none. Never fill in a unit you assume.
    - `key` when the value is one the calculators take (table below). Blood pressure is two items, `sbp` and `dbp`, with the same quote. Values with no key (medications, findings) are still extracted, just not handed on.
+   - `lab: true` on every laboratory result, keyed or not: blood and urine tests, blood gases, cultures. Not vital signs, weight and height, exam findings, imaging or medications. It only tells the screen to list them apart.
    - `episode` on **every** item, no exceptions:
      - `"current"` — the illness this note is about: its symptoms, exam, readings, results, and what was done for it in this episode (oxygen started, antibiotic given).
      - `"history"` — anything from before it: past illnesses, earlier admissions and their results, background medications, allergies, past surgery.
@@ -130,6 +131,10 @@ Extraction stops here. Whatever reads `inputs` does the analysis; this module ne
   - `mismatched` → "Quote doesn't state this value" — span still highlighted, styled as a warning
   - `unverified` → "Not found in note" — nothing highlighted
   - `none` → "No quote"
+- When the quote is the value word for word (a symptom, a complaint), show it once, in quotation marks.
+- A `quoted` row shows only a found mark, the field and the value. The mark is its status: an icon in the group's colour, with "Found in note" as its tooltip and screen-reader text, and no label in the row. A quote that is not the value itself, and the time, fold under the row and open on click or Enter; a row with neither has nothing to open. The quote stays one step away: pointing at the row lights it in the note. Rows that need review are never folded: they show everything.
+- Inside "Current illness" and "History", list the `lab: true` rows apart, after the others, under a "Labs" sub-heading with their count. "Needs review" is not split.
+- A long value or quote wraps inside its own column and never squeezes the field.
 - Group rows: "Needs review" (every status but `quoted`) first, then "Current illness", then "History". Never hide a failing item.
 - Highlight history quotes in a different style from current ones (e.g. outlined vs filled), plus the text tag — not colour alone.
 - `ambiguous` → add "appears more than once — first occurrence marked".

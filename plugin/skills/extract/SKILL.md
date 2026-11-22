@@ -28,9 +28,9 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 ## Phase 1: Clinical Requirements
 
-**Default: the page.** Start `medprotocol extract --serve` in the background (Bash, `run_in_background`) and read the address it prints. Tell the doctor in a full sentence: "The extraction page is open at http://localhost:7332. Paste your note there and tick the box; the page pulls out the values, re-checks them and lets you accept or reject each correction. Only use a made-up or de-identified note: it is sent to the AI model, which runs on external servers. Tell me when you are done, or if you want a screen of it in your app." Use the address the server printed. The server does `extraction.md` § Who extracts steps 1–4 itself; don't read the note, extract, verify or edit the files in `extractions/` while the doctor works in the page. If the port is in use, start it again with `--port <number>`.
+**Default: the page.** Read and follow `${CLAUDE_SKILL_DIR}/../extract-page/SKILL.md`. The server does `extraction.md` § Who extracts steps 1–4 itself.
 
-When the doctor comes back, the folder is the last `http://localhost:<port>/#<hash>` line the server printed. A screen in the doctor's app is still a chat request: only when the doctor asks for one, do step 5 and build it (§ Build).
+A screen in the doctor's app is still a chat request: only when the doctor asks for one, do step 5 and build it (§ Build).
 
 **Fallback: the chat.** Only when `claude` is not on PATH (`command -v claude` prints nothing, or the page says the 'claude' command was not found). Then:
 

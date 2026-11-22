@@ -76,6 +76,7 @@ Already have an app? Run `/medical-protocol:overlay`, then hover over any part o
 |-------|-----------|
 | `start` | Describe what you need. Everything starts here. |
 | `extract` | Pull the values out of a clinical note, each with the words it came from |
+| `extract-page` | Open the extraction page in your browser: paste a note, review the values, accept or reject corrections |
 | `preferences` | Set your specialty, patient population, guidelines and units |
 | `protocol-audit` | Audit the project for safety, completeness, privacy and accessibility |
 | `calc-audit` | Test the clinical calculations in your screens against the library |
