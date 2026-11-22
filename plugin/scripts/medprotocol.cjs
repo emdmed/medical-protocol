@@ -5756,7 +5756,7 @@ Waiting for the overlay to create it\u2026
 });
 
 // package.json
-var version = "1.1.0";
+var version = "1.2.0";
 
 // src/index.ts
 var USAGE13 = `medprotocol \u2014 Medical calculations from the terminal
