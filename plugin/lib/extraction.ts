@@ -346,3 +346,30 @@ export const toInputs = (checked: CheckedItem[]): ExtractionInputs => {
   }
   return out;
 };
+
+/** What the second pass says about the first: a wrong item (`index`), a missed one (no `index`), or a remark. */
+export interface Finding {
+  /** Position of the first-pass item this is about; absent for a missed item or a remark. */
+  index?: number;
+  problem: string;
+  /** The item as it should be; `null` with an `index` means the item should go. */
+  correction: ExtractedItem | null;
+}
+
+/**
+ * The first pass with the accepted findings applied; `rejected` holds positions in `findings`.
+ * `index` + correction replaces that item, `index` + null removes it, a correction alone is added
+ * after the first-pass items, in finding order. A finding with neither, or with an index outside
+ * the first pass, changes nothing. Returns a new array; when two findings name one item the later wins.
+ */
+export const applyFindings = (firstPass: readonly ExtractedItem[], findings: readonly Finding[], rejected: ReadonlySet<number>): ExtractedItem[] => {
+  const kept: (ExtractedItem | null)[] = [...firstPass];
+  const added: ExtractedItem[] = [];
+  findings.forEach(({ index, correction }, n) => {
+    if (rejected.has(n)) return;
+    if (index === undefined) {
+      if (correction) added.push(correction);
+    } else if (Number.isInteger(index) && index >= 0 && index < firstPass.length) kept[index] = correction;
+  });
+  return [...kept.filter((item) => item !== null), ...added];
+};

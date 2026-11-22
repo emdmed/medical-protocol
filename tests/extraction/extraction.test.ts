@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { checkItem, checkExtraction, noteSegments, valueInQuote, toInputs } from '../../plugin/lib/extraction';
+import { checkItem, checkExtraction, noteSegments, valueInQuote, toInputs, applyFindings } from '../../plugin/lib/extraction';
+import type { ExtractedItem, Finding } from '../../plugin/lib/extraction';
 
 const note = 'Seen on the ward.\nBP 120/80, HR 88 bpm,\ntemp 37,5 °C. Presión arterial estable.\nCreatinine 1.4 mg/dL.';
 
@@ -221,5 +222,69 @@ describe('word-order match', () => {
     expect(inputs).toEqual({});
     expect(review[0]!.item.status).toBe('reordered');
     expect(review[0]!.reason).toBe('low-confidence');
+  });
+});
+
+describe('applyFindings', () => {
+  const item = (field: string, value = '1'): ExtractedItem => ({ episode: 'current', field, value, quote: `${field} ${value}` });
+  const first = [item('HR', '88'), item('RR', '18'), item('Temp', '37')];
+  const fields = (items: ExtractedItem[]) => items.map((i) => `${i.field} ${i.value}`);
+  const none = new Set<number>();
+
+  it('replaces the item a finding corrects', () => {
+    expect(fields(applyFindings(first, [{ index: 1, problem: 'wrong value', correction: item('RR', '28') }], none))).toEqual(['HR 88', 'RR 28', 'Temp 37']);
+  });
+
+  it('removes the item a finding has no correction for', () => {
+    expect(fields(applyFindings(first, [{ index: 0, problem: 'not in the note', correction: null }], none))).toEqual(['RR 18', 'Temp 37']);
+  });
+
+  it('adds a missed item after the first pass, in finding order', () => {
+    const findings: Finding[] = [{ problem: 'missed', correction: item('SpO2', '94') }, { problem: 'missed', correction: item('GCS', '15') }];
+    expect(fields(applyFindings(first, findings, none))).toEqual(['HR 88', 'RR 18', 'Temp 37', 'SpO2 94', 'GCS 15']);
+  });
+
+  it('changes nothing for a rejected finding of each kind', () => {
+    const findings: Finding[] = [
+      { index: 1, problem: 'wrong value', correction: item('RR', '28') },
+      { index: 0, problem: 'not in the note', correction: null },
+      { problem: 'missed', correction: item('SpO2', '94') },
+    ];
+    expect(applyFindings(first, findings, new Set([0, 1, 2]))).toEqual(first);
+  });
+
+  it('changes nothing for a remark', () => {
+    expect(applyFindings(first, [{ problem: 'note is hard to read', correction: null }], none)).toEqual(first);
+  });
+
+  it('ignores an index outside the first pass', () => {
+    const findings: Finding[] = [
+      { index: 3, problem: 'x', correction: item('K', '4') },
+      { index: -1, problem: 'x', correction: null },
+      { index: 1.5, problem: 'x', correction: null },
+    ];
+    expect(applyFindings(first, findings, none)).toEqual(first);
+  });
+
+  it('returns a copy when there are no findings', () => {
+    const out = applyFindings(first, [], none);
+    expect(out).toEqual(first);
+    expect(out).not.toBe(first);
+  });
+
+  it('applies the accepted finding, skips the rejected one, and keeps the order', () => {
+    const findings: Finding[] = [
+      { index: 0, problem: 'not in the note', correction: null },
+      { index: 2, problem: 'wrong value', correction: item('Temp', '38') },
+      { problem: 'missed', correction: item('SpO2', '94') },
+    ];
+    expect(fields(applyFindings(first, findings, new Set([0])))).toEqual(['HR 88', 'RR 18', 'Temp 38', 'SpO2 94']);
+  });
+
+  it('does not mutate the first pass', () => {
+    const input = [...first];
+    applyFindings(input, [{ index: 0, problem: 'x', correction: null }, { index: 1, problem: 'x', correction: item('RR', '28') }, { problem: 'x', correction: item('K', '4') }], none);
+    expect(input).toEqual(first);
+    expect(input).toHaveLength(3);
   });
 });

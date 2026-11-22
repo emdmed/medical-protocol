@@ -158,5 +158,5 @@ export { Trace } from "./trace";
 export type { TraceEntry } from "./trace";
 export * as sources from "./sources";
 
-export { FIELDS, EPISODES, MAX_EDITS, checkItem, checkExtraction, noteSegments, valueInQuote, toInputs } from "./extraction";
-export type { FieldKey, Episode, ExtractedItem, CheckedItem, QuoteStatus, NoteSegment, ExtractedInput, ExtractionInputs, ReviewReason } from "./extraction";
+export { FIELDS, EPISODES, MAX_EDITS, checkItem, checkExtraction, noteSegments, valueInQuote, toInputs, applyFindings } from "./extraction";
+export type { FieldKey, Episode, ExtractedItem, CheckedItem, QuoteStatus, NoteSegment, ExtractedInput, ExtractionInputs, ReviewReason, Finding } from "./extraction";
