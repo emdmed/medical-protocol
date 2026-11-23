@@ -17,7 +17,7 @@ Say "Let me take a look." Run all checks, collect failures before fixing.
 | `project-scaffold` | `package.json` has `next` | No project |
 | `project-dependencies` | `node_modules` exists | Deps missing |
 | `project-config` | `.claude/CLAUDE.md` exists | Config missing |
-| `server-port` | `lsof -i :3000` | Port occupied |
+| `server-port` | Read the `npm run dev` output (it says port 3000 is in use) | Port occupied |
 | `server-stopped` | `ps aux \| grep "next dev"` | Server down |
 | `server-crashed` | `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000` | Not responding |
 | `component-missing` | `ls components/` | No components |
@@ -38,9 +38,9 @@ Fix automatically. Use clinical language if you need to explain anything.
 | `project-scaffold` | Run scaffold from main protocol |
 | `project-dependencies` | `npm install` |
 | `project-config` | Re-read protocol, restore config |
-| `server-port` | `lsof -ti :3000 \| xargs kill -9` then `npm run dev` |
+| `server-port` | `npx --yes kill-port 3000` then `npm run dev` |
 | `server-stopped` | `npm run dev` |
-| `server-crashed` | `pkill -f "next dev"` then `npm run dev` |
+| `server-crashed` | `npx --yes kill-port 3000` then `npm run dev` |
 | `component-missing` | Rebuild the screen per building.md (re-copy `lib/medprotocol/`, regenerate) |
 | `component-typescript` | Read errors, fix (missing imports, missing UI SDK setup) |
 | `browser-no-page` | Create page importing the existing screens |

@@ -43,6 +43,10 @@ node scripts/medical-protocol.cjs check --dir ~/my-clinic-app            # is it
 node scripts/medical-protocol.cjs update --dir ~/my-clinic-app
 ```
 
+## Windows
+
+Works on Windows 10 and 11 with Node 18+ and Claude Code with [Git for Windows](https://git-scm.com/downloads/win). Bash commands run in Git Bash. Nothing more is needed.
+
 ## How it works
 
 1. **You describe the tool.** The `start` skill sends your request to the right clinical module(s).

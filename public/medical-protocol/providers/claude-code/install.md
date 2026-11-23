@@ -34,6 +34,10 @@ Run `node -v` in the background.
   eval "$(fnm env)"
   fnm install --lts
   ```
+  **On Windows** the script above does not work. Run this instead, then open a new terminal:
+  ```
+  winget install OpenJS.NodeJS.LTS
+  ```
   If `fnm` fails, tell the doctor: "I need Node.js to continue. Please visit https://nodejs.org, download the version marked LTS, and install it. Then come back and we'll pick up where we left off."
 
 ---
@@ -44,7 +48,8 @@ Run `claude --version` in the background.
 
 - **If Claude Code is installed**: move to step 3.
 - **If missing**: run `npm install -g @anthropic-ai/claude-code` automatically.
-  - If this fails due to permissions, try `sudo npm install -g @anthropic-ai/claude-code`.
+  - If this fails due to permissions, try `sudo npm install -g @anthropic-ai/claude-code` (macOS and Linux only).
+  - **On Windows** Claude Code needs Git for Windows (https://git-scm.com/downloads/win). Install it first if `git --version` fails. You can also install Claude Code from PowerShell with `irm https://claude.ai/install.ps1 | iex`.
   - If it still fails, tell the doctor: "I wasn't able to install Claude Code automatically. Please ask someone with admin access on this computer to run this for you, then come back."
 
 ---
