@@ -33,9 +33,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// node_modules/commander/lib/error.js
+// packages/medical-protocol/node_modules/commander/lib/error.js
 var require_error = __commonJS({
-  "node_modules/commander/lib/error.js"(exports2) {
+  "packages/medical-protocol/node_modules/commander/lib/error.js"(exports2) {
     "use strict";
     var CommanderError2 = class extends Error {
       /**
@@ -69,9 +69,9 @@ var require_error = __commonJS({
   }
 });
 
-// node_modules/commander/lib/argument.js
+// packages/medical-protocol/node_modules/commander/lib/argument.js
 var require_argument = __commonJS({
-  "node_modules/commander/lib/argument.js"(exports2) {
+  "packages/medical-protocol/node_modules/commander/lib/argument.js"(exports2) {
     "use strict";
     var { InvalidArgumentError: InvalidArgumentError2 } = require_error();
     var Argument2 = class {
@@ -198,9 +198,9 @@ var require_argument = __commonJS({
   }
 });
 
-// node_modules/commander/lib/help.js
+// packages/medical-protocol/node_modules/commander/lib/help.js
 var require_help = __commonJS({
-  "node_modules/commander/lib/help.js"(exports2) {
+  "packages/medical-protocol/node_modules/commander/lib/help.js"(exports2) {
     "use strict";
     var { humanReadableArgName } = require_argument();
     var Help2 = class {
@@ -235,8 +235,8 @@ var require_help = __commonJS({
           visibleCommands.push(helpCommand);
         }
         if (this.sortSubcommands) {
-          visibleCommands.sort((a2, b) => {
-            return a2.name().localeCompare(b.name());
+          visibleCommands.sort((a, b) => {
+            return a.name().localeCompare(b.name());
           });
         }
         return visibleCommands;
@@ -248,11 +248,11 @@ var require_help = __commonJS({
        * @param {Option} b
        * @returns {number}
        */
-      compareOptions(a2, b) {
+      compareOptions(a, b) {
         const getSortKey = (option) => {
           return option.short ? option.short.replace(/^-/, "") : option.long.replace(/^--/, "");
         };
-        return getSortKey(a2).localeCompare(getSortKey(b));
+        return getSortKey(a).localeCompare(getSortKey(b));
       }
       /**
        * Get an array of the visible options. Includes a placeholder for the implicit help option, if there is one.
@@ -801,9 +801,9 @@ ${itemIndentStr}`);
   }
 });
 
-// node_modules/commander/lib/option.js
+// packages/medical-protocol/node_modules/commander/lib/option.js
 var require_option = __commonJS({
-  "node_modules/commander/lib/option.js"(exports2) {
+  "packages/medical-protocol/node_modules/commander/lib/option.js"(exports2) {
     "use strict";
     var { InvalidArgumentError: InvalidArgumentError2 } = require_error();
     var Option2 = class {
@@ -1115,43 +1115,43 @@ var require_option = __commonJS({
   }
 });
 
-// node_modules/commander/lib/suggestSimilar.js
+// packages/medical-protocol/node_modules/commander/lib/suggestSimilar.js
 var require_suggestSimilar = __commonJS({
-  "node_modules/commander/lib/suggestSimilar.js"(exports2) {
+  "packages/medical-protocol/node_modules/commander/lib/suggestSimilar.js"(exports2) {
     "use strict";
     var maxDistance = 3;
-    function editDistance(a2, b) {
-      if (Math.abs(a2.length - b.length) > maxDistance)
-        return Math.max(a2.length, b.length);
-      const d = [];
-      for (let i2 = 0; i2 <= a2.length; i2++) {
-        d[i2] = [i2];
+    function editDistance(a, b) {
+      if (Math.abs(a.length - b.length) > maxDistance)
+        return Math.max(a.length, b.length);
+      const d3 = [];
+      for (let i = 0; i <= a.length; i++) {
+        d3[i] = [i];
       }
-      for (let j = 0; j <= b.length; j++) {
-        d[0][j] = j;
+      for (let j2 = 0; j2 <= b.length; j2++) {
+        d3[0][j2] = j2;
       }
-      for (let j = 1; j <= b.length; j++) {
-        for (let i2 = 1; i2 <= a2.length; i2++) {
+      for (let j2 = 1; j2 <= b.length; j2++) {
+        for (let i = 1; i <= a.length; i++) {
           let cost = 1;
-          if (a2[i2 - 1] === b[j - 1]) {
+          if (a[i - 1] === b[j2 - 1]) {
             cost = 0;
           } else {
             cost = 1;
           }
-          d[i2][j] = Math.min(
-            d[i2 - 1][j] + 1,
+          d3[i][j2] = Math.min(
+            d3[i - 1][j2] + 1,
             // deletion
-            d[i2][j - 1] + 1,
+            d3[i][j2 - 1] + 1,
             // insertion
-            d[i2 - 1][j - 1] + cost
+            d3[i - 1][j2 - 1] + cost
             // substitution
           );
-          if (i2 > 1 && j > 1 && a2[i2 - 1] === b[j - 2] && a2[i2 - 2] === b[j - 1]) {
-            d[i2][j] = Math.min(d[i2][j], d[i2 - 2][j - 2] + 1);
+          if (i > 1 && j2 > 1 && a[i - 1] === b[j2 - 2] && a[i - 2] === b[j2 - 1]) {
+            d3[i][j2] = Math.min(d3[i][j2], d3[i - 2][j2 - 2] + 1);
           }
         }
       }
-      return d[a2.length][b.length];
+      return d3[a.length][b.length];
     }
     function suggestSimilar(word, candidates) {
       if (!candidates || candidates.length === 0) return "";
@@ -1178,7 +1178,7 @@ var require_suggestSimilar = __commonJS({
           }
         }
       });
-      similar.sort((a2, b) => a2.localeCompare(b));
+      similar.sort((a, b) => a.localeCompare(b));
       if (searchingOptions) {
         similar = similar.map((candidate) => `--${candidate}`);
       }
@@ -1196,9 +1196,9 @@ var require_suggestSimilar = __commonJS({
   }
 });
 
-// node_modules/commander/lib/command.js
+// packages/medical-protocol/node_modules/commander/lib/command.js
 var require_command = __commonJS({
-  "node_modules/commander/lib/command.js"(exports2) {
+  "packages/medical-protocol/node_modules/commander/lib/command.js"(exports2) {
     "use strict";
     var EventEmitter = require("events").EventEmitter;
     var childProcess = require("child_process");
@@ -2373,8 +2373,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @private
        */
       _checkNumberOfArguments() {
-        this.registeredArguments.forEach((arg, i2) => {
-          if (arg.required && this.args[i2] == null) {
+        this.registeredArguments.forEach((arg, i) => {
+          if (arg.required && this.args[i] == null) {
             this.missingArgument(arg.name());
           }
         });
@@ -2672,13 +2672,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
         };
         let activeVariadicOption = null;
         let activeGroup = null;
-        let i2 = 0;
-        while (i2 < args.length || activeGroup) {
-          const arg = activeGroup ?? args[i2++];
+        let i = 0;
+        while (i < args.length || activeGroup) {
+          const arg = activeGroup ?? args[i++];
           activeGroup = null;
           if (arg === "--") {
             if (dest === unknown) dest.push(arg);
-            dest.push(...args.slice(i2));
+            dest.push(...args.slice(i));
             break;
           }
           if (activeVariadicOption && (!maybeOption(arg) || negativeNumberArg(arg))) {
@@ -2690,13 +2690,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
             const option = this._findOption(arg);
             if (option) {
               if (option.required) {
-                const value = args[i2++];
+                const value = args[i++];
                 if (value === void 0) this.optionMissingArgument(option);
                 this.emit(`option:${option.name()}`, value);
               } else if (option.optional) {
                 let value = null;
-                if (i2 < args.length && (!maybeOption(args[i2]) || negativeNumberArg(args[i2]))) {
-                  value = args[i2++];
+                if (i < args.length && (!maybeOption(args[i]) || negativeNumberArg(args[i]))) {
+                  value = args[i++];
                 }
                 this.emit(`option:${option.name()}`, value);
               } else {
@@ -2732,18 +2732,18 @@ Expecting one of '${allowedValues.join("', '")}'`);
           if ((this._enablePositionalOptions || this._passThroughOptions) && operands.length === 0 && unknown.length === 0) {
             if (this._findCommand(arg)) {
               operands.push(arg);
-              unknown.push(...args.slice(i2));
+              unknown.push(...args.slice(i));
               break;
             } else if (this._getHelpCommand() && arg === this._getHelpCommand().name()) {
-              operands.push(arg, ...args.slice(i2));
+              operands.push(arg, ...args.slice(i));
               break;
             } else if (this._defaultCommandName) {
-              unknown.push(arg, ...args.slice(i2));
+              unknown.push(arg, ...args.slice(i));
               break;
             }
           }
           if (this._passThroughOptions) {
-            dest.push(arg, ...args.slice(i2));
+            dest.push(arg, ...args.slice(i));
             break;
           }
           dest.push(arg);
@@ -2759,8 +2759,8 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (this._storeOptionsAsProperties) {
           const result = {};
           const len = this.options.length;
-          for (let i2 = 0; i2 < len; i2++) {
-            const key = this.options[i2].attributeName();
+          for (let i = 0; i < len; i++) {
+            const key = this.options[i].attributeName();
             result[key] = key === this._versionOptionName ? this._version : this[key];
           }
           return result;
@@ -3204,9 +3204,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
           helpWidth: context.helpWidth,
           outputHasColors: context.hasColors
         });
-        const text2 = helper.formatHelp(this, helper);
-        if (context.hasColors) return text2;
-        return this._outputConfiguration.stripColor(text2);
+        const text = helper.formatHelp(this, helper);
+        if (context.hasColors) return text;
+        return this._outputConfiguration.stripColor(text);
       }
       /**
        * @typedef HelpContext
@@ -3366,7 +3366,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @param {(string | Function)} text - string to add, or a function returning a string
        * @return {Command} `this` command for chaining
        */
-      addHelpText(position, text2) {
+      addHelpText(position, text) {
         const allowedValues = ["beforeAll", "before", "after", "afterAll"];
         if (!allowedValues.includes(position)) {
           throw new Error(`Unexpected value for position to addHelpText.
@@ -3375,10 +3375,10 @@ Expecting one of '${allowedValues.join("', '")}'`);
         const helpEvent = `${position}Help`;
         this.on(helpEvent, (context) => {
           let helpStr;
-          if (typeof text2 === "function") {
-            helpStr = text2({ error: context.error, command: context.command });
+          if (typeof text === "function") {
+            helpStr = text({ error: context.error, command: context.command });
           } else {
-            helpStr = text2;
+            helpStr = text;
           }
           if (helpStr) {
             context.write(`${helpStr}
@@ -3443,9 +3443,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
   }
 });
 
-// node_modules/commander/index.js
+// packages/medical-protocol/node_modules/commander/index.js
 var require_commander = __commonJS({
-  "node_modules/commander/index.js"(exports2) {
+  "packages/medical-protocol/node_modules/commander/index.js"(exports2) {
     "use strict";
     var { Argument: Argument2 } = require_argument();
     var { Command: Command2 } = require_command();
@@ -3475,39 +3475,30 @@ var init_package = __esm({
 });
 
 // node_modules/fast-string-truncated-width/dist/utils.js
-var getCodePointsLength, isFullWidth, isWideNotCJKTNotEmoji;
+var isAmbiguous, isFullWidth, isWide;
 var init_utils = __esm({
   "node_modules/fast-string-truncated-width/dist/utils.js"() {
     "use strict";
-    getCodePointsLength = /* @__PURE__ */ (() => {
-      const SURROGATE_PAIR_RE = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-      return (input) => {
-        let surrogatePairsNr = 0;
-        SURROGATE_PAIR_RE.lastIndex = 0;
-        while (SURROGATE_PAIR_RE.test(input)) {
-          surrogatePairsNr += 1;
-        }
-        return input.length - surrogatePairsNr;
-      };
-    })();
+    isAmbiguous = (x) => {
+      return x === 161 || x === 164 || x === 167 || x === 168 || x === 170 || x === 173 || x === 174 || x >= 176 && x <= 180 || x >= 182 && x <= 186 || x >= 188 && x <= 191 || x === 198 || x === 208 || x === 215 || x === 216 || x >= 222 && x <= 225 || x === 230 || x >= 232 && x <= 234 || x === 236 || x === 237 || x === 240 || x === 242 || x === 243 || x >= 247 && x <= 250 || x === 252 || x === 254 || x === 257 || x === 273 || x === 275 || x === 283 || x === 294 || x === 295 || x === 299 || x >= 305 && x <= 307 || x === 312 || x >= 319 && x <= 322 || x === 324 || x >= 328 && x <= 331 || x === 333 || x === 338 || x === 339 || x === 358 || x === 359 || x === 363 || x === 462 || x === 464 || x === 466 || x === 468 || x === 470 || x === 472 || x === 474 || x === 476 || x === 593 || x === 609 || x === 708 || x === 711 || x >= 713 && x <= 715 || x === 717 || x === 720 || x >= 728 && x <= 731 || x === 733 || x === 735 || x >= 768 && x <= 879 || x >= 913 && x <= 929 || x >= 931 && x <= 937 || x >= 945 && x <= 961 || x >= 963 && x <= 969 || x === 1025 || x >= 1040 && x <= 1103 || x === 1105 || x === 8208 || x >= 8211 && x <= 8214 || x === 8216 || x === 8217 || x === 8220 || x === 8221 || x >= 8224 && x <= 8226 || x >= 8228 && x <= 8231 || x === 8240 || x === 8242 || x === 8243 || x === 8245 || x === 8251 || x === 8254 || x === 8308 || x === 8319 || x >= 8321 && x <= 8324 || x === 8364 || x === 8451 || x === 8453 || x === 8457 || x === 8467 || x === 8470 || x === 8481 || x === 8482 || x === 8486 || x === 8491 || x === 8531 || x === 8532 || x >= 8539 && x <= 8542 || x >= 8544 && x <= 8555 || x >= 8560 && x <= 8569 || x === 8585 || x >= 8592 && x <= 8601 || x === 8632 || x === 8633 || x === 8658 || x === 8660 || x === 8679 || x === 8704 || x === 8706 || x === 8707 || x === 8711 || x === 8712 || x === 8715 || x === 8719 || x === 8721 || x === 8725 || x === 8730 || x >= 8733 && x <= 8736 || x === 8739 || x === 8741 || x >= 8743 && x <= 8748 || x === 8750 || x >= 8756 && x <= 8759 || x === 8764 || x === 8765 || x === 8776 || x === 8780 || x === 8786 || x === 8800 || x === 8801 || x >= 8804 && x <= 8807 || x === 8810 || x === 8811 || x === 8814 || x === 8815 || x === 8834 || x === 8835 || x === 8838 || x === 8839 || x === 8853 || x === 8857 || x === 8869 || x === 8895 || x === 8978 || x >= 9312 && x <= 9449 || x >= 9451 && x <= 9547 || x >= 9552 && x <= 9587 || x >= 9600 && x <= 9615 || x >= 9618 && x <= 9621 || x === 9632 || x === 9633 || x >= 9635 && x <= 9641 || x === 9650 || x === 9651 || x === 9654 || x === 9655 || x === 9660 || x === 9661 || x === 9664 || x === 9665 || x >= 9670 && x <= 9672 || x === 9675 || x >= 9678 && x <= 9681 || x >= 9698 && x <= 9701 || x === 9711 || x === 9733 || x === 9734 || x === 9737 || x === 9742 || x === 9743 || x === 9756 || x === 9758 || x === 9792 || x === 9794 || x === 9824 || x === 9825 || x >= 9827 && x <= 9829 || x >= 9831 && x <= 9834 || x === 9836 || x === 9837 || x === 9839 || x === 9886 || x === 9887 || x === 9919 || x >= 9926 && x <= 9933 || x >= 9935 && x <= 9939 || x >= 9941 && x <= 9953 || x === 9955 || x === 9960 || x === 9961 || x >= 9963 && x <= 9969 || x === 9972 || x >= 9974 && x <= 9977 || x === 9979 || x === 9980 || x === 9982 || x === 9983 || x === 10045 || x >= 10102 && x <= 10111 || x >= 11094 && x <= 11097 || x >= 12872 && x <= 12879 || x >= 57344 && x <= 63743 || x >= 65024 && x <= 65039 || x === 65533 || x >= 127232 && x <= 127242 || x >= 127248 && x <= 127277 || x >= 127280 && x <= 127337 || x >= 127344 && x <= 127373 || x === 127375 || x === 127376 || x >= 127387 && x <= 127404 || x >= 917760 && x <= 917999 || x >= 983040 && x <= 1048573 || x >= 1048576 && x <= 1114109;
+    };
     isFullWidth = (x) => {
       return x === 12288 || x >= 65281 && x <= 65376 || x >= 65504 && x <= 65510;
     };
-    isWideNotCJKTNotEmoji = (x) => {
-      return x === 8987 || x === 9001 || x >= 12272 && x <= 12287 || x >= 12289 && x <= 12350 || x >= 12441 && x <= 12543 || x >= 12549 && x <= 12591 || x >= 12593 && x <= 12686 || x >= 12688 && x <= 12771 || x >= 12783 && x <= 12830 || x >= 12832 && x <= 12871 || x >= 12880 && x <= 19903 || x >= 65040 && x <= 65049 || x >= 65072 && x <= 65106 || x >= 65108 && x <= 65126 || x >= 65128 && x <= 65131 || x >= 127488 && x <= 127490 || x >= 127504 && x <= 127547 || x >= 127552 && x <= 127560 || x >= 131072 && x <= 196605 || x >= 196608 && x <= 262141;
+    isWide = (x) => {
+      return x >= 4352 && x <= 4447 || x === 8986 || x === 8987 || x === 9001 || x === 9002 || x >= 9193 && x <= 9196 || x === 9200 || x === 9203 || x === 9725 || x === 9726 || x === 9748 || x === 9749 || x >= 9800 && x <= 9811 || x === 9855 || x === 9875 || x === 9889 || x === 9898 || x === 9899 || x === 9917 || x === 9918 || x === 9924 || x === 9925 || x === 9934 || x === 9940 || x === 9962 || x === 9970 || x === 9971 || x === 9973 || x === 9978 || x === 9981 || x === 9989 || x === 9994 || x === 9995 || x === 10024 || x === 10060 || x === 10062 || x >= 10067 && x <= 10069 || x === 10071 || x >= 10133 && x <= 10135 || x === 10160 || x === 10175 || x === 11035 || x === 11036 || x === 11088 || x === 11093 || x >= 11904 && x <= 11929 || x >= 11931 && x <= 12019 || x >= 12032 && x <= 12245 || x >= 12272 && x <= 12287 || x >= 12289 && x <= 12350 || x >= 12353 && x <= 12438 || x >= 12441 && x <= 12543 || x >= 12549 && x <= 12591 || x >= 12593 && x <= 12686 || x >= 12688 && x <= 12771 || x >= 12783 && x <= 12830 || x >= 12832 && x <= 12871 || x >= 12880 && x <= 19903 || x >= 19968 && x <= 42124 || x >= 42128 && x <= 42182 || x >= 43360 && x <= 43388 || x >= 44032 && x <= 55203 || x >= 63744 && x <= 64255 || x >= 65040 && x <= 65049 || x >= 65072 && x <= 65106 || x >= 65108 && x <= 65126 || x >= 65128 && x <= 65131 || x >= 94176 && x <= 94180 || x === 94192 || x === 94193 || x >= 94208 && x <= 100343 || x >= 100352 && x <= 101589 || x >= 101632 && x <= 101640 || x >= 110576 && x <= 110579 || x >= 110581 && x <= 110587 || x === 110589 || x === 110590 || x >= 110592 && x <= 110882 || x === 110898 || x >= 110928 && x <= 110930 || x === 110933 || x >= 110948 && x <= 110951 || x >= 110960 && x <= 111355 || x === 126980 || x === 127183 || x === 127374 || x >= 127377 && x <= 127386 || x >= 127488 && x <= 127490 || x >= 127504 && x <= 127547 || x >= 127552 && x <= 127560 || x === 127568 || x === 127569 || x >= 127584 && x <= 127589 || x >= 127744 && x <= 127776 || x >= 127789 && x <= 127797 || x >= 127799 && x <= 127868 || x >= 127870 && x <= 127891 || x >= 127904 && x <= 127946 || x >= 127951 && x <= 127955 || x >= 127968 && x <= 127984 || x === 127988 || x >= 127992 && x <= 128062 || x === 128064 || x >= 128066 && x <= 128252 || x >= 128255 && x <= 128317 || x >= 128331 && x <= 128334 || x >= 128336 && x <= 128359 || x === 128378 || x === 128405 || x === 128406 || x === 128420 || x >= 128507 && x <= 128591 || x >= 128640 && x <= 128709 || x === 128716 || x >= 128720 && x <= 128722 || x >= 128725 && x <= 128727 || x >= 128732 && x <= 128735 || x === 128747 || x === 128748 || x >= 128756 && x <= 128764 || x >= 128992 && x <= 129003 || x === 129008 || x >= 129292 && x <= 129338 || x >= 129340 && x <= 129349 || x >= 129351 && x <= 129535 || x >= 129648 && x <= 129660 || x >= 129664 && x <= 129672 || x >= 129680 && x <= 129725 || x >= 129727 && x <= 129733 || x >= 129742 && x <= 129755 || x >= 129760 && x <= 129768 || x >= 129776 && x <= 129784 || x >= 131072 && x <= 196605 || x >= 196608 && x <= 262141;
     };
   }
 });
 
 // node_modules/fast-string-truncated-width/dist/index.js
-var ANSI_RE, CONTROL_RE, CJKT_WIDE_RE, TAB_RE, EMOJI_RE, LATIN_RE, MODIFIER_RE, NO_TRUNCATION, getStringTruncatedWidth, dist_default;
+var ANSI_RE, CONTROL_RE, TAB_RE, EMOJI_RE, LATIN_RE, MODIFIER_RE, NO_TRUNCATION, getStringTruncatedWidth, dist_default;
 var init_dist = __esm({
   "node_modules/fast-string-truncated-width/dist/index.js"() {
     "use strict";
     init_utils();
-    ANSI_RE = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]|\u001b\]8;[^;]*;.*?(?:\u0007|\u001b\u005c)/y;
+    ANSI_RE = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/y;
     CONTROL_RE = /[\x00-\x08\x0A-\x1F\x7F-\x9F]{1,1000}/y;
-    CJKT_WIDE_RE = /(?:(?![\uFF61-\uFF9F\uFF00-\uFFEF])[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Tangut}]){1,1000}/yu;
     TAB_RE = /\t{1,1000}/y;
     EMOJI_RE = new RegExp("[\\u{1F1E6}-\\u{1F1FF}]{2}|\\u{1F3F4}[\\u{E0061}-\\u{E007A}]{2}[\\u{E0030}-\\u{E0039}\\u{E0061}-\\u{E007A}]{1,3}\\u{E007F}|(?:\\p{Emoji}\\uFE0F\\u20E3?|\\p{Emoji_Modifier_Base}\\p{Emoji_Modifier}?|\\p{Emoji_Presentation})(?:\\u200D(?:\\p{Emoji_Modifier_Base}\\p{Emoji_Modifier}?|\\p{Emoji_Presentation}|\\p{Emoji}\\uFE0F\\u20E3?))*", "yu");
     LATIN_RE = /(?:[\x20-\x7E\xA0-\xFF](?!\uFE0F)){1,1000}/y;
@@ -3517,21 +3508,14 @@ var init_dist = __esm({
       const LIMIT = truncationOptions.limit ?? Infinity;
       const ELLIPSIS = truncationOptions.ellipsis ?? "";
       const ELLIPSIS_WIDTH = truncationOptions?.ellipsisWidth ?? (ELLIPSIS ? getStringTruncatedWidth(ELLIPSIS, NO_TRUNCATION, widthOptions).width : 0);
-      const ANSI_WIDTH = 0;
+      const ANSI_WIDTH = widthOptions.ansiWidth ?? 0;
       const CONTROL_WIDTH = widthOptions.controlWidth ?? 0;
       const TAB_WIDTH = widthOptions.tabWidth ?? 8;
+      const AMBIGUOUS_WIDTH = widthOptions.ambiguousWidth ?? 1;
       const EMOJI_WIDTH = widthOptions.emojiWidth ?? 2;
-      const FULL_WIDTH_WIDTH = 2;
+      const FULL_WIDTH_WIDTH = widthOptions.fullWidthWidth ?? 2;
       const REGULAR_WIDTH = widthOptions.regularWidth ?? 1;
-      const WIDE_WIDTH = widthOptions.wideWidth ?? FULL_WIDTH_WIDTH;
-      const PARSE_BLOCKS = [
-        [LATIN_RE, REGULAR_WIDTH],
-        [ANSI_RE, ANSI_WIDTH],
-        [CONTROL_RE, CONTROL_WIDTH],
-        [TAB_RE, TAB_WIDTH],
-        [EMOJI_RE, EMOJI_WIDTH],
-        [CJKT_WIDE_RE, WIDE_WIDTH]
-      ];
+      const WIDE_WIDTH = widthOptions.wideWidth ?? 2;
       let indexPrev = 0;
       let index = 0;
       let length = input.length;
@@ -3551,8 +3535,10 @@ var init_dist = __esm({
             const codePoint = char.codePointAt(0) || 0;
             if (isFullWidth(codePoint)) {
               widthExtra = FULL_WIDTH_WIDTH;
-            } else if (isWideNotCJKTNotEmoji(codePoint)) {
+            } else if (isWide(codePoint)) {
               widthExtra = WIDE_WIDTH;
+            } else if (AMBIGUOUS_WIDTH !== REGULAR_WIDTH && isAmbiguous(codePoint)) {
+              widthExtra = AMBIGUOUS_WIDTH;
             } else {
               widthExtra = REGULAR_WIDTH;
             }
@@ -3568,28 +3554,88 @@ var init_dist = __esm({
           }
           unmatchedStart = unmatchedEnd = 0;
         }
-        if (index >= length) {
-          break outer;
-        }
-        for (let i2 = 0, l = PARSE_BLOCKS.length; i2 < l; i2++) {
-          const [BLOCK_RE, BLOCK_WIDTH] = PARSE_BLOCKS[i2];
-          BLOCK_RE.lastIndex = index;
-          if (BLOCK_RE.test(input)) {
-            lengthExtra = BLOCK_RE === CJKT_WIDE_RE ? getCodePointsLength(input.slice(index, BLOCK_RE.lastIndex)) : BLOCK_RE === EMOJI_RE ? 1 : BLOCK_RE.lastIndex - index;
-            widthExtra = lengthExtra * BLOCK_WIDTH;
-            if (width + widthExtra > truncationLimit) {
-              truncationIndex = Math.min(truncationIndex, index + Math.floor((truncationLimit - width) / BLOCK_WIDTH));
-            }
-            if (width + widthExtra > LIMIT) {
-              truncationEnabled = true;
-              break outer;
-            }
-            width += widthExtra;
-            unmatchedStart = indexPrev;
-            unmatchedEnd = index;
-            index = indexPrev = BLOCK_RE.lastIndex;
-            continue outer;
+        if (index >= length)
+          break;
+        LATIN_RE.lastIndex = index;
+        if (LATIN_RE.test(input)) {
+          lengthExtra = LATIN_RE.lastIndex - index;
+          widthExtra = lengthExtra * REGULAR_WIDTH;
+          if (width + widthExtra > truncationLimit) {
+            truncationIndex = Math.min(truncationIndex, index + Math.floor((truncationLimit - width) / REGULAR_WIDTH));
           }
+          if (width + widthExtra > LIMIT) {
+            truncationEnabled = true;
+            break;
+          }
+          width += widthExtra;
+          unmatchedStart = indexPrev;
+          unmatchedEnd = index;
+          index = indexPrev = LATIN_RE.lastIndex;
+          continue;
+        }
+        ANSI_RE.lastIndex = index;
+        if (ANSI_RE.test(input)) {
+          if (width + ANSI_WIDTH > truncationLimit) {
+            truncationIndex = Math.min(truncationIndex, index);
+          }
+          if (width + ANSI_WIDTH > LIMIT) {
+            truncationEnabled = true;
+            break;
+          }
+          width += ANSI_WIDTH;
+          unmatchedStart = indexPrev;
+          unmatchedEnd = index;
+          index = indexPrev = ANSI_RE.lastIndex;
+          continue;
+        }
+        CONTROL_RE.lastIndex = index;
+        if (CONTROL_RE.test(input)) {
+          lengthExtra = CONTROL_RE.lastIndex - index;
+          widthExtra = lengthExtra * CONTROL_WIDTH;
+          if (width + widthExtra > truncationLimit) {
+            truncationIndex = Math.min(truncationIndex, index + Math.floor((truncationLimit - width) / CONTROL_WIDTH));
+          }
+          if (width + widthExtra > LIMIT) {
+            truncationEnabled = true;
+            break;
+          }
+          width += widthExtra;
+          unmatchedStart = indexPrev;
+          unmatchedEnd = index;
+          index = indexPrev = CONTROL_RE.lastIndex;
+          continue;
+        }
+        TAB_RE.lastIndex = index;
+        if (TAB_RE.test(input)) {
+          lengthExtra = TAB_RE.lastIndex - index;
+          widthExtra = lengthExtra * TAB_WIDTH;
+          if (width + widthExtra > truncationLimit) {
+            truncationIndex = Math.min(truncationIndex, index + Math.floor((truncationLimit - width) / TAB_WIDTH));
+          }
+          if (width + widthExtra > LIMIT) {
+            truncationEnabled = true;
+            break;
+          }
+          width += widthExtra;
+          unmatchedStart = indexPrev;
+          unmatchedEnd = index;
+          index = indexPrev = TAB_RE.lastIndex;
+          continue;
+        }
+        EMOJI_RE.lastIndex = index;
+        if (EMOJI_RE.test(input)) {
+          if (width + EMOJI_WIDTH > truncationLimit) {
+            truncationIndex = Math.min(truncationIndex, index);
+          }
+          if (width + EMOJI_WIDTH > LIMIT) {
+            truncationEnabled = true;
+            break;
+          }
+          width += EMOJI_WIDTH;
+          unmatchedStart = indexPrev;
+          unmatchedEnd = index;
+          index = indexPrev = EMOJI_RE.lastIndex;
+          continue;
         }
         index += 1;
       }
@@ -3792,19 +3838,16 @@ var init_main = __esm({
       }
       const preString = rows.join("\n");
       let inSurrogate = false;
-      for (let i2 = 0; i2 < preString.length; i2++) {
-        const character = preString[i2];
+      for (let i = 0; i < preString.length; i++) {
+        const character = preString[i];
         returnValue += character;
         if (!inSurrogate) {
           inSurrogate = character >= "\uD800" && character <= "\uDBFF";
-          if (inSurrogate) {
-            continue;
-          }
         } else {
-          inSurrogate = false;
+          continue;
         }
         if (character === ESC || character === CSI) {
-          GROUP_REGEX.lastIndex = i2 + 1;
+          GROUP_REGEX.lastIndex = i + 1;
           const groupsResult = GROUP_REGEX.exec(preString);
           const groups = groupsResult?.groups;
           if (groups?.code !== void 0) {
@@ -3814,7 +3857,7 @@ var init_main = __esm({
             escapeUrl = groups.uri.length === 0 ? void 0 : groups.uri;
           }
         }
-        if (preString[i2 + 1] === "\n") {
+        if (preString[i + 1] === "\n") {
           if (escapeUrl) {
             returnValue += wrapAnsiHyperlink("");
           }
@@ -3837,29 +3880,24 @@ var init_main = __esm({
   }
 });
 
-// node_modules/sisteransi/dist/index.js
-var ESC2, CSI2, cursor, erase, clear;
-var init_dist3 = __esm({
-  "node_modules/sisteransi/dist/index.js"() {
+// node_modules/sisteransi/src/index.js
+var require_src = __commonJS({
+  "node_modules/sisteransi/src/index.js"(exports2, module2) {
     "use strict";
-    ESC2 = "\x1B";
-    CSI2 = `${ESC2}[`;
-    cursor = {
-      to(x, y) {
-        if (!y)
-          return `${CSI2}${x + 1}G`;
-        return `${CSI2}${y + 1};${x + 1}H`;
+    var ESC2 = "\x1B";
+    var CSI2 = `${ESC2}[`;
+    var beep = "\x07";
+    var cursor = {
+      to(x, y2) {
+        if (!y2) return `${CSI2}${x + 1}G`;
+        return `${CSI2}${y2 + 1};${x + 1}H`;
       },
-      move(x, y) {
+      move(x, y2) {
         let ret = "";
-        if (x < 0)
-          ret += `${CSI2}${-x}D`;
-        else if (x > 0)
-          ret += `${CSI2}${x}C`;
-        if (y < 0)
-          ret += `${CSI2}${-y}A`;
-        else if (y > 0)
-          ret += `${CSI2}${y}B`;
+        if (x < 0) ret += `${CSI2}${-x}D`;
+        else if (x > 0) ret += `${CSI2}${x}C`;
+        if (y2 < 0) ret += `${CSI2}${-y2}A`;
+        else if (y2 > 0) ret += `${CSI2}${y2}B`;
         return ret;
       },
       up: (count = 1) => `${CSI2}${count}A`,
@@ -3874,7 +3912,11 @@ var init_dist3 = __esm({
       save: `${ESC2}7`,
       restore: `${ESC2}8`
     };
-    erase = {
+    var scroll = {
+      up: (count = 1) => `${CSI2}S`.repeat(count),
+      down: (count = 1) => `${CSI2}T`.repeat(count)
+    };
+    var erase = {
       screen: `${CSI2}2J`,
       up: (count = 1) => `${CSI2}1J`.repeat(count),
       down: (count = 1) => `${CSI2}J`.repeat(count),
@@ -3882,173 +3924,90 @@ var init_dist3 = __esm({
       lineEnd: `${CSI2}K`,
       lineStart: `${CSI2}1K`,
       lines(count) {
-        let clear2 = "";
-        for (let i2 = 0; i2 < count; i2++)
-          clear2 += this.line + (i2 < count - 1 ? cursor.up() : "");
+        let clear = "";
+        for (let i = 0; i < count; i++)
+          clear += this.line + (i < count - 1 ? cursor.up() : "");
         if (count)
-          clear2 += cursor.left;
-        return clear2;
+          clear += cursor.left;
+        return clear;
       }
     };
-    clear = {
-      screen: `${ESC2}c`
-    };
+    module2.exports = { cursor, scroll, erase, beep };
   }
 });
 
 // node_modules/@clack/core/dist/index.mjs
-function findCursor(o, s, l) {
-  if (!l.some((r2) => !r2.disabled))
-    return o;
-  const t2 = o + s, n3 = Math.max(l.length - 1, 0), e = t2 < 0 ? n3 : t2 > n3 ? 0 : t2;
-  return l[e]?.disabled ? findCursor(e, s < 0 ? -1 : 1, l) : e;
+function d(r, t2, e) {
+  if (!e.some((o) => !o.disabled)) return r;
+  const s = r + t2, i = Math.max(e.length - 1, 0), n = s < 0 ? i : s > i ? 0 : s;
+  return e[n].disabled ? d(n, t2 < 0 ? -1 : 1, e) : n;
 }
-function isAccessible(n3) {
-  if (n3 !== void 0) return n3;
-  if (settings.accessible !== void 0) return settings.accessible;
-  const e = process.env.ACCESSIBLE;
-  return e !== void 0 && e !== "" && e !== "0" && e !== "false";
-}
-function isActionKey(n3, e) {
-  if (typeof n3 == "string")
-    return settings.aliases.get(n3) === e;
-  for (const s of n3)
-    if (s !== void 0 && isActionKey(s, e))
-      return true;
+function V(r, t2) {
+  if (typeof r == "string") return u.aliases.get(r) === t2;
+  for (const e of r) if (e !== void 0 && V(e, t2)) return true;
   return false;
 }
-function diffLines(i2, s) {
-  if (i2 === s) return;
-  const e = i2.split(`
-`), t2 = s.split(`
-`), r2 = Math.max(e.length, t2.length), f = [];
-  for (let n3 = 0; n3 < r2; n3++)
-    e[n3] !== t2[n3] && f.push(n3);
-  return {
-    lines: f,
-    numLinesBefore: e.length,
-    numLinesAfter: t2.length,
-    numLines: r2
-  };
+function j(r, t2) {
+  if (r === t2) return;
+  const e = r.split(`
+`), s = t2.split(`
+`), i = Math.max(e.length, s.length), n = [];
+  for (let o = 0; o < i; o++) e[o] !== s[o] && n.push(o);
+  return { lines: n, numLinesBefore: e.length, numLinesAfter: s.length, numLines: i };
 }
-function isCancel(e) {
-  return e === CANCEL_SYMBOL;
+function q(r) {
+  return r === C;
 }
-function setRawMode(e, r2) {
-  const o = e;
-  o.isTTY && o.setRawMode(r2);
+function w(r, t2) {
+  const e = r;
+  e.isTTY && e.setRawMode(t2);
 }
-function block({
-  input: e = import_node_process.stdin,
-  output: r2 = import_node_process.stdout,
-  overwrite: o = true,
-  hideCursor: n3 = true
-} = {}) {
-  const s = f$1.createInterface({
-    input: e,
-    output: r2,
-    prompt: "",
-    tabSize: 1
-  });
-  f$1.emitKeypressEvents(e, s), e instanceof import_node_tty.ReadStream && e.isTTY && e.setRawMode(true);
-  const t2 = (l, { name: i2, sequence: p }) => {
-    const w = String(l);
-    if (isActionKey([w, i2, p], "cancel")) {
-      n3 && r2.write(cursor.show), process.exit(0);
+function z({ input: r = import_node_process.stdin, output: t2 = import_node_process.stdout, overwrite: e = true, hideCursor: s = true } = {}) {
+  const i = _.createInterface({ input: r, output: t2, prompt: "", tabSize: 1 });
+  _.emitKeypressEvents(r, i), r instanceof import_node_tty.ReadStream && r.isTTY && r.setRawMode(true);
+  const n = (o, { name: a, sequence: h }) => {
+    const l = String(o);
+    if (V([l, a, h], "cancel")) {
+      s && t2.write(import_sisteransi.cursor.show), process.exit(0);
       return;
     }
-    if (!o) return;
-    const c3 = i2 === "return" ? 0 : -1, a2 = i2 === "return" ? -1 : 0;
-    f$1.moveCursor(r2, c3, a2, () => {
-      f$1.clearLine(r2, 1, () => {
-        e.once("keypress", t2);
+    if (!e) return;
+    const f = a === "return" ? 0 : -1, v = a === "return" ? -1 : 0;
+    _.moveCursor(t2, f, v, () => {
+      _.clearLine(t2, 1, () => {
+        r.once("keypress", n);
       });
     });
   };
-  return n3 && r2.write(cursor.hide), e.once("keypress", t2), () => {
-    e.off("keypress", t2), n3 && r2.write(cursor.show), e instanceof import_node_tty.ReadStream && e.isTTY && !R && e.setRawMode(false), s.terminal = false, s.close();
+  return s && t2.write(import_sisteransi.cursor.hide), r.once("keypress", n), () => {
+    r.off("keypress", n), s && t2.write(import_sisteransi.cursor.show), r instanceof import_node_tty.ReadStream && r.isTTY && !Y && r.setRawMode(false), i.terminal = false, i.close();
   };
 }
-function wrapTextWithPrefix(e, r2, o, n3 = o, s = o, t2) {
-  const l = getColumns(e ?? import_node_process.stdout), i2 = dist_default2(o);
-  return wrapAnsi(r2, l - i2, {
-    hard: true,
-    trim: false
-  }).split(`
-`).map((c3, a2, g) => {
-    const m = t2 ? t2(c3, a2) : c3;
-    return a2 === 0 ? `${n3}${m}` : a2 === g.length - 1 ? `${s}${m}` : `${o}${m}`;
-  }).join(`
+function R(r, t2, e, s = e) {
+  const i = O(r ?? import_node_process.stdout);
+  return wrapAnsi(t2, i - e.length, { hard: true, trim: false }).split(`
+`).map((n, o) => `${o === 0 ? s : e}${n}`).join(`
 `);
 }
-function runValidation(e, a2) {
-  if ("~standard" in e) {
-    const n3 = e["~standard"].validate(a2);
-    return n3 instanceof Promise ? n3.then((r2) => r2.issues?.at(0)?.message) : n3.issues?.at(0)?.message;
-  }
-  return e(a2);
-}
-var import_node_util, import_node_process, f$1, import_node_readline, import_node_tty, a$1, t, settings, R, CANCEL_SYMBOL, getColumns, getRows, C$1, r, n$1, n2;
-var init_dist4 = __esm({
+var import_node_util, import_node_process, _, import_node_readline, import_sisteransi, import_node_tty, E, G, u, Y, C, O, A, p, Q, nt, at;
+var init_dist3 = __esm({
   "node_modules/@clack/core/dist/index.mjs"() {
     "use strict";
     import_node_util = require("util");
     import_node_process = require("process");
-    f$1 = __toESM(require("readline"), 1);
+    _ = __toESM(require("readline"), 1);
     import_node_readline = __toESM(require("readline"), 1);
     init_main();
-    init_dist3();
+    import_sisteransi = __toESM(require_src(), 1);
     import_node_tty = require("tty");
-    init_dist2();
-    a$1 = ["up", "down", "left", "right", "space", "enter", "cancel"];
-    t = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December"
-    ];
-    settings = {
-      actions: new Set(a$1),
-      aliases: /* @__PURE__ */ new Map([
-        // vim support
-        ["k", "up"],
-        ["j", "down"],
-        ["h", "left"],
-        ["l", "right"],
-        ["", "cancel"],
-        // opinionated defaults!
-        ["escape", "cancel"]
-      ]),
-      messages: {
-        cancel: "Canceled",
-        error: "Something went wrong"
-      },
-      withGuide: true,
-      accessible: void 0,
-      date: {
-        monthNames: [...t],
-        messages: {
-          required: "Please enter a valid date",
-          invalidMonth: "There are only 12 months in a year",
-          invalidDay: (n3, e) => `There are only ${n3} days in ${e}`,
-          afterMin: (n3) => `Date must be on or after ${n3.toISOString().slice(0, 10)}`,
-          beforeMax: (n3) => `Date must be on or before ${n3.toISOString().slice(0, 10)}`
-        }
-      }
-    };
-    R = globalThis.process.platform.startsWith("win");
-    CANCEL_SYMBOL = /* @__PURE__ */ Symbol("clack:cancel");
-    getColumns = (e) => "columns" in e && typeof e.columns == "number" ? e.columns : 80;
-    getRows = (e) => "rows" in e && typeof e.rows == "number" ? e.rows : 20;
-    C$1 = class C {
+    E = ["up", "down", "left", "right", "space", "enter", "cancel"];
+    G = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    u = { actions: new Set(E), aliases: /* @__PURE__ */ new Map([["k", "up"], ["j", "down"], ["h", "left"], ["l", "right"], ["", "cancel"], ["escape", "cancel"]]), messages: { cancel: "Canceled", error: "Something went wrong" }, withGuide: true, date: { monthNames: [...G], messages: { required: "Please enter a valid date", invalidMonth: "There are only 12 months in a year", invalidDay: (r, t2) => `There are only ${r} days in ${t2}`, afterMin: (r) => `Date must be on or after ${r.toISOString().slice(0, 10)}`, beforeMax: (r) => `Date must be on or before ${r.toISOString().slice(0, 10)}` } } };
+    Y = globalThis.process.platform.startsWith("win");
+    C = /* @__PURE__ */ Symbol("clack:cancel");
+    O = (r) => "columns" in r && typeof r.columns == "number" ? r.columns : 80;
+    A = (r) => "rows" in r && typeof r.rows == "number" ? r.rows : 20;
+    p = class {
       input;
       output;
       _abortSignal;
@@ -4063,91 +4022,45 @@ var init_dist4 = __esm({
       error = "";
       value;
       userInput = "";
-      /**
-       * Whether accessible (static, screen-reader friendly) output is enabled for
-       * this prompt, resolved from the `accessible` option, the global setting,
-       * and the `ACCESSIBLE` env var.
-       */
-      get accessible() {
-        return isAccessible(this.opts.accessible);
-      }
       constructor(t2, e = true) {
-        const { input: i2 = import_node_process.stdin, output: s = import_node_process.stdout, render: r2, signal: n3, ...o } = t2;
-        this.opts = o, this.onKeypress = this.onKeypress.bind(this), this.close = this.close.bind(this), this.render = this.render.bind(this), this._render = r2.bind(this), this._track = e, this._abortSignal = n3, this.input = i2, this.output = s;
+        const { input: s = import_node_process.stdin, output: i = import_node_process.stdout, render: n, signal: o, ...a } = t2;
+        this.opts = a, this.onKeypress = this.onKeypress.bind(this), this.close = this.close.bind(this), this.render = this.render.bind(this), this._render = n.bind(this), this._track = e, this._abortSignal = o, this.input = s, this.output = i;
       }
-      /**
-       * Unsubscribe all listeners
-       */
       unsubscribe() {
         this._subscribers.clear();
       }
-      /**
-       * Set a subscriber with opts
-       * @param event - The event name
-       */
       setSubscriber(t2, e) {
-        const i2 = this._subscribers.get(t2) ?? [];
-        i2.push(e), this._subscribers.set(t2, i2);
+        const s = this._subscribers.get(t2) ?? [];
+        s.push(e), this._subscribers.set(t2, s);
       }
-      /**
-       * Subscribe to an event
-       * @param event - The event name
-       * @param cb - The callback
-       */
       on(t2, e) {
         this.setSubscriber(t2, { cb: e });
       }
-      /**
-       * Subscribe to an event once
-       * @param event - The event name
-       * @param cb - The callback
-       */
       once(t2, e) {
         this.setSubscriber(t2, { cb: e, once: true });
       }
-      /**
-       * Emit an event with data
-       * @param event - The event name
-       * @param data - The data to pass to the callback
-       */
       emit(t2, ...e) {
-        const i2 = this._subscribers.get(t2) ?? [], s = [];
-        for (const r2 of i2)
-          r2.cb(...e), r2.once && s.push(() => i2.splice(i2.indexOf(r2), 1));
-        for (const r2 of s)
-          r2();
+        const s = this._subscribers.get(t2) ?? [], i = [];
+        for (const n of s) n.cb(...e), n.once && i.push(() => s.splice(s.indexOf(n), 1));
+        for (const n of i) n();
       }
       prompt() {
         return new Promise((t2) => {
           if (this._abortSignal) {
-            if (this._abortSignal.aborted)
-              return this.state = "cancel", this.close(), t2(CANCEL_SYMBOL);
-            this._abortSignal.addEventListener(
-              "abort",
-              () => {
-                this.state = "cancel", this.close();
-              },
-              { once: true }
-            );
+            if (this._abortSignal.aborted) return this.state = "cancel", this.close(), t2(C);
+            this._abortSignal.addEventListener("abort", () => {
+              this.state = "cancel", this.close();
+            }, { once: true });
           }
-          this.rl = import_node_readline.default.createInterface({
-            input: this.input,
-            tabSize: 2,
-            prompt: "",
-            escapeCodeTimeout: 50,
-            terminal: true
-          }), this.rl.prompt(), this.opts.initialUserInput !== void 0 && this._setUserInput(this.opts.initialUserInput, true), this.input.on("keypress", this.onKeypress), setRawMode(this.input, true), this.output.on("resize", this.render), this.render(), this.once("submit", () => {
-            this.output.write(cursor.show), this.output.off("resize", this.render), setRawMode(this.input, false), t2(this.value);
+          this.rl = import_node_readline.default.createInterface({ input: this.input, tabSize: 2, prompt: "", escapeCodeTimeout: 50, terminal: true }), this.rl.prompt(), this.opts.initialUserInput !== void 0 && this._setUserInput(this.opts.initialUserInput, true), this.input.on("keypress", this.onKeypress), w(this.input, true), this.output.on("resize", this.render), this.render(), this.once("submit", () => {
+            this.output.write(import_sisteransi.cursor.show), this.output.off("resize", this.render), w(this.input, false), t2(this.value);
           }), this.once("cancel", () => {
-            this.output.write(cursor.show), this.output.off("resize", this.render), setRawMode(this.input, false), t2(CANCEL_SYMBOL);
+            this.output.write(import_sisteransi.cursor.show), this.output.off("resize", this.render), w(this.input, false), t2(C);
           });
         });
       }
       _isActionKey(t2, e) {
         return t2 === "	";
-      }
-      _shouldSubmit(t2, e) {
-        return true;
       }
       _setValue(t2) {
         this.value = t2, this.emit("value", this.value);
@@ -4158,73 +4071,65 @@ var init_dist4 = __esm({
       _clearUserInput() {
         this.rl?.write(null, { ctrl: true, name: "u" }), this._setUserInput("");
       }
-      async onKeypress(t2, e) {
-        if (this.state !== "validating") {
-          if (this._track && e.name !== "return" && (e.name && this._isActionKey(t2, e) && this.rl?.write(null, { ctrl: true, name: "h" }), this._cursor = this.rl?.cursor ?? 0, this._setUserInput(this.rl?.line)), this.state === "error" && (this.state = "active"), e?.name && (!this._track && settings.aliases.has(e.name) && this.emit("cursor", settings.aliases.get(e.name)), settings.actions.has(e.name) && this.emit("cursor", e.name)), t2 && (t2.toLowerCase() === "y" || t2.toLowerCase() === "n") && this.emit("confirm", t2.toLowerCase() === "y"), this.emit("key", t2, e), e?.name === "return" && this._shouldSubmit(t2, e)) {
-            if (this.opts.validate) {
-              const i2 = runValidation(this.opts.validate, this.value);
-              let s;
-              i2 instanceof Promise ? (this.state = "validating", this.render(), s = await i2) : s = i2, s && (this.error = s instanceof Error ? s.message : s, this.state = "error", this.rl?.write(this.userInput));
-            }
-            this.state !== "error" && (this.state = "submit");
+      onKeypress(t2, e) {
+        if (this._track && e.name !== "return" && (e.name && this._isActionKey(t2, e) && this.rl?.write(null, { ctrl: true, name: "h" }), this._cursor = this.rl?.cursor ?? 0, this._setUserInput(this.rl?.line)), this.state === "error" && (this.state = "active"), e?.name && (!this._track && u.aliases.has(e.name) && this.emit("cursor", u.aliases.get(e.name)), u.actions.has(e.name) && this.emit("cursor", e.name)), t2 && (t2.toLowerCase() === "y" || t2.toLowerCase() === "n") && this.emit("confirm", t2.toLowerCase() === "y"), this.emit("key", t2?.toLowerCase(), e), e?.name === "return") {
+          if (this.opts.validate) {
+            const s = this.opts.validate(this.value);
+            s && (this.error = s instanceof Error ? s.message : s, this.state = "error", this.rl?.write(this.userInput));
           }
-          isActionKey([t2, e?.name, e?.sequence], "cancel") && (this.state = "cancel"), (this.state === "submit" || this.state === "cancel") && this.emit("finalize"), this.render(), (this.state === "submit" || this.state === "cancel") && this.close();
+          this.state !== "error" && (this.state = "submit");
         }
+        V([t2, e?.name, e?.sequence], "cancel") && (this.state = "cancel"), (this.state === "submit" || this.state === "cancel") && this.emit("finalize"), this.render(), (this.state === "submit" || this.state === "cancel") && this.close();
       }
       close() {
         this.input.unpipe(), this.input.removeListener("keypress", this.onKeypress), this.output.write(`
-`), setRawMode(this.input, false), this.rl?.close(), this.rl = void 0, this.emit(`${this.state}`, this.value), this.unsubscribe();
+`), w(this.input, false), this.rl?.close(), this.rl = void 0, this.emit(`${this.state}`, this.value), this.unsubscribe();
       }
       restoreCursor() {
-        const t2 = wrapAnsi(this._prevFrame, getColumns(this.output), { hard: true, trim: false }).split(`
+        const t2 = wrapAnsi(this._prevFrame, process.stdout.columns, { hard: true, trim: false }).split(`
 `).length - 1;
-        this.output.write(cursor.move(-999, t2 * -1));
+        this.output.write(import_sisteransi.cursor.move(-999, t2 * -1));
       }
       render() {
-        const t2 = wrapAnsi(this._render(this) ?? "", getColumns(this.output), {
-          hard: true,
-          trim: false
-        });
+        const t2 = wrapAnsi(this._render(this) ?? "", process.stdout.columns, { hard: true, trim: false });
         if (t2 !== this._prevFrame) {
-          if (this.state === "initial")
-            this.output.write(cursor.hide);
+          if (this.state === "initial") this.output.write(import_sisteransi.cursor.hide);
           else {
-            const e = diffLines(this._prevFrame, t2), i2 = getRows(this.output);
+            const e = j(this._prevFrame, t2), s = A(this.output);
             if (this.restoreCursor(), e) {
-              const s = Math.max(0, e.numLinesAfter - i2), r2 = Math.max(0, e.numLinesBefore - i2);
-              let n3 = e.lines.find((o) => o >= s);
-              if (n3 === void 0) {
+              const i = Math.max(0, e.numLinesAfter - s), n = Math.max(0, e.numLinesBefore - s);
+              let o = e.lines.find((a) => a >= i);
+              if (o === void 0) {
                 this._prevFrame = t2;
                 return;
               }
               if (e.lines.length === 1) {
-                this.output.write(cursor.move(0, n3 - r2)), this.output.write(erase.lines(1));
-                const o = t2.split(`
+                this.output.write(import_sisteransi.cursor.move(0, o - n)), this.output.write(import_sisteransi.erase.lines(1));
+                const a = t2.split(`
 `);
-                this.output.write(o[n3]), this._prevFrame = t2, this.output.write(cursor.move(0, o.length - n3 - 1));
+                this.output.write(a[o]), this._prevFrame = t2, this.output.write(import_sisteransi.cursor.move(0, a.length - o - 1));
                 return;
               } else if (e.lines.length > 1) {
-                if (s < r2)
-                  n3 = s;
+                if (i < n) o = i;
                 else {
-                  const h2 = n3 - r2;
-                  h2 > 0 && this.output.write(cursor.move(0, h2));
+                  const h = o - n;
+                  h > 0 && this.output.write(import_sisteransi.cursor.move(0, h));
                 }
-                this.output.write(erase.down());
-                const m = t2.split(`
-`).slice(n3);
-                this.output.write(m.join(`
+                this.output.write(import_sisteransi.erase.down());
+                const a = t2.split(`
+`).slice(o);
+                this.output.write(a.join(`
 `)), this._prevFrame = t2;
                 return;
               }
             }
-            this.output.write(erase.down());
+            this.output.write(import_sisteransi.erase.down());
           }
           this.output.write(t2), this.state === "initial" && (this.state = "active"), this._prevFrame = t2;
         }
       }
     };
-    r = class extends C$1 {
+    Q = class extends p {
       get cursor() {
         return this.value ? 0 : 1;
       }
@@ -4234,60 +4139,54 @@ var init_dist4 = __esm({
       constructor(t2) {
         super(t2, false), this.value = !!t2.initialValue, this.on("userInput", () => {
           this.value = this._value;
-        }), this.on("confirm", (i2) => {
-          this.output.write(cursor.move(0, -1)), this.value = i2, this.state = "submit", this.close();
+        }), this.on("confirm", (e) => {
+          this.output.write(import_sisteransi.cursor.move(0, -1)), this.value = e, this.state = "submit", this.close();
         }), this.on("cursor", () => {
           this.value = !this.value;
         });
       }
     };
-    n$1 = class n extends C$1 {
+    nt = class extends p {
       options;
       cursor = 0;
       get _selectedValue() {
         return this.options[this.cursor];
       }
       changeValue() {
-        const e = this._selectedValue;
-        this.value = e === void 0 ? void 0 : e.value;
+        this.value = this._selectedValue.value;
       }
-      constructor(e) {
-        super(e, false), this.options = e.options;
-        const o = this.options.findIndex(({ value: s }) => s === e.initialValue), t2 = o === -1 ? 0 : o;
-        this.cursor = this.options[t2]?.disabled ? findCursor(t2, 1, this.options) : t2, this.changeValue(), this.on("cursor", (s) => {
-          switch (s) {
+      constructor(t2) {
+        super(t2, false), this.options = t2.options;
+        const e = this.options.findIndex(({ value: i }) => i === t2.initialValue), s = e === -1 ? 0 : e;
+        this.cursor = this.options[s].disabled ? d(s, 1, this.options) : s, this.changeValue(), this.on("cursor", (i) => {
+          switch (i) {
             case "left":
             case "up":
-              this.cursor = findCursor(this.cursor, -1, this.options);
+              this.cursor = d(this.cursor, -1, this.options);
               break;
             case "down":
             case "right":
-              this.cursor = findCursor(this.cursor, 1, this.options);
+              this.cursor = d(this.cursor, 1, this.options);
               break;
           }
           this.changeValue();
         });
       }
     };
-    n2 = class extends C$1 {
+    at = class extends p {
       get userInputWithCursor() {
-        if (this.state === "submit")
-          return this.userInput;
+        if (this.state === "submit") return this.userInput;
         const t2 = this.userInput;
-        if (this.cursor >= t2.length)
-          return `${this.userInput}\u2588`;
-        const r2 = t2.slice(0, this.cursor), s = t2.slice(this.cursor, this.cursor + 1), e = t2.slice(this.cursor + 1);
-        return `${r2}${(0, import_node_util.styleText)("inverse", s)}${e}`;
+        if (this.cursor >= t2.length) return `${this.userInput}\u2588`;
+        const e = t2.slice(0, this.cursor), [s, ...i] = t2.slice(this.cursor);
+        return `${e}${(0, import_node_util.styleText)("inverse", s)}${i.join("")}`;
       }
       get cursor() {
         return this._cursor;
       }
       constructor(t2) {
-        super({
-          ...t2,
-          initialUserInput: t2.initialUserInput ?? t2.initialValue
-        }), this.on("userInput", (r2) => {
-          this._setValue(r2);
+        super({ ...t2, initialUserInput: t2.initialUserInput ?? t2.initialValue }), this.on("userInput", (e) => {
+          this._setValue(e);
         }), this.on("finalize", () => {
           this.value || (this.value = t2.defaultValue), this.value === void 0 && (this.value = "");
         });
@@ -4297,490 +4196,308 @@ var init_dist4 = __esm({
 });
 
 // node_modules/@clack/prompts/dist/index.mjs
-function isUnicodeSupported() {
-  if (import_node_process2.default.platform !== "win32") {
-    return import_node_process2.default.env.TERM !== "linux";
-  }
-  return Boolean(import_node_process2.default.env.CI) || Boolean(import_node_process2.default.env.WT_SESSION) || Boolean(import_node_process2.default.env.TERMINUS_SUBLIME) || import_node_process2.default.env.ConEmuTask === "{cmd::Cmder}" || import_node_process2.default.env.TERM_PROGRAM === "Terminus-Sublime" || import_node_process2.default.env.TERM_PROGRAM === "vscode" || import_node_process2.default.env.TERM === "xterm-256color" || import_node_process2.default.env.TERM === "alacritty" || import_node_process2.default.env.TERMINAL_EMULATOR === "JetBrains-JediTerm";
+function Ze() {
+  return import_node_process2.default.platform !== "win32" ? import_node_process2.default.env.TERM !== "linux" : !!import_node_process2.default.env.CI || !!import_node_process2.default.env.WT_SESSION || !!import_node_process2.default.env.TERMINUS_SUBLIME || import_node_process2.default.env.ConEmuTask === "{cmd::Cmder}" || import_node_process2.default.env.TERM_PROGRAM === "Terminus-Sublime" || import_node_process2.default.env.TERM_PROGRAM === "vscode" || import_node_process2.default.env.TERM === "xterm-256color" || import_node_process2.default.env.TERM === "alacritty" || import_node_process2.default.env.TERMINAL_EMULATOR === "JetBrains-JediTerm";
 }
-function formatInstructionFooter(e, o, r2) {
-  const s = r2 ? `${(0, import_node_util2.styleText)("cyan", S_BAR)}  ` : "", n3 = wrapTextWithPrefix(e, o.join(" \u2022 "), s).split(`
-`);
-  return r2 && n3.push((0, import_node_util2.styleText)("cyan", S_BAR_END)), n3;
-}
-var import_node_util2, import_node_process2, import_node_fs, import_node_path, unicode, isCI, unicodeOr, S_STEP_ACTIVE, S_STEP_CANCEL, S_STEP_ERROR, S_STEP_SUBMIT, S_BAR_START, S_BAR, S_BAR_END, S_BAR_START_RIGHT, S_BAR_END_RIGHT, S_RADIO_ACTIVE, S_RADIO_INACTIVE, S_CHECKBOX_ACTIVE, S_CHECKBOX_SELECTED, S_CHECKBOX_INACTIVE, S_PASSWORD_MASK, S_BAR_H, S_CORNER_TOP_RIGHT, S_CONNECT_LEFT, S_CORNER_BOTTOM_RIGHT, S_CORNER_BOTTOM_LEFT, S_CORNER_TOP_LEFT, S_INFO, S_SUCCESS, S_WARN, S_ERROR, symbol, symbolBar, E$1, limitOptions, confirm, MULTISELECT_INSTRUCTIONS, log, cancel, intro, outro, Y, Z, spinner, u2, SELECT_INSTRUCTIONS, c2, select, i, text;
-var init_dist5 = __esm({
+var import_node_util2, import_node_process2, import_node_fs, import_node_path, import_sisteransi2, ee, ae, w2, _e, oe, ue, F, le, d2, E2, Ie, Ee, z2, H2, te, U, J, xe, se, ce, Ge, $e, de, Oe, he, pe, me, ge, V2, ye, et2, Y2, ot2, O2, pt, mt, gt, Ct, fe, Ve, re, _t, je, Ot;
+var init_dist4 = __esm({
   "node_modules/@clack/prompts/dist/index.mjs"() {
     "use strict";
-    init_dist4();
-    init_dist4();
+    init_dist3();
+    init_dist3();
     import_node_util2 = require("util");
     import_node_process2 = __toESM(require("process"), 1);
     init_main();
     init_dist2();
     import_node_fs = require("fs");
     import_node_path = require("path");
-    init_dist3();
-    unicode = isUnicodeSupported();
-    isCI = () => process.env.CI === "true";
-    unicodeOr = (e, o) => unicode ? e : o;
-    S_STEP_ACTIVE = unicodeOr("\u25C6", "*");
-    S_STEP_CANCEL = unicodeOr("\u25A0", "x");
-    S_STEP_ERROR = unicodeOr("\u25B2", "x");
-    S_STEP_SUBMIT = unicodeOr("\u25C7", "o");
-    S_BAR_START = unicodeOr("\u250C", "T");
-    S_BAR = unicodeOr("\u2502", "|");
-    S_BAR_END = unicodeOr("\u2514", "\u2014");
-    S_BAR_START_RIGHT = unicodeOr("\u2510", "T");
-    S_BAR_END_RIGHT = unicodeOr("\u2518", "\u2014");
-    S_RADIO_ACTIVE = unicodeOr("\u25CF", ">");
-    S_RADIO_INACTIVE = unicodeOr("\u25CB", " ");
-    S_CHECKBOX_ACTIVE = unicodeOr("\u25FB", "[\u2022]");
-    S_CHECKBOX_SELECTED = unicodeOr("\u25FC", "[+]");
-    S_CHECKBOX_INACTIVE = unicodeOr("\u25FB", "[ ]");
-    S_PASSWORD_MASK = unicodeOr("\u25AA", "\u2022");
-    S_BAR_H = unicodeOr("\u2500", "-");
-    S_CORNER_TOP_RIGHT = unicodeOr("\u256E", "+");
-    S_CONNECT_LEFT = unicodeOr("\u251C", "+");
-    S_CORNER_BOTTOM_RIGHT = unicodeOr("\u256F", "+");
-    S_CORNER_BOTTOM_LEFT = unicodeOr("\u2570", "+");
-    S_CORNER_TOP_LEFT = unicodeOr("\u256D", "+");
-    S_INFO = unicodeOr("\u25CF", "\u2022");
-    S_SUCCESS = unicodeOr("\u25C6", "*");
-    S_WARN = unicodeOr("\u25B2", "!");
-    S_ERROR = unicodeOr("\u25A0", "x");
-    symbol = (e) => {
+    import_sisteransi2 = __toESM(require_src(), 1);
+    ee = Ze();
+    ae = () => process.env.CI === "true";
+    w2 = (e, i) => ee ? e : i;
+    _e = w2("\u25C6", "*");
+    oe = w2("\u25A0", "x");
+    ue = w2("\u25B2", "x");
+    F = w2("\u25C7", "o");
+    le = w2("\u250C", "T");
+    d2 = w2("\u2502", "|");
+    E2 = w2("\u2514", "\u2014");
+    Ie = w2("\u2510", "T");
+    Ee = w2("\u2518", "\u2014");
+    z2 = w2("\u25CF", ">");
+    H2 = w2("\u25CB", " ");
+    te = w2("\u25FB", "[\u2022]");
+    U = w2("\u25FC", "[+]");
+    J = w2("\u25FB", "[ ]");
+    xe = w2("\u25AA", "\u2022");
+    se = w2("\u2500", "-");
+    ce = w2("\u256E", "+");
+    Ge = w2("\u251C", "+");
+    $e = w2("\u256F", "+");
+    de = w2("\u2570", "+");
+    Oe = w2("\u256D", "+");
+    he = w2("\u25CF", "\u2022");
+    pe = w2("\u25C6", "*");
+    me = w2("\u25B2", "!");
+    ge = w2("\u25A0", "x");
+    V2 = (e) => {
       switch (e) {
         case "initial":
         case "active":
-          return (0, import_node_util2.styleText)("cyan", S_STEP_ACTIVE);
+          return (0, import_node_util2.styleText)("cyan", _e);
         case "cancel":
-          return (0, import_node_util2.styleText)("red", S_STEP_CANCEL);
+          return (0, import_node_util2.styleText)("red", oe);
         case "error":
-          return (0, import_node_util2.styleText)("yellow", S_STEP_ERROR);
+          return (0, import_node_util2.styleText)("yellow", ue);
         case "submit":
-          return (0, import_node_util2.styleText)("green", S_STEP_SUBMIT);
-        case "validating":
-          return (0, import_node_util2.styleText)("dim", S_STEP_ACTIVE);
+          return (0, import_node_util2.styleText)("green", F);
       }
     };
-    symbolBar = (e) => {
+    ye = (e) => {
       switch (e) {
         case "initial":
         case "active":
-          return (0, import_node_util2.styleText)("cyan", S_BAR);
+          return (0, import_node_util2.styleText)("cyan", d2);
         case "cancel":
-          return (0, import_node_util2.styleText)("red", S_BAR);
+          return (0, import_node_util2.styleText)("red", d2);
         case "error":
-          return (0, import_node_util2.styleText)("yellow", S_BAR);
+          return (0, import_node_util2.styleText)("yellow", d2);
         case "submit":
-          return (0, import_node_util2.styleText)("green", S_BAR);
+          return (0, import_node_util2.styleText)("green", d2);
       }
     };
-    E$1 = (l, e, w, p, b, C2 = false) => {
-      let r2 = e, O = 0;
-      if (C2)
-        for (let i2 = p - 1; i2 >= w; i2--) {
-          const m = l[i2];
-          if (m && (r2 -= m.length), O++, r2 <= b) break;
-        }
-      else
-        for (let i2 = w; i2 < p; i2++) {
-          const m = l[i2];
-          if (m && (r2 -= m.length), O++, r2 <= b) break;
-        }
-      return { lineCount: r2, removals: O };
+    et2 = (e, i, s, r, u2) => {
+      let n = i, o = 0;
+      for (let c2 = s; c2 < r; c2++) {
+        const a = e[c2];
+        if (n = n - a.length, o++, n <= u2) break;
+      }
+      return { lineCount: n, removals: o };
     };
-    limitOptions = ({
-      cursor: l,
-      options: e,
-      style: w,
-      output: p = process.stdout,
-      maxItems: b = Number.POSITIVE_INFINITY,
-      columnPadding: C2 = 0,
-      rowPadding: r2 = 4
-    }) => {
-      const i2 = getColumns(p) - C2, m = getRows(p), M = (0, import_node_util2.styleText)("dim", "..."), v = Math.max(m - r2, 0), a2 = Math.max(Math.min(b, v), 5);
+    Y2 = ({ cursor: e, options: i, style: s, output: r = process.stdout, maxItems: u2 = Number.POSITIVE_INFINITY, columnPadding: n = 0, rowPadding: o = 4 }) => {
+      const c2 = O(r) - n, a = A(r), l = (0, import_node_util2.styleText)("dim", "..."), $2 = Math.max(a - o, 0), y2 = Math.max(Math.min(u2, $2), 5);
+      let p2 = 0;
+      e >= y2 - 3 && (p2 = Math.max(Math.min(e - y2 + 3, i.length - y2), 0));
+      let m = y2 < i.length && p2 > 0, g = y2 < i.length && p2 + y2 < i.length;
+      const S2 = Math.min(p2 + y2, i.length), h = [];
       let f = 0;
-      l >= a2 - 3 && (f = Math.max(
-        Math.min(l - a2 + 3, e.length - a2),
-        0
-      ));
-      let d = a2 < e.length && f > 0, c3 = a2 < e.length && f + a2 < e.length;
-      const I = Math.min(
-        f + a2,
-        e.length
-      ), s = [];
-      let g = 0;
-      d && g++, c3 && g++;
-      const T = f + (d ? 1 : 0), W = I - (c3 ? 1 : 0);
-      for (let t2 = T; t2 < W; t2++) {
-        const n3 = e[t2], o = n3 !== void 0 ? w(n3, t2 === l) : "", h2 = wrapAnsi(o, i2, {
-          hard: true,
-          trim: false
-        }).split(`
+      m && f++, g && f++;
+      const v = p2 + (m ? 1 : 0), T = S2 - (g ? 1 : 0);
+      for (let b = v; b < T; b++) {
+        const x = wrapAnsi(s(i[b], b === e), c2, { hard: true, trim: false }).split(`
 `);
-        s.push(h2), g += h2.length;
+        h.push(x), f += x.length;
       }
-      if (g > v) {
-        let t2 = 0, n3 = 0, o = g;
-        const h2 = l - T;
-        let u3 = v;
-        const L = () => E$1(s, o, 0, h2, u3), y = () => E$1(
-          s,
-          o,
-          h2 + 1,
-          s.length,
-          u3,
-          true
-        );
-        d ? ({ lineCount: o, removals: t2 } = L(), o > u3 && (c3 || (u3 -= 1), { lineCount: o, removals: n3 } = y())) : (c3 || (u3 -= 1), { lineCount: o, removals: n3 } = y(), o > u3 && (u3 -= 1, { lineCount: o, removals: t2 } = L())), t2 > 0 && (d = true, s.splice(0, t2)), n3 > 0 && (c3 = true, s.splice(s.length - n3, n3));
+      if (f > $2) {
+        let b = 0, x = 0, G2 = f;
+        const M2 = e - v, R2 = (j2, D2) => et2(h, G2, j2, D2, $2);
+        m ? ({ lineCount: G2, removals: b } = R2(0, M2), G2 > $2 && ({ lineCount: G2, removals: x } = R2(M2 + 1, h.length))) : ({ lineCount: G2, removals: x } = R2(M2 + 1, h.length), G2 > $2 && ({ lineCount: G2, removals: b } = R2(0, M2))), b > 0 && (m = true, h.splice(0, b)), x > 0 && (g = true, h.splice(h.length - x, x));
       }
-      const x = [];
-      d && x.push(M);
-      for (const t2 of s)
-        for (const n3 of t2)
-          x.push(n3);
-      return c3 && x.push(M), x;
+      const C2 = [];
+      m && C2.push(l);
+      for (const b of h) for (const x of b) C2.push(x);
+      return g && C2.push(l), C2;
     };
-    confirm = (e) => {
-      const a2 = e.active ?? "Yes", o = e.inactive ?? "No";
-      return new r({
-        active: a2,
-        inactive: o,
-        signal: e.signal,
-        input: e.input,
-        output: e.output,
-        initialValue: e.initialValue ?? true,
-        render() {
-          const i2 = e.withGuide ?? settings.withGuide, u3 = `${symbol(this.state)}  `, l = i2 ? `${(0, import_node_util2.styleText)("gray", S_BAR)}  ` : "", f = wrapTextWithPrefix(
-            e.output,
-            e.message,
-            l,
-            u3
-          ), s = `${i2 ? `${(0, import_node_util2.styleText)("gray", S_BAR)}
-` : ""}${f}
-`, c3 = this.value ? a2 : o;
-          switch (this.state) {
-            case "submit": {
-              const r2 = i2 ? `${(0, import_node_util2.styleText)("gray", S_BAR)}  ` : "";
-              return `${s}${r2}${(0, import_node_util2.styleText)("dim", c3)}`;
-            }
-            case "cancel": {
-              const r2 = i2 ? `${(0, import_node_util2.styleText)("gray", S_BAR)}  ` : "";
-              return `${s}${r2}${(0, import_node_util2.styleText)(["strikethrough", "dim"], c3)}${i2 ? `
-${(0, import_node_util2.styleText)("gray", S_BAR)}` : ""}`;
-            }
-            default: {
-              const r2 = i2 ? `${(0, import_node_util2.styleText)("cyan", S_BAR)}  ` : "", g = i2 ? (0, import_node_util2.styleText)("cyan", S_BAR_END) : "";
-              return `${s}${r2}${this.value ? `${(0, import_node_util2.styleText)("green", S_RADIO_ACTIVE)} ${a2}` : `${(0, import_node_util2.styleText)("dim", S_RADIO_INACTIVE)} ${(0, import_node_util2.styleText)("dim", a2)}`}${e.vertical ? i2 ? `
-${(0, import_node_util2.styleText)("cyan", S_BAR)}  ` : `
-` : ` ${(0, import_node_util2.styleText)("dim", "/")} `}${this.value ? `${(0, import_node_util2.styleText)("dim", S_RADIO_INACTIVE)} ${(0, import_node_util2.styleText)("dim", o)}` : `${(0, import_node_util2.styleText)("green", S_RADIO_ACTIVE)} ${o}`}
-${g}
-`;
-            }
-          }
-        }
-      }).prompt();
-    };
-    MULTISELECT_INSTRUCTIONS = [
-      `${(0, import_node_util2.styleText)("dim", "\u2191/\u2193")} to navigate`,
-      `${(0, import_node_util2.styleText)("dim", "Space:")} select`,
-      `${(0, import_node_util2.styleText)("dim", "Enter:")} confirm`
-    ];
-    log = {
-      message: (s = [], {
-        symbol: e = (0, import_node_util2.styleText)("gray", S_BAR),
-        secondarySymbol: r2 = (0, import_node_util2.styleText)("gray", S_BAR),
-        output: m = process.stdout,
-        spacing: l = 1,
-        withGuide: c3
-      } = {}) => {
-        const t2 = [], o = c3 ?? settings.withGuide, f = o ? r2 : "", O = o ? `${e}  ` : "", u3 = o ? `${r2}  ` : "";
-        for (let i2 = 0; i2 < l; i2++)
-          t2.push(f);
-        const g = Array.isArray(s) ? s : s.split(`
-`);
-        if (g.length > 0) {
-          const [i2, ...y] = g;
-          i2.length > 0 ? t2.push(`${O}${i2}`) : t2.push(o ? e : "");
-          for (const p of y)
-            p.length > 0 ? t2.push(`${u3}${p}`) : t2.push(o ? r2 : "");
-        }
-        m.write(`${t2.join(`
-`)}
-`);
-      },
-      info: (s, e) => {
-        log.message(s, { ...e, symbol: (0, import_node_util2.styleText)("blue", S_INFO) });
-      },
-      success: (s, e) => {
-        log.message(s, { ...e, symbol: (0, import_node_util2.styleText)("green", S_SUCCESS) });
-      },
-      step: (s, e) => {
-        log.message(s, { ...e, symbol: (0, import_node_util2.styleText)("green", S_STEP_SUBMIT) });
-      },
-      warn: (s, e) => {
-        log.message(s, { ...e, symbol: (0, import_node_util2.styleText)("yellow", S_WARN) });
-      },
-      /** alias for `log.warn()`. */
-      warning: (s, e) => {
-        log.warn(s, e);
-      },
-      error: (s, e) => {
-        log.message(s, { ...e, symbol: (0, import_node_util2.styleText)("red", S_ERROR) });
-      }
-    };
-    cancel = (o = "", t2) => {
-      const i2 = t2?.output ?? process.stdout, e = t2?.withGuide ?? settings.withGuide ? `${(0, import_node_util2.styleText)("gray", S_BAR_END)}  ` : "";
-      i2.write(`${e}${(0, import_node_util2.styleText)("red", o)}
-
-`);
-    };
-    intro = (o = "", t2) => {
-      const i2 = t2?.output ?? process.stdout, e = t2?.withGuide ?? settings.withGuide ? `${(0, import_node_util2.styleText)("gray", S_BAR_START)}  ` : "";
-      i2.write(`${e}${o}
-`);
-    };
-    outro = (o = "", t2) => {
-      const i2 = t2?.output ?? process.stdout, e = t2?.withGuide ?? settings.withGuide ? `${(0, import_node_util2.styleText)("gray", S_BAR)}
-${(0, import_node_util2.styleText)("gray", S_BAR_END)}  ` : "";
-      i2.write(`${e}${o}
-
-`);
-    };
-    Y = 3e4;
-    Z = (c3) => (0, import_node_util2.styleText)("magenta", c3);
-    spinner = ({
-      indicator: c3 = "dots",
-      onCancel: b,
-      output: n3 = process.stdout,
-      cancelMessage: _,
-      errorMessage: C2,
-      frames: M = unicode ? ["\u25D2", "\u25D0", "\u25D3", "\u25D1"] : ["\u2022", "o", "O", "0"],
-      delay: O = unicode ? 80 : 120,
-      signal: g,
-      ...E
-    } = {}) => {
-      const u3 = isCI(), h2 = isAccessible(E.accessible);
-      let x, I, p = false, l = false, r2 = "", v, w = performance.now();
-      const y = getColumns(n3), F = E?.styleFrame ?? Z, S = (e) => {
-        const s = e > 1 ? C2 ?? settings.messages.error : _ ?? settings.messages.cancel;
-        l = e === 1, p && (m(s, e), l && typeof b == "function" && b());
-      }, $ = () => S(2), a2 = () => S(1), H = () => {
-        process.on("uncaughtExceptionMonitor", $), process.on("unhandledRejection", $), process.on("SIGINT", a2), process.on("SIGTERM", a2), process.on("exit", S), g && g.addEventListener("abort", a2);
-      }, B = () => {
-        process.removeListener("uncaughtExceptionMonitor", $), process.removeListener("unhandledRejection", $), process.removeListener("SIGINT", a2), process.removeListener("SIGTERM", a2), process.removeListener("exit", S), g && g.removeEventListener("abort", a2);
-      }, R2 = () => {
-        if (v === void 0) return;
-        u3 && n3.write(`
-`);
-        const s = wrapAnsi(v, y, {
-          hard: true,
-          trim: false
-        }).split(`
-`);
-        s.length > 1 && n3.write(cursor.up(s.length - 1)), n3.write(cursor.to(0)), n3.write(erase.down());
-      }, L = (e) => e.replace(/\.+$/, ""), T = (e) => {
-        const s = (performance.now() - e) / 1e3, i2 = Math.floor(s / 60), t2 = Math.floor(s % 60);
-        return i2 > 0 ? `[${i2}m ${t2}s]` : `[${t2}s]`;
-      }, N = E.withGuide ?? settings.withGuide, P = (e = "") => {
-        if (p = true, l = false, r2 = L(e), w = performance.now(), H(), h2) {
-          r2 !== "" && n3.write(`${r2}
-`), I = setInterval(() => {
-            n3.write(r2 === "" ? `still working
-` : `still working: ${r2}
-`);
-          }, Y);
-          return;
-        }
-        x = block({ output: n3 }), N && n3.write(`${(0, import_node_util2.styleText)("gray", S_BAR)}
-`);
-        let s = 0, i2 = 0;
-        I = setInterval(() => {
-          if (u3 && r2 === v)
-            return;
-          R2(), v = r2;
-          const t2 = F(M[s]);
-          let o;
-          if (u3)
-            o = `${t2}  ${r2}...`;
-          else if (c3 === "timer")
-            o = `${t2}  ${r2} ${T(w)}`;
-          else {
-            const j = ".".repeat(Math.floor(i2)).slice(0, 3);
-            o = `${t2}  ${r2}${j}`;
-          }
-          const D = wrapAnsi(o, y, {
-            hard: true,
-            trim: false
-          });
-          n3.write(D), s = s + 1 < M.length ? s + 1 : 0, i2 = i2 < 4 ? i2 + 0.125 : 0;
-        }, O);
-      }, m = (e = "", s = 0, i2 = false) => {
-        if (p) {
-          if (p = false, l = s === 1, clearInterval(I), h2 || R2(), r2 = e ?? r2, !i2)
-            if (h2) {
-              const t2 = s === 1 ? _ ?? settings.messages.cancel : s === 2 ? C2 ?? settings.messages.error : "Done", o = r2 || t2;
-              c3 === "timer" ? n3.write(`${o} ${T(w)}
-`) : n3.write(`${o}
-`);
-            } else {
-              const t2 = s === 0 ? (0, import_node_util2.styleText)("green", S_STEP_SUBMIT) : s === 1 ? (0, import_node_util2.styleText)("red", S_STEP_CANCEL) : (0, import_node_util2.styleText)("red", S_STEP_ERROR);
-              c3 === "timer" ? n3.write(`${t2}  ${r2} ${T(w)}
-`) : n3.write(`${t2}  ${r2}
-`);
-            }
-          B(), x?.();
-        }
-      };
-      return {
-        start: P,
-        stop: (e = "") => m(e, 0),
-        message: (e = "") => {
-          r2 = L(e ?? r2);
-        },
-        cancel: (e = "") => m(e, 1),
-        error: (e = "") => m(e, 2),
-        clear: () => m("", 0, true),
-        get isCancelled() {
-          return l;
-        }
-      };
-    };
-    u2 = {
-      light: unicodeOr("\u2500", "-"),
-      heavy: unicodeOr("\u2501", "="),
-      block: unicodeOr("\u2588", "#")
-    };
-    SELECT_INSTRUCTIONS = [
-      `${(0, import_node_util2.styleText)("dim", "\u2191/\u2193")} to navigate`,
-      `${(0, import_node_util2.styleText)("dim", "Enter:")} confirm`
-    ];
-    c2 = (t2, o) => t2.includes(`
-`) ? t2.split(`
-`).map((d) => o(d)).join(`
-`) : o(t2);
-    select = (t2) => {
-      const o = (n3, m) => {
-        if (n3 === void 0)
-          return "";
-        const s = n3.label ?? String(n3.value);
-        switch (m) {
-          case "disabled":
-            return `${(0, import_node_util2.styleText)("gray", S_RADIO_INACTIVE)} ${c2(s, (i2) => (0, import_node_util2.styleText)("gray", i2))}${n3.hint ? ` ${(0, import_node_util2.styleText)("dim", `(${n3.hint ?? "disabled"})`)}` : ""}`;
-          case "selected":
-            return `${c2(s, (i2) => (0, import_node_util2.styleText)("dim", i2))}`;
-          case "active":
-            return `${(0, import_node_util2.styleText)("green", S_RADIO_ACTIVE)} ${s}${n3.hint ? ` ${(0, import_node_util2.styleText)("dim", `(${n3.hint})`)}` : ""}`;
-          case "cancelled":
-            return `${c2(s, (i2) => (0, import_node_util2.styleText)(["strikethrough", "dim"], i2))}`;
-          default:
-            return `${(0, import_node_util2.styleText)("dim", S_RADIO_INACTIVE)} ${c2(s, (i2) => (0, import_node_util2.styleText)("dim", i2))}`;
-        }
-      }, d = t2.showInstructions ?? true;
-      return new n$1({
-        options: t2.options,
-        signal: t2.signal,
-        input: t2.input,
-        output: t2.output,
-        initialValue: t2.initialValue,
-        render() {
-          const n3 = t2.withGuide ?? settings.withGuide, m = `${symbol(this.state)}  `, s = `${symbolBar(this.state)}  `, i2 = wrapTextWithPrefix(
-            t2.output,
-            t2.message,
-            s,
-            m
-          ), u3 = `${n3 ? `${(0, import_node_util2.styleText)("gray", S_BAR)}
-` : ""}${i2}
-`;
-          switch (this.state) {
-            case "submit": {
-              const r2 = n3 ? `${(0, import_node_util2.styleText)("gray", S_BAR)}  ` : "", a2 = wrapTextWithPrefix(
-                t2.output,
-                o(this.options[this.cursor], "selected"),
-                r2
-              );
-              return `${u3}${a2}`;
-            }
-            case "cancel": {
-              const r2 = n3 ? `${(0, import_node_util2.styleText)("gray", S_BAR)}  ` : "", a2 = wrapTextWithPrefix(
-                t2.output,
-                o(this.options[this.cursor], "cancelled"),
-                r2
-              );
-              return `${u3}${a2}${n3 ? `
-${(0, import_node_util2.styleText)("gray", S_BAR)}` : ""}`;
-            }
-            default: {
-              const r2 = n3 ? `${(0, import_node_util2.styleText)("cyan", S_BAR)}  ` : "", a2 = u3.split(`
-`).length, p = d ? formatInstructionFooter(t2.output, SELECT_INSTRUCTIONS, n3) : n3 ? [(0, import_node_util2.styleText)("cyan", S_BAR_END)] : [], f = p.join(`
-`), b = p.length + 1;
-              return `${u3}${r2}${limitOptions({
-                output: t2.output,
-                cursor: this.cursor,
-                options: this.options,
-                maxItems: t2.maxItems,
-                columnPadding: r2.length,
-                rowPadding: a2 + b,
-                style: (g, x) => o(g, g.disabled ? "disabled" : x ? "active" : "inactive")
-              }).join(`
-${r2}`)}
-${f}
-`;
-            }
-          }
-        }
-      }).prompt();
-    };
-    i = `${(0, import_node_util2.styleText)("gray", S_BAR)}  `;
-    text = (t2) => new n2({
-      validate: t2.validate,
-      placeholder: t2.placeholder,
-      defaultValue: t2.defaultValue,
-      initialValue: t2.initialValue,
-      output: t2.output,
-      signal: t2.signal,
-      input: t2.input,
-      render() {
-        const r2 = t2?.withGuide ?? settings.withGuide, l = `${`${r2 ? `${(0, import_node_util2.styleText)("gray", S_BAR)}
-` : ""}${symbol(this.state)}  `}${t2.message}
-`, d = t2.placeholder && t2.placeholder.length > 0 ? (
-          // biome-ignore lint/style/noNonNullAssertion: guarded by placeholder.length > 0
-          (0, import_node_util2.styleText)("inverse", t2.placeholder[0]) + (0, import_node_util2.styleText)("dim", t2.placeholder.slice(1))
-        ) : (0, import_node_util2.styleText)(["inverse", "hidden"], "_"), o = this.userInput ? this.userInputWithCursor : d, s = this.value ?? "";
+    ot2 = (e) => {
+      const i = e.active ?? "Yes", s = e.inactive ?? "No";
+      return new Q({ active: i, inactive: s, signal: e.signal, input: e.input, output: e.output, initialValue: e.initialValue ?? true, render() {
+        const r = e.withGuide ?? u.withGuide, u2 = `${V2(this.state)}  `, n = r ? `${(0, import_node_util2.styleText)("gray", d2)}  ` : "", o = R(e.output, e.message, n, u2), c2 = `${r ? `${(0, import_node_util2.styleText)("gray", d2)}
+` : ""}${o}
+`, a = this.value ? i : s;
         switch (this.state) {
-          case "validating": {
-            const n3 = r2 ? `${(0, import_node_util2.styleText)("cyan", S_BAR)}  ` : "", i2 = r2 ? (0, import_node_util2.styleText)("cyan", S_BAR_END) : "", c3 = (0, import_node_util2.styleText)("dim", o), $ = (0, import_node_util2.styleText)("dim", "Validating...");
-            return `${l}${n3}${c3}
-${i2}  ${$}
-`;
-          }
-          case "error": {
-            const n3 = this.error ? `  ${(0, import_node_util2.styleText)("yellow", this.error)}` : "", i2 = r2 ? `${(0, import_node_util2.styleText)("yellow", S_BAR)}  ` : "", c3 = r2 ? (0, import_node_util2.styleText)("yellow", S_BAR_END) : "";
-            return `${l.trim()}
-${i2}${o}
-${c3}${n3}
-`;
-          }
           case "submit": {
-            const n3 = s ? `${r2 ? "  " : ""}${(0, import_node_util2.styleText)("dim", s)}` : "", i2 = r2 ? (0, import_node_util2.styleText)("gray", S_BAR) : "";
-            return `${l}${i2}${n3}`;
+            const l = r ? `${(0, import_node_util2.styleText)("gray", d2)}  ` : "";
+            return `${c2}${l}${(0, import_node_util2.styleText)("dim", a)}`;
           }
           case "cancel": {
-            const n3 = s ? `  ${(0, import_node_util2.styleText)(["strikethrough", "dim"], s)}` : "", i2 = r2 ? (0, import_node_util2.styleText)("gray", S_BAR) : "";
-            return `${l}${i2}${n3}${s.trim() ? `
-${i2}` : ""}`;
+            const l = r ? `${(0, import_node_util2.styleText)("gray", d2)}  ` : "";
+            return `${c2}${l}${(0, import_node_util2.styleText)(["strikethrough", "dim"], a)}${r ? `
+${(0, import_node_util2.styleText)("gray", d2)}` : ""}`;
           }
           default: {
-            const n3 = r2 ? `${(0, import_node_util2.styleText)("cyan", S_BAR)}  ` : "", i2 = r2 ? (0, import_node_util2.styleText)("cyan", S_BAR_END) : "";
-            return `${l}${n3}${o}
-${i2}
+            const l = r ? `${(0, import_node_util2.styleText)("cyan", d2)}  ` : "", $2 = r ? (0, import_node_util2.styleText)("cyan", E2) : "";
+            return `${c2}${l}${this.value ? `${(0, import_node_util2.styleText)("green", z2)} ${i}` : `${(0, import_node_util2.styleText)("dim", H2)} ${(0, import_node_util2.styleText)("dim", i)}`}${e.vertical ? r ? `
+${(0, import_node_util2.styleText)("cyan", d2)}  ` : `
+` : ` ${(0, import_node_util2.styleText)("dim", "/")} `}${this.value ? `${(0, import_node_util2.styleText)("dim", H2)} ${(0, import_node_util2.styleText)("dim", s)}` : `${(0, import_node_util2.styleText)("green", z2)} ${s}`}
+${$2}
 `;
           }
         }
+      } }).prompt();
+    };
+    O2 = { message: (e = [], { symbol: i = (0, import_node_util2.styleText)("gray", d2), secondarySymbol: s = (0, import_node_util2.styleText)("gray", d2), output: r = process.stdout, spacing: u2 = 1, withGuide: n } = {}) => {
+      const o = [], c2 = n ?? u.withGuide, a = c2 ? s : "", l = c2 ? `${i}  ` : "", $2 = c2 ? `${s}  ` : "";
+      for (let p2 = 0; p2 < u2; p2++) o.push(a);
+      const y2 = Array.isArray(e) ? e : e.split(`
+`);
+      if (y2.length > 0) {
+        const [p2, ...m] = y2;
+        p2.length > 0 ? o.push(`${l}${p2}`) : o.push(c2 ? i : "");
+        for (const g of m) g.length > 0 ? o.push(`${$2}${g}`) : o.push(c2 ? s : "");
       }
-    }).prompt();
+      r.write(`${o.join(`
+`)}
+`);
+    }, info: (e, i) => {
+      O2.message(e, { ...i, symbol: (0, import_node_util2.styleText)("blue", he) });
+    }, success: (e, i) => {
+      O2.message(e, { ...i, symbol: (0, import_node_util2.styleText)("green", pe) });
+    }, step: (e, i) => {
+      O2.message(e, { ...i, symbol: (0, import_node_util2.styleText)("green", F) });
+    }, warn: (e, i) => {
+      O2.message(e, { ...i, symbol: (0, import_node_util2.styleText)("yellow", me) });
+    }, warning: (e, i) => {
+      O2.warn(e, i);
+    }, error: (e, i) => {
+      O2.message(e, { ...i, symbol: (0, import_node_util2.styleText)("red", ge) });
+    } };
+    pt = (e = "", i) => {
+      const s = i?.output ?? process.stdout, r = i?.withGuide ?? u.withGuide ? `${(0, import_node_util2.styleText)("gray", E2)}  ` : "";
+      s.write(`${r}${(0, import_node_util2.styleText)("red", e)}
+
+`);
+    };
+    mt = (e = "", i) => {
+      const s = i?.output ?? process.stdout, r = i?.withGuide ?? u.withGuide ? `${(0, import_node_util2.styleText)("gray", le)}  ` : "";
+      s.write(`${r}${e}
+`);
+    };
+    gt = (e = "", i) => {
+      const s = i?.output ?? process.stdout, r = i?.withGuide ?? u.withGuide ? `${(0, import_node_util2.styleText)("gray", d2)}
+${(0, import_node_util2.styleText)("gray", E2)}  ` : "";
+      s.write(`${r}${e}
+
+`);
+    };
+    Ct = (e) => (0, import_node_util2.styleText)("magenta", e);
+    fe = ({ indicator: e = "dots", onCancel: i, output: s = process.stdout, cancelMessage: r, errorMessage: u2, frames: n = ee ? ["\u25D2", "\u25D0", "\u25D3", "\u25D1"] : ["\u2022", "o", "O", "0"], delay: o = ee ? 80 : 120, signal: c2, ...a } = {}) => {
+      const l = ae();
+      let $2, y2, p2 = false, m = false, g = "", S2, h = performance.now();
+      const f = O(s), v = a?.styleFrame ?? Ct, T = (_2) => {
+        const A2 = _2 > 1 ? u2 ?? u.messages.error : r ?? u.messages.cancel;
+        m = _2 === 1, p2 && (W(A2, _2), m && typeof i == "function" && i());
+      }, C2 = () => T(2), b = () => T(1), x = () => {
+        process.on("uncaughtExceptionMonitor", C2), process.on("unhandledRejection", C2), process.on("SIGINT", b), process.on("SIGTERM", b), process.on("exit", T), c2 && c2.addEventListener("abort", b);
+      }, G2 = () => {
+        process.removeListener("uncaughtExceptionMonitor", C2), process.removeListener("unhandledRejection", C2), process.removeListener("SIGINT", b), process.removeListener("SIGTERM", b), process.removeListener("exit", T), c2 && c2.removeEventListener("abort", b);
+      }, M2 = () => {
+        if (S2 === void 0) return;
+        l && s.write(`
+`);
+        const _2 = wrapAnsi(S2, f, { hard: true, trim: false }).split(`
+`);
+        _2.length > 1 && s.write(import_sisteransi2.cursor.up(_2.length - 1)), s.write(import_sisteransi2.cursor.to(0)), s.write(import_sisteransi2.erase.down());
+      }, R2 = (_2) => _2.replace(/\.+$/, ""), j2 = (_2) => {
+        const A2 = (performance.now() - _2) / 1e3, k = Math.floor(A2 / 60), L = Math.floor(A2 % 60);
+        return k > 0 ? `[${k}m ${L}s]` : `[${L}s]`;
+      }, D2 = a.withGuide ?? u.withGuide, ie = (_2 = "") => {
+        p2 = true, $2 = z({ output: s }), g = R2(_2), h = performance.now(), D2 && s.write(`${(0, import_node_util2.styleText)("gray", d2)}
+`);
+        let A2 = 0, k = 0;
+        x(), y2 = setInterval(() => {
+          if (l && g === S2) return;
+          M2(), S2 = g;
+          const L = v(n[A2]);
+          let Z;
+          if (l) Z = `${L}  ${g}...`;
+          else if (e === "timer") Z = `${L}  ${g} ${j2(h)}`;
+          else {
+            const Be = ".".repeat(Math.floor(k)).slice(0, 3);
+            Z = `${L}  ${g}${Be}`;
+          }
+          const Ne = wrapAnsi(Z, f, { hard: true, trim: false });
+          s.write(Ne), A2 = A2 + 1 < n.length ? A2 + 1 : 0, k = k < 4 ? k + 0.125 : 0;
+        }, o);
+      }, W = (_2 = "", A2 = 0, k = false) => {
+        if (!p2) return;
+        p2 = false, clearInterval(y2), M2();
+        const L = A2 === 0 ? (0, import_node_util2.styleText)("green", F) : A2 === 1 ? (0, import_node_util2.styleText)("red", oe) : (0, import_node_util2.styleText)("red", ue);
+        g = _2 ?? g, k || (e === "timer" ? s.write(`${L}  ${g} ${j2(h)}
+`) : s.write(`${L}  ${g}
+`)), G2(), $2();
+      };
+      return { start: ie, stop: (_2 = "") => W(_2, 0), message: (_2 = "") => {
+        g = R2(_2 ?? g);
+      }, cancel: (_2 = "") => W(_2, 1), error: (_2 = "") => W(_2, 2), clear: () => W("", 0, true), get isCancelled() {
+        return m;
+      } };
+    };
+    Ve = { light: w2("\u2500", "-"), heavy: w2("\u2501", "="), block: w2("\u2588", "#") };
+    re = (e, i) => e.includes(`
+`) ? e.split(`
+`).map((s) => i(s)).join(`
+`) : i(e);
+    _t = (e) => {
+      const i = (s, r) => {
+        const u2 = s.label ?? String(s.value);
+        switch (r) {
+          case "disabled":
+            return `${(0, import_node_util2.styleText)("gray", H2)} ${re(u2, (n) => (0, import_node_util2.styleText)("gray", n))}${s.hint ? ` ${(0, import_node_util2.styleText)("dim", `(${s.hint ?? "disabled"})`)}` : ""}`;
+          case "selected":
+            return `${re(u2, (n) => (0, import_node_util2.styleText)("dim", n))}`;
+          case "active":
+            return `${(0, import_node_util2.styleText)("green", z2)} ${u2}${s.hint ? ` ${(0, import_node_util2.styleText)("dim", `(${s.hint})`)}` : ""}`;
+          case "cancelled":
+            return `${re(u2, (n) => (0, import_node_util2.styleText)(["strikethrough", "dim"], n))}`;
+          default:
+            return `${(0, import_node_util2.styleText)("dim", H2)} ${re(u2, (n) => (0, import_node_util2.styleText)("dim", n))}`;
+        }
+      };
+      return new nt({ options: e.options, signal: e.signal, input: e.input, output: e.output, initialValue: e.initialValue, render() {
+        const s = e.withGuide ?? u.withGuide, r = `${V2(this.state)}  `, u2 = `${ye(this.state)}  `, n = R(e.output, e.message, u2, r), o = `${s ? `${(0, import_node_util2.styleText)("gray", d2)}
+` : ""}${n}
+`;
+        switch (this.state) {
+          case "submit": {
+            const c2 = s ? `${(0, import_node_util2.styleText)("gray", d2)}  ` : "", a = R(e.output, i(this.options[this.cursor], "selected"), c2);
+            return `${o}${a}`;
+          }
+          case "cancel": {
+            const c2 = s ? `${(0, import_node_util2.styleText)("gray", d2)}  ` : "", a = R(e.output, i(this.options[this.cursor], "cancelled"), c2);
+            return `${o}${a}${s ? `
+${(0, import_node_util2.styleText)("gray", d2)}` : ""}`;
+          }
+          default: {
+            const c2 = s ? `${(0, import_node_util2.styleText)("cyan", d2)}  ` : "", a = s ? (0, import_node_util2.styleText)("cyan", E2) : "", l = o.split(`
+`).length, $2 = s ? 2 : 1;
+            return `${o}${c2}${Y2({ output: e.output, cursor: this.cursor, options: this.options, maxItems: e.maxItems, columnPadding: c2.length, rowPadding: l + $2, style: (y2, p2) => i(y2, y2.disabled ? "disabled" : p2 ? "active" : "inactive") }).join(`
+${c2}`)}
+${a}
+`;
+          }
+        }
+      } }).prompt();
+    };
+    je = `${(0, import_node_util2.styleText)("gray", d2)}  `;
+    Ot = (e) => new at({ validate: e.validate, placeholder: e.placeholder, defaultValue: e.defaultValue, initialValue: e.initialValue, output: e.output, signal: e.signal, input: e.input, render() {
+      const i = e?.withGuide ?? u.withGuide, s = `${`${i ? `${(0, import_node_util2.styleText)("gray", d2)}
+` : ""}${V2(this.state)}  `}${e.message}
+`, r = e.placeholder ? (0, import_node_util2.styleText)("inverse", e.placeholder[0]) + (0, import_node_util2.styleText)("dim", e.placeholder.slice(1)) : (0, import_node_util2.styleText)(["inverse", "hidden"], "_"), u2 = this.userInput ? this.userInputWithCursor : r, n = this.value ?? "";
+      switch (this.state) {
+        case "error": {
+          const o = this.error ? `  ${(0, import_node_util2.styleText)("yellow", this.error)}` : "", c2 = i ? `${(0, import_node_util2.styleText)("yellow", d2)}  ` : "", a = i ? (0, import_node_util2.styleText)("yellow", E2) : "";
+          return `${s.trim()}
+${c2}${u2}
+${a}${o}
+`;
+        }
+        case "submit": {
+          const o = n ? `  ${(0, import_node_util2.styleText)("dim", n)}` : "", c2 = i ? (0, import_node_util2.styleText)("gray", d2) : "";
+          return `${s}${c2}${o}`;
+        }
+        case "cancel": {
+          const o = n ? `  ${(0, import_node_util2.styleText)(["strikethrough", "dim"], n)}` : "", c2 = i ? (0, import_node_util2.styleText)("gray", d2) : "";
+          return `${s}${c2}${o}${n.trim() ? `
+${c2}` : ""}`;
+        }
+        default: {
+          const o = i ? `${(0, import_node_util2.styleText)("cyan", d2)}  ` : "", c2 = i ? (0, import_node_util2.styleText)("cyan", E2) : "";
+          return `${s}${o}${u2}
+${c2}
+`;
+        }
+      }
+    } }).prompt();
   }
 });
 
@@ -4788,22 +4505,22 @@ ${i2}
 var require_picocolors = __commonJS({
   "node_modules/picocolors/picocolors.js"(exports2, module2) {
     "use strict";
-    var p = process || {};
-    var argv = p.argv || [];
-    var env = p.env || {};
-    var isColorSupported = !(!!env.NO_COLOR || argv.includes("--no-color")) && (!!env.FORCE_COLOR || argv.includes("--color") || p.platform === "win32" || (p.stdout || {}).isTTY && env.TERM !== "dumb" || !!env.CI);
+    var p2 = process || {};
+    var argv = p2.argv || [];
+    var env = p2.env || {};
+    var isColorSupported = !(!!env.NO_COLOR || argv.includes("--no-color")) && (!!env.FORCE_COLOR || argv.includes("--color") || p2.platform === "win32" || (p2.stdout || {}).isTTY && env.TERM !== "dumb" || !!env.CI);
     var formatter = (open, close, replace = open) => (input) => {
       let string = "" + input, index = string.indexOf(close, open.length);
       return ~index ? open + replaceClose(string, close, replace, index) + close : open + string + close;
     };
     var replaceClose = (string, close, replace, index) => {
-      let result = "", cursor2 = 0;
+      let result = "", cursor = 0;
       do {
-        result += string.substring(cursor2, index) + replace;
-        cursor2 = index + close.length;
-        index = string.indexOf(close, cursor2);
+        result += string.substring(cursor, index) + replace;
+        cursor = index + close.length;
+        index = string.indexOf(close, cursor);
       } while (~index);
-      return result + string.substring(cursor2);
+      return result + string.substring(cursor);
     };
     var createColors = (enabled = isColorSupported) => {
       let f = enabled ? formatter : () => String;
@@ -5055,31 +4772,31 @@ function mergeSettings(baseDir, pluginDir) {
   const isOurs = (command) => command.includes("/.claude/hooks/") && ours.has(scriptOf(command) ?? "");
   const hooks = existing.hooks ?? {};
   for (const event of Object.keys(hooks)) {
-    hooks[event] = hooks[event].map((g) => ({ ...g, hooks: g.hooks.filter((h2) => !isOurs(h2.command)) })).filter((g) => g.hooks.length);
+    hooks[event] = hooks[event].map((g) => ({ ...g, hooks: g.hooks.filter((h) => !isOurs(h.command)) })).filter((g) => g.hooks.length);
     if (!hooks[event].length) delete hooks[event];
   }
   for (const [event, groups] of Object.entries(source)) {
-    hooks[event] = [...hooks[event] ?? [], ...groups.map((g) => ({ ...g, hooks: g.hooks.map((h2) => ({ ...h2, command: localCommand(h2.command) })) }))];
+    hooks[event] = [...hooks[event] ?? [], ...groups.map((g) => ({ ...g, hooks: g.hooks.map((h) => ({ ...h, command: localCommand(h.command) })) }))];
   }
   existing.hooks = hooks;
   fs3.mkdirSync(path3.dirname(target), { recursive: true });
   fs3.writeFileSync(target, JSON.stringify(existing, null, 2) + "\n");
 }
 function hookIssues(baseDir, pluginDir) {
-  let settings2;
+  let settings;
   try {
-    settings2 = readSettings(getSettingsPath(baseDir));
+    settings = readSettings(getSettingsPath(baseDir));
   } catch (e) {
     return [e.message];
   }
-  const registered = settings2.hooks ?? {};
+  const registered = settings.hooks ?? {};
   const issues = [];
   for (const [event, groups] of Object.entries(pluginHooks(pluginDir))) {
     for (const g of groups) {
-      for (const h2 of g.hooks) {
-        const command = localCommand(h2.command);
+      for (const h of g.hooks) {
+        const command = localCommand(h.command);
         const script = scriptOf(command) ?? command;
-        if (!(registered[event] ?? []).some((r2) => r2.matcher === g.matcher && r2.hooks.some((x) => x.command === command)))
+        if (!(registered[event] ?? []).some((r) => r.matcher === g.matcher && r.hooks.some((x) => x.command === command)))
           issues.push(`Safety hook not active: ${script} (${event}). Run 'medical-protocol update'.`);
         if (scriptOf(command) && !fs3.existsSync(path3.join(getHooksDir(baseDir), script)))
           issues.push(`Safety hook file missing: .claude/hooks/${script}. Run 'medical-protocol update'.`);
@@ -5147,18 +4864,18 @@ function isInteractive(opts) {
   return !opts.yes && !opts.json && !!process.stdin.isTTY;
 }
 async function selectInstallMode() {
-  const result = await select({
+  const result = await _t({
     message: "How would you like to install?",
     options: [
       { value: "copy", label: "Copy files", hint: "recommended" },
       { value: "link", label: "Symlink", hint: "for development" }
     ]
   });
-  if (isCancel(result)) return "cancel";
+  if (q(result)) return "cancel";
   return result;
 }
 async function confirmAlreadyInstalled() {
-  const result = await select({
+  const result = await _t({
     message: "Plugin already installed. What would you like to do?",
     options: [
       { value: "update", label: "Update to latest" },
@@ -5166,39 +4883,39 @@ async function confirmAlreadyInstalled() {
       { value: "cancel", label: "Cancel" }
     ]
   });
-  if (isCancel(result)) return "cancel";
+  if (q(result)) return "cancel";
   return result;
 }
 async function promptSourcePath() {
-  const result = await text({
+  const result = await Ot({
     message: "Path to repo clone:",
     placeholder: "~/.medical-protocol"
   });
-  if (isCancel(result)) return null;
+  if (q(result)) return null;
   return result || null;
 }
 async function confirmInstallAgentBrowser() {
-  const result = await confirm({
+  const result = await ot2({
     message: "Also install agent-browser? (enables automated browser QA of your clinical UI)",
     initialValue: true
   });
-  if (isCancel(result)) return false;
+  if (q(result)) return false;
   return result;
 }
 async function confirmOverwriteModified(files) {
   const list = files.map((f) => `  - ${f}`).join("\n");
-  log.warn(`Locally modified files:
+  O2.warn(`Locally modified files:
 ${list}`);
-  const result = await confirm({
+  const result = await ot2({
     message: "Overwrite these files with the latest version?"
   });
-  if (isCancel(result)) return false;
+  if (q(result)) return false;
   return result;
 }
 var init_prompts = __esm({
   "packages/medical-protocol/src/prompts.ts"() {
     "use strict";
-    init_dist5();
+    init_dist4();
   }
 });
 
@@ -5230,7 +4947,7 @@ async function runUpdate(opts) {
   const manifest = readManifest(skillsDir);
   if (!manifest) {
     if (isInteractive(opts)) {
-      log.error("Not installed. Run 'medical-protocol install' first.");
+      O2.error("Not installed. Run 'medical-protocol install' first.");
     } else {
       process.stderr.write(formatError("Not installed. Run 'medical-protocol install' first.") + "\n");
     }
@@ -5244,15 +4961,15 @@ async function runUpdate(opts) {
   }
 }
 async function updateLinkedInteractive(baseDir, manifest) {
-  intro(import_picocolors.default.bgCyan(import_picocolors.default.black(" medical-protocol ")));
+  mt(import_picocolors.default.bgCyan(import_picocolors.default.black(" medical-protocol ")));
   const sourcePath = manifest.sourcePath;
   if (!fs4.existsSync(path4.join(sourcePath, ".git"))) {
-    log.error(`Source repo not found at ${sourcePath}`);
-    outro(import_picocolors.default.red("Update failed"));
+    O2.error(`Source repo not found at ${sourcePath}`);
+    gt(import_picocolors.default.red("Update failed"));
     process.exitCode = 1;
     return;
   }
-  const s = spinner();
+  const s = fe();
   s.start("Pulling latest changes...");
   let pullOutput;
   let pullFailed = false;
@@ -5276,11 +4993,11 @@ async function updateLinkedInteractive(baseDir, manifest) {
   } else {
     s.stop(import_picocolors.default.green("Updated via git pull"));
   }
-  outro(alreadyUpToDate ? import_picocolors.default.green("All good") : "Done");
+  gt(alreadyUpToDate ? import_picocolors.default.green("All good") : "Done");
 }
 async function updateCopyInteractive(baseDir, manifest, force) {
-  intro(import_picocolors.default.bgCyan(import_picocolors.default.black(" medical-protocol ")));
-  const s = spinner();
+  mt(import_picocolors.default.bgCyan(import_picocolors.default.black(" medical-protocol ")));
+  const s = fe();
   s.start("Checking for updates...");
   const skillsDir = getSkillsDir(baseDir);
   const hooksDir = getHooksDir(baseDir);
@@ -5311,7 +5028,7 @@ async function updateCopyInteractive(baseDir, manifest, force) {
     s.stop(import_picocolors.default.yellow(`${skipped.length} locally modified file(s) found`));
     const overwrite = await confirmOverwriteModified(skipped);
     if (overwrite) {
-      const s2 = spinner();
+      const s2 = fe();
       s2.start("Overwriting modified files...");
       for (const key of [...skipped]) {
         const [prefix, ...rest] = key.split("/");
@@ -5351,11 +5068,11 @@ async function updateCopyInteractive(baseDir, manifest, force) {
   } else if (totalChanged > 0 && skipped.length === 0) {
     s.stop(import_picocolors.default.green(`${totalChanged} file(s) updated`));
   }
-  if (updated.length > 0) log.success(`Updated: ${updated.length} file(s)`);
-  if (added.length > 0) log.success(`Added: ${added.length} file(s)`);
-  if (removed.length > 0) log.info(`Removed: ${removed.length} file(s)`);
-  if (skipped.length > 0) log.warn(`Skipped: ${skipped.length} locally modified file(s)`);
-  outro(`Done! Plugin v${version}`);
+  if (updated.length > 0) O2.success(`Updated: ${updated.length} file(s)`);
+  if (added.length > 0) O2.success(`Added: ${added.length} file(s)`);
+  if (removed.length > 0) O2.info(`Removed: ${removed.length} file(s)`);
+  if (skipped.length > 0) O2.warn(`Skipped: ${skipped.length} locally modified file(s)`);
+  gt(`Done! Plugin v${version}`);
 }
 function updateLinked(baseDir, manifest, json) {
   const sourcePath = manifest.sourcePath;
@@ -5529,7 +5246,7 @@ var import_picocolors, import_child_process2, fs4, path4;
 var init_update = __esm({
   "packages/medical-protocol/src/commands/update.ts"() {
     "use strict";
-    init_dist5();
+    init_dist4();
     import_picocolors = __toESM(require_picocolors());
     import_child_process2 = require("child_process");
     init_package();
@@ -5556,7 +5273,7 @@ async function run2(opts) {
   }
 }
 async function runInteractive(opts) {
-  intro(import_picocolors2.default.bgCyan(import_picocolors2.default.black(" medical-protocol ")));
+  mt(import_picocolors2.default.bgCyan(import_picocolors2.default.black(" medical-protocol ")));
   const baseDir = opts.dir;
   const skillsDir = getSkillsDir(baseDir);
   const manifestPath = path5.join(skillsDir, ".manifest.json");
@@ -5565,12 +5282,12 @@ async function runInteractive(opts) {
   if (alreadyInstalled) {
     const action = await confirmAlreadyInstalled();
     if (action === "cancel") {
-      cancel("Installation cancelled.");
+      pt("Installation cancelled.");
       return;
     }
     if (action === "update") {
       const updateMod = await Promise.resolve().then(() => (init_update(), update_exports));
-      outro("Switching to update...");
+      gt("Switching to update...");
       await updateMod.run({ dir: baseDir, yes: true });
       return;
     }
@@ -5578,7 +5295,7 @@ async function runInteractive(opts) {
   }
   const mode = await selectInstallMode();
   if (mode === "cancel") {
-    cancel("Installation cancelled.");
+    pt("Installation cancelled.");
     return;
   }
   if (mode === "link") {
@@ -5586,32 +5303,32 @@ async function runInteractive(opts) {
     if (!sourcePath) {
       sourcePath = await promptSourcePath() ?? void 0;
     }
-    const s = spinner();
+    const s = fe();
     s.start("Cloning/updating source repo...");
     try {
       installLinked(baseDir, sourcePath, !!opts.force, false);
       s.stop(import_picocolors2.default.green("Plugin installed (symlink mode)"));
     } catch (e) {
       s.error(import_picocolors2.default.red("Installation failed"));
-      log.error(e.message);
+      O2.error(e.message);
       process.exitCode = 1;
       return;
     }
   } else {
-    const s = spinner();
+    const s = fe();
     s.start("Installing plugin...");
     try {
       installCopy(baseDir, !!opts.force, false);
       s.stop(import_picocolors2.default.green("Plugin installed"));
     } catch (e) {
       s.error(import_picocolors2.default.red("Installation failed"));
-      log.error(e.message);
+      O2.error(e.message);
       process.exitCode = 1;
       return;
     }
   }
   await promptAndInstallAgentBrowser();
-  outro(`Done! Plugin v${version} installed`);
+  gt(`Done! Plugin v${version} installed`);
 }
 function isAgentBrowserInstalled() {
   try {
@@ -5628,19 +5345,19 @@ function installAgentBrowser(silent) {
 }
 async function promptAndInstallAgentBrowser() {
   if (isAgentBrowserInstalled()) {
-    log.info("agent-browser already installed \u2014 browser QA enabled.");
+    O2.info("agent-browser already installed \u2014 browser QA enabled.");
     return;
   }
   const wants = await confirmInstallAgentBrowser();
   if (!wants) return;
-  const s = spinner();
+  const s = fe();
   s.start("Installing agent-browser (also downloads a browser)...");
   try {
     installAgentBrowser(true);
     s.stop(import_picocolors2.default.green("agent-browser installed"));
   } catch (e) {
     s.error(import_picocolors2.default.yellow("Could not install agent-browser \u2014 skipping (the plugin works without it)"));
-    log.warn(e.message);
+    O2.warn(e.message);
   }
 }
 function runNonInteractive(opts) {
@@ -5874,7 +5591,7 @@ var import_picocolors2, import_child_process3, fs5, path5;
 var init_install = __esm({
   "packages/medical-protocol/src/commands/install.ts"() {
     "use strict";
-    init_dist5();
+    init_dist4();
     import_picocolors2 = __toESM(require_picocolors());
     init_package();
     init_files();
@@ -5908,7 +5625,7 @@ async function run3(opts) {
   const manifest = readManifest(skillsDir);
   if (!manifest) {
     if (isInteractive(opts)) {
-      log.error("Not installed. Run 'medical-protocol install' first.");
+      O2.error("Not installed. Run 'medical-protocol install' first.");
     } else {
       process.stderr.write(formatError("Not installed. Run 'medical-protocol install' first.") + "\n");
     }
@@ -5922,8 +5639,8 @@ async function run3(opts) {
   }
 }
 async function checkLinkedInteractive(baseDir, manifest) {
-  intro(import_picocolors3.default.bgCyan(import_picocolors3.default.black(" medical-protocol ")));
-  const s = spinner();
+  mt(import_picocolors3.default.bgCyan(import_picocolors3.default.black(" medical-protocol ")));
+  const s = fe();
   s.start("Checking plugin status...");
   const { issues, repoStatus } = gatherLinkedStatus(baseDir, manifest);
   const healthy = issues.length === 0;
@@ -5932,26 +5649,26 @@ async function checkLinkedInteractive(baseDir, manifest) {
   } else {
     s.stop(import_picocolors3.default.yellow(`${issues.length} issue(s) found`));
   }
-  log.info(`Version: v${manifest.version} | Mode: symlink`);
+  O2.info(`Version: v${manifest.version} | Mode: symlink`);
   if (repoStatus) {
-    log.info(`Branch: ${repoStatus.branch} | Ahead: ${repoStatus.ahead} | Behind: ${repoStatus.behind}`);
+    O2.info(`Branch: ${repoStatus.branch} | Ahead: ${repoStatus.ahead} | Behind: ${repoStatus.behind}`);
     if (repoStatus.behind > 0) {
-      log.warn(`Behind by ${repoStatus.behind} commits \u2014 run 'medical-protocol update' to pull latest.`);
+      O2.warn(`Behind by ${repoStatus.behind} commits \u2014 run 'medical-protocol update' to pull latest.`);
     }
   }
   if (issues.length > 0) {
     for (const issue of issues) {
-      log.warn(issue);
+      O2.warn(issue);
     }
   }
-  outro(healthy ? import_picocolors3.default.green("All good") : import_picocolors3.default.yellow("Issues need attention"));
+  gt(healthy ? import_picocolors3.default.green("All good") : import_picocolors3.default.yellow("Issues need attention"));
   if (!healthy) {
     process.exitCode = 1;
   }
 }
 async function checkCopyInteractive(baseDir, manifest) {
-  intro(import_picocolors3.default.bgCyan(import_picocolors3.default.black(" medical-protocol ")));
-  const s = spinner();
+  mt(import_picocolors3.default.bgCyan(import_picocolors3.default.black(" medical-protocol ")));
+  const s = fe();
   s.start("Checking plugin status...");
   const { stale, added, removed, modified, issues, upToDate } = gatherCopyStatus(baseDir, manifest);
   if (upToDate) {
@@ -5959,13 +5676,13 @@ async function checkCopyInteractive(baseDir, manifest) {
   } else {
     s.stop(import_picocolors3.default.yellow("Updates available"));
   }
-  log.info(`Installed: v${manifest.version} | Bundled: v${version}`);
-  if (stale.length > 0) log.warn(`Stale: ${stale.length} file(s)`);
-  if (added.length > 0) log.info(`New: ${added.length} file(s)`);
-  if (removed.length > 0) log.info(`Removed upstream: ${removed.length} file(s)`);
-  if (modified.length > 0) log.warn(`Locally modified: ${modified.length} file(s)`);
-  for (const issue of issues) log.warn(issue);
-  outro(upToDate ? import_picocolors3.default.green("All good") : import_picocolors3.default.yellow("Run 'medical-protocol update' to fix"));
+  O2.info(`Installed: v${manifest.version} | Bundled: v${version}`);
+  if (stale.length > 0) O2.warn(`Stale: ${stale.length} file(s)`);
+  if (added.length > 0) O2.info(`New: ${added.length} file(s)`);
+  if (removed.length > 0) O2.info(`Removed upstream: ${removed.length} file(s)`);
+  if (modified.length > 0) O2.warn(`Locally modified: ${modified.length} file(s)`);
+  for (const issue of issues) O2.warn(issue);
+  gt(upToDate ? import_picocolors3.default.green("All good") : import_picocolors3.default.yellow("Run 'medical-protocol update' to fix"));
   if (!upToDate) {
     process.exitCode = 1;
   }
@@ -6184,7 +5901,7 @@ var import_picocolors3, fs6, path6;
 var init_check = __esm({
   "packages/medical-protocol/src/commands/check.ts"() {
     "use strict";
-    init_dist5();
+    init_dist4();
     import_picocolors3 = __toESM(require_picocolors());
     init_package();
     init_files();
@@ -6197,7 +5914,7 @@ var init_check = __esm({
   }
 });
 
-// node_modules/commander/esm.mjs
+// packages/medical-protocol/node_modules/commander/esm.mjs
 var import_index = __toESM(require_commander(), 1);
 var {
   program,
