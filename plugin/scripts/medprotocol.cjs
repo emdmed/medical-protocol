@@ -4065,25 +4065,26 @@ var init_extract_artifact = __esm({
 <style>
 :root{
   --ground:#f1ebde; --sheet:#fbf8f2; --ink:#1d1a16; --ink-2:#5a534a; --line:#cdc3b0;
-  --hl:#e3d9c3; --hl-on:#cdc3b0; --hl-line:#1d1a16;
+  --hl:#e3d9c3; --hl-line:#1d1a16;
   --bad:#b0182f; --bad-t:#f1d5d8;
   --ui:"Fira Sans",system-ui,sans-serif;
   --label:"Fira Sans Condensed","Arial Narrow",sans-serif;
   --text:"Spectral",Georgia,serif;
   --mono:"Geist Mono",ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.16,1,.3,1); --mark:#3a2e2a;
   --gut:max(16px,env(safe-area-inset-left,0px)); --lh:29px; --mw:35rem;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f;
-  --hl:#3d372f; --hl-on:#5a534a; --hl-line:#f1ebde;
-  --bad:#e7959f; --bad-t:#4a2228; color-scheme:dark}}
+  --hl:#3d372f; --hl-line:#f1ebde;
+  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark}}
 :root[data-theme="dark"]{
   --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f;
-  --hl:#3d372f; --hl-on:#5a534a; --hl-line:#f1ebde;
-  --bad:#e7959f; --bad-t:#4a2228; color-scheme:dark}
+  --hl:#3d372f; --hl-line:#f1ebde;
+  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark}
 @media (min-width:700px){:root{--gut:max(28px,env(safe-area-inset-left,0px))}}
 *{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--ink-2) transparent}
-body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh;overflow:hidden;margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.4 var(--ui);font-variant-numeric:tabular-nums;caret-color:var(--ink)}
+body{display:grid;grid-template-rows:auto minmax(0,1fr);height:100dvh;overflow:hidden;margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.4 var(--ui);font-variant-numeric:tabular-nums;caret-color:var(--ink)}
 ::selection{background:var(--bad);color:var(--sheet)}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 h1,h2,h3,p,ol,ul{margin:0;padding:0}
@@ -4093,7 +4094,9 @@ ol,ul{list-style:none}
 
 /* top bar */
 .run{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;min-height:52px;padding:8px var(--gut);padding-top:calc(8px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--ink)}
-.brand{font:700 14px/1 var(--label);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.brand{display:flex;align-items:center;gap:9px;font:700 14px/1 var(--label);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.brand svg{width:20px;height:20px}
+.brand path{stroke:var(--mark)}
 h1{font:400 23px/1.1 var(--text);text-wrap:balance;overflow-wrap:anywhere;min-width:0;padding-left:24px;border-left:1px solid var(--line)}
 .tally{margin-left:auto;display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px}
 .tally li{display:flex;align-items:center;gap:7px}
@@ -4106,7 +4109,7 @@ dialog::backdrop{background:rgba(29,26,22,.55)}
 dialog h2{margin:20px 20px 0}
 dialog ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));align-content:start;overflow-y:auto;overscroll-behavior:contain}
 dialog li{min-width:0}
-dialog a{display:grid;gap:3px;padding:12px 20px;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;transition:background-color .15s}
+dialog a{display:grid;gap:3px;padding:12px 20px;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;transition:background-color .3s var(--ease)}
 dialog a:hover,dialog a[aria-current]{background:var(--sheet)}
 dialog a:focus-visible{outline-offset:-2px}
 .first{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:400 16px/1.5 var(--text)}
@@ -4114,7 +4117,7 @@ dialog a span+span{font-size:13px;color:var(--ink-2)}
 dialog form{display:flex;justify-content:flex-end;padding:14px 20px}
 .conn{flex-basis:100%;font-size:14px;color:var(--bad)}
 
-.btn{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 14px;border:1px solid var(--ink);font:600 14px/1.2 var(--ui);color:var(--ink);white-space:nowrap;transition:background-color .15s,color .15s}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 14px;border:1px solid var(--ink);font:600 14px/1.2 var(--ui);color:var(--ink);white-space:nowrap;transition:background-color .3s var(--ease),color .3s var(--ease)}
 .btn:hover{background:var(--line)}
 .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .btn.fill{border-radius:3px;background:var(--ink);color:var(--ground)}
@@ -4136,17 +4139,17 @@ main{min-height:0}
 .rail .lead,.rail .box,.step{max-width:34rem}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:0 36px;margin-bottom:26px}
 .rail{min-height:0;overflow-y:auto;padding:0 20px 22px var(--gut);border-right:1px solid var(--line)}
-h2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--ink);font:700 12.5px/1.3 var(--label);letter-spacing:.14em;text-transform:uppercase}
-h2 span,h2 b{font:400 13px/1.3 var(--ui);letter-spacing:0;text-transform:none;color:var(--ink-2)}
+h2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:7px;border-bottom:1px solid var(--ink);font:italic 400 21px/24px var(--text)}
+h2 span,h2 b{font:400 13px/1.3 var(--ui);color:var(--ink-2)}
 h2 b{font:500 12px/1.3 var(--mono);color:var(--ink)}
 /* the heads stack at the top of the pane as their sections scroll under them: head --i stops below the
    ones before it, and a click on it brings its section back. All are one height, so the stops are exact */
-.rail h2,.ph{position:sticky;top:calc(var(--i,0)*40px);z-index:1;height:40px;padding-top:12px;background:var(--ground);box-shadow:-12px 0 var(--ground),12px 0 var(--ground)}
+.rail h2,.ph{position:sticky;top:calc(var(--i,0)*40px);z-index:1;height:40px;padding-top:8px;background:var(--ground);box-shadow:-12px 0 var(--ground),12px 0 var(--ground)}
 .rail section{display:contents}
 .rail section>h2{cursor:pointer}
 .lead{padding-top:10px;font-size:14px;color:var(--ink-2);text-wrap:pretty}
 .empty{font-style:italic;color:var(--ink-2)}
-.card{margin-inline:-12px;padding:10px 12px 12px;border-bottom:1px solid var(--line);transition:background-color .15s}
+.card{margin-inline:-12px;padding:10px 12px 12px;border-bottom:1px solid var(--line);transition:background-color .3s var(--ease)}
 .card:hover,.card:focus-visible,.card:focus-within,.card.on{background:var(--sheet)}
 .card:focus-visible{outline-offset:-2px}
 h3{display:flex;align-items:start;gap:10px;font:400 20px/1.2 var(--text)}
@@ -4176,17 +4179,21 @@ q{quotes:"\201C" "\201D";font-family:var(--text);color:var(--ink)}
 .key b{font:500 14px/1 var(--mono);color:var(--ink)}
 
 /* the proof: the note as it was written, one sheet of raw text; only the quotes are marked */
-.proof{display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0;min-height:0;padding:0 var(--gut) 0 28px}
-#note{overflow-y:auto;padding:18px 24px 28px;background:var(--sheet);font:400 18px/var(--lh) var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
-mark{color:var(--ink);background:linear-gradient(var(--hl),var(--hl)) 0 0/100% 100% no-repeat;padding:2px 3px;border-bottom:2px solid var(--hl-line);-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:pointer}
-mark.his{border-bottom:4px double var(--hl-line)}
-mark.close{background:none;border-bottom:2px dashed var(--bad)}
-mark.bad{--hl:var(--bad-t);border-bottom:0;box-shadow:inset 0 0 0 2px var(--bad)}
-mark.on{--hl:var(--hl-on);outline:2px solid var(--ink);outline-offset:1px}
+.proof{display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0;min-height:0;padding:0 var(--gut) 22px 28px}
+#note,textarea{margin-top:14px;border:1px solid var(--ink);box-shadow:0 1px 2px rgba(29,26,22,.06),0 14px 28px -14px rgba(29,26,22,.28)}
+#note{overflow-y:auto;padding:26px 40px 36px;background:var(--sheet);font:400 18px/var(--lh) var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
+/* a quote is a band of highlighter lower than the line, so two marked lines never touch, over a line under
+   its words: solid = found, double = history, dashed carmine and no band = close match, carmine on a wash = bad */
+mark{color:var(--ink);background:linear-gradient(var(--hl),var(--hl)) 0 50%/100% 1.3em no-repeat;padding:0 3px;text-decoration:underline 1px var(--hl-line);text-underline-offset:5px;text-decoration-skip-ink:none;-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:pointer}
+mark.his{text-decoration-style:double;text-decoration-thickness:1px}
+mark.close{--hl:transparent;--hl-line:var(--bad);text-decoration-style:dashed}
+mark.bad{--hl:var(--bad-t);--hl-line:var(--bad);text-decoration-thickness:1.5px}
+/* the quote pointed at is filled with its own ink, the text in paper */
+mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent}
 /* a group of values reads like a lab sheet, across then down, in as many columns as fit:
    field at left, the figure and its unit in fixed places at right, so figures line up */
 .vals{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr));gap:0 36px;margin-bottom:26px}
-.e{display:grid;grid-template-columns:14px fit-content(100%) minmax(0,1fr) auto;align-content:start;align-items:baseline;gap:0 6px;margin-inline:-6px;padding:6px 6px 7px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink-2);cursor:pointer;transition:background-color .15s}
+.e{display:grid;grid-template-columns:14px fit-content(100%) minmax(0,1fr) auto;align-content:start;align-items:baseline;gap:0 6px;margin-inline:-6px;padding:6px 6px 7px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink-2);cursor:pointer;transition:background-color .3s var(--ease)}
 .e .m{align-self:start;margin-top:3px}
 .e:hover,.e:focus-visible,.e.on{background:var(--hl);color:var(--ink)}
 .e:focus-visible{outline-offset:-2px}
@@ -4205,19 +4212,19 @@ mark.on{--hl:var(--hl-on);outline:2px solid var(--ink);outline-offset:1px}
 .e:hover.bad,.e.on.bad{background:var(--bad-t)}
 @media (prefers-reduced-motion:no-preference){
   /* the highlighter is drawn across each quote once, when the note first appears */
-  .fresh mark{animation:stroke .6s cubic-bezier(.16,1,.3,1) .1s both}
-  @keyframes stroke{from{background-size:0 100%}}
+  .fresh mark{animation:stroke .9s var(--ease) .1s both}
+  @keyframes stroke{from{background-size:0 1.3em}}
 }
 
 /* live mode only (extract --serve): the intake form, the steps, the failed box */
 .in .proof{grid-template-rows:auto minmax(160px,1fr) auto}
-textarea{display:block;max-width:calc(var(--mw) + 48px);width:100%;padding:14px 24px;border:1px solid var(--line);resize:none;background:var(--sheet);color:var(--ink);font:400 18px/var(--lh) var(--text)}
+textarea{display:block;max-width:calc(var(--mw) + 80px);width:100%;padding:26px 40px;resize:none;background:var(--sheet);color:var(--ink);font:400 18px/var(--lh) var(--text)}
 textarea:focus-visible{outline-offset:0}
 textarea::placeholder{color:var(--ink-2);font-style:italic}
-.send{display:grid;gap:16px;max-width:calc(var(--mw) + 48px);padding:18px 0 22px}
+.send{display:grid;gap:16px;max-width:calc(var(--mw) + 80px);padding:22px 0 0}
 .agree{display:flex;align-items:flex-start;gap:12px;color:var(--ink-2);cursor:pointer}
 /* a square in a frame, like the marks */
-.agree input{appearance:none;flex:none;width:18px;height:18px;margin:2px 0 0;border:1px solid var(--ink);background:var(--sheet);cursor:pointer;transition:background-color .15s}
+.agree input{appearance:none;flex:none;width:18px;height:18px;margin:2px 0 0;border:1px solid var(--ink);background:var(--sheet);cursor:pointer;transition:background-color .3s var(--ease)}
 .agree input:checked{background:var(--ink);box-shadow:inset 0 0 0 3px var(--sheet)}
 .go{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14px;color:var(--ink-2)}
 .go .btn{padding:10px 20px}
@@ -4244,8 +4251,6 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   @keyframes read{to{transform:translateX(257.2%)}}
 }
 
-footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 24px;padding:9px var(--gut) calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);font-size:13px;color:var(--ink-2)}
-footer code{font:500 12px var(--mono)}
 
 /* narrow screens: one column, the page scrolls: the values, then the note */
 @media (max-width:900px){
@@ -4258,11 +4263,11 @@ footer code{font:500 12px var(--mono)}
   .in .rail{order:1}
   .proof{padding:0 var(--gut) 22px}
   textarea{min-height:240px}
-  #note{overflow:visible;padding-inline:16px}
+  #note{overflow:visible;padding:18px 18px 24px}
+  textarea{padding-inline:18px}
   /* the legend opens in the flow of the bar, on a line of its own */
   .lg[open]{flex-basis:100%}
   .key{position:static;margin-top:8px}
-  footer{padding-block:14px 28px}
 }
 @media (max-width:640px){
   .tally{margin-left:0;flex-basis:100%}
@@ -4272,7 +4277,7 @@ footer code{font:500 12px var(--mono)}
 </style>
 
 <header class="run">
-  <span class="brand">Medical Protocol</span>
+  <span class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8.5 6 L2.5 16 L8.5 26 M23.5 6 L29.5 16 L23.5 26" fill="none" stroke="#3a2e2a" stroke-width="4" stroke-linecap="square"/><rect x="9.5" y="13.75" width="13" height="4.5" fill="#e8907a"/><rect x="13.75" y="9.5" width="4.5" height="13" fill="#e8907a"/></svg>Medical Protocol</span>
   <h1 id="t"></h1>
   <button class="btn" id="pick" type="button" hidden>Saved notes</button>
   <ul class="tally" id="tally" aria-label="Counts"></ul>
@@ -4312,11 +4317,6 @@ footer code{font:500 12px var(--mono)}
     </section>
   </div>
 </main>
-
-<footer>
-    <span>Values copied from the note, each with the words it came from. Extraction only: no ranges, scores or interpretation. Checked with <code>medprotocol extract</code>.</span>
-    <span id="when"></span>
-</footer>
 
 <script type="application/json" id="data">__DATA__</script>
 <script>
@@ -4524,7 +4524,6 @@ footer code{font:500 12px var(--mono)}
     pinned = -1; legend.hidden = !data.items.length;
 
     title.textContent = data.name;
-    document.getElementById("when").textContent = data.checkedAt ? "Checked " + data.checkedAt : "";
     var count = { "": 0, his: 0, close: 0, bad: 0 };
     items.forEach(function (i) { count[kind(i)]++; });
     var found = count[""] + count.his;
@@ -4601,8 +4600,6 @@ footer code{font:500 12px var(--mono)}
   var conn = document.getElementById("conn");
   // one node for every state, so a change of its text is announced
   var statusLine = el("p", "sr"); statusLine.setAttribute("role", "status");
-  var when = document.getElementById("when");
-  when.parentNode.insertBefore(el("span", "", "This page runs on this computer. The note is sent to the AI model only after you tick the box."), when);
   // last: the response text already drawn. seq: answers to an older request are dropped
   var id = null, last = null, timer = 0, seq = 0, tick = 0;
 
@@ -4673,7 +4670,7 @@ footer code{font:500 12px var(--mono)}
     tally.hidden = copyBtn.hidden = busy || s.state === "failed";
     if (tally.hidden) legend.hidden = true;
     if (!tally.hidden) { corrections(s); return; }
-    rail.textContent = ""; when.textContent = "";
+    rail.textContent = "";
     if (busy) {
       var at = s.state === "verifying" ? 1 : 0, clock = el("b"), from = started(s.id);
       var show = function () {
@@ -4819,7 +4816,7 @@ footer code{font:500 12px var(--mono)}
     intake.hidden = !!id; panes.hidden = !id;
     tally.hidden = copyBtn.hidden = legend.hidden = true;
     document.getElementById("new").hidden = !id;
-    title.textContent = "Note extraction"; when.textContent = "";
+    title.textContent = "Note extraction";
     // the bar under the note's head runs until the first answer
     panes.classList.toggle("busy", !!id);
     notes();
