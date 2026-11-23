@@ -36,6 +36,16 @@ describe("installer settings merge", () => {
     expect(settings().model).toBe("x");
   });
 
+  it("carries the PowerShell mirrors of the Bash permission rules", () => {
+    mergeSettings(dir, PLUGIN);
+    const { allow, deny } = settings().permissions;
+    expect(allow).toContain("PowerShell(node *medprotocol.cjs *)");
+    for (const cmd of ["git push", "npm publish", "yarn publish", "pnpm publish"]) {
+      expect(deny).toContain(`Bash(${cmd} *)`);
+      expect(deny).toContain(`PowerShell(${cmd} *)`);
+    }
+  });
+
   it("refuses to overwrite settings it can't parse", () => {
     writeFileSync(join(dir, ".claude", "settings.json"), "{ // comment\n}");
     expect(() => mergeSettings(dir, PLUGIN)).toThrow(/Can't parse/);

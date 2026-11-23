@@ -68,6 +68,9 @@ describe("note-consent hook", () => {
     hook({ hook_event_name: "PostToolUse", tool_name: "PowerShell", tool_input: { command: "Get-Content extractions\\abc123def456\\note.md" } });
     expect(existsSync(join(folder, ".consent"))).toBe(true);
     expect(decision("PowerShell", { command: "Get-ChildItem" })).toBeUndefined();
+    rmSync(join(folder, ".consent"));
+    hook({ hook_event_name: "PostToolUse", tool_name: "PowerShell", tool_input: { command: "Get-Content extractions/abc123def456/note.md" } });
+    expect(existsSync(join(folder, ".consent"))).toBe(true);
   });
 
   // backslashes separate folders only on Windows

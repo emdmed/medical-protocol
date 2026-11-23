@@ -17,6 +17,7 @@
       "Bash(gh api *)",
       "Bash(agent-browser *)",
       "Bash(node *medprotocol.cjs *)",
+      "PowerShell(node *medprotocol.cjs *)",
 
       "Read",
       "Write",
@@ -28,7 +29,11 @@
       "Bash(git push *)",
       "Bash(npm publish *)",
       "Bash(yarn publish *)",
-      "Bash(pnpm publish *)"
+      "Bash(pnpm publish *)",
+      "PowerShell(git push *)",
+      "PowerShell(npm publish *)",
+      "PowerShell(yarn publish *)",
+      "PowerShell(pnpm publish *)"
     ]
   }
 }
