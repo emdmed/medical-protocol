@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process";
+import { claudeCommand, killClaude } from "../claude-spawn";
 import { createHash } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
@@ -109,14 +110,15 @@ const askClaude: AskModel = (prompt) =>
   new Promise((done, fail) => {
     // --system-prompt drops the coding-agent prompt; settings stay on (login, model, the project's hooks).
     // --no-session-persistence: the prompt holds the note, keep it out of the saved transcripts
-    const child = spawn("claude", ["-p", "--output-format", "json", "--tools", "", "--no-session-persistence", "--system-prompt", "You read clinical notes and reply with JSON only."]);
+    const cmd = claudeCommand(["-p", "--output-format", "json", "--tools", "", "--no-session-persistence", "--system-prompt", "You read clinical notes and reply with JSON only."]);
+    const child = spawn(cmd.command, cmd.args, { shell: cmd.shell });
     children.add(child);
     let out = "";
     let err = "";
     let timedOut = false;
     const timer = setTimeout(() => {
       timedOut = true;
-      child.kill();
+      killClaude(child);
     }, TIMEOUT_MS);
     child.stdout.on("data", (d) => (out += d));
     child.stderr.on("data", (d) => (err += d));
@@ -318,7 +320,7 @@ export const serve = (port: number, askModel: AskModel = askClaude): Server => {
   });
 
   const stop = (): void => {
-    for (const child of children) child.kill();
+    for (const child of children) killClaude(child);
     process.exit();
   };
   process.on("SIGINT", stop).on("SIGTERM", stop);

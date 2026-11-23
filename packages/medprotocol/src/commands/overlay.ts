@@ -3,6 +3,7 @@ import { readdirSync, readFileSync, writeFileSync, unlinkSync, existsSync, mkdir
 import { join, resolve, sep } from "node:path";
 import { createServer } from "node:http";
 import { spawn, spawnSync } from "node:child_process";
+import { claudeCommand } from "../claude-spawn";
 import { OVERLAY_CLIENT_JS } from "../overlay-client";
 
 const USAGE = `Usage: medprotocol overlay [options]
@@ -194,11 +195,8 @@ const makeDispatcher = (cwd: string) => {
   const spawnAgent = (): void => {
     busy = true;
     process.stdout.write("▶ dispatching headless Claude (claude -p) to process the queue…\n");
-    const child = spawn(
-      "claude",
-      ["-p", AUTO_PROMPT, "--permission-mode", "acceptEdits", "--allowedTools", "Bash", "Read", "Edit", "Write", "Grep", "Glob"],
-      { cwd, stdio: ["ignore", "pipe", "pipe"] },
-    );
+    const cmd = claudeCommand(["-p", AUTO_PROMPT, "--permission-mode", "acceptEdits", "--allowedTools", "Bash", "Read", "Edit", "Write", "Grep", "Glob"]);
+    const child = spawn(cmd.command, cmd.args, { cwd, stdio: ["ignore", "pipe", "pipe"], shell: cmd.shell });
     child.stdout.on("data", (d) => process.stdout.write(`[claude] ${d}`));
     child.stderr.on("data", (d) => process.stderr.write(`[claude] ${d}`));
     child.on("error", (err: NodeJS.ErrnoException) => {
@@ -565,7 +563,9 @@ export const run = (argv: string[]): void => {
       return;
     }
     // Automatic unless --manual, and only when a headless Claude can actually be spawned.
-    const hasClaude = !spawnSync("claude", ["--version"], { stdio: "ignore" }).error;
+    const version = claudeCommand(["--version"]);
+    // status, not .error: through a shell a missing claude is a non-zero exit, not ENOENT
+    const hasClaude = spawnSync(version.command, version.args, { stdio: "ignore", shell: version.shell }).status === 0;
     if (!values.manual && !hasClaude) {
       process.stderr.write("'claude' CLI not found on PATH — falling back to manual mode.\n");
     }

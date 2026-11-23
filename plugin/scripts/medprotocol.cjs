@@ -3807,6 +3807,25 @@ Examples:
   }
 });
 
+// src/claude-spawn.ts
+var import_node_child_process, quoteWin, claudeCommand, killClaude;
+var init_claude_spawn = __esm({
+  "src/claude-spawn.ts"() {
+    "use strict";
+    import_node_child_process = require("child_process");
+    quoteWin = (arg) => `"${arg.replace(/(\\*)"/g, '$1$1""').replace(/\\+$/, "$&$&")}"`;
+    claudeCommand = (args, platform = process.platform) => platform === "win32" ? (
+      // one command string: Node warns when args are passed with shell:true
+      // shortcut: %VAR% inside an arg is still expanded by cmd.exe, matters only if the install path has % in it
+      { command: ["claude", ...args.map(quoteWin)].join(" "), args: [], shell: true }
+    ) : { command: "claude", args, shell: false };
+    killClaude = (child, platform = process.platform) => {
+      if (platform === "win32" && child.pid) (0, import_node_child_process.spawn)("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+      else child.kill();
+    };
+  }
+});
+
 // ../../plugin/lib/extraction.ts
 var FIELDS, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, checkItem, checkExtraction, noteSegments, toNumber, unitOk, toInputs, applyFindings;
 var init_extraction = __esm({
@@ -5522,7 +5541,7 @@ __export(overlay_exports, {
   isLocalOrigin: () => isLocalOrigin,
   run: () => run11
 });
-var import_node_util11, import_node_fs, import_node_path, import_node_http, import_node_child_process, USAGE11, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run11;
+var import_node_util11, import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE11, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run11;
 var init_overlay = __esm({
   "src/commands/overlay.ts"() {
     "use strict";
@@ -5530,7 +5549,8 @@ var init_overlay = __esm({
     import_node_fs = require("fs");
     import_node_path = require("path");
     import_node_http = require("http");
-    import_node_child_process = require("child_process");
+    import_node_child_process2 = require("child_process");
+    init_claude_spawn();
     init_overlay_client();
     USAGE11 = `Usage: medprotocol overlay [options]
 
@@ -5642,11 +5662,8 @@ Examples:
       const spawnAgent = () => {
         busy = true;
         process.stdout.write("\u25B6 dispatching headless Claude (claude -p) to process the queue\u2026\n");
-        const child = (0, import_node_child_process.spawn)(
-          "claude",
-          ["-p", AUTO_PROMPT, "--permission-mode", "acceptEdits", "--allowedTools", "Bash", "Read", "Edit", "Write", "Grep", "Glob"],
-          { cwd, stdio: ["ignore", "pipe", "pipe"] }
-        );
+        const cmd = claudeCommand(["-p", AUTO_PROMPT, "--permission-mode", "acceptEdits", "--allowedTools", "Bash", "Read", "Edit", "Write", "Grep", "Glob"]);
+        const child = (0, import_node_child_process2.spawn)(cmd.command, cmd.args, { cwd, stdio: ["ignore", "pipe", "pipe"], shell: cmd.shell });
         child.stdout.on("data", (d) => process.stdout.write(`[claude] ${d}`));
         child.stderr.on("data", (d) => process.stderr.write(`[claude] ${d}`));
         child.on("error", (err) => {
@@ -5996,7 +6013,8 @@ Examples:
           process.exitCode = 1;
           return;
         }
-        const hasClaude = !(0, import_node_child_process.spawnSync)("claude", ["--version"], { stdio: "ignore" }).error;
+        const version2 = claudeCommand(["--version"]);
+        const hasClaude = (0, import_node_child_process2.spawnSync)(version2.command, version2.args, { stdio: "ignore", shell: version2.shell }).status === 0;
         if (!values.manual && !hasClaude) {
           process.stderr.write("'claude' CLI not found on PATH \u2014 falling back to manual mode.\n");
         }
@@ -6058,11 +6076,12 @@ __export(extract_exports, {
   serve: () => serve2,
   stateOf: () => stateOf
 });
-var import_node_child_process2, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, import_node_util12, USAGE12, saveNote, itemsError, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run12;
+var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, import_node_util12, USAGE12, saveNote, itemsError, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run12;
 var init_extract = __esm({
   "src/commands/extract.ts"() {
     "use strict";
-    import_node_child_process2 = require("child_process");
+    import_node_child_process3 = require("child_process");
+    init_claude_spawn();
     import_node_crypto = require("crypto");
     import_node_fs2 = require("fs");
     import_node_http2 = require("http");
@@ -6147,14 +6166,15 @@ Example:
     children = /* @__PURE__ */ new Set();
     TIMEOUT_MS = 5 * 6e4;
     askClaude = (prompt) => new Promise((done, fail) => {
-      const child = (0, import_node_child_process2.spawn)("claude", ["-p", "--output-format", "json", "--tools", "", "--no-session-persistence", "--system-prompt", "You read clinical notes and reply with JSON only."]);
+      const cmd = claudeCommand(["-p", "--output-format", "json", "--tools", "", "--no-session-persistence", "--system-prompt", "You read clinical notes and reply with JSON only."]);
+      const child = (0, import_node_child_process3.spawn)(cmd.command, cmd.args, { shell: cmd.shell });
       children.add(child);
       let out = "";
       let err = "";
       let timedOut = false;
       const timer = setTimeout(() => {
         timedOut = true;
-        child.kill();
+        killClaude(child);
       }, TIMEOUT_MS);
       child.stdout.on("data", (d) => out += d);
       child.stderr.on("data", (d) => err += d);
@@ -6336,7 +6356,7 @@ ${check}`));
         process.exitCode = 1;
       });
       const stop = () => {
-        for (const child of children) child.kill();
+        for (const child of children) killClaude(child);
         process.exit();
       };
       process.on("SIGINT", stop).on("SIGTERM", stop);
