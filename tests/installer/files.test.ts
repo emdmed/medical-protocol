@@ -112,7 +112,8 @@ describe("isLink / isSymlink", () => {
     const link = path.join(dir, "link");
     fs.writeFileSync(realFile, "x");
     fs.mkdirSync(realDir);
-    fs.symlinkSync(realFile, link);
+    // junction: Windows blocks file symlinks without admin; POSIX ignores the type
+    fs.symlinkSync(realDir, link, "junction");
 
     expect(isLink(link)).toBe(true);
     expect(isLink(realFile)).toBe(false);
@@ -127,19 +128,20 @@ describe("isLink / isSymlink", () => {
 
 describe("removeLink", () => {
   it("removes a symlink without touching its target", () => {
-    const target = path.join(dir, "target.txt");
+    const target = path.join(dir, "target");
     const link = path.join(dir, "link");
-    fs.writeFileSync(target, "keep");
-    fs.symlinkSync(target, link);
+    fs.mkdirSync(target);
+    fs.writeFileSync(path.join(target, "keep.txt"), "keep");
+    fs.symlinkSync(target, link, "junction"); // a dir link works on Windows without admin
 
     removeLink(link);
 
     expect(fs.existsSync(link)).toBe(false);
-    expect(fs.existsSync(target)).toBe(true);
-    expect(fs.readFileSync(target, "utf8")).toBe("keep");
+    expect(fs.readFileSync(path.join(target, "keep.txt"), "utf8")).toBe("keep");
   });
 
-  it("removes a dangling symlink", () => {
+  // file symlinks need admin or Developer Mode on Windows
+  it.skipIf(process.platform === "win32")("removes a dangling symlink", () => {
     const link = path.join(dir, "dangling");
     fs.symlinkSync(path.join(dir, "nope"), link);
 
@@ -200,7 +202,8 @@ describe("symlinkDir", () => {
     expect(fs.readFileSync(path.join(linkPath, "file.txt"), "utf8")).toBe("data");
   });
 
-  it("requests a dir symlink on non-win32", () => {
+  // on Windows the code asks for a junction, covered by the test above
+  it.skipIf(process.platform === "win32")("requests a dir symlink on non-win32", () => {
     const target = path.join(dir, "source");
     fs.mkdirSync(target);
     const linkPath = path.join(dir, "linked");

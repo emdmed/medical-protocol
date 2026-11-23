@@ -6,12 +6,12 @@ import { mergeSettings, hookIssues } from "../../packages/medical-protocol/src/s
 
 const PLUGIN = join(__dirname, "../../plugin");
 let dir: string;
-const settings = () => JSON.parse(readFileSync(join(dir, ".claude/settings.json"), "utf8"));
+const settings = () => JSON.parse(readFileSync(join(dir, ".claude", "settings.json"), "utf8"));
 const commands = () => JSON.stringify(settings().hooks);
 
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), "settings-"));
-  mkdirSync(join(dir, ".claude/hooks"), { recursive: true });
+  mkdirSync(join(dir, ".claude", "hooks"), { recursive: true });
   for (const f of ["privacy-guard.mjs", "extraction-guard.mjs", "note-consent.mjs", "qa-reminder.mjs", "track-workflow.mjs"]) writeFileSync(join(dir, ".claude/hooks", f), "");
 });
 
@@ -26,7 +26,7 @@ describe("installer settings merge", () => {
 
   it("keeps the doctor's own hooks and permissions, and doesn't duplicate ours on update", () => {
     const own = { matcher: "Bash", hooks: [{ type: "command", command: "node mine.mjs" }] };
-    writeFileSync(join(dir, ".claude/settings.json"), JSON.stringify({ model: "x", permissions: { allow: ["Bash(ls)"] }, hooks: { PreToolUse: [own] } }));
+    writeFileSync(join(dir, ".claude", "settings.json"), JSON.stringify({ model: "x", permissions: { allow: ["Bash(ls)"] }, hooks: { PreToolUse: [own] } }));
     mergeSettings(dir, PLUGIN);
     const once = commands();
     mergeSettings(dir, PLUGIN);
@@ -37,15 +37,15 @@ describe("installer settings merge", () => {
   });
 
   it("refuses to overwrite settings it can't parse", () => {
-    writeFileSync(join(dir, ".claude/settings.json"), "{ // comment\n}");
+    writeFileSync(join(dir, ".claude", "settings.json"), "{ // comment\n}");
     expect(() => mergeSettings(dir, PLUGIN)).toThrow(/Can't parse/);
-    expect(readFileSync(join(dir, ".claude/settings.json"), "utf8")).toBe("{ // comment\n}");
+    expect(readFileSync(join(dir, ".claude", "settings.json"), "utf8")).toBe("{ // comment\n}");
   });
 
   it("reports hooks that aren't active", () => {
     expect(hookIssues(dir, PLUGIN).some((i) => i.includes("note-consent.mjs"))).toBe(true);
     mergeSettings(dir, PLUGIN);
-    rmSync(join(dir, ".claude/hooks/note-consent.mjs"));
+    rmSync(join(dir, ".claude", "hooks", "note-consent.mjs"));
     expect(hookIssues(dir, PLUGIN)).toContain("Safety hook file missing: .claude/hooks/note-consent.mjs. Run 'medical-protocol update'.");
   });
 });

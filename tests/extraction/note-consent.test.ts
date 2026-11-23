@@ -7,13 +7,14 @@ import { EXTRACT_ARTIFACT_HTML } from "../../packages/medprotocol/src/extract-ar
 
 const HOOK = join(__dirname, "../../plugin/hooks/note-consent.mjs");
 const dir = mkdtempSync(join(tmpdir(), "consent-"));
-const folder = join(dir, "extractions/abc123def456");
+const folder = join(dir, "extractions", "abc123def456");
 mkdirSync(folder, { recursive: true });
 mkdirSync(join(dir, "other"));
 mkdirSync(join(dir, "src"));
 writeFileSync(join(folder, "note.md"), "TA 90/60 mmHg");
 writeFileSync(join(folder, "extraction.json"), "[]");
-symlinkSync(join(folder, "note.md"), join(dir, "other/link.md"));
+// a link to the folder, not the file: a junction needs no admin on Windows (POSIX ignores the type)
+symlinkSync(folder, join(dir, "other", "link"), "junction");
 
 const hook = (input: object, args = ["--all"]) => {
   const out = execFileSync("node", [HOOK, ...args], { input: JSON.stringify({ cwd: dir, ...input }), env: { ...process.env, CLAUDE_PROJECT_DIR: dir } }).toString();
@@ -54,7 +55,7 @@ describe("note-consent hook", () => {
   it("stops anything reaching a pending note, however the path is written: Read and Grep are sent to Bash, Bash asks", () => {
     expect(denies("Read", { file_path: "extractions/abc123def456/note.md" })).toBe(true);
     expect(denies("Read", { file_path: "./extractions/abc123def456/../abc123def456/note.md" })).toBe(true);
-    expect(denies("Read", { file_path: "other/link.md" })).toBe(true);
+    expect(denies("Read", { file_path: "other/link/note.md" })).toBe(true);
     expect(denies("Read", { file_path: "extractions/abc123def456/extraction.json" })).toBe(true);
     expect(denies("Grep", { pattern: "TA", path: "extractions" })).toBe(true);
     expect(denies("Grep", { pattern: "TA" })).toBe(true);
@@ -73,17 +74,17 @@ describe("note-consent hook", () => {
     hook({ hook_event_name: "PostToolUse", tool_name: "Bash", tool_input: { command: "cat extractions/abc123def456/note.md" } });
     expect(existsSync(join(folder, ".consent"))).toBe(true);
     expect(decision("Bash", { command: "cat extractions/*/note.md" })).toBeUndefined();
-    expect(decision("Read", { file_path: "other/link.md" })).toBeUndefined();
+    expect(decision("Read", { file_path: "other/link/note.md" })).toBeUndefined();
   });
 
   it("never lets an extraction page be published, even a cleared one or a copy", () => {
     writeFileSync(join(folder, ".consent"), "x");
     expect(denies("Artifact", { file_path: "extractions/abc123def456/artifact.html" })).toBe(true);
     expect(decision("Artifact", { file_path: "docs/page.html" })).toBeUndefined();
-    writeFileSync(join(dir, "other/copy.html"), EXTRACT_ARTIFACT_HTML);
+    writeFileSync(join(dir, "other", "copy.html"), EXTRACT_ARTIFACT_HTML);
     expect(denies("Artifact", { file_path: "other/copy.html" })).toBe(true);
     // the live page as `extract --serve` sends it
-    writeFileSync(join(dir, "other/live.html"), EXTRACT_ARTIFACT_HTML.replace("__TITLE__", "Note extraction").replace("__DATA__", '{"live":true}'));
+    writeFileSync(join(dir, "other", "live.html"), EXTRACT_ARTIFACT_HTML.replace("__TITLE__", "Note extraction").replace("__DATA__", '{"live":true}'));
     expect(denies("Artifact", { file_path: "other/live.html" })).toBe(true);
   });
 });
