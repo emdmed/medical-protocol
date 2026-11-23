@@ -3827,7 +3827,7 @@ var init_claude_spawn = __esm({
 });
 
 // ../../plugin/lib/extraction.ts
-var FIELDS, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, checkItem, checkExtraction, noteSegments, toNumber, unitOk, toInputs, applyFindings;
+var FIELDS, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, prepared, checkItem, checkExtraction, noteSegments, toNumber, unitOk, toInputs, applyFindings;
 var init_extraction = __esm({
   "../../plugin/lib/extraction.ts"() {
     "use strict";
@@ -3964,8 +3964,11 @@ var init_extraction = __esm({
     checkItem = (note, item) => {
       const q = collapse(item.quote.normalize("NFC"));
       if (!q) return { ...item, status: "none" };
-      const nfc = note.normalize("NFC");
-      const { text, map } = collapseWithMap(nfc);
+      if (prepared?.note !== note) {
+        const nfc2 = note.normalize("NFC");
+        prepared = { note, nfc: nfc2, ...collapseWithMap(nfc2) };
+      }
+      const { nfc, text, map } = prepared;
       const at = text.indexOf(q);
       if (at < 0) {
         const budget = Math.min(MAX_EDITS, Math.floor(q.length / 4));
@@ -4061,7 +4064,7 @@ var init_extract_artifact = __esm({
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
 <style>
 :root{
   --ground:#f1ebde; --sheet:#fbf8f2; --ink:#1d1a16; --ink-2:#5a534a; --line:#cdc3b0;

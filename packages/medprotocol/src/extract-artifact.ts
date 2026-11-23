@@ -13,7 +13,7 @@ export const EXTRACT_ARTIFACT_HTML = String.raw`<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
 <style>
 :root{
   --ground:#f1ebde; --sheet:#fbf8f2; --ink:#1d1a16; --ink-2:#5a534a; --line:#cdc3b0;

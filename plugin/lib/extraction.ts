@@ -229,11 +229,17 @@ const reorderedSpan = (note: string, quote: string): { distance: number; start: 
   return best;
 };
 
+// the last note prepared: every item of an extraction is checked against the same note
+let prepared: { note: string; nfc: string; text: string; map: number[] } | undefined;
+
 export const checkItem = (note: string, item: ExtractedItem): CheckedItem => {
   const q = collapse(item.quote.normalize("NFC"));
   if (!q) return { ...item, status: "none" };
-  const nfc = note.normalize("NFC");
-  const { text, map } = collapseWithMap(nfc);
+  if (prepared?.note !== note) {
+    const nfc = note.normalize("NFC");
+    prepared = { note, nfc, ...collapseWithMap(nfc) };
+  }
+  const { nfc, text, map } = prepared;
   const at = text.indexOf(q);
   if (at < 0) {
     // A quarter of the quote at most, so a short quote ("K 5.1") cannot match any five characters.
