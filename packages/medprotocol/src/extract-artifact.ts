@@ -1,7 +1,7 @@
 // The page `medprotocol extract --artifact <file>` writes: one extraction as a marked-up proof. Every
 // value is listed at left in one place (what needs review, then current illness, history, labs); the note
 // stands at right as it was written, with the words each value came from highlighted.
-// Black ink on white, yellow highlighter on the quotes, red for alarm.
+// The field sheet of the landing page (claude-medical-protocol/DESIGN.md): warm paper, ink, one carmine.
 // A standalone local file: it holds the full note and is never published.
 // __TITLE__ and __DATA__ are filled by the CLI. Kept as String.raw with no backticks or `${`.
 // `medprotocol extract --serve` serves the same page with __DATA__ = {"live":true}: it then takes the
@@ -13,30 +13,30 @@ export const EXTRACT_ARTIFACT_HTML = String.raw`<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Schibsted+Grotesk:wght@400;500;700;800&family=Red+Hat+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500&display=swap">
 <style>
 :root{
-  --ground:#eceef1; --sheet:#fff; --ink:#14171f; --ink-2:#565d6b; --line:#c6cbd3;
-  --hl:#ffee8c; --hl-on:#ffd61f; --hl-line:#14171f;
-  --bad:#c81e30; --bad-t:#fbe3e5; --close:#0b7a55;
-  --bar:#14171f; --bar-close:#7fe0bb; --bar-bad:#ff8e99;
-  --ui:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;
-  --text:"Literata",Georgia,serif;
-  --mono:"Red Hat Mono",ui-monospace,Menlo,monospace;
+  --ground:#f1ebde; --sheet:#fbf8f2; --ink:#1d1a16; --ink-2:#5a534a; --line:#cdc3b0;
+  --hl:#e3d9c3; --hl-on:#cdc3b0; --hl-line:#1d1a16;
+  --bad:#b0182f; --bad-t:#f1d5d8;
+  --ui:"Fira Sans",system-ui,sans-serif;
+  --label:"Fira Sans Condensed","Arial Narrow",sans-serif;
+  --text:"Spectral",Georgia,serif;
+  --mono:"Geist Mono",ui-monospace,Menlo,monospace;
   --gut:max(16px,env(safe-area-inset-left,0px)); --lh:29px; --mw:35rem;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --ground:#14171f; --sheet:#1d212b; --ink:#eceef1; --ink-2:#a6aebb; --line:#3a404d;
-  --hl:#5a4f0e; --hl-on:#8a7912; --hl-line:#ffee8c;
-  --bad:#ff7c88; --bad-t:#4a1c22; --close:#5ad6a6; --bar:#0b0d12; color-scheme:dark}}
+  --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f;
+  --hl:#3d372f; --hl-on:#5a534a; --hl-line:#f1ebde;
+  --bad:#e7959f; --bad-t:#4a2228; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --ground:#14171f; --sheet:#1d212b; --ink:#eceef1; --ink-2:#a6aebb; --line:#3a404d;
-  --hl:#5a4f0e; --hl-on:#8a7912; --hl-line:#ffee8c;
-  --bad:#ff7c88; --bad-t:#4a1c22; --close:#5ad6a6; --bar:#0b0d12; color-scheme:dark}
+  --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f;
+  --hl:#3d372f; --hl-on:#5a534a; --hl-line:#f1ebde;
+  --bad:#e7959f; --bad-t:#4a2228; color-scheme:dark}
 @media (min-width:700px){:root{--gut:max(28px,env(safe-area-inset-left,0px))}}
 *{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--ink-2) transparent}
-body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh;overflow:hidden;margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.4 var(--ui);caret-color:var(--ink)}
-::selection{background:var(--hl);color:var(--ink)}
+body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh;overflow:hidden;margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.4 var(--ui);font-variant-numeric:tabular-nums;caret-color:var(--ink)}
+::selection{background:var(--bad);color:var(--sheet)}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 h1,h2,h3,p,ol,ul{margin:0;padding:0}
 ol,ul{list-style:none}
@@ -44,18 +44,17 @@ ol,ul{list-style:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
 /* top bar */
-.run{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;min-height:56px;padding:8px var(--gut);padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--bar);color:#fff}
-.run :focus-visible{outline-color:#fff}
-.brand{font:800 14px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
-h1{font:700 21px/1.1 var(--ui);text-wrap:balance;overflow-wrap:anywhere;min-width:0;padding-left:24px;border-left:1px solid rgba(255,255,255,.35)}
-.tally{margin-left:auto;display:flex;flex-wrap:wrap;gap:4px 18px;font-weight:500;font-size:14px}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;min-height:52px;padding:8px var(--gut);padding-top:calc(8px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--ink)}
+.brand{font:700 14px/1 var(--label);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+h1{font:400 23px/1.1 var(--text);text-wrap:balance;overflow-wrap:anywhere;min-width:0;padding-left:24px;border-left:1px solid var(--line)}
+.tally{margin-left:auto;display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px}
 .tally li{display:flex;align-items:center;gap:7px}
-.tally b{font:700 14px/1 var(--mono)}
+.tally b{font:500 14px/1 var(--mono)}
 .tally[hidden]~#new,.tally[hidden]~#new[hidden]~#theme{margin-left:auto}
 /* live mode: the saved notes of this folder, in a dialog */
-dialog{width:min(960px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:0;border:1.5px solid var(--ink);background:var(--ground);color:var(--ink)}
+dialog{width:min(960px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:0;border:1px solid var(--ink);background:var(--ground);color:var(--ink)}
 dialog[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto}
-dialog::backdrop{background:rgba(20,23,31,.55)}
+dialog::backdrop{background:rgba(29,26,22,.55)}
 dialog h2{margin:20px 20px 0}
 dialog ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));align-content:start;overflow-y:auto;overscroll-behavior:contain}
 dialog li{min-width:0}
@@ -65,39 +64,33 @@ dialog a:focus-visible{outline-offset:-2px}
 .first{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:400 16px/1.5 var(--text)}
 dialog a span+span{font-size:13px;color:var(--ink-2)}
 dialog form{display:flex;justify-content:flex-end;padding:14px 20px}
-.conn{flex-basis:100%;font-size:14px;color:var(--bar-bad)}
+.conn{flex-basis:100%;font-size:14px;color:var(--bad)}
 
-.btn{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 14px;border:1.5px solid var(--ink);font:700 14px/1.2 var(--ui);color:var(--ink);white-space:nowrap;transition:background-color .15s,color .15s}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 14px;border:1px solid var(--ink);font:600 14px/1.2 var(--ui);color:var(--ink);white-space:nowrap;transition:background-color .15s,color .15s}
 .btn:hover{background:var(--line)}
 .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.btn.fill{background:var(--ink);color:var(--ground)}
+.btn.fill{border-radius:3px;background:var(--ink);color:var(--ground)}
 .btn.fill:hover{background:var(--ink-2);border-color:var(--ink-2)}
 .btn:disabled,.btn:disabled:hover{background:transparent;border-color:var(--ink-2);color:var(--ink-2);cursor:default}
-.run .btn{background:#fff;border-color:#fff;color:#14171f}
-.run .btn:hover{background:#dfe2e7}
-.run a.btn,.run #theme,.run #pick,.run summary.btn{background:transparent;color:#fff}
-.run a.btn:hover,.run #theme:hover,.run #pick:hover,.run summary.btn:hover{background:rgba(255,255,255,.16)}
 
 /* the one ramp of marks, the same in the bar, the rail and the margin:
-   filled = found word for word, double = the same in the history, dashed = close match, ring = missing or not stated */
-.m{display:inline-block;flex:none;width:14px;height:14px;background:var(--ink)}
-.m.his{background:none;border:4px double var(--ink)}
-.m.close{background:none;border:2px dashed var(--close)}
+   small square = found word for word, framed = the same in the history, dashed = close match, ring = missing or not stated.
+   What was found is drawn small: the marks that need the eye are the carmine ones */
+.m{display:inline-block;flex:none;width:14px;height:14px;background:linear-gradient(var(--ink),var(--ink)) center/6px 6px no-repeat}
+.m.his{box-shadow:inset 0 0 0 1px var(--ink)}
+.m.close{background:none;border:2px dashed var(--bad)}
 .m.bad{background:none;border:2.5px solid var(--bad);border-radius:50%}
-.run .m{background:#fff}
-.run .m.close{background:none;border-color:var(--bar-close)}
-.run .m.bad{background:none;border-color:var(--bar-bad)}
 
 /* at left every value in one place; the note at right keeps its reading width. Each side scrolls by itself */
 main{min-height:0}
 .shell{display:grid;grid-template-columns:316px minmax(0,1fr);height:100%}
 #panes{grid-template-columns:minmax(340px,1fr) minmax(0,44rem)}
 .rail .lead,.rail .box,.step{max-width:34rem}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:0 36px;margin-bottom:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:0 36px;margin-bottom:26px}
 .rail{min-height:0;overflow-y:auto;padding:0 20px 22px var(--gut);border-right:1px solid var(--line)}
-h2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:10px;border-bottom:2px solid var(--ink);font:800 12.5px/1.3 var(--ui);letter-spacing:.1em;text-transform:uppercase}
-h2 span,h2 b{font:500 12.5px/1.3 var(--ui);letter-spacing:0;text-transform:none;color:var(--ink-2)}
-h2 b{font:700 12px/1.3 var(--mono);color:var(--ink)}
+h2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--ink);font:700 12.5px/1.3 var(--label);letter-spacing:.14em;text-transform:uppercase}
+h2 span,h2 b{font:400 13px/1.3 var(--ui);letter-spacing:0;text-transform:none;color:var(--ink-2)}
+h2 b{font:500 12px/1.3 var(--mono);color:var(--ink)}
 /* the heads stack at the top of the pane as their sections scroll under them: head --i stops below the
    ones before it, and a click on it brings its section back. All are one height, so the stops are exact */
 .rail h2,.ph{position:sticky;top:calc(var(--i,0)*40px);z-index:1;height:40px;padding-top:12px;background:var(--ground);box-shadow:-12px 0 var(--ground),12px 0 var(--ground)}
@@ -108,18 +101,18 @@ h2 b{font:700 12px/1.3 var(--mono);color:var(--ink)}
 .card{margin-inline:-12px;padding:10px 12px 12px;border-bottom:1px solid var(--line);transition:background-color .15s}
 .card:hover,.card:focus-visible,.card:focus-within,.card.on{background:var(--sheet)}
 .card:focus-visible{outline-offset:-2px}
-h3{display:flex;align-items:start;gap:10px;font:700 16px/1.25 var(--ui)}
-h3 .m{margin-top:3px}
+h3{display:flex;align-items:start;gap:10px;font:400 20px/1.2 var(--text)}
+h3 .m{margin-top:5px}
 /* an answered correction steps back: its answer in words, and one button to change it */
-.card.done h3{font-weight:500}
+.card.done h3{color:var(--ink-2)}
 .card.done .st{color:var(--ink)}
 .card p{margin-top:5px;font-size:14px;color:var(--ink-2)}
-.card .st{font-weight:700}
+.card .st{font-weight:600}
 .card.bad .st{color:var(--bad)}
-.card.close .st{color:var(--close)}
-.k{margin-right:7px;font:800 11.5px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase}
+.card.close .st{color:var(--bad)}
+.k{margin-right:7px;font:700 11.5px/1 var(--label);letter-spacing:.1em;text-transform:uppercase}
 /* the extracted value and the note's own numbers are set alike, to compare digit by digit */
-.n{font:700 15px/1.3 var(--mono);color:var(--ink)}
+.n{font:500 15px/1.3 var(--mono);color:var(--ink)}
 .n.x,.card.bad .cmp:first-of-type .n{color:var(--bad)}
 q{quotes:"\201C" "\201D";font-family:var(--text);color:var(--ink)}
 /* the two answers stand apart, so neither is pressed by accident */
@@ -127,42 +120,40 @@ q{quotes:"\201C" "\201D";font-family:var(--text);color:var(--ink)}
 /* the legend drops from its button in the bar: what each mark means, and how many there are */
 .lg{position:relative}
 .lg summary::-webkit-details-marker{display:none}
-.run .lg[open] summary{background:rgba(255,255,255,.16)}
-/* its panel is paper, not the bar: the marks take the page's inks again */
-.run .key .m{background:var(--ink)}
-.run .key .m.his,.run .key .m.close,.run .key .m.bad{background:none}
-.run .key .m.close{border-color:var(--close)}
-.run .key .m.bad{border-color:var(--bad)}
-.key{position:absolute;right:0;top:calc(100% + 8px);z-index:2;display:grid;gap:9px;width:max-content;max-width:min(440px,calc(100vw - 32px));padding:14px 16px;border:1.5px solid var(--ink);background:var(--ground);font-size:14px;color:var(--ink-2)}
+.run .btn:not(.fill){padding-inline:2px;border-color:transparent;font:700 12.5px/1.2 var(--label);letter-spacing:.12em;text-transform:uppercase;text-underline-offset:5px}
+.run .btn:not(.fill):hover,.lg[open] summary{background:none;text-decoration:underline}
+.key{position:absolute;right:0;top:calc(100% + 8px);z-index:2;display:grid;gap:9px;width:max-content;max-width:min(440px,calc(100vw - 32px));padding:14px 16px;border:1px solid var(--ink);background:var(--ground);font-size:14px;color:var(--ink-2)}
 .key li{display:grid;grid-template-columns:14px auto 1fr;align-items:baseline;gap:9px}
 .key .m{align-self:start;margin-top:3px}
-.key b{font:700 14px/1 var(--mono);color:var(--ink)}
+.key b{font:500 14px/1 var(--mono);color:var(--ink)}
 
 /* the proof: the note as it was written, one sheet of raw text; only the quotes are marked */
 .proof{display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0;min-height:0;padding:0 var(--gut) 0 28px}
-#note{overflow-y:auto;padding:18px 24px 28px;background:var(--sheet);font:400 17px/var(--lh) var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
+#note{overflow-y:auto;padding:18px 24px 28px;background:var(--sheet);font:400 18px/var(--lh) var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
 mark{color:var(--ink);background:linear-gradient(var(--hl),var(--hl)) 0 0/100% 100% no-repeat;padding:2px 3px;border-bottom:2px solid var(--hl-line);-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:pointer}
 mark.his{border-bottom:4px double var(--hl-line)}
-mark.close{background:none;border-bottom:2px dashed var(--close)}
+mark.close{background:none;border-bottom:2px dashed var(--bad)}
 mark.bad{--hl:var(--bad-t);border-bottom:0;box-shadow:inset 0 0 0 2px var(--bad)}
 mark.on{--hl:var(--hl-on);outline:2px solid var(--ink);outline-offset:1px}
 /* a group of values reads like a lab sheet, across then down, in as many columns as fit:
    field at left, the figure and its unit in fixed places at right, so figures line up */
-.vals{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr));gap:0 36px;margin-bottom:14px}
-.e{display:grid;grid-template-columns:14px minmax(0,1fr) auto;align-content:start;align-items:baseline;gap:0 8px;margin-inline:-6px;padding:5px 6px;border-bottom:1px solid var(--line);font-size:13px;font-weight:500;color:var(--ink-2);cursor:pointer;transition:background-color .15s}
+.vals{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr));gap:0 36px;margin-bottom:26px}
+.e{display:grid;grid-template-columns:14px fit-content(100%) minmax(0,1fr) auto;align-content:start;align-items:baseline;gap:0 6px;margin-inline:-6px;padding:6px 6px 7px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink-2);cursor:pointer;transition:background-color .15s}
 .e .m{align-self:start;margin-top:3px}
 .e:hover,.e:focus-visible,.e.on{background:var(--hl);color:var(--ink)}
 .e:focus-visible{outline-offset:-2px}
-.val{text-align:right;white-space:nowrap}
+.val{grid-column:4;text-align:right;white-space:nowrap}
+.e:not(.t)::after{content:"";grid-area:1/3;border-bottom:1px dotted;opacity:.45;transform:translateY(-3px)}
 /* a value in words is read, not compared: under its field, at text weight */
-.e.t .val{grid-column:2/-1;text-align:left;white-space:normal}
+.e.t>span{grid-column:2/-1}
+.e.t .val{text-align:left;white-space:normal}
 /* the figure is the largest thing in an entry */
-.v{font:700 15px/1.3 var(--mono);color:var(--ink)}
-.v.txt{font:500 14px/1.35 var(--ui)}
+.v{font:500 15px/1.3 var(--mono);color:var(--ink)}
+.v.txt{font:400 14.5px/1.35 var(--ui)}
 .e small,.e .why{margin-left:5px;font-size:12px}
 .e .u{display:inline-block;min-width:5ch;text-align:left}
 .e.bad,.e.bad .v{color:var(--bad)}
-.e.close .why{color:var(--close)}
+.e.close .why{color:var(--bad)}
 .e:hover.bad,.e.on.bad{background:var(--bad-t)}
 @media (prefers-reduced-motion:no-preference){
   /* the highlighter is drawn across each quote once, when the note first appears */
@@ -172,22 +163,22 @@ mark.on{--hl:var(--hl-on);outline:2px solid var(--ink);outline-offset:1px}
 
 /* live mode only (extract --serve): the intake form, the steps, the failed box */
 .in .proof{grid-template-rows:auto minmax(160px,1fr) auto}
-textarea{display:block;max-width:calc(var(--mw) + 48px);width:100%;padding:14px 24px;border:1px solid var(--line);resize:none;background:var(--sheet);color:var(--ink);font:400 17px/var(--lh) var(--text)}
+textarea{display:block;max-width:calc(var(--mw) + 48px);width:100%;padding:14px 24px;border:1px solid var(--line);resize:none;background:var(--sheet);color:var(--ink);font:400 18px/var(--lh) var(--text)}
 textarea:focus-visible{outline-offset:0}
 textarea::placeholder{color:var(--ink-2);font-style:italic}
 .send{display:grid;gap:16px;max-width:calc(var(--mw) + 48px);padding:18px 0 22px}
 .agree{display:flex;align-items:flex-start;gap:12px;color:var(--ink-2);cursor:pointer}
 /* a square in a frame, like the marks */
-.agree input{appearance:none;flex:none;width:18px;height:18px;margin:2px 0 0;border:1.5px solid var(--ink);background:var(--sheet);cursor:pointer;transition:background-color .15s}
+.agree input{appearance:none;flex:none;width:18px;height:18px;margin:2px 0 0;border:1px solid var(--ink);background:var(--sheet);cursor:pointer;transition:background-color .15s}
 .agree input:checked{background:var(--ink);box-shadow:inset 0 0 0 3px var(--sheet)}
 .go{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14px;color:var(--ink-2)}
 .go .btn{padding:10px 20px}
 /* the steps: done is a tick, now is the spinner, next is its number */
 .step{display:grid;grid-template-columns:22px minmax(0,1fr);gap:2px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
-.step b{font:700 16px/1.25 var(--ui)}
+.step b{font:600 16px/1.25 var(--ui)}
 .step p{grid-column:2;font-size:14px;color:var(--ink-2)}
 .step.next b{color:var(--ink-2)}
-.tr{display:grid;place-items:center;width:22px;height:22px;border:1.5px solid var(--ink-2);font:700 11px/1 var(--mono);color:var(--ink-2)}
+.tr{display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--ink-2);font:500 11px/1 var(--mono);color:var(--ink-2)}
 .tr.ok{border-color:var(--ink);background:var(--ink)}
 .tr svg{width:14px;height:14px;fill:none;stroke:var(--ground);stroke-width:2.2;stroke-linecap:square}
 .tr.now{border:0}
@@ -195,7 +186,7 @@ textarea::placeholder{color:var(--ink-2);font-style:italic}
 .spin,.btn[aria-busy="true"]::before{content:"";display:inline-block;flex:none;width:16px;height:16px;border:2px solid var(--ink);background:conic-gradient(var(--ink) 25%,transparent 0)}
 .btn[aria-busy="true"]::before{width:10px;height:10px;margin-right:8px;border:1.5px solid currentColor;vertical-align:-1px;background:conic-gradient(currentColor 25%,transparent 0)}
 .busy .ph{position:relative}
-.busy .ph::after{content:"";position:absolute;left:0;bottom:-2px;width:28%;height:2px;background:var(--hl-on)}
+.busy .ph::after{content:"";position:absolute;left:0;bottom:-2px;width:28%;height:2px;background:var(--bad)}
 pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/1.5 var(--mono);color:var(--ink-2)}
 .box{display:grid;justify-items:start;gap:14px;padding-top:4px}
 @media (prefers-reduced-motion:no-preference){
@@ -238,7 +229,7 @@ footer code{font:500 12px var(--mono)}
   <button class="btn" id="pick" type="button" hidden>Saved notes</button>
   <ul class="tally" id="tally" aria-label="Counts"></ul>
   <details class="lg" id="legend"><summary class="btn">Legend</summary><ul class="key" id="key"></ul></details>
-  <button class="btn" id="copy" type="button">Copy extraction JSON</button>
+  <button class="btn fill" id="copy" type="button">Copy extraction JSON</button>
   <a class="btn" id="new" href="#" hidden>New note</a>
   <button class="btn" id="theme" type="button">Dark mode</button>
   <p class="conn" id="conn" role="alert" hidden>Lost the connection to the local server. Start it again with medprotocol extract --serve.</p>
