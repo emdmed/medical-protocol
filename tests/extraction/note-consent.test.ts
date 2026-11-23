@@ -63,6 +63,18 @@ describe("note-consent hook", () => {
     expect(asks("Bash", { command: "ls" })).toBe(true);
   });
 
+  it("asks for a PowerShell command as for Bash, and a yes to one naming the folder clears it", () => {
+    expect(asks("PowerShell", { command: "Get-ChildItem" })).toBe(true);
+    hook({ hook_event_name: "PostToolUse", tool_name: "PowerShell", tool_input: { command: "Get-Content extractions\\abc123def456\\note.md" } });
+    expect(existsSync(join(folder, ".consent"))).toBe(true);
+    expect(decision("PowerShell", { command: "Get-ChildItem" })).toBeUndefined();
+  });
+
+  // backslashes separate folders only on Windows
+  it.skipIf(process.platform !== "win32")("denies a Read whose path is written with backslashes", () => {
+    expect(denies("Read", { file_path: "extractions\\abc123def456\\note.md" })).toBe(true);
+  });
+
   it("leaves unrelated files alone", () => {
     expect(decision("Read", { file_path: "package.json" })).toBeUndefined();
     expect(decision("Grep", { pattern: "TA", path: "src" })).toBeUndefined();

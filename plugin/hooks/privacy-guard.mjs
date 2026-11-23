@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Medical Protocol Hook: PreToolUse (Bash)
+// Medical Protocol Hook: PreToolUse (Bash, PowerShell)
 // Enforces patient data privacy by blocking commands that could exfiltrate data.
 // Allows safe operations: npm install/dev, curl GET, git add/commit, tsc.
 // Blocks: git push, curl POST, scp, nc, npm publish, and other outbound data commands.
@@ -42,8 +42,8 @@ async function main() {
   }
 
   const toolName = input.tool_name || "";
-  // Only guard Bash commands
-  if (toolName !== "Bash") process.exit(0);
+  // Only guard shell commands
+  if (!/^(Bash|PowerShell)$/.test(toolName)) process.exit(0);
 
   const command = (input.tool_input && input.tool_input.command) || "";
   // Normalize: lowercase + collapse whitespace, matching the original shell behavior.

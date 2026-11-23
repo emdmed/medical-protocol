@@ -2,7 +2,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Bash|PowerShell",
         "hooks": [
           {
             "type": "command",
@@ -22,7 +22,7 @@
         ]
       },
       {
-        "matcher": "Read|Bash|Grep|Artifact",
+        "matcher": "Read|Bash|PowerShell|Grep|Artifact",
         "hooks": [
           {
             "type": "command",
@@ -34,7 +34,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Bash|PowerShell",
         "hooks": [
           {
             "type": "command",
@@ -44,7 +44,7 @@
         ]
       },
       {
-        "matcher": "Read|Bash|Grep",
+        "matcher": "Read|Bash|PowerShell|Grep",
         "hooks": [
           {
             "type": "command",

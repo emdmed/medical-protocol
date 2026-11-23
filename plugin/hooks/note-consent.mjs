@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Medical Protocol Hook: UserPromptSubmit + PreToolUse/PostToolUse (Read/Bash/Grep)
+// Medical Protocol Hook: UserPromptSubmit + PreToolUse/PostToolUse (Read/Bash/PowerShell/Grep)
 // A clinical note reaches the AI model only after the doctor says it is not real patient data.
 // Tool checks run plugin-wide from hooks.json (plugin hooks also run inside the verifier subagent; a plugin
 // agent's own frontmatter hooks are ignored) and do nothing unless a note is pending. The prompt check
@@ -106,7 +106,7 @@ const within = (inner, outer) => {
 };
 const where = (hashes) => hashes.map((h) => `extractions/${h}/`).join(", ");
 
-if (input.tool_name === "Bash") {
+if (/^(Bash|PowerShell)$/.test(input.tool_name)) {
   if (input.hook_event_name === "PostToolUse") {
     // only runs if the call was allowed, i.e. the doctor said yes; clears the folders the command names
     for (const h of pending) if ((t.command || "").includes(h)) fs.writeFileSync(path.join(root, h, ".consent"), new Date().toISOString() + "\n");

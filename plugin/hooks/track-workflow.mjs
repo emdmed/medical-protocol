@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Medical Protocol Hook: PostToolUse (Bash)
+// Medical Protocol Hook: PostToolUse (Bash, PowerShell)
 // Tracks workflow state for the QA reminder hook.
 // Sets marker files when:
 //   - QA-related actions are detected (.qa_started)
@@ -35,8 +35,8 @@ async function main() {
 
   const toolName = input.tool_name || "";
 
-  // ─── Track Bash commands ───
-  if (toolName === "Bash") {
+  // ─── Track shell commands ───
+  if (/^(Bash|PowerShell)$/.test(toolName)) {
     const command = (input.tool_input && input.tool_input.command) || "";
     const cmd = command.toLowerCase();
 
