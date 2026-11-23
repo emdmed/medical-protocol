@@ -91,6 +91,33 @@ async function main() {
     deny("Blocked HTTP client with outbound data method.");
   }
 
+  // ─── Block: PowerShell web cmdlets with data-sending methods ───
+  // Bare `curl` is an alias of Invoke-WebRequest in Windows PowerShell 5, so it gets these rules too.
+  // Parameter names may be shortened (-Me, -Bo, -InF), so prefixes are matched.
+  if (/\b(invoke-webrequest|invoke-restmethod|iwr|irm|curl)\b/.test(cmd)) {
+    if (/\s-me\w*[\s:]+(?!['"]?(get|head)\b)|\s-(bod?y?|inf\w*|form?)\b/.test(cmd)) {
+      deny("Blocked PowerShell web request with outbound data. Use it only for fetching (GET).");
+    }
+  }
+  // [System.Net.WebClient] UploadFile/UploadData/UploadString/UploadValues
+  if (/\.upload(file|data|string|values)/.test(cmd)) {
+    deny("Blocked WebClient upload. Patient data must not be sent externally.");
+  }
+  if (/\bstart-bitstransfer\b.*\bupload\b/.test(cmd)) {
+    deny("Blocked BITS upload. Patient data must not be sent externally.");
+  }
+  if (/\bsend-mailmessage\b/.test(cmd)) {
+    deny("Blocked Send-MailMessage. Patient data must not be sent by email.");
+  }
+  // Environment or file content piped into a PowerShell network command
+  if (
+    /(env:|\b(get-content|gc)\b).*\|.*\b(invoke-webrequest|invoke-restmethod|iwr|irm|curl|wget|start-bitstransfer|send-mailmessage)\b/.test(
+      cmd,
+    )
+  ) {
+    deny("Blocked environment or file content piped to a network command.");
+  }
+
   // ─── Block: docker push ───
   if (/\bdocker\s+push\b/.test(cmd)) {
     deny("Blocked 'docker push'. Container images may contain patient data or clinical configs.");
