@@ -30,6 +30,11 @@ describe("extraction-guard hook", () => {
     expect(denied("extractions/abc123def456/.consent")).toBe(true);
   });
 
+  it("blocks other spellings of the same file on case-insensitive disks (macOS, Windows)", () => {
+    expect(denied("Extractions/abc123def456/Note.md")).toBe(true);
+    expect(denied("extractions/abc123def456/.Consent")).toBe(true);
+  });
+
   it("allows creating them, and writing the verification files", () => {
     expect(denied("extractions/0123456789ab/extraction.json")).toBe(false);
     expect(denied("extractions/abc123def456/corrected.json")).toBe(false);

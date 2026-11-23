@@ -18,8 +18,9 @@ try {
 const projectDir = process.env.CLAUDE_PROJECT_DIR || input.cwd || process.cwd();
 const file = path.resolve(projectDir, (input.tool_input && input.tool_input.file_path) || "");
 // Only <project>/extractions/<hash>/, not data/extractions/.
-const inFolder = path.dirname(path.dirname(file)) === path.resolve(projectDir, "extractions");
-const name = path.basename(file);
+// Compared in lower case: on macOS and Windows "Extractions/x/Note.md" is the same file.
+const inFolder = path.dirname(path.dirname(file)).toLowerCase() === path.resolve(projectDir, "extractions").toLowerCase();
+const name = path.basename(file).toLowerCase();
 // .consent is written only by the note-consent hook or the `extract --serve` server, after the doctor said yes
 if (!inFolder || !(name === "note.md" || name === ".consent" || (name === "extraction.json" && fs.existsSync(file)))) process.exit(0);
 

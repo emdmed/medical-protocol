@@ -71,7 +71,8 @@ update_json "$ROOT/packages/medical-protocol/package.json" "obj.version = '$VERS
 update_json "$ROOT/plugin/.claude-plugin/plugin.json" "obj.version = '$VERSION';"
 
 # --- 6. SPEC.md status line ---
-sed -i -E "s/\(v[0-9]+\.[0-9]+\.[0-9]+\)/(v$VERSION)/" "$ROOT/SPEC.md"
+# -i.bak: the one in-place form both GNU (Linux) and BSD (macOS) sed accept
+sed -i.bak -E "s/\(v[0-9]+\.[0-9]+\.[0-9]+\)/(v$VERSION)/" "$ROOT/SPEC.md" && rm "$ROOT/SPEC.md.bak"
 
 # --- 7. lockfile + committed bundles (they embed the version at build time) ---
 cd "$ROOT"
