@@ -26,7 +26,7 @@ A single local HTML file, or the same page served by a local server. It holds th
 
 - One self-contained HTML string in `src/extract-artifact.ts` (String.raw, no backticks or `${`), no framework, no runtime deps.
 - States: intake form, working (steps and clock), failed (retry), review (corrections to decide), done.
-- Items group as needs review, current illness, history; labs tagged "lab" in the margin; rows and note highlights light each other.
+- Values listed in one place, grouped as needs review, current illness, history, labs; the note beside them as raw text; rows and note highlights light each other.
 - Copy extraction JSON. Light and dark themes. One column under 900px.
 
 ## Product Principles

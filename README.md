@@ -64,7 +64,7 @@ Ask for a note extraction and you get a page in your browser, served from your o
 
 This is what the page looks like:
 
-![The extraction page: a fictional admission note on the left with the quoted words highlighted, and the extracted values on the right, grouped into needs review, current illness and history](.github/readme/extraction-page.png)
+![The extraction page: every extracted value on the left, grouped as needs review, current illness, history and labs, and the fictional note on the right as written, with the quoted words highlighted](.github/readme/extraction-page.png)
 
 The page runs on your computer only (`medprotocol extract --serve`) and can be saved as a local file. It is never published, and the note only reaches the model after you confirm it is not real patient data.
 

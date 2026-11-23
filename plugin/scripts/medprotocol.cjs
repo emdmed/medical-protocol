@@ -4123,8 +4123,8 @@ dialog form{display:flex;justify-content:flex-end;padding:14px 20px}
 .btn:disabled,.btn:disabled:hover{background:transparent;border-color:var(--ink-2);color:var(--ink-2);cursor:default}
 .run .btn{background:#fff;border-color:#fff;color:#14171f}
 .run .btn:hover{background:#dfe2e7}
-.run a.btn,.run #theme,.run #pick{background:transparent;color:#fff}
-.run a.btn:hover,.run #theme:hover,.run #pick:hover{background:rgba(255,255,255,.16)}
+.run a.btn,.run #theme,.run #pick,.run summary.btn{background:transparent;color:#fff}
+.run a.btn:hover,.run #theme:hover,.run #pick:hover,.run summary.btn:hover{background:rgba(255,255,255,.16)}
 
 /* the one ramp of marks, the same in the bar, the rail and the margin:
    filled = found word for word, double = the same in the history, dashed = close match, ring = missing or not stated */
@@ -4136,17 +4136,24 @@ dialog form{display:flex;justify-content:flex-end;padding:14px 20px}
 .run .m.close{background:none;border-color:var(--bar-close)}
 .run .m.bad{background:none;border-color:var(--bar-bad)}
 
-/* rail at left: what is left to do. The proof at right scrolls by itself */
+/* at left every value in one place; the note at right keeps its reading width. Each side scrolls by itself */
 main{min-height:0}
 .shell{display:grid;grid-template-columns:316px minmax(0,1fr);height:100%}
-.rail{min-height:0;overflow-y:auto;padding:22px 20px 22px var(--gut);border-right:1px solid var(--line)}
+#panes{grid-template-columns:minmax(340px,1fr) minmax(0,44rem)}
+.rail .lead,.rail .box,.step{max-width:34rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:0 36px;margin-bottom:14px}
+.rail{min-height:0;overflow-y:auto;padding:0 20px 22px var(--gut);border-right:1px solid var(--line)}
 h2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:10px;border-bottom:2px solid var(--ink);font:800 12.5px/1.3 var(--ui);letter-spacing:.1em;text-transform:uppercase}
 h2 span,h2 b{font:500 12.5px/1.3 var(--ui);letter-spacing:0;text-transform:none;color:var(--ink-2)}
 h2 b{font:700 12px/1.3 var(--mono);color:var(--ink)}
-.rail *+h2,.rail *+div>h2{margin-top:30px}
-.lead{padding-top:10px;font-size:14px;color:var(--ink-2)}
+/* the heads stack at the top of the pane as their sections scroll under them: head --i stops below the
+   ones before it, and a click on it brings its section back. All are one height, so the stops are exact */
+.rail h2,.ph{position:sticky;top:calc(var(--i,0)*40px);z-index:1;height:40px;padding-top:12px;background:var(--ground);box-shadow:-12px 0 var(--ground),12px 0 var(--ground)}
+.rail section{display:contents}
+.rail section>h2{cursor:pointer}
+.lead{padding-top:10px;font-size:14px;color:var(--ink-2);text-wrap:pretty}
 .empty{font-style:italic;color:var(--ink-2)}
-.card{margin-inline:-12px;padding:14px 12px 16px;border-bottom:1px solid var(--line);transition:background-color .15s}
+.card{margin-inline:-12px;padding:10px 12px 12px;border-bottom:1px solid var(--line);transition:background-color .15s}
 .card:hover,.card:focus-visible,.card:focus-within,.card.on{background:var(--sheet)}
 .card:focus-visible{outline-offset:-2px}
 h3{display:flex;align-items:start;gap:10px;font:700 16px/1.25 var(--ui)}
@@ -4165,33 +4172,43 @@ h3 .m{margin-top:3px}
 q{quotes:"\201C" "\201D";font-family:var(--text);color:var(--ink)}
 /* the two answers stand apart, so neither is pressed by accident */
 .acts{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:12px}
-.key{display:grid;gap:9px;padding-top:12px;font-size:14px;color:var(--ink-2)}
+/* the legend drops from its button in the bar: what each mark means, and how many there are */
+.lg{position:relative}
+.lg summary::-webkit-details-marker{display:none}
+.run .lg[open] summary{background:rgba(255,255,255,.16)}
+/* its panel is paper, not the bar: the marks take the page's inks again */
+.run .key .m{background:var(--ink)}
+.run .key .m.his,.run .key .m.close,.run .key .m.bad{background:none}
+.run .key .m.close{border-color:var(--close)}
+.run .key .m.bad{border-color:var(--bad)}
+.key{position:absolute;right:0;top:calc(100% + 8px);z-index:2;display:grid;gap:9px;width:max-content;max-width:min(440px,calc(100vw - 32px));padding:14px 16px;border:1.5px solid var(--ink);background:var(--ground);font-size:14px;color:var(--ink-2)}
 .key li{display:grid;grid-template-columns:14px auto 1fr;align-items:baseline;gap:9px}
 .key .m{align-self:start;margin-top:3px}
 .key b{font:700 14px/1 var(--mono);color:var(--ink)}
 
-/* the proof: one row per line of the note; each value sits in the margin beside its words */
-.proof{display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0;min-height:0;padding:22px var(--gut) 0 0}
-.ph{margin-left:46px}
-#note{display:grid;grid-template-columns:46px minmax(0,var(--mw)) minmax(240px,1fr);align-content:start;overflow-y:auto;padding-bottom:22px;--ry:19px}
-.ln{padding:5px 12px 0 0;font:500 12px/var(--lh) var(--mono);color:var(--ink-2);text-align:right;user-select:none}
-.l{min-height:calc(var(--lh) + 10px);padding:5px 22px;background:var(--sheet);font:400 17px/var(--lh) var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
-.mg{display:flex;flex-wrap:wrap;align-content:start;gap:0 4px;padding:5px 0 5px 10px}
-.mg:not(:empty){background:linear-gradient(var(--line),var(--line)) 0 var(--ry)/100% 1px no-repeat}
-#note>:nth-child(-n+3){padding-top:14px;--ry:28px}
-#note>.l:nth-last-child(2){padding-bottom:14px}
+/* the proof: the note as it was written, one sheet of raw text; only the quotes are marked */
+.proof{display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0;min-height:0;padding:0 var(--gut) 0 28px}
+#note{overflow-y:auto;padding:18px 24px 28px;background:var(--sheet);font:400 17px/var(--lh) var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
 mark{color:var(--ink);background:linear-gradient(var(--hl),var(--hl)) 0 0/100% 100% no-repeat;padding:2px 3px;border-bottom:2px solid var(--hl-line);-webkit-box-decoration-break:clone;box-decoration-break:clone;cursor:pointer}
 mark.his{border-bottom:4px double var(--hl-line)}
 mark.close{background:none;border-bottom:2px dashed var(--close)}
 mark.bad{--hl:var(--bad-t);border-bottom:0;box-shadow:inset 0 0 0 2px var(--bad)}
 mark.on{--hl:var(--hl-on);outline:2px solid var(--ink);outline-offset:1px}
-.e{display:flex;flex-wrap:wrap;align-items:center;gap:0 5px;min-height:var(--lh);max-width:100%;padding:0 5px;background:var(--ground);font-size:12px;font-weight:500;color:var(--ink-2);cursor:default;transition:background-color .15s}
+/* a group of values reads like a lab sheet, across then down, in as many columns as fit:
+   field at left, the figure and its unit in fixed places at right, so figures line up */
+.vals{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr));gap:0 36px;margin-bottom:14px}
+.e{display:grid;grid-template-columns:14px minmax(0,1fr) auto;align-content:start;align-items:baseline;gap:0 8px;margin-inline:-6px;padding:5px 6px;border-bottom:1px solid var(--line);font-size:13px;font-weight:500;color:var(--ink-2);cursor:pointer;transition:background-color .15s}
+.e .m{align-self:start;margin-top:3px}
 .e:hover,.e:focus-visible,.e.on{background:var(--hl);color:var(--ink)}
 .e:focus-visible{outline-offset:-2px}
+.val{text-align:right;white-space:nowrap}
+/* a value in words is read, not compared: under its field, at text weight */
+.e.t .val{grid-column:2/-1;text-align:left;white-space:normal}
 /* the figure is the largest thing in an entry */
-.v{font:700 16px/var(--lh) var(--mono);color:var(--ink)}
-.v.txt{font:700 14px/var(--lh) var(--ui)}
-.e small{font-size:12px}
+.v{font:700 15px/1.3 var(--mono);color:var(--ink)}
+.v.txt{font:500 14px/1.35 var(--ui)}
+.e small,.e .why{margin-left:5px;font-size:12px}
+.e .u{display:inline-block;min-width:5ch;text-align:left}
 .e.bad,.e.bad .v{color:var(--bad)}
 .e.close .why{color:var(--close)}
 .e:hover.bad,.e.on.bad{background:var(--bad-t)}
@@ -4203,10 +4220,10 @@ mark.on{--hl:var(--hl-on);outline:2px solid var(--ink);outline-offset:1px}
 
 /* live mode only (extract --serve): the intake form, the steps, the failed box */
 .in .proof{grid-template-rows:auto minmax(160px,1fr) auto}
-textarea{display:block;max-width:var(--mw);margin-left:46px;width:calc(100% - 46px);padding:14px 22px;border:1px solid var(--line);resize:none;background:var(--sheet);color:var(--ink);font:400 17px/var(--lh) var(--text)}
+textarea{display:block;max-width:calc(var(--mw) + 48px);width:100%;padding:14px 24px;border:1px solid var(--line);resize:none;background:var(--sheet);color:var(--ink);font:400 17px/var(--lh) var(--text)}
 textarea:focus-visible{outline-offset:0}
 textarea::placeholder{color:var(--ink-2);font-style:italic}
-.send{display:grid;gap:16px;max-width:calc(var(--mw) + 46px);padding:18px 0 22px 46px}
+.send{display:grid;gap:16px;max-width:calc(var(--mw) + 48px);padding:18px 0 22px}
 .agree{display:flex;align-items:flex-start;gap:12px;color:var(--ink-2);cursor:pointer}
 /* a square in a frame, like the marks */
 .agree input{appearance:none;flex:none;width:18px;height:18px;margin:2px 0 0;border:1.5px solid var(--ink);background:var(--sheet);cursor:pointer;transition:background-color .15s}
@@ -4239,24 +4256,21 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
 footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 24px;padding:9px var(--gut) calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);font-size:13px;color:var(--ink-2)}
 footer code{font:500 12px var(--mono)}
 
-/* narrow screens: one column, the page scrolls, and each value drops under its line */
+/* narrow screens: one column, the page scrolls: the values, then the note */
 @media (max-width:900px){
   body{display:block;height:auto;overflow:visible}
-  .shell{display:flex;flex-direction:column;height:auto}
-  .rail{overflow:visible;padding:22px var(--gut);border-right:0}
+  .shell,#panes{display:flex;flex-direction:column;height:auto}
+  .rail{overflow:visible;padding:0 var(--gut) 22px;border-right:0}
+  /* a stack would take too much of a small screen: each head gives way to the next */
+  .rail h2{top:0}
   /* the note is pasted first; what happens next comes after it */
   .in .rail{order:1}
-  .proof{padding:10px var(--gut) 22px}
-  .ph,textarea{margin-left:0;width:100%}
-  .send{padding-left:0}
+  .proof{padding:0 var(--gut) 22px}
   textarea{min-height:240px}
-  #note{grid-template-columns:30px minmax(0,1fr);overflow:visible;padding-bottom:0}
-  .ln{padding-right:8px}
-  .l{padding-inline:14px}
-  .mg,.mg:not(:empty){grid-column:2;padding:0 8px 8px;background:var(--sheet)}
-  .mg:empty{display:none}
-  #note>.mg:nth-child(3){padding-top:0}
-  .e{background:var(--ground)}
+  #note{overflow:visible;padding-inline:16px}
+  /* the legend opens in the flow of the bar, on a line of its own */
+  .lg[open]{flex-basis:100%}
+  .key{position:static;margin-top:8px}
   footer{padding-block:14px 28px}
 }
 @media (max-width:640px){
@@ -4271,6 +4285,7 @@ footer code{font:500 12px var(--mono)}
   <h1 id="t"></h1>
   <button class="btn" id="pick" type="button" hidden>Saved notes</button>
   <ul class="tally" id="tally" aria-label="Counts"></ul>
+  <details class="lg" id="legend"><summary class="btn">Legend</summary><ul class="key" id="key"></ul></details>
   <button class="btn" id="copy" type="button">Copy extraction JSON</button>
   <a class="btn" id="new" href="#" hidden>New note</a>
   <button class="btn" id="theme" type="button">Dark mode</button>
@@ -4299,7 +4314,7 @@ footer code{font:500 12px var(--mono)}
     </section>
   </form>
   <div class="shell" id="panes">
-    <aside class="rail" id="rail" aria-label="To review"></aside>
+    <aside class="rail" id="rail" aria-label="Extracted values"></aside>
     <section class="proof" aria-label="The note">
       <h2 class="ph">Note, as written<span id="len"></span></h2>
       <div class="fresh" id="note" tabindex="0"></div>
@@ -4317,6 +4332,8 @@ footer code{font:500 12px var(--mono)}
 (function () {
   var data = JSON.parse(document.getElementById("data").textContent);
   var CLOSE = { edited: 1, approximate: 1, reordered: 1 };
+  // a figure is set in mono; words are set as text
+  var FIG = /^[-+<>]?\d[\d.,\/]*$/;
   var LABEL = {
     quoted: "Found in note",
     edited: "Close match: case or accents differ",
@@ -4362,6 +4379,9 @@ footer code{font:500 12px var(--mono)}
   var title = document.getElementById("t");
   var tally = document.getElementById("tally");
   var copyBtn = document.getElementById("copy");
+  var legend = document.getElementById("legend"), key = document.getElementById("key");
+  // a click anywhere else closes the legend
+  document.addEventListener("click", function (e) { if (!legend.contains(e.target)) legend.open = false; });
   var note = document.getElementById("note");
   var rail = document.getElementById("rail");
   var len = document.getElementById("len");
@@ -4384,62 +4404,84 @@ footer code{font:500 12px var(--mono)}
     else fallback();
   });
 
-  function clear() {
-    document.querySelectorAll(".on").forEach(function (e) { e.classList.remove("on"); });
-  }
-  function light(n, scroll) {
-    clear();
+  // pinned: the item chosen with a click or Enter; it stays lit until another is chosen or Esc
+  var pinned = -1;
+  function on(n) {
     rows[n].forEach(function (r) { r.classList.add("on"); });
     marksOf[n].forEach(function (m) { m.classList.add("on"); });
-    var m = marksOf[n][0];
-    if (scroll && m) {
-      // only where the note scrolls by itself; on a narrow screen the page is left where it is
-      var a = m.getBoundingClientRect(), b = note.getBoundingClientRect();
-      if (a.top < b.top || a.bottom > b.bottom - 40) note.scrollTo({ top: note.scrollTop + a.top - b.top - note.clientHeight / 3, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-    }
   }
-  // pointing at (or focusing) e lights item n in the note
+  function clear() {
+    document.querySelectorAll(".on").forEach(function (e) { e.classList.remove("on"); });
+    if (pinned >= 0) on(pinned);
+  }
+  // brings e to top px below the top of its pane (no top: to the middle). Only that pane moves, or the
+  // page on a narrow screen: scrollIntoView would also move the page under the bar
+  function bring(e, top) {
+    var box = e.closest("#rail,#note"), own = getComputedStyle(box).overflowY !== "visible";
+    var r = e.getBoundingClientRect(), b = own ? box.getBoundingClientRect() : { top: 0, height: innerHeight };
+    if (top == null) top = (b.height - r.height) / 2;
+    (own ? box : window).scrollBy({ top: r.top - b.top - top, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }
+  function pin(n) {
+    pinned = n; clear();
+    if (marksOf[n][0]) bring(marksOf[n][0]);
+  }
+  // pointing at (or focusing) e lights item n in the note; a click or Enter brings its words into view.
+  // Pointing alone never moves the note: the pointer crosses other rows on its way there
   function point(e, n) {
-    e.addEventListener("mouseenter", function () { light(n, true); });
-    e.addEventListener("focusin", function () { light(n, true); });
+    function lit() { clear(); on(n); }
+    e.addEventListener("mouseenter", lit);
+    e.addEventListener("focusin", lit);
     e.addEventListener("mouseleave", clear);
     e.addEventListener("focusout", clear);
+    e.addEventListener("click", function () { pin(n); });
+    // not from a button inside a card
+    e.addEventListener("keydown", function (ev) {
+      if (ev.target !== e || (ev.key !== "Enter" && ev.key !== " ")) return;
+      ev.preventDefault(); pin(n);
+    });
   }
-  note.addEventListener("mouseover", function (e) {
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { pinned = -1; clear(); legend.open = false; } });
+  function over(e) {
     var m = e.target.closest("mark");
     if (!m) return;
     clear();
-    m.dataset.items.split(" ").forEach(function (n) {
-      rows[n].forEach(function (r) { r.classList.add("on"); });
-      marksOf[n].forEach(function (x) { x.classList.add("on"); });
-    });
-  });
+    m.dataset.items.split(" ").forEach(function (n) { on(n); });
+  }
+  note.addEventListener("mouseover", over);
+  note.addEventListener("focusin", over);
   note.addEventListener("mouseleave", clear);
-  note.addEventListener("click", function (e) {
+  note.addEventListener("focusout", clear);
+  // a highlight, clicked or entered, brings its row into view
+  function toRow(e) {
     var m = e.target.closest("mark");
-    var r = m && rows[m.dataset.items.split(" ")[0]];
-    if (r && r.length) r[r.length - 1].scrollIntoView({ block: "nearest" });
-  });
+    if (!m || (e.type === "keydown" && e.key !== "Enter")) return;
+    var n = +m.dataset.items.split(" ")[0], r = rows[n];
+    pinned = n; clear();
+    // below the stacked heads
+    if (r.length) bring(r[r.length - 1], rail.querySelectorAll("h2").length * 40 + 8);
+  }
+  note.addEventListener("click", toRow);
+  note.addEventListener("keydown", toRow);
 
-  // the margin entry of an item: its mark, field and value. The words it came from are lit on its line
+  // the row of an item in its group: its mark, field and value. Pointing at it lights its words in the note
   function entry(it, n) {
-    var k = kind(it), li = el("li", "e " + k);
+    var k = kind(it), fig = FIG.test(it.value), li = el("li", "e " + k + (fig ? "" : " t")), name = el("span", "", it.field), val = el("span", "val");
     li.tabIndex = 0;
     li.appendChild(mk(k));
-    li.appendChild(el("span", "", it.field));
-    // the quote is the value, word for word: it is already on the line
-    var same = !it.unit && it.quote && it.quote.trim().toLowerCase() === String(it.value).trim().toLowerCase();
-    if (!same) {
-      // figures are set in mono; words are set as text
-      li.appendChild(el("b", /^[-+<>]?\d[\d.,\/]*$/.test(it.value) ? "v" : "v txt", it.value));
-      if (it.unit) li.appendChild(el("small", "", it.unit));
-    }
-    if (it.lab === true) li.appendChild(el("small", "", "lab"));
+    // the notes on a value stand with its field, so the figures stay in line
+    // the labs are one group: say which ones are from before this illness
+    if (it.lab === true && it.episode === "history") name.appendChild(el("small", "", "history"));
     // when it was taken: the one thing the check cannot verify, so it is always shown
-    if (it.time) li.appendChild(el("small", "", it.time));
-    if (k === "close" || k === "bad") li.appendChild(el("span", "why", k === "close" ? "close match" : "not stated"));
-    if (it.ambiguous) li.appendChild(el("small", "", "first of several"));
-    li.title = status(it); li.appendChild(el("span", "sr", status(it)));
+    if (it.time) name.appendChild(el("small", "", it.time));
+    if (k === "close" || k === "bad") name.appendChild(el("span", "why", k === "close" ? "close match" : it.status === "mismatched" ? "not stated" : "not found"));
+    if (it.ambiguous) name.appendChild(el("small", "", "first of several"));
+    li.appendChild(name);
+    val.appendChild(el("b", fig ? "v" : "v txt", it.value));
+    // a figure keeps the place of its unit even without one
+    if (fig || it.unit) val.appendChild(el("small", "u", it.unit || ""));
+    li.appendChild(val);
+    li.appendChild(el("span", "sr", status(it)));
     point(li, n); rows[n].push(li);
     return li;
   }
@@ -4451,7 +4493,7 @@ footer code{font:500 12px var(--mono)}
     var h = el("h3"); h.appendChild(mk(k)); h.appendChild(document.createTextNode(it.field)); li.appendChild(h);
     li.appendChild(el("p", "st", status(it)));
     var v = line(bad ? "Extracted" : "Value", "cmp");
-    v.appendChild(el("span", "n", it.value));
+    v.appendChild(FIG.test(it.value) ? el("span", "n", it.value) : document.createTextNode(it.value));
     if (it.unit) v.appendChild(document.createTextNode(" " + it.unit));
     li.appendChild(v);
     if (it.quote && bad) {
@@ -4466,14 +4508,20 @@ footer code{font:500 12px var(--mono)}
     if (CLOSE[it.status] && it.start != null) {
       var s = line("Note says"); s.appendChild(document.createTextNode(text.slice(it.start, it.end))); li.appendChild(s);
     }
-    var meta = [it.episode === "history" ? "History" : "Current illness"];
+    var meta = [(it.lab === true ? "Labs · " : "") + (it.episode === "history" ? "History" : "Current illness")];
     if (it.time) meta.push(it.time);
     if (it.ambiguous) meta.push("Appears more than once: first occurrence marked");
     li.appendChild(el("p", "", meta.join(" · ")));
-    // on a narrow screen the note is further down the page
-    li.addEventListener("click", function () { var m = marksOf[n][0]; if (m) m.scrollIntoView({ block: "nearest" }); });
     point(li, n); rows[n].push(li);
     return li;
+  }
+
+  // numbers the heads of the rail for the stack; a click on one brings its section up under the stack
+  function stack() {
+    rail.querySelectorAll("h2").forEach(function (h, i) {
+      h.style.setProperty("--i", i);
+      h.onclick = function () { bring(h.nextElementSibling, (i + 1) * 40); };
+    });
   }
 
   // draws one extraction from scratch: the bar, the rail and the proof
@@ -4481,7 +4529,8 @@ footer code{font:500 12px var(--mono)}
     var segs = data.segments;
     items = data.items;
     text = segs.map(function (s) { return s.text; }).join("");
-    note.textContent = ""; rail.textContent = ""; tally.textContent = "";
+    note.textContent = ""; rail.textContent = ""; tally.textContent = ""; key.textContent = "";
+    pinned = -1; legend.hidden = !data.items.length;
 
     title.textContent = data.name;
     document.getElementById("when").textContent = data.checkedAt ? "Checked " + data.checkedAt : "";
@@ -4497,37 +4546,19 @@ footer code{font:500 12px var(--mono)}
       return o;
     }), null, 2);
 
-    // the note, only from its segments, one row per line: its number, its words, its margin.
-    // Each mark knows its items; an item's entry goes in the margin of the line its quote starts on
+    // the note, only from its segments, as raw text. Each mark knows its items
     marksOf = items.map(function () { return []; });
     rows = items.map(function () { return []; });
-    var no = 0, cur;
-    function row() {
-      var num = el("div", "ln", String(++no)); num.setAttribute("aria-hidden", "true");
-      cur = { l: el("div", "l"), mg: el("ul", "mg") };
-      note.appendChild(num); note.appendChild(cur.l); note.appendChild(cur.mg);
-    }
-    row();
     segs.forEach(function (s) {
+      if (!s.items.length) { note.appendChild(document.createTextNode(s.text)); return; }
       var ks = s.items.map(function (n) { return kind(items[n]); });
-      var cls = ks.indexOf("bad") >= 0 ? "bad" : ks.indexOf("close") >= 0 ? "close" : ks[0];
-      s.text.split("\n").forEach(function (part, i) {
-        if (i) row();
-        if (!part) return;
-        if (!s.items.length) { cur.l.appendChild(document.createTextNode(part)); return; }
-        var m = el("mark", cls, part);
-        m.dataset.items = s.items.join(" ");
-        s.items.forEach(function (n) {
-          if (!marksOf[n].length) cur.mg.appendChild(entry(items[n], n));
-          marksOf[n].push(m);
-        });
-        cur.l.appendChild(m);
-      });
+      var m = el("mark", ks.indexOf("bad") >= 0 ? "bad" : ks.indexOf("close") >= 0 ? "close" : ks[0], s.text);
+      m.dataset.items = s.items.join(" ");
+      m.tabIndex = 0;
+      s.items.forEach(function (n) { marksOf[n].push(m); });
+      note.appendChild(m);
     });
-
-    // a note that ends in a line break has no last line to number
-    if (no > 1 && !cur.l.firstChild) { note.removeChild(cur.mg); note.removeChild(cur.l); note.removeChild(note.lastChild); no--; }
-    len.textContent = no + (no === 1 ? " line" : " lines") + (items.length ? " · each value sits beside its line" : "");
+    len.textContent = items.length ? "The highlighted words are where each value came from" : "";
 
     // the bar: what to distrust first
     [["bad", "missing or not stated"], ["close", count.close === 1 ? "close match" : "close matches"]].forEach(function (g) {
@@ -4536,21 +4567,35 @@ footer code{font:500 12px var(--mono)}
     });
     var f = el("li"); f.appendChild(mk("")); f.appendChild(el("b", "", found + "/" + items.length)); f.appendChild(el("span", "", "found word for word")); tally.appendChild(f);
 
-    // the rail: every item that is not found word for word, in note order; one with no words in the note is only here
     if (!items.length) { rail.appendChild(el("p", "empty", "Nothing was extracted from this note.")); return; }
-    rail.appendChild(head(flagged ? "Needs review" : "Nothing to review", flagged || null));
-    rail.appendChild(el("p", "lead", flagged ? "The quote is missing, inexact, or doesn't state the value. Check each against the note." : "Every quote was found word for word in the note."));
-    var ol = el("ol");
-    items.forEach(function (it, n) { if (it.status !== "quoted") ol.appendChild(card(it, n)); });
-    rail.appendChild(ol);
-    // the counts by mark, which is also the legend
-    rail.appendChild(head("In this note", items.length));
-    var key = el("ul", "key");
+    // a section of the rail: its head, then its body
+    function sec(title, n, body, lead) {
+      var s = el("section"); s.appendChild(head(title, n));
+      if (lead) s.appendChild(el("p", "lead", lead));
+      s.appendChild(body); rail.appendChild(s);
+    }
+    // first, every item that is not found word for word, in note order, with what the note says
+    if (flagged) {
+      var ol = el("ol", "cards");
+      items.forEach(function (it, n) { if (it.status !== "quoted") ol.appendChild(card(it, n)); });
+      sec("Needs review", flagged, ol, "The quote is missing, inexact, or doesn't state the value. Check each against the note.");
+    }
+    // then every item once, in its group, in note order; in the labs, this illness before the history
+    [
+      ["Current illness", function (i) { return i.lab !== true && i.episode !== "history"; }],
+      ["History", function (i) { return i.lab !== true && i.episode === "history"; }],
+      ["Labs", function (i) { return i.lab === true && i.episode !== "history"; }, function (i) { return i.lab === true && i.episode === "history"; }]
+    ].forEach(function (g) {
+      var ul = el("ul", "vals");
+      g.slice(1).forEach(function (is) { items.forEach(function (it, n) { if (is(it)) ul.appendChild(entry(it, n)); }); });
+      if (ul.firstChild) sec(g[0], ul.children.length, ul);
+    });
+    stack();
+    // the legend: the counts by mark
     [["", "current illness, found word for word"], ["his", "history, found word for word"], ["close", "close match"], ["bad", "missing, or the quote doesn't state the value"]].forEach(function (g) {
       if (!count[g[0]]) return;
       var li = el("li"); li.appendChild(mk(g[0])); li.appendChild(el("b", "", String(count[g[0]]))); li.appendChild(el("span", "", g[1])); key.appendChild(li);
     });
-    rail.appendChild(key);
   }
 
   if (!data.live) { render(data); return; }
@@ -4635,6 +4680,7 @@ footer code{font:500 12px var(--mono)}
     clearInterval(tick);
     panes.classList.toggle("busy", busy);
     tally.hidden = copyBtn.hidden = busy || s.state === "failed";
+    if (tally.hidden) legend.hidden = true;
     if (!tally.hidden) { corrections(s); return; }
     rail.textContent = ""; when.textContent = "";
     if (busy) {
@@ -4647,7 +4693,7 @@ footer code{font:500 12px var(--mono)}
       rail.appendChild(el("p", "lead", "It usually takes a minute or two. This page updates by itself."));
       show(); tick = setInterval(show, 1000);
       rail.appendChild(stepList(at));
-      len.textContent = "The values appear beside their lines when both steps finish";
+      len.textContent = "The values appear when both steps finish";
       statusLine.textContent = at ? "Step 2 of 3: the second check is re-reading the note." : "Step 1 of 3: pulling out the values.";
       rail.appendChild(statusLine);
       return;
@@ -4714,10 +4760,10 @@ footer code{font:500 12px var(--mono)}
     if (!s.findings.length) return;
     var open = s.findings.filter(function (f) { return (f.correction || f.index != null) && !f.decision; }).length;
     if (open) { var t = el("li"); t.appendChild(el("b", "", String(open))); t.appendChild(el("span", "", "to decide")); tally.insertBefore(t, tally.firstChild); }
-    var sec = el("div");
+    var sec = el("section");
     sec.appendChild(head("Corrections", s.findings.length));
     sec.appendChild(el("p", "lead", "The second check re-read the note. Accept each change or keep the original."));
-    var ol = el("ol");
+    var ol = el("ol", "cards");
     s.findings.forEach(function (f, n) {
       var li = el("li", "card");
       li.appendChild(el("h3", "", f.problem));
@@ -4751,6 +4797,7 @@ footer code{font:500 12px var(--mono)}
     });
     sec.appendChild(ol);
     rail.insertBefore(sec, rail.firstChild);
+    stack();
   }
 
   function load() {
@@ -4779,7 +4826,7 @@ footer code{font:500 12px var(--mono)}
     var m = /^#([0-9a-f]{12})$/.exec(location.hash);
     id = m && m[1];
     intake.hidden = !!id; panes.hidden = !id;
-    tally.hidden = copyBtn.hidden = true;
+    tally.hidden = copyBtn.hidden = legend.hidden = true;
     document.getElementById("new").hidden = !id;
     title.textContent = "Note extraction"; when.textContent = "";
     // the bar under the note's head runs until the first answer
