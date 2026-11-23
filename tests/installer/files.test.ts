@@ -73,8 +73,8 @@ describe("listFiles", () => {
     fs.writeFileSync(path.join(dir, "a", "m.txt"), "m");
     fs.writeFileSync(path.join(dir, "a", "b", "c.txt"), "c");
 
-    const result = listFiles(dir).map((p) => p.split(path.sep).join("/"));
-    expect(result).toEqual(["a/b/c.txt", "a/m.txt", "z.txt"]);
+    // "/" on every platform: these paths become manifest keys
+    expect(listFiles(dir)).toEqual(["a/b/c.txt", "a/m.txt", "z.txt"]);
   });
 });
 

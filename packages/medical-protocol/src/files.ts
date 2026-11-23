@@ -44,7 +44,8 @@ export function listFiles(dir: string): string[] {
       if (entry.isDirectory()) {
         walk(fullPath);
       } else {
-        results.push(path.relative(dir, fullPath));
+        // Always "/": these become manifest keys, which must match across Windows and Unix
+        results.push(path.relative(dir, fullPath).split(path.sep).join("/"));
       }
     }
   }
