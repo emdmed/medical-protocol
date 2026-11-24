@@ -1,6 +1,7 @@
 // Shared with ckd.ts — one implementation
 export { checkESAEligibility, getCKDMBDMonitoring } from "./ckd";
 import { assessPhosphate, assessPTH, assessVitaminD, correctCalcium, classifyAnemia } from "./ckd";
+import type { Severity } from "./severity";
 
 /**
  * Nephrology specialty calculations.
@@ -21,7 +22,7 @@ const sf = (v: string): number => {
 
 export function classifyLDL(ldl: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(ldl);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -34,7 +35,7 @@ export function classifyLDL(ldl: string): {
 
 export function classifyHbA1c(hba1c: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(hba1c);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -47,7 +48,7 @@ export function classifyHbA1c(hba1c: string): {
 export function classifyBPInCKD(
   sbp: string,
   dbp: string,
-): { label: string; severity: "normal" | "warning" | "critical" } {
+): { label: string; severity: Severity } {
   const s = sf(sbp);
   const d = sf(dbp);
   if (s === 0 || d === 0) return { label: "—", severity: "normal" };
@@ -59,7 +60,7 @@ export function classifyBPInCKD(
 
 export function classifyTriglycerides(tg: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(tg);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -71,7 +72,7 @@ export function classifyTriglycerides(tg: string): {
 
 export function classifyLpa(lpa: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(lpa);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -82,7 +83,7 @@ export function classifyLpa(lpa: string): {
 
 export function classifyNonHDL(nonHdl: number): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   if (nonHdl <= 0) return { label: "—", severity: "normal" };
   if (nonHdl < 100) return { label: "Optimal", severity: "normal" };
@@ -93,7 +94,7 @@ export function classifyNonHDL(nonHdl: number): {
 
 export function classifyApoB(apoB: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(apoB);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -193,7 +194,7 @@ export function calculateCorrectedCalcium(
 
 export function classifyCalcium(ca: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(ca);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -204,7 +205,7 @@ export function classifyCalcium(ca: string): {
 
 export function classifyPhosphorus(ph: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(ph);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -216,7 +217,7 @@ export function classifyPhosphorus(ph: string): {
 /** PTH display class, consistent with assessPTH (normal range G1–G3b; 2–9× ULN for G4–G5). */
 export function classifyPTH(pth: string, gfrCategory?: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(pth);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -232,7 +233,7 @@ export function classifyPTH(pth: string, gfrCategory?: string): {
 
 export function classifyVitaminD(vd: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(vd);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -243,7 +244,7 @@ export function classifyVitaminD(vd: string): {
 
 export function classifyCaPhProduct(product: number): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   if (product < 55) return { label: "Normal", severity: "normal" };
   return { label: "Elevated — vascular calcification risk", severity: "critical" };
@@ -259,7 +260,7 @@ export function classifyCaPhProduct(product: number): {
  */
 export function classifyHemoglobin(hb: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(hb);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -272,7 +273,7 @@ export function classifyHemoglobin(hb: string): {
 
 export function classifyFerritin(ferritin: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(ferritin);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -285,7 +286,7 @@ export function classifyFerritin(ferritin: string): {
 
 export function classifyTSAT(tsat: string): {
   label: string;
-  severity: "normal" | "warning" | "critical";
+  severity: Severity;
 } {
   const v = sf(tsat);
   if (v === 0) return { label: "—", severity: "normal" };
@@ -325,7 +326,7 @@ export function needsIronSupplementation(
 export function classifyAnemiaBySex(
   hb: string,
   sex: string,
-): { label: string; severity: "normal" | "warning" | "critical"; anemic: boolean } {
+): { label: string; severity: Severity; anemic: boolean } {
   const { anemic, severity } = classifyAnemia(hb, sex);
   if (severity === "unknown") return { label: "—", severity: "normal", anemic: false };
   if (severity === "none") return { label: "Normal", severity: "normal", anemic: false };

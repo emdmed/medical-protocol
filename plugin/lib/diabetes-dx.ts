@@ -11,7 +11,8 @@
 
 import { safeParseFloat } from "./utils/safeParseFloat";
 
-export type Severity = "normal" | "warning" | "critical";
+import type { Severity } from "./severity";
+export type { Severity } from "./severity";
 export type DiagnosisCategory = "normal" | "prediabetes-ifg" | "prediabetes-igt" | "diabetes";
 
 // ─── Individual test classifiers ──────────────────────────────────

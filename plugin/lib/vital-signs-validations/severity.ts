@@ -24,8 +24,9 @@ import {
   parseTemperatureValue,
 } from "./temperature-validations";
 import { bloodOxygenValidations } from "./blood-oxygen-validations";
+import type { Severity } from "../severity";
 
-export type VitalSeverity = "normal" | "warning" | "critical";
+export type VitalSeverity = Severity;
 
 export interface SeverityResult {
   severity: VitalSeverity;

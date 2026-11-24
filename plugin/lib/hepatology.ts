@@ -3,12 +3,12 @@
  * MASLD/MASH screening — ADA Standards of Care 2026 Ch. 4, Fig 4.3.
  */
 
+import type { Severity } from "./severity";
+
 const sf = (v: any): number => {
   const n = parseFloat(v);
   return isNaN(n) ? 0 : n;
 };
-
-type Severity = "normal" | "warning" | "critical";
 
 // ═══════════════════════════════════════════════════════════════════
 // FIB-4 CALCULATION

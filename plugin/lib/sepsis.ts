@@ -4,6 +4,7 @@
  */
 
 import { safeParseFloat } from "./utils/safeParseFloat";
+import type { Severity } from "./severity";
 
 // ─── SOFA-2 Organ Scoring (each 0-4) ────────────────────────────────
 // Ranzani et al., Development and Validation of the SOFA-2 Score, JAMA 2025;334(23):2090-2103.
@@ -403,7 +404,7 @@ export const getSOFASeverityLevel = (
  */
 export const getSOFASeverity = (
   score: number,
-): "normal" | "warning" | "critical" => {
+): Severity => {
   if (score <= 5) return "normal";
   if (score <= 10) return "warning";
   return "critical";

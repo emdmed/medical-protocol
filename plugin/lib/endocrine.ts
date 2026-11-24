@@ -11,7 +11,8 @@
 
 import { safeParseFloat } from "./utils/safeParseFloat";
 
-export type Severity = "normal" | "warning" | "critical";
+import type { Severity } from "./severity";
+export type { Severity } from "./severity";
 
 // ═══════════════════════════════════════════════════════════════════
 // T1D STAGING (ADA Table 2.4)

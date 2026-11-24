@@ -4,6 +4,7 @@
  */
 
 import { safeParseFloat } from "./utils/safeParseFloat";
+import type { Severity } from "./severity";
 
 // ─── eGFR (CKD-EPI 2021 Race-Free) ─────────────────────────────────
 
@@ -564,7 +565,7 @@ export const getCKDMBDMonitoring = (
  */
 export const getCKDSeverity = (
   gfrCategory: string,
-): "normal" | "warning" | "critical" => {
+): Severity => {
   if (gfrCategory === "G1" || gfrCategory === "G2") return "normal";
   if (gfrCategory === "G3a" || gfrCategory === "G3b") return "warning";
   return "critical";
