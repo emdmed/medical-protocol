@@ -11,6 +11,7 @@ Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
 Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
+Module docs: ${CLAUDE_SKILL_DIR}/../start/reference/context — each module's `{module}.md` (functions, thresholds, Screen spec)
 Read when needed: reference/ards-berlin-criteria.md
 Read when needed: reference/ventilation-targets.md
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`

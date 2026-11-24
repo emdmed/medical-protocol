@@ -8,6 +8,7 @@ user-invocable: false
 Read and follow: reference/core.md
 Read and follow: reference/building.md
 Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
+Module docs: ${CLAUDE_SKILL_DIR}/../start/reference/context — each module's `{module}.md` (functions, thresholds, Screen spec)
 Read when needed: reference/queue.md
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 

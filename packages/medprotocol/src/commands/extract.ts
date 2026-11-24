@@ -304,7 +304,7 @@ Reply with the verify.json object { "findings": [...] } and nothing else: no pro
 /** The two model steps for one saved note, skipping what is already on disk. Throws with the line the page shows. */
 const runJob = async (dir: string, askModel: AskModel): Promise<void> => {
   const note = readFileSync(join(dir, "note.md"), "utf8");
-  // next to the built CLI in the plugin; no realpath, so a --link install resolves too
+  // next to the built CLI in the plugin
   const rules = readFileSync(resolve(dirname(process.argv[1]), "../skills/extract/reference/extraction.md"), "utf8");
   const context = `=== RULES ===\n${rules}\n=== NOTE ===\n${note}\n=== END NOTE ===`;
 

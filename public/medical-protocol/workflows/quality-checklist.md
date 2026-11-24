@@ -64,7 +64,7 @@ Apply these additional checks based on what was built:
 
 > **Skip this entire section** if `agent-browser --version` fails. The system works without it — this is an enhancement, not a requirement.
 
-Run the full browser QA workflow defined in `${CLAUDE_PLUGIN_ROOT}/reference/workflows/agent-qa.md`. It covers:
+Run the full browser QA workflow defined in `agent-qa.md`. It covers:
 
 - **Page load:** No console errors, accessibility tree populated
 - **Interactive elements:** Click-to-edit, form inputs, navigation all functional

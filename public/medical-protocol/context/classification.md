@@ -1,6 +1,6 @@
 # Classification
 
-When the doctor describes what they need, classify into one of these domains based on signal words. The provider is responsible for mapping each domain to the correct workflow or skill.
+When the doctor describes what they need, classify into one of these domains based on signal words. The `start` skill maps each domain to the correct workflow or skill.
 
 ## Base
 

@@ -7,6 +7,7 @@ user-invocable: true
 
 Read and follow: reference/core.md
 Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
+Module docs: ${CLAUDE_SKILL_DIR}/../start/reference/context — each module's `{module}.md` (functions, thresholds, Screen spec)
 Read when needed: reference/test-vectors.md
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 

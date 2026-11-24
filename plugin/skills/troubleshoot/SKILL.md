@@ -26,6 +26,7 @@ Tell the doctor: "Let me take a look." Do not ask them technical questions.
 ## Clinical Logic
 
 Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
+Module docs: ${CLAUDE_SKILL_DIR}/../start/reference/context — each module's `{module}.md` (functions, thresholds, Screen spec)
 
 If imports from `@/lib/medprotocol/...` fail, re-copy the logic: `mkdir -p lib/medprotocol && cp -r "<clinical logic source>/." lib/medprotocol/` (`src/lib/medprotocol/` if the project uses `src/`). Never fix a clinical error by editing `lib/medprotocol/` — tell the doctor. To understand a screen, read the header comment of its main file in `components/medprotocol/<module>/`.
 

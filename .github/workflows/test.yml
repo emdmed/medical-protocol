@@ -19,5 +19,4 @@ jobs:
       - run: npm test
       # bundles and skill reference/ copies must be committed, with no CRLF noise
       - run: npm run build
-      - run: node packages/medical-protocol/build.mjs
       - run: git diff --exit-code

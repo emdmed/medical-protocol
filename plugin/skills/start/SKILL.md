@@ -10,6 +10,7 @@ Read and follow: reference/project-setup.md
 Read and follow: reference/clinical-context.md
 Read and follow: reference/building.md (when building a screen)
 Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
+Module docs: ${CLAUDE_SKILL_DIR}/../start/reference/context — each module's `{module}.md` (functions, thresholds, Screen spec)
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 ## Step 1: Returning Project Check

@@ -6,9 +6,9 @@ A clinical module is logic plus the docs and entry points that let agents find i
 2. **Tests** — `tests/{module}/*.test.ts` (Vitest), importing from `../../plugin/lib/{module}`. Cover boundaries of every classification tier, empty/invalid input, extreme values.
 3. **Context doc** — `public/medical-protocol/context/{module}.md` with the function signatures, thresholds, and a **Screen spec** (inputs with units, outputs, display rules). Add the module to `context/components.md` (Available Tools + dependencies) and a signal-word row to `context/classification.md`. If the module name differs from the domain (e.g. domain `diabetes` → module `diabetes-dx`), note it.
 4. **CLI command** — `packages/medprotocol/src/commands/{module}.ts`, registered in `packages/medprotocol/src/index.ts`, documented in `context/cli.md`. See `../medprotocol/medprotocol.md`.
-5. **Skill** — `plugin/skills/{module}/SKILL.md` following an existing skill (e.g. `plugin/skills/bmi/`): reads `reference/building.md`, declares `Clinical logic source:`. Add its reference-doc copies to `packages/medical-protocol/build.mjs`. Modules routed through a workflow file instead (nephrology, cardiology, sepsis) get `public/medical-protocol/providers/claude-code/workflows/{module}.md` and a row in the start skill's routing table.
+5. **Skill** — `plugin/skills/{module}/SKILL.md` following an existing skill (e.g. `plugin/skills/bmi/`): reads `reference/building.md`, declares `Clinical logic source:`. Add its reference-doc copies to `scripts/sync-reference.mjs`. Modules routed through a workflow file instead (nephrology, cardiology, sepsis) get `public/medical-protocol/workflows/{module}.md` and a row in the start skill's routing table.
 
-Run `npm test` and `node packages/medical-protocol/build.mjs` before committing.
+Run `npm test` and `npm run build` before committing.
 
 ## What breaks without each step
 

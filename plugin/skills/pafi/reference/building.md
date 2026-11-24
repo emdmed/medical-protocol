@@ -21,7 +21,7 @@ mkdir -p lib/medprotocol && cp -r "<clinical logic source>/." lib/medprotocol/
 
 If the project uses `src/`, copy to `src/lib/medprotocol/` instead. Import from `@/lib/medprotocol/<module>`, for example `import { calculateBMI, getBMICategory } from "@/lib/medprotocol/bmi"`.
 
-The module for each tool is listed in `components.md`. Function signatures and thresholds are in each module's context doc (`{module}.md`).
+The module for each tool is listed in `components.md`. Function signatures and thresholds are in each module's context doc: `{module}.md`, in the folder on the skill's `Module docs:` line (`overlay.md` is there too).
 
 ## 2. Set up UI SDK (once per project)
 

@@ -1,17 +1,16 @@
 # CLAUDE.md
 
-> Before changing the CLI or installer source, or testing the installer, follow `AGENTS.md`.
+> Before changing the CLI, the logic or the shared docs, follow `AGENTS.md`.
 
-## System Overview — 4 Parts
+## System Overview — 3 Parts
 
-This project is one piece of a four-part medical protocol system. Know which part you're in before making changes.
+This project is a three-part medical protocol system. Know which part you're in before making changes.
 
 | Part | What it does | Where it lives |
 |------|-------------|----------------|
 | **1. Workflows & Plugin** (this repo) | Markdown protocols, workflows, context, skills, and hooks that agents like Claude Code consume. Also contains `plugin/lib/` with pure calculation logic, shipped inside the plugin. | `/home/enrique/projects/medprotocol-core` |
-| **2. medical-protocol installer** (this repo) | Optional local installer. `node scripts/medical-protocol.cjs install --dir <project>` copies (or `--link`s) skills, hooks, settings, lib and scripts from `plugin/` into a project's `.claude/`. The main install is the marketplace (`plugin/.claude-plugin/plugin.json`). Source in `packages/medical-protocol/src/`, bundled by `build.mjs` into the committed `scripts/medical-protocol.cjs`. | `packages/medical-protocol/` in this repo |
-| **3. medprotocol CLI** (this repo) | Terminal calculator tool. Imports logic from `plugin/lib/`. No UI. Bundled into the committed `plugin/scripts/medprotocol.cjs`, which ships with the plugin; skills run it with `node`. | `packages/medprotocol/` in this repo |
-| **4. Generated UI** (no repo) | The agent generates each screen in the doctor's project with [UI SDK](https://ui-sdk.dev/docs) (React 19+, unstyled), importing the logic copied to `lib/medprotocol/`. Contract: `public/medical-protocol/context/building.md`. | Doctor's project only |
+| **2. medprotocol CLI** (this repo) | Terminal calculator tool. Imports logic from `plugin/lib/`. No UI. Bundled into the committed `plugin/scripts/medprotocol.cjs`, which ships with the plugin; skills run it with `node`. | `packages/medprotocol/` in this repo |
+| **3. Generated UI** (no repo) | The agent generates each screen in the doctor's project with [UI SDK](https://ui-sdk.dev/docs) (React 19+, unstyled), importing the logic copied to `lib/medprotocol/`. Contract: `public/medical-protocol/context/building.md`. | Doctor's project only |
 
 ### Boundaries — read this
 
@@ -28,9 +27,8 @@ npm test                              # Run all unit tests (Vitest)
 npm run test:watch                    # Watch mode
 npx vitest run tests/vital-signs/     # Run a single test directory
 npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
-npm run version:bump 0.4.0            # Bump version everywhere + rebuild both bundles
-npm run build                         # Build CLI → plugin/scripts/medprotocol.cjs (commit it)
-node packages/medical-protocol/build.mjs  # Sync reference docs into skills + build installer → scripts/medical-protocol.cjs (commit it)
+npm run version:bump 0.4.0            # Bump version everywhere + rebuild
+npm run build                         # Build CLI → plugin/scripts/medprotocol.cjs, sync reference docs into skills (commit both)
 node plugin/scripts/medprotocol.cjs <cmd> [opts]  # CLI calculators (abg, bmi, cardiology, ckd, diabetes, dka, extract, pafi, sepsis, vitals, water-balance, overlay)
 ```
 
@@ -39,10 +37,7 @@ No linter. TypeScript strict mode (`tsconfig.json`).
 ## Architecture
 
 ```
-public/medical-protocol/
-├── providers/                     # Provider protocols + install guides
-│   ├── manifest.json              # Provider registry
-│   └── claude-code/               # protocol.md, install.md, workflows/
+public/medical-protocol/workflows/ # Shared workflows: initial-clarification, agent-qa, quality-checklist, patient-privacy, troubleshoot, cardiology, nephrology, sepsis
 public/medical-protocol/context/   # Shared medical context (single source of truth)
 ├── building.md                    # How every screen is built: copy logic, set up UI SDK, generate
 ├── components.md                  # Tool registry and dependencies
@@ -61,10 +56,9 @@ plugin/                            # Claude plugin source
 ├── scripts/medprotocol.cjs        # Built CLI (skills run it via node; nothing is published to npm)
 ├── skills/                        # SKILL.md + reference/ per skill
 └── settings.json
-packages/medical-protocol/         # Installer source → scripts/medical-protocol.cjs. build.mjs also syncs reference docs into plugin/skills.
 packages/medprotocol/              # CLI source → plugin/scripts/medprotocol.cjs
 tests/                             # Vitest — test files, clinical logic only, no UI rendering
-scripts/                           # bump-version.sh, medical-protocol.cjs (built installer)
+scripts/                           # bump-version.sh, sync-reference.mjs (copies public/ docs into plugin/skills)
 .patterns/                         # Reusable guides: new-module checklist, medprotocol CLI, logic/UI split
 ```
 
@@ -75,5 +69,5 @@ scripts/                           # bump-version.sh, medical-protocol.cjs (buil
 - **Testing:** Logic-only via Vitest; UI QA via agent-browser (workflows/agent-qa.md)
 - **Content is markdown and JSON only** — no HTML
 - **Plugin:** skills in `plugin/skills/` (SKILL.md + reference docs), 5 hooks in `plugin/hooks/` (privacy-guard, extraction-guard, note-consent, qa-reminder, track-workflow)
-- **Shared context:** `public/medical-protocol/context/` — build contract, tool registry, classification, CLI ref, composition patterns, and per-module docs (single source of truth; `build.mjs` copies them into skill `reference/` dirs)
-- **Version:** synced across package.json files, provider manifest, and plugin.json via `npm run version:bump`
+- **Shared context:** `public/medical-protocol/context/` — build contract, tool registry, classification, CLI ref, composition patterns, and per-module docs (single source of truth; `scripts/sync-reference.mjs` copies them into skill `reference/` dirs)
+- **Version:** synced across package.json files and plugin.json via `npm run version:bump`

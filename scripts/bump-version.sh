@@ -58,35 +58,28 @@ update_json() {
 # --- 1. package.json ---
 update_json "$ROOT/package.json" "obj.version = '$VERSION';"
 
-# --- 2. providers/manifest.json ---
-update_json "$ROOT/public/medical-protocol/providers/manifest.json" "obj.version = '$VERSION';"
-
-# --- 3. packages/medprotocol/package.json ---
+# --- 2. packages/medprotocol/package.json ---
 update_json "$ROOT/packages/medprotocol/package.json" "obj.version = '$VERSION';"
 
-# --- 4. packages/medical-protocol/package.json ---
-update_json "$ROOT/packages/medical-protocol/package.json" "obj.version = '$VERSION';"
-
-# --- 5. plugin/.claude-plugin/plugin.json ---
+# --- 3. plugin/.claude-plugin/plugin.json ---
 update_json "$ROOT/plugin/.claude-plugin/plugin.json" "obj.version = '$VERSION';"
 
-# --- 6. SPEC.md status line ---
+# --- 4. SPEC.md status line ---
 # -i.bak: the one in-place form both GNU (Linux) and BSD (macOS) sed accept
 sed -i.bak -E "s/\(v[0-9]+\.[0-9]+\.[0-9]+\)/(v$VERSION)/" "$ROOT/SPEC.md" && rm "$ROOT/SPEC.md.bak"
 
-# --- 7. lockfile + committed bundles (they embed the version at build time) ---
+# --- 5. lockfile + committed bundle (it embeds the version at build time) ---
 cd "$ROOT"
 # edit versions directly; `npm install --package-lock-only` would also re-resolve deps
 node -e "
   const fs = require('fs');
   const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
   lock.version = '$VERSION';
-  for (const p of ['', 'packages/medprotocol', 'packages/medical-protocol'])
+  for (const p of ['', 'packages/medprotocol'])
     if (lock.packages[p]) lock.packages[p].version = '$VERSION';
   fs.writeFileSync('package-lock.json', JSON.stringify(lock, null, 2) + '\\n');
 "
 npm run build --silent
-node packages/medical-protocol/build.mjs
 
 echo ""
 echo "Done. All parts at $VERSION. Commit, then: git tag v$VERSION"

@@ -4,14 +4,12 @@
   "license": "MIT",
   "description": "Medical protocol workflows, calculation logic, and CLI for Claude Code",
   "workspaces": [
-    "packages/medprotocol",
-    "packages/medical-protocol"
+    "packages/medprotocol"
   ],
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "npm run build -w packages/medprotocol",
-    "build:installer": "npm run build -w packages/medical-protocol",
+    "build": "npm run build -w packages/medprotocol && node scripts/sync-reference.mjs",
     "medprotocol": "node plugin/scripts/medprotocol.cjs",
     "version:bump": "bash scripts/bump-version.sh"
   },

@@ -32,15 +32,13 @@ In Claude Code:
 
 Then run `/medical-protocol:start` and describe what you need. That's it.
 
-### Or install from a clone
+The plugin is the whole install: the skills, the hooks, the clinical library and the calculator all come with it. It needs Node 18 or newer, and nothing is installed from npm for the plugin itself.
 
-The installer is a single Node script in this repo. It needs only Node and git.
+To get a newer version, run these in a terminal, then restart Claude Code:
 
 ```bash
-node scripts/medical-protocol.cjs install --dir ~/my-clinic-app          # copy into the project's .claude/
-node scripts/medical-protocol.cjs install --link --dir ~/my-clinic-app   # symlink to the clone instead
-node scripts/medical-protocol.cjs check --dir ~/my-clinic-app            # is it up to date?
-node scripts/medical-protocol.cjs update --dir ~/my-clinic-app
+claude plugin marketplace update medical-protocol
+claude plugin update medical-protocol@medical-protocol
 ```
 
 ## Windows
@@ -110,7 +108,7 @@ Internal skills (called by the agent): `vital-signs`, `acid-base`, `bmi`, `pafi`
 | **DKA** | Hourly glucose/ketone/HCO3 rates, resolution criteria, cerebral edema warnings |
 | **Cardiology** | ASCVD 10-year risk, HEART score, CHA₂DS₂-VASc |
 | **Sepsis** | qSOFA, SOFA-2 (6 organs), lactate clearance, hour-1 bundle |
-| **CKD** | eGFR (CKD-EPI 2021), KDIGO staging, KFRE 2/5-year risk, treatment |
+| **CKD** | eGFR (CKD-EPI 2021), KDIGO staging, KFRE 2/5-year risk, treatment criteria, anemia, CKD-MBD |
 | **Diabetes** | ADA 2026 diagnosis, T1D staging, T1 vs T2, T2D screening, gestational diabetes |
 
 ## The `medprotocol` CLI
@@ -157,10 +155,9 @@ plugin/                    # The Claude Code plugin
 ├── scripts/medprotocol.cjs # Built CLI
 ├── hooks/                 # privacy-guard, note-consent, extraction-guard, track-workflow, qa-reminder
 └── lib/                   # Clinical logic (copied into doctor projects)
-public/medical-protocol/   # Shared context docs: build contract, routing, per-module specs
+public/medical-protocol/   # Source of the shared docs: build contract, routing, per-module specs, workflows
 packages/medprotocol/      # CLI source
-packages/medical-protocol/ # Installer source
-scripts/                   # Built installer, version bump
+scripts/                   # Version bump; sync of the shared docs into plugin/skills (part of `npm run build`)
 tests/                     # Vitest, clinical logic only
 ```
 
@@ -172,7 +169,7 @@ Contributions are welcome, especially new clinical modules and corrections from 
 
 1. Fork and create a feature branch
 2. Add tests in `tests/` for any new clinical logic
-3. Make sure all tests pass. If you changed the CLI or installer source, rebuild (`npm run build`, `node packages/medical-protocol/build.mjs`) and commit the `.cjs` files
+3. Make sure all tests pass. If you changed the CLI, `plugin/lib/` or `public/medical-protocol/`, rebuild (`npm run build`) and commit the result
 4. Open a PR
 
 New clinical module: follow `.patterns/new-module/new-module.md` (logic in `plugin/lib/`, tests, context doc, CLI command, skill, classification row).

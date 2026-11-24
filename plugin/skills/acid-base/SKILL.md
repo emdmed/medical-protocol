@@ -11,6 +11,7 @@ Read and follow: reference/hook-markers.md
 Read and follow: reference/after-workflow.md
 Read and follow: reference/clinical-context.md
 Clinical logic source: ${CLAUDE_SKILL_DIR}/../../lib
+Module docs: ${CLAUDE_SKILL_DIR}/../start/reference/context — each module's `{module}.md` (functions, thresholds, Screen spec)
 Read when needed: reference/compensation-formulas.md
 Read when needed: reference/anion-gap-interpretation.md
 Read when needed: reference/mixed-disorders.md

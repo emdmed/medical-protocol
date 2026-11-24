@@ -29,40 +29,27 @@ Three properties hold the system together:
 
 ---
 
-## 2. System Topology — Four Parts
+## 2. System Topology — Three Parts
 
-| # | Part | npm name | Lives in | Role |
-|---|------|----------|----------|------|
-| 1 | **Core** (this repo) | `medprotocol-core` (private root) | repo root | Source of truth: `plugin/lib/` logic, markdown protocols/workflows/context, plugin source, build/release tooling. |
-| 2 | **Plugin installer** | `medical-protocol` | `packages/medical-protocol/` | `npx medical-protocol install` — bundles `plugin/` (incl. `lib/`) + context and installs skills/hooks/settings/lib into a doctor's project's `.claude/`. Also installable from the marketplace (`plugin/.claude-plugin/plugin.json`). |
-| 3 | **CLI calculator** | `medprotocol` | `packages/medprotocol/` | `npx medprotocol <cmd>` — terminal calculators importing `plugin/lib/`. No UI. |
-| 4 | **Generated UI** | — (no package) | doctor's project | Screens generated per project with [UI SDK](https://ui-sdk.dev/docs) (React 19+, unstyled) following `context/building.md`. They import the copied logic from `lib/medprotocol/`. |
+| # | Part | Lives in | Role |
+|---|------|----------|------|
+| 1 | **Plugin** | `plugin/` (+ `public/medical-protocol/` doc sources) | The Claude Code plugin doctors install from the marketplace (`plugin/.claude-plugin/plugin.json`): skills, hooks, agents, `lib/` logic, built CLI. |
+| 2 | **CLI calculator** | `packages/medprotocol/` | Terminal calculators importing `plugin/lib/`. No UI. Bundled into `plugin/scripts/medprotocol.cjs`; skills run it with `node`. |
+| 3 | **Generated UI** | doctor's project | Screens generated per project with [UI SDK](https://ui-sdk.dev/docs) (React 19+, unstyled) following `context/building.md`. They import the copied logic from `lib/medprotocol/`. |
+
+Nothing ships through npm.
 
 ```
-                        ┌─────────────────────────────────┐
-                        │  medprotocol-core (this repo)    │
-                        │                                  │
-                        │   plugin/lib/ ← single source    │
-                        │     │            of truth        │
-                        │     │ imports                    │
-                        │     ▼                            │
-                        │  packages/medprotocol (CLI)      │
-                        │                                  │
-                        │  plugin/  ──build.mjs─▶ packages/ │
-                        │  (skills, hooks,     medical-     │
-                        │   settings, lib)     protocol     │
-                        │                      (installer)  │
-                        └───────────────┬──────────────────┘
-                                        │ npx medical-protocol install
-                                        │ (or marketplace plugin)
-                                        ▼
-                        ┌─────────────────────────────────┐
-                        │  Doctor's Next.js project        │
-                        │   .claude/ (skills, hooks, lib)  │
-                        │   lib/medprotocol/ ← copied lib  │
-                        │   components/medprotocol/        │
-                        │     ← generated with UI SDK      │
-                        └─────────────────────────────────┘
+  medprotocol-core (this repo)
+    plugin/lib/  ← single source of clinical logic
+      └─ imported by packages/medprotocol → plugin/scripts/medprotocol.cjs
+    public/medical-protocol/ ──sync-reference.mjs─▶ plugin/skills/*/reference/
+    plugin/  (skills, hooks, agents, lib, scripts)
+        │  /plugin install medical-protocol@medical-protocol
+        ▼
+  Doctor's Next.js project
+    lib/medprotocol/         ← copied lib
+    components/medprotocol/  ← generated with UI SDK
 ```
 
 ---
@@ -78,9 +65,8 @@ These are hard constraints. Violations are bugs.
    bridge consumed by the CLI (import) and the generated UI (unmodified copy).
 3. **No production dependencies in the root.** Root has only devDependencies
    (`typescript`, `vitest`, `@types/node`). Do not add runtime packages to the
-   root. (Sub-packages may have their own build/CLI deps — see §6–7.)
-4. **Content is markdown and JSON only.** Protocols, workflows, context,
-   manifests. No HTML.
+   root. (The CLI package has its own build devDependencies — see §5.)
+4. **Content is markdown and JSON only.** Workflows, context, manifests. No HTML.
 5. **`plugin/lib/` is the source of truth for clinical logic.** Doctor projects
    never edit their copy, and generated UI never computes or thresholds a
    clinical value itself (see §8).
@@ -141,7 +127,7 @@ re-exports every public function, giving one import point:
 
 ---
 
-## 5. Part 3 — CLI (`medprotocol`)
+## 5. Part 2 — CLI (`medprotocol`)
 
 - **Entry:** `packages/medprotocol/src/index.ts`. Dispatches `argv[2]` to a
   lazy-loaded command module: `commands: Record<string, () => Promise<{ run }>>`.
@@ -156,80 +142,45 @@ re-exports every public function, giving one import point:
 - **Global `--json` contract:** every command accepts `--json` for
   machine-readable output. This is the integration point for QA: the agent runs
   the CLI with `--json` and compares against the UI to verify the UI's math.
-- **Build:** `tsup src/index.ts --format cjs --target node18 --out-dir dist`.
-  Published with only `dist/`. Bin: `medprotocol`.
+- **Build:** `npm run build` bundles it with tsup into the committed
+  `plugin/scripts/medprotocol.cjs`. Not published to npm.
 
 ---
 
-## 6. Part 2 — Plugin Installer (`medical-protocol`)
+## 6. Reference sync — `scripts/sync-reference.mjs`
 
-CLI built with `commander`. Entry: `packages/medical-protocol/src/index.ts`.
+Run by `npm run build` after the CLI build. It copies the shared docs from
+`public/medical-protocol/` (the single source of truth) into the plugin:
 
-### 6.1 Commands
+- `context/` shared docs (`building.md`, `components.md`, `composition.md`,
+  `classification.md`, `cli.md`, `extraction.md`) → the `reference/` dir of each
+  skill that uses them.
+- `context/` module docs (Screen specs) → one copy in
+  `plugin/skills/start/reference/context/`, which every build skill points at
+  with its `Module docs:` line.
+- `workflows/` (`agent-qa`, `quality-checklist`, `patient-privacy`,
+  `troubleshoot`, `initial-clarification`, `nephrology`/`cardiology`/`sepsis`)
+  → the skills that read them.
 
-| Command | Purpose | Key options |
-|---------|---------|-------------|
-| `install` | Install plugin into a project | `--dir`, `--force`, `--link`, `--source <path>`, `--json`, `-y/--yes` |
-| `check` | Report whether the installed plugin is up to date / symlinks healthy | `--dir`, `--json` |
-| `update` | Update installed plugin to bundled version | `--dir`, `--force`, `--json` |
-
-### 6.2 Install modes
-
-- **Copy mode (default):** files are copied into the project's `.claude/`. A
-  **manifest** (`src/manifest.ts`: `hashFile`, `readManifest`, `writeManifest`,
-  `FileManifest`) records SHA hashes so `update`/`check` can detect locally
-  modified files and avoid clobbering them (prompts via `confirmOverwriteModified`).
-- **Symlink mode (`--link`):** clones the repo to `~/.medical-protocol` (or
-  `--source`) and symlinks instead of copying, so all linked projects update on
-  `git pull`. `files.ts` provides `cloneOrPullRepo`, `symlinkDir/File`,
-  `isSymlink`, `getRepoStatus`, `getDefaultSourceDir`, `REPO_URL`.
-- **Settings/hooks merge:** `mergeSettings` and `mergeHooksJson` merge bundled
-  `settings.json` / `hooks.json` into existing project files rather than
-  overwriting, so doctor customizations survive updates.
-- **Interactivity:** `prompts.ts` (`@clack/prompts`) drives interactive flows;
-  `-y`/`--json` force non-interactive.
-
-### 6.3 Build & bundling — `build.mjs`
-
-`packages/medical-protocol/build.mjs` is the bridge from source to publishable
-package. It:
-
-1. Builds `src/index.ts` with tsup.
-2. Wipes and repopulates `packages/medical-protocol/plugin/` from the repo's
-   `plugin/` (skills, hooks, settings.json).
-3. **Syncs canonical context into each skill's `reference/`** from
-   `public/medical-protocol/context/` (the single source of truth):
-   `classification.md` → `start`; `cli.md` → `calc`; `components.md` &
-   `composition.md` → a fixed list of skills; plus workflow files
-   (`nephrology`/`cardiology`/`sepsis`/`troubleshoot`/`initial-clarification`).
-
-> Invariant: `plugin/skills/*/reference/*.md` copies of shared context are
-> **generated** at build time from `public/.../context/`. Edit the source under
-> `public/`, not the per-skill copies.
-
-Published with `dist/` + `plugin/`. Bin: `medical-protocol`.
+> Invariant: those copies under `plugin/skills/*/reference/` are **generated**.
+> Edit the source under `public/`, not the per-skill copies. CI fails if they
+> are out of date.
 
 ---
 
 ## 7. Plugin Runtime (skills, hooks, classification)
 
-What gets installed into the doctor's project.
+What the marketplace installs.
 
-### 7.1 Protocol entry & agent contract
+### 7.1 Agent contract
 
-`public/medical-protocol/providers/claude-code/protocol.md` is the top-level
-agent instruction. It mandates:
-
-- **Communication in clinical language only** — never expose frameworks, code,
-  or terminal output unless asked.
-- **Project check / scaffold** — ensure a Next.js project exists (else
-  `create-next-app`), set up UI SDK; write a project `CLAUDE.md` with QA rules.
-- **Building a screen** — per `context/building.md`: copy logic to
-  `lib/medprotocol/`, generate the UI with UI SDK.
-- **Initial Clarification (blocking)** → **Classification** → **Workflow
-  execution** → **Quality Checklist** → **Browser QA**.
-- `providers/manifest.json` registers providers (currently only `claude-code`,
-  `status: active`).
+Every skill reads `reference/core.md` (clinical language only — never expose
+frameworks, code, or terminal output unless asked; interface in the doctor's
+language). The `start` skill then runs: **Project check / scaffold**
+(`reference/project-setup.md`: ensure a Next.js project, set up UI SDK, write a
+project `CLAUDE.md` with QA rules) → **Initial Clarification (blocking)** →
+**Classification** → **Workflow execution** (screens built per
+`context/building.md`) → **Quality Checklist** → **Browser QA**.
 
 ### 7.2 Classification & routing
 
@@ -247,7 +198,7 @@ Each skill is a directory under `plugin/skills/<name>/` with a `SKILL.md`
 (frontmatter: `name`, `description`, `allowed-tools`, `user-invocable`) plus a
 `reference/` dir of supporting docs. `SKILL.md` files delegate via
 `Read and follow: reference/<file>`; build skills also declare
-`Clinical logic source:` (the plugin's `lib/` folder). Skills: `start`, `bmi`,
+`Clinical logic source:` (the plugin's `lib/` folder) and `Module docs:`. Skills: `start`, `bmi`,
 `acid-base`, `vital-signs`, `water-balance`, `pafi`, `dka`, `dashboard`,
 `modify`, `troubleshoot`, `calc`, `calc-audit`, `preferences`,
 `protocol-audit`, `overlay`, `overlay-setup`, `overlay-audit`, `overlay-implement`,
@@ -261,14 +212,14 @@ skill.)
 | Hook | Event | Behavior |
 |------|-------|----------|
 | `privacy-guard.mjs` | PreToolUse (Bash) | **Denies** outbound-data commands: `git push`, `npm/yarn/pnpm publish`, `scp/sftp/ftp`, `nc/netcat`, `rsync` to remote, `curl`/`wget`/`httpie` with data-sending methods, `docker push`, non-local `ssh`, base64/env piped to network. Allows GET, local dev, git add/commit, tsc. |
-| `track-workflow.mjs` | PostToolUse (Bash) | When a workflow is active, sets marker files in `.claude/hooks-state/`: `.qa_started` (on `tsc --noEmit`/`npx medprotocol`/eslint/prettier), `.dev_server_up` (on `npm run dev`). |
+| `track-workflow.mjs` | PostToolUse (Bash) | When a workflow is active, sets marker files in `.claude/hooks-state/`: `.qa_started` (on `tsc --noEmit`/a `medprotocol.cjs` run/eslint/prettier), `.dev_server_up` (on `npm run dev`). |
 | `qa-reminder.mjs` | Stop | If a workflow ran but QA/dev-server markers are missing, **blocks** stop and instructs the agent to finish the Quality Checklist + start dev server. On success, clears the state dir. |
 
-The hooks are dependency-free Node (`.mjs`) scripts — no bash/jq/grep — so they run identically on Windows, macOS, and Linux. `hooks.json` invokes each via `node "$CLAUDE_PROJECT_DIR/.claude/hooks/<name>.mjs"`; `settings.json` carries plugin settings.
+The hooks are dependency-free Node (`.mjs`) scripts — no bash/jq/grep — so they run identically on Windows, macOS, and Linux. `hooks.json` invokes each via `node "${CLAUDE_PLUGIN_ROOT}/hooks/<name>.mjs"`.
 
 ---
 
-## 8. Part 4 — Generated UI
+## 8. Part 3 — Generated UI
 
 There is no component package. The UI for each clinical tool is generated in the
 doctor's project by the agent, following `public/medical-protocol/context/building.md`:
@@ -283,36 +234,21 @@ Rules: every clinical value on screen comes from a `lib/medprotocol` function;
 `lib/medprotocol/` is never edited locally (fixes go upstream to `plugin/lib/`);
 no thresholds in the UI; units and guideline sources shown; disclaimer on every
 clinical screen. Correctness is checked by comparing the screen against
-`npx medprotocol <cmd> --json` during QA.
+`medprotocol <cmd> --json` during QA.
 
 Because the doctor's project holds an unmodified copy rather than a hand-ported
 fork, there is nothing to keep in sync.
 
 ---
 
-## 9. Versioning, Build & Release
+## 9. Versioning & Build
 
-**One version** flows across four files via `npm run version:bump <X.Y.Z>`
+**One version** flows across the files via `npm run version:bump <X.Y.Z>`
 (`scripts/bump-version.sh`): root `package.json`,
-`public/medical-protocol/providers/manifest.json`,
-`packages/medprotocol/package.json`,
-`packages/medical-protocol/package.json`. The script validates semver and is
-idempotent; follow with `npm install --package-lock-only` to sync the lockfile.
-
-### 9.1 Gated release — `scripts/npm/release.sh` (`npm run release`)
-
-`release.sh <version> [all|cli|installer] [-- <npm args>]`. Gates, all must pass
-before anything publishes:
-
-1. **npm auth** present (`npm whoami`).
-2. **Version sanity** — valid semver and strictly greater than each target's
-   published version.
-3. **Full test suite passes** (`npm test`).
-
-Then: `version:bump` (all files) → lockfile sync → per-target `build` →
-`npm publish`. `--dry-run` relaxes gates 1–2. Targets map: `cli` →
-`packages/medprotocol` (npm `medprotocol`); `installer` →
-`packages/medical-protocol` (npm `medical-protocol`).
+`packages/medprotocol/package.json`, `plugin/.claude-plugin/plugin.json`, this
+file's status line and the lockfile. The script validates semver, then runs
+`npm run build`. Release is a commit plus a `v<X.Y.Z>` git tag; the marketplace
+serves `plugin/` from the repo.
 
 ---
 
@@ -322,9 +258,8 @@ Then: `version:bump` (all files) → lockfile sync → per-target `build` →
   storage only in doctor projects.
 - **Enforced at the tool layer**, not by convention: `privacy-guard.mjs` denies
   any Bash command that could exfiltrate data (see §7.4). This is why
-  `npm publish` and `git push` are blocked inside doctor projects — release from
-  this repo uses the gated scripts in §9 instead.
-- The protocol instructs the agent to warn the doctor if they paste real patient
+  `npm publish` and `git push` are blocked inside doctor projects.
+- The skills instruct the agent to warn the doctor if they paste real patient
   data into chat, and to state on first completion that data stays on the machine.
 
 ---
@@ -335,7 +270,7 @@ Then: `version:bump` (all files) → lockfile sync → per-target `build` →
   clinical tests + `tests/cli/` per-command tests). Watch: `npm run test:watch`.
   Single dir/file: `npx vitest run tests/<dir>/[file].test.ts`.
 - **No UI tests in this repo.** UI verification is the agent's **Browser QA**
-  workflow (`agent-qa.md`) plus calculation cross-checks against `npx medprotocol
+  workflow (`agent-qa.md`) plus calculation cross-checks against `medprotocol
   --json`.
 - **Coverage intent:** extreme/negative/zero-divisor inputs, boundary conditions
   for every classification tier, mixed/triple acid-base disorders.
@@ -348,12 +283,10 @@ Then: `version:bump` (all files) → lockfile sync → per-target `build` →
 1. **Author** edits clinical logic in `plugin/lib/` (source of truth) and/or markdown
    context in `public/medical-protocol/`.
 2. **Tests** (`tests/`) pin the logic; CLI commands surface it via `--json`.
-3. **`build.mjs`** bundles `plugin/` + canonical context into the installer
-   package; **`release.sh`** gates and publishes `medprotocol` (CLI) and
-   `medical-protocol` (installer).
-4. **Doctor** runs `npx medical-protocol install` → skills/hooks/settings land in
-   their project's `.claude/`.
-5. **Agent** (Claude Code) reads the protocol, clarifies, classifies, routes to a
+3. **`npm run build`** bundles the CLI and syncs the docs into `plugin/skills`;
+   both are committed.
+4. **Doctor** installs the plugin from the marketplace.
+5. **Agent** (Claude Code) runs the `start` skill, clarifies, classifies, routes to a
    skill/workflow, copies the logic into `lib/medprotocol/`, generates the
    screens with UI SDK, and wires them — communicating only in clinical language.
 6. **Privacy guard + QA hooks** enforce data locality and quality at runtime.
@@ -372,6 +305,7 @@ Per `.patterns/new-module/` and the README contributing section:
 5. **Classification row** in `public/.../context/classification.md` and routing
    in the `start` skill.
 6. **Skill** under `plugin/skills/<module>/` (or a workflow file under
-   `providers/claude-code/workflows/`), plus its reference copies in `build.mjs`.
+   `public/medical-protocol/workflows/`), plus its reference copies in
+   `scripts/sync-reference.mjs`.
 7. Bump version via `npm run version:bump`.
 ```
