@@ -1,4 +1,3 @@
-import { parseArgs } from "node:util";
 import {
   getBloodPressureCategory,
   BLOOD_PRESSURE_LIMITS,
@@ -24,8 +23,8 @@ import {
   getTemperatureSeverity,
   type SeverityResult,
 } from "../../../../plugin/lib/vital-signs-validations/severity";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
-import { fail } from "../cli";
+import { formatError } from "../../../../plugin/lib/format";
+import { fail, parseFlags, printTable } from "../cli";
 
 const USAGE = `Usage: medprotocol vitals [options]
 
@@ -50,26 +49,16 @@ const severityFields = (s: SeverityResult) => ({ severity: s.severity, ...(s.sev
 const severityLabel = (label: string, s: SeverityResult) => (s.severity === "critical" ? `${s.label}, critical` : label);
 
 export const run = (argv: string[]): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      bp: { type: "string" },
-      hr: { type: "string" },
-      rr: { type: "string" },
-      temp: { type: "string" },
-      spo2: { type: "string" },
-      fio2: { type: "string" },
-      fahrenheit: { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+  const values = parseFlags(argv, {
+    bp: { type: "string" },
+    hr: { type: "string" },
+    rr: { type: "string" },
+    temp: { type: "string" },
+    spo2: { type: "string" },
+    fio2: { type: "string" },
+    fahrenheit: { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   const hasAny = values.bp || values.hr || values.rr || values.temp || values.spo2 || values.fio2;
   if (!hasAny) return fail("At least one vital sign is required", USAGE);
@@ -228,7 +217,5 @@ export const run = (argv: string[]): void => {
     return;
   }
 
-  printResult(results, values.json!, () => {
-    return [formatHeader("Vital Signs"), formatTable(humanRows)].join("\n");
-  });
+  printTable(results, values.json, "Vital Signs", humanRows);
 };

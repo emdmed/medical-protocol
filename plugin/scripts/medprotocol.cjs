@@ -38,10 +38,11 @@ ${"\u2500".repeat(title.length)}`;
 });
 
 // src/cli.ts
-var fail, requireFlags, runSubcommand;
+var import_node_util, fail, requireFlags, parseFlags, printTable, runSubcommand;
 var init_cli = __esm({
   "src/cli.ts"() {
     "use strict";
+    import_node_util = require("util");
     init_format();
     fail = (message, usage) => {
       process.stderr.write(formatError(message) + "\n" + (usage ? "\n" + usage + "\n" : ""));
@@ -53,6 +54,19 @@ var init_cli = __esm({
       fail(`Missing required flags: ${missing.map((name) => `--${name}`).join(", ")}`, usage);
       return false;
     };
+    parseFlags = (argv, options, usage) => {
+      const { values } = (0, import_node_util.parseArgs)({
+        args: argv,
+        options: { ...options, json: { type: "boolean", default: false }, help: { type: "boolean", default: false } },
+        strict: true
+      });
+      if (values.help) {
+        process.stdout.write(usage + "\n");
+        return null;
+      }
+      return values;
+    };
+    printTable = (data, json, title, rows) => printResult(data, json, () => [formatHeader(title), formatTable(rows)].join("\n"));
     runSubcommand = (argv, usage, subcommands) => {
       const [subcommand, ...subArgs] = argv;
       if (!subcommand || subcommand === "--help" || subcommand === "-h") {
@@ -69,7 +83,7 @@ Available: ${Object.keys(subcommands).join(", ")}
         process.exitCode = 1;
         return;
       }
-      subcommands[subcommand](subArgs, subArgs.includes("--json"));
+      subcommands[subcommand](subArgs);
     };
   }
 });
@@ -117,13 +131,11 @@ var bmi_exports = {};
 __export(bmi_exports, {
   run: () => run
 });
-var import_node_util, USAGE, run;
+var USAGE, run;
 var init_bmi2 = __esm({
   "src/commands/bmi.ts"() {
     "use strict";
-    import_node_util = require("util");
     init_bmi();
-    init_format();
     init_cli();
     USAGE = `Usage: medprotocol bmi [options]
 
@@ -140,23 +152,14 @@ Examples:
   medprotocol bmi --weight 154 --height-ft 5 --height-in 9
   medprotocol bmi --weight 70 --height-m 1.75 --metric`;
     run = (argv) => {
-      const { values } = (0, import_node_util.parseArgs)({
-        args: argv,
-        options: {
-          weight: { type: "string" },
-          "height-ft": { type: "string" },
-          "height-in": { type: "string" },
-          "height-m": { type: "string" },
-          metric: { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE + "\n");
-        return;
-      }
+      const values = parseFlags(argv, {
+        weight: { type: "string" },
+        "height-ft": { type: "string" },
+        "height-in": { type: "string" },
+        "height-m": { type: "string" },
+        metric: { type: "boolean", default: false }
+      }, USAGE);
+      if (!values) return;
       if (!values.weight) return fail("--weight is required", USAGE);
       const isMetric = values.metric;
       if (isMetric && !values["height-m"]) return fail("--height-m is required with --metric", USAGE);
@@ -182,19 +185,14 @@ Examples:
           heightIn: parseFloat(values["height-in"] || "0")
         }
       };
-      printResult(data, values.json, () => {
-        const heightDisplay = isMetric ? `${values["height-m"]}m` : `${values["height-ft"] || 0}'${values["height-in"] || 0}"`;
-        const weightUnit = isMetric ? "kg" : "lbs";
-        return [
-          formatHeader("BMI Calculator"),
-          formatTable([
-            ["BMI", bmi],
-            ["Category", category],
-            ["Weight", `${values.weight} ${weightUnit}`],
-            ["Height", heightDisplay]
-          ])
-        ].join("\n");
-      });
+      const heightDisplay = isMetric ? `${values["height-m"]}m` : `${values["height-ft"] || 0}'${values["height-in"] || 0}"`;
+      const weightUnit = isMetric ? "kg" : "lbs";
+      printTable(data, values.json, "BMI Calculator", [
+        ["BMI", bmi],
+        ["Category", category],
+        ["Weight", `${values.weight} ${weightUnit}`],
+        ["Height", heightDisplay]
+      ]);
     };
   }
 });
@@ -514,13 +512,11 @@ var abg_exports = {};
 __export(abg_exports, {
   run: () => run2
 });
-var import_node_util2, USAGE2, run2;
+var USAGE2, run2;
 var init_abg = __esm({
   "src/commands/abg.ts"() {
     "use strict";
-    import_node_util2 = require("util");
     init_acid_base();
-    init_format();
     init_cli();
     USAGE2 = `Usage: medprotocol abg [options]
 
@@ -539,25 +535,16 @@ Examples:
   medprotocol abg --ph 7.25 --pco2 29 --hco3 14
   medprotocol abg --ph 7.25 --pco2 29 --hco3 14 --na 140 --cl 105 --albumin 4.0`;
     run2 = (argv) => {
-      const { values } = (0, import_node_util2.parseArgs)({
-        args: argv,
-        options: {
-          ph: { type: "string" },
-          pco2: { type: "string" },
-          hco3: { type: "string" },
-          na: { type: "string" },
-          cl: { type: "string" },
-          albumin: { type: "string" },
-          chronic: { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE2 + "\n");
-        return;
-      }
+      const values = parseFlags(argv, {
+        ph: { type: "string" },
+        pco2: { type: "string" },
+        hco3: { type: "string" },
+        na: { type: "string" },
+        cl: { type: "string" },
+        albumin: { type: "string" },
+        chronic: { type: "boolean", default: false }
+      }, USAGE2);
+      if (!values) return;
       if (!requireFlags(values, ["ph", "pco2", "hco3"], USAGE2)) return;
       const result = analyze({
         values: {
@@ -590,29 +577,27 @@ Examples:
           deltaRatioInterpretation: result.deltaRatioInterpretation
         }
       };
-      printResult(data, values.json, () => {
-        const rows = [
-          ["Disorder", result.disorder],
-          ["Compensation", result.compensation],
-          ["Interpretation", result.interpretation]
-        ];
-        if (result.expectedValues?.low && result.expectedValues?.high) {
-          rows.push(["Expected range", `${result.expectedValues.low}\u2013${result.expectedValues.high}`]);
-        }
-        if (result.anionGap !== null) {
-          rows.push(["Anion Gap", `${result.anionGap} (${result.agStatus})`]);
-        }
-        if (result.correctedAG !== null) {
-          rows.push(["Corrected AG", result.correctedAG]);
-        }
-        if (result.deltaRatio !== null) {
-          rows.push(["Delta Ratio", `${result.deltaRatio} \u2014 ${result.deltaRatioInterpretation}`]);
-        }
-        if (result.additionalDisorders.length > 0) {
-          rows.push(["Additional", result.additionalDisorders.join(", ")]);
-        }
-        return [formatHeader("ABG Analysis"), formatTable(rows)].join("\n");
-      });
+      const rows = [
+        ["Disorder", result.disorder],
+        ["Compensation", result.compensation],
+        ["Interpretation", result.interpretation]
+      ];
+      if (result.expectedValues?.low && result.expectedValues?.high) {
+        rows.push(["Expected range", `${result.expectedValues.low}\u2013${result.expectedValues.high}`]);
+      }
+      if (result.anionGap !== null) {
+        rows.push(["Anion Gap", `${result.anionGap} (${result.agStatus})`]);
+      }
+      if (result.correctedAG !== null) {
+        rows.push(["Corrected AG", result.correctedAG]);
+      }
+      if (result.deltaRatio !== null) {
+        rows.push(["Delta Ratio", `${result.deltaRatio} \u2014 ${result.deltaRatioInterpretation}`]);
+      }
+      if (result.additionalDisorders.length > 0) {
+        rows.push(["Additional", result.additionalDisorders.join(", ")]);
+      }
+      printTable(data, values.json, "ABG Analysis", rows);
     };
   }
 });
@@ -656,11 +641,10 @@ var water_balance_exports = {};
 __export(water_balance_exports, {
   run: () => run3
 });
-var import_node_util3, USAGE3, run3;
+var USAGE3, run3;
 var init_water_balance2 = __esm({
   "src/commands/water-balance.ts"() {
     "use strict";
-    import_node_util3 = require("util");
     init_water_balance();
     init_format();
     init_cli();
@@ -679,23 +663,14 @@ Examples:
   medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --stools 2
   medprotocol water-balance --weight 70 --oral 1500 --json`;
     run3 = (argv) => {
-      const { values } = (0, import_node_util3.parseArgs)({
-        args: argv,
-        options: {
-          weight: { type: "string" },
-          oral: { type: "string", default: "0" },
-          iv: { type: "string", default: "0" },
-          diuresis: { type: "string", default: "0" },
-          stools: { type: "string", default: "0" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE3 + "\n");
-        return;
-      }
+      const values = parseFlags(argv, {
+        weight: { type: "string" },
+        oral: { type: "string", default: "0" },
+        iv: { type: "string", default: "0" },
+        diuresis: { type: "string", default: "0" },
+        stools: { type: "string", default: "0" }
+      }, USAGE3);
+      if (!values) return;
       if (!values.weight) return fail("--weight is required", USAGE3);
       const weightNum = safeParseFloat(values.weight);
       const insensible = calculateInsensibleLoss(weightNum);
@@ -1114,11 +1089,10 @@ var vitals_exports = {};
 __export(vitals_exports, {
   run: () => run4
 });
-var import_node_util4, USAGE4, severityFields, severityLabel, run4;
+var USAGE4, severityFields, severityLabel, run4;
 var init_vitals = __esm({
   "src/commands/vitals.ts"() {
     "use strict";
-    import_node_util4 = require("util");
     init_blood_pressure_validations();
     init_heart_rate_validations();
     init_respiratory_rate_validations();
@@ -1147,25 +1121,16 @@ Examples:
     severityFields = (s) => ({ severity: s.severity, ...s.severity === "critical" && { alert: s.label } });
     severityLabel = (label, s) => s.severity === "critical" ? `${s.label}, critical` : label;
     run4 = (argv) => {
-      const { values } = (0, import_node_util4.parseArgs)({
-        args: argv,
-        options: {
-          bp: { type: "string" },
-          hr: { type: "string" },
-          rr: { type: "string" },
-          temp: { type: "string" },
-          spo2: { type: "string" },
-          fio2: { type: "string" },
-          fahrenheit: { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE4 + "\n");
-        return;
-      }
+      const values = parseFlags(argv, {
+        bp: { type: "string" },
+        hr: { type: "string" },
+        rr: { type: "string" },
+        temp: { type: "string" },
+        spo2: { type: "string" },
+        fio2: { type: "string" },
+        fahrenheit: { type: "boolean", default: false }
+      }, USAGE4);
+      if (!values) return;
       const hasAny = values.bp || values.hr || values.rr || values.temp || values.spo2 || values.fio2;
       if (!hasAny) return fail("At least one vital sign is required", USAGE4);
       const useFahrenheit = values.fahrenheit;
@@ -1299,9 +1264,7 @@ Examples:
         process.exitCode = 1;
         return;
       }
-      printResult(results, values.json, () => {
-        return [formatHeader("Vital Signs"), formatTable(humanRows)].join("\n");
-      });
+      printTable(results, values.json, "Vital Signs", humanRows);
     };
   }
 });
@@ -1347,13 +1310,11 @@ var pafi_exports = {};
 __export(pafi_exports, {
   run: () => run5
 });
-var import_node_util5, USAGE5, run5;
+var USAGE5, run5;
 var init_pafi2 = __esm({
   "src/commands/pafi.ts"() {
     "use strict";
-    import_node_util5 = require("util");
     init_pafi();
-    init_format();
     init_cli();
     USAGE5 = `Usage: medprotocol pafi [options]
 
@@ -1367,20 +1328,11 @@ Examples:
   medprotocol pafi --pao2 60 --fio2 40
   medprotocol pafi --pao2 90 --fio2 21`;
     run5 = (argv) => {
-      const { values } = (0, import_node_util5.parseArgs)({
-        args: argv,
-        options: {
-          pao2: { type: "string" },
-          fio2: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE5 + "\n");
-        return;
-      }
+      const values = parseFlags(argv, {
+        pao2: { type: "string" },
+        fio2: { type: "string" }
+      }, USAGE5);
+      if (!values) return;
       if (!requireFlags(values, ["pao2", "fio2"], USAGE5)) return;
       const paFi = calculatePaFi(values.pao2, values.fio2);
       if (!paFi) return fail("Could not calculate PaFi \u2014 check input values (PaO2 > 0, FiO2 21-100)");
@@ -1393,18 +1345,13 @@ Examples:
         paO2: parseFloat(values.pao2),
         fiO2: parseFloat(values.fio2)
       };
-      printResult(data, values.json, () => {
-        return [
-          formatHeader("PaFi Calculator"),
-          formatTable([
-            ["PaFi Ratio", paFi],
-            ["Classification", classification],
-            ["Severity", severity],
-            ["PaO2", `${values.pao2} mmHg`],
-            ["FiO2", `${values.fio2}%`]
-          ])
-        ].join("\n");
-      });
+      printTable(data, values.json, "PaFi Calculator", [
+        ["PaFi Ratio", paFi],
+        ["Classification", classification],
+        ["Severity", severity],
+        ["PaO2", `${values.pao2} mmHg`],
+        ["FiO2", `${values.fio2}%`]
+      ]);
     };
   }
 });
@@ -1487,13 +1434,11 @@ var dka_exports = {};
 __export(dka_exports, {
   run: () => run6
 });
-var import_node_util6, USAGE6, run6;
+var USAGE6, run6;
 var init_dka2 = __esm({
   "src/commands/dka.ts"() {
     "use strict";
-    import_node_util6 = require("util");
     init_dka();
-    init_format();
     init_cli();
     USAGE6 = `Usage: medprotocol dka [options]
 
@@ -1513,26 +1458,17 @@ Examples:
   medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl
   medprotocol dka --glucose 350 --ketones 3.0 --bicarbonate 12 --ph 7.20 --unit mgdl`;
     run6 = (argv) => {
-      const { values } = (0, import_node_util6.parseArgs)({
-        args: argv,
-        options: {
-          glucose: { type: "string" },
-          "prev-glucose": { type: "string" },
-          hours: { type: "string", default: "1" },
-          ketones: { type: "string" },
-          bicarbonate: { type: "string" },
-          ph: { type: "string" },
-          "insulin-rate": { type: "string" },
-          unit: { type: "string", default: "mgdl" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE6 + "\n");
-        return;
-      }
+      const values = parseFlags(argv, {
+        glucose: { type: "string" },
+        "prev-glucose": { type: "string" },
+        hours: { type: "string", default: "1" },
+        ketones: { type: "string" },
+        bicarbonate: { type: "string" },
+        ph: { type: "string" },
+        "insulin-rate": { type: "string" },
+        unit: { type: "string", default: "mgdl" }
+      }, USAGE6);
+      if (!values) return;
       if (!values.glucose) return fail("--glucose is required", USAGE6);
       const unit = values.unit === "mmol" ? "mmol" : "mgdl";
       const unitLabel = unit === "mgdl" ? "mg/dL" : "mmol/L";
@@ -1593,9 +1529,7 @@ Examples:
         data.insulinRate = parseFloat(values["insulin-rate"]);
         data.insulinSuggestion = suggestion;
       }
-      printResult(data, values.json, () => {
-        return [formatHeader("DKA Assessment"), formatTable(rows)].join("\n");
-      });
+      printTable(data, values.json, "DKA Assessment", rows);
     };
   }
 });
@@ -1797,13 +1731,11 @@ var cardiology_exports = {};
 __export(cardiology_exports, {
   run: () => run7
 });
-var import_node_util7, USAGE7, runASCVD, runHEART, runCHADSVASc, run7;
+var USAGE7, runASCVD, runHEART, runCHADSVASc, run7;
 var init_cardiology2 = __esm({
   "src/commands/cardiology.ts"() {
     "use strict";
-    import_node_util7 = require("util");
     init_cardiology();
-    init_format();
     init_cli();
     USAGE7 = `Usage: medprotocol cardiology <sub-command> [options]
 
@@ -1848,28 +1780,19 @@ Examples:
   medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
   medprotocol cardiology heart --history 1 --ecg 0 --age 2 --risk-factors 1 --troponin 0
   medprotocol cardiology chadsvasc --hypertension --age75 --diabetes`;
-    runASCVD = (argv, json) => {
-      const { values } = (0, import_node_util7.parseArgs)({
-        args: argv,
-        options: {
-          age: { type: "string" },
-          sex: { type: "string" },
-          race: { type: "string", default: "white" },
-          tc: { type: "string" },
-          hdl: { type: "string" },
-          sbp: { type: "string" },
-          "bp-treatment": { type: "boolean", default: false },
-          diabetes: { type: "boolean", default: false },
-          smoker: { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE7 + "\n");
-        return;
-      }
+    runASCVD = (argv) => {
+      const values = parseFlags(argv, {
+        age: { type: "string" },
+        sex: { type: "string" },
+        race: { type: "string", default: "white" },
+        tc: { type: "string" },
+        hdl: { type: "string" },
+        sbp: { type: "string" },
+        "bp-treatment": { type: "boolean", default: false },
+        diabetes: { type: "boolean", default: false },
+        smoker: { type: "boolean", default: false }
+      }, USAGE7);
+      if (!values) return;
       if (!requireFlags(values, ["age", "sex", "tc", "hdl", "sbp"], USAGE7)) return;
       const inputs = {
         age: values.age,
@@ -1902,44 +1825,30 @@ Examples:
           smoker: inputs.smoker
         }
       };
-      printResult(data, json, () => {
-        return [
-          formatHeader("ASCVD 10-Year Risk (Pooled Cohort Equations 2013, superseded by PREVENT)"),
-          formatTable([
-            ["Risk", `${risk}%`],
-            ["Category", category],
-            ["Severity", severity],
-            ["Age", inputs.age],
-            ["Sex", inputs.sex],
-            ["Race", inputs.race],
-            ["Total Cholesterol", `${inputs.totalCholesterol} mg/dL`],
-            ["HDL Cholesterol", `${inputs.hdlCholesterol} mg/dL`],
-            ["Systolic BP", `${inputs.systolicBP} mmHg`],
-            ["BP Treatment", inputs.bpTreatment ? "Yes" : "No"],
-            ["Diabetes", inputs.diabetes ? "Yes" : "No"],
-            ["Smoker", inputs.smoker ? "Yes" : "No"]
-          ])
-        ].join("\n");
-      });
+      printTable(data, values.json, "ASCVD 10-Year Risk (Pooled Cohort Equations 2013, superseded by PREVENT)", [
+        ["Risk", `${risk}%`],
+        ["Category", category],
+        ["Severity", severity],
+        ["Age", inputs.age],
+        ["Sex", inputs.sex],
+        ["Race", inputs.race],
+        ["Total Cholesterol", `${inputs.totalCholesterol} mg/dL`],
+        ["HDL Cholesterol", `${inputs.hdlCholesterol} mg/dL`],
+        ["Systolic BP", `${inputs.systolicBP} mmHg`],
+        ["BP Treatment", inputs.bpTreatment ? "Yes" : "No"],
+        ["Diabetes", inputs.diabetes ? "Yes" : "No"],
+        ["Smoker", inputs.smoker ? "Yes" : "No"]
+      ]);
     };
-    runHEART = (argv, json) => {
-      const { values } = (0, import_node_util7.parseArgs)({
-        args: argv,
-        options: {
-          history: { type: "string" },
-          ecg: { type: "string" },
-          age: { type: "string" },
-          "risk-factors": { type: "string" },
-          troponin: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE7 + "\n");
-        return;
-      }
+    runHEART = (argv) => {
+      const values = parseFlags(argv, {
+        history: { type: "string" },
+        ecg: { type: "string" },
+        age: { type: "string" },
+        "risk-factors": { type: "string" },
+        troponin: { type: "string" }
+      }, USAGE7);
+      if (!values) return;
       if (!requireFlags(values, ["history", "ecg", "age", "risk-factors", "troponin"], USAGE7)) return;
       const parseScore = (v) => {
         const n = parseInt(v, 10);
@@ -1964,43 +1873,29 @@ Examples:
         severity,
         inputs
       };
-      printResult(data, json, () => {
-        return [
-          formatHeader("HEART Score"),
-          formatTable([
-            ["Score", `${score}/10`],
-            ["Category", category],
-            ["Guideline", action],
-            ["History", `${inputs.history}`],
-            ["ECG", `${inputs.ecg}`],
-            ["Age", `${inputs.age}`],
-            ["Risk Factors", `${inputs.riskFactors}`],
-            ["Troponin", `${inputs.troponin}`]
-          ])
-        ].join("\n");
-      });
+      printTable(data, values.json, "HEART Score", [
+        ["Score", `${score}/10`],
+        ["Category", category],
+        ["Guideline", action],
+        ["History", `${inputs.history}`],
+        ["ECG", `${inputs.ecg}`],
+        ["Age", `${inputs.age}`],
+        ["Risk Factors", `${inputs.riskFactors}`],
+        ["Troponin", `${inputs.troponin}`]
+      ]);
     };
-    runCHADSVASc = (argv, json) => {
-      const { values } = (0, import_node_util7.parseArgs)({
-        args: argv,
-        options: {
-          chf: { type: "boolean", default: false },
-          hypertension: { type: "boolean", default: false },
-          age75: { type: "boolean", default: false },
-          diabetes: { type: "boolean", default: false },
-          stroke: { type: "boolean", default: false },
-          vascular: { type: "boolean", default: false },
-          age65: { type: "boolean", default: false },
-          female: { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE7 + "\n");
-        return;
-      }
+    runCHADSVASc = (argv) => {
+      const values = parseFlags(argv, {
+        chf: { type: "boolean", default: false },
+        hypertension: { type: "boolean", default: false },
+        age75: { type: "boolean", default: false },
+        diabetes: { type: "boolean", default: false },
+        stroke: { type: "boolean", default: false },
+        vascular: { type: "boolean", default: false },
+        age65: { type: "boolean", default: false },
+        female: { type: "boolean", default: false }
+      }, USAGE7);
+      if (!values) return;
       const inputs = {
         chf: values.chf,
         hypertension: values.hypertension,
@@ -2022,18 +1917,13 @@ Examples:
         severity,
         inputs
       };
-      printResult(data, json, () => {
-        const factors = Object.entries(inputs).filter(([, v]) => v).map(([k]) => k).join(", ");
-        return [
-          formatHeader("CHA\u2082DS\u2082-VASc Score"),
-          formatTable([
-            ["Score", `${score}/9`],
-            ["Category", category],
-            ["Guideline", action],
-            ["Factors", factors || "None"]
-          ])
-        ].join("\n");
-      });
+      const factors = Object.entries(inputs).filter(([, v]) => v).map(([k]) => k).join(", ");
+      printTable(data, values.json, "CHA\u2082DS\u2082-VASc Score", [
+        ["Score", `${score}/9`],
+        ["Category", category],
+        ["Guideline", action],
+        ["Factors", factors || "None"]
+      ]);
     };
     run7 = (argv) => runSubcommand(argv, USAGE7, {
       ascvd: runASCVD,
@@ -2246,13 +2136,11 @@ var sepsis_exports = {};
 __export(sepsis_exports, {
   run: () => run8
 });
-var import_node_util8, USAGE8, runSOFA, runQSOFA, runLactate, run8;
+var USAGE8, runSOFA, runQSOFA, runLactate, run8;
 var init_sepsis2 = __esm({
   "src/commands/sepsis.ts"() {
     "use strict";
-    import_node_util8 = require("util");
     init_sepsis();
-    init_format();
     init_cli();
     USAGE8 = `Usage: medprotocol sepsis <sub-command> [options]
 
@@ -2309,47 +2197,38 @@ Examples:
   medprotocol sepsis sofa --pao2 60 --fio2 80 --advanced-support --platelets 40 --infection --lactate 4
   medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13
   medprotocol sepsis lactate --initial 4.2 --repeat 2.1`;
-    runSOFA = (argv, json) => {
-      const { values } = (0, import_node_util8.parseArgs)({
-        args: argv,
-        options: {
-          pao2: { type: "string", default: "" },
-          fio2: { type: "string", default: "" },
-          spo2: { type: "string", default: "" },
-          "advanced-support": { type: "boolean", default: false },
-          ecmo: { type: "boolean", default: false },
-          "other-vasopressor": { type: "boolean", default: false },
-          "mechanical-support": { type: "boolean", default: false },
-          "delirium-drugs": { type: "boolean", default: false },
-          rrt: { type: "boolean", default: false },
-          potassium: { type: "string", default: "" },
-          ph: { type: "string", default: "" },
-          bicarbonate: { type: "string", default: "" },
-          ceiling: { type: "boolean", default: false },
-          platelets: { type: "string", default: "" },
-          bilirubin: { type: "string", default: "" },
-          map: { type: "string", default: "" },
-          dopamine: { type: "string", default: "" },
-          dobutamine: { type: "string", default: "" },
-          epinephrine: { type: "string", default: "" },
-          norepinephrine: { type: "string", default: "" },
-          gcs: { type: "string", default: "" },
-          creatinine: { type: "string", default: "" },
-          "urine-output": { type: "string", default: "" },
-          weight: { type: "string", default: "" },
-          hours: { type: "string", default: "24" },
-          baseline: { type: "string", default: "0" },
-          infection: { type: "boolean", default: false },
-          lactate: { type: "string", default: "" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE8 + "\n");
-        return;
-      }
+    runSOFA = (argv) => {
+      const values = parseFlags(argv, {
+        pao2: { type: "string", default: "" },
+        fio2: { type: "string", default: "" },
+        spo2: { type: "string", default: "" },
+        "advanced-support": { type: "boolean", default: false },
+        ecmo: { type: "boolean", default: false },
+        "other-vasopressor": { type: "boolean", default: false },
+        "mechanical-support": { type: "boolean", default: false },
+        "delirium-drugs": { type: "boolean", default: false },
+        rrt: { type: "boolean", default: false },
+        potassium: { type: "string", default: "" },
+        ph: { type: "string", default: "" },
+        bicarbonate: { type: "string", default: "" },
+        ceiling: { type: "boolean", default: false },
+        platelets: { type: "string", default: "" },
+        bilirubin: { type: "string", default: "" },
+        map: { type: "string", default: "" },
+        dopamine: { type: "string", default: "" },
+        dobutamine: { type: "string", default: "" },
+        epinephrine: { type: "string", default: "" },
+        norepinephrine: { type: "string", default: "" },
+        gcs: { type: "string", default: "" },
+        creatinine: { type: "string", default: "" },
+        "urine-output": { type: "string", default: "" },
+        weight: { type: "string", default: "" },
+        hours: { type: "string", default: "24" },
+        baseline: { type: "string", default: "0" },
+        infection: { type: "boolean", default: false },
+        lactate: { type: "string", default: "" }
+      }, USAGE8);
+      if (!values) return;
       const reading = {
         paO2: values.pao2,
         fiO2: values.fio2,
@@ -2410,26 +2289,15 @@ Examples:
           rows.push(["Septic Shock", septicShock ? "Yes" : "No"]);
         }
       }
-      printResult(data, json, () => {
-        return [formatHeader("SOFA-2 Score (Sepsis-3)"), formatTable(rows)].join("\n");
-      });
+      printTable(data, values.json, "SOFA-2 Score (Sepsis-3)", rows);
     };
-    runQSOFA = (argv, json) => {
-      const { values } = (0, import_node_util8.parseArgs)({
-        args: argv,
-        options: {
-          rr: { type: "string" },
-          sbp: { type: "string" },
-          gcs: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE8 + "\n");
-        return;
-      }
+    runQSOFA = (argv) => {
+      const values = parseFlags(argv, {
+        rr: { type: "string" },
+        sbp: { type: "string" },
+        gcs: { type: "string" }
+      }, USAGE8);
+      if (!values) return;
       if (!requireFlags(values, ["rr", "sbp", "gcs"], USAGE8)) return;
       const score = calculateQSOFA(values.rr, values.sbp, values.gcs);
       const positive = isQSOFAPositive(score);
@@ -2440,34 +2308,20 @@ Examples:
         sbp: parseFloat(values.sbp),
         gcs: parseFloat(values.gcs)
       };
-      printResult(data, json, () => {
-        return [
-          formatHeader("Quick SOFA (qSOFA)"),
-          formatTable([
-            ["Score", `${score}/3`],
-            ["Positive", positive ? "Yes" : "No"],
-            ["Respiratory Rate", values.rr],
-            ["Systolic BP", `${values.sbp} mmHg`],
-            ["GCS", values.gcs]
-          ])
-        ].join("\n");
-      });
+      printTable(data, values.json, "Quick SOFA (qSOFA)", [
+        ["Score", `${score}/3`],
+        ["Positive", positive ? "Yes" : "No"],
+        ["Respiratory Rate", values.rr],
+        ["Systolic BP", `${values.sbp} mmHg`],
+        ["GCS", values.gcs]
+      ]);
     };
-    runLactate = (argv, json) => {
-      const { values } = (0, import_node_util8.parseArgs)({
-        args: argv,
-        options: {
-          initial: { type: "string" },
-          repeat: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE8 + "\n");
-        return;
-      }
+    runLactate = (argv) => {
+      const values = parseFlags(argv, {
+        initial: { type: "string" },
+        repeat: { type: "string" }
+      }, USAGE8);
+      if (!values) return;
       if (!requireFlags(values, ["initial", "repeat"], USAGE8)) return;
       const clearance = calculateLactateClearance(values.initial, values.repeat);
       const adequate = isLactateClearanceAdequate(clearance);
@@ -2477,17 +2331,12 @@ Examples:
         clearance: clearance ? parseFloat(clearance) : null,
         adequate
       };
-      printResult(data, json, () => {
-        return [
-          formatHeader("Lactate Clearance"),
-          formatTable([
-            ["Initial", `${values.initial} mmol/L`],
-            ["Repeat", `${values.repeat} mmol/L`],
-            ["Clearance", clearance ? `${clearance}%` : "N/A"],
-            ["Adequate", adequate ? "Yes" : "No"]
-          ])
-        ].join("\n");
-      });
+      printTable(data, values.json, "Lactate Clearance", [
+        ["Initial", `${values.initial} mmol/L`],
+        ["Repeat", `${values.repeat} mmol/L`],
+        ["Clearance", clearance ? `${clearance}%` : "N/A"],
+        ["Adequate", adequate ? "Yes" : "No"]
+      ]);
     };
     run8 = (argv) => runSubcommand(argv, USAGE8, {
       sofa: runSOFA,
@@ -2758,13 +2607,11 @@ var ckd_exports = {};
 __export(ckd_exports, {
   run: () => run9
 });
-var import_node_util9, USAGE9, failNotCalculated, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run9;
+var USAGE9, failNotCalculated, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run9;
 var init_ckd2 = __esm({
   "src/commands/ckd.ts"() {
     "use strict";
-    import_node_util9 = require("util");
     init_ckd();
-    init_format();
     init_cli();
     USAGE9 = `Usage: medprotocol ckd <sub-command> [options]
 
@@ -2824,22 +2671,13 @@ Examples:
   medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
   medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4`;
     failNotCalculated = () => fail("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0");
-    runEGFR = (argv, json) => {
-      const { values } = (0, import_node_util9.parseArgs)({
-        args: argv,
-        options: {
-          creatinine: { type: "string" },
-          age: { type: "string" },
-          sex: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE9 + "\n");
-        return;
-      }
+    runEGFR = (argv) => {
+      const values = parseFlags(argv, {
+        creatinine: { type: "string" },
+        age: { type: "string" },
+        sex: { type: "string" }
+      }, USAGE9);
+      if (!values) return;
       if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE9)) return;
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
       if (egfr === 0) return failNotCalculated();
@@ -2847,34 +2685,20 @@ Examples:
       const gfrLabel = getGFRCategoryLabel(gfrCategory);
       const severity = getCKDSeverity(gfrCategory);
       const data = { egfr, gfrCategory, gfrLabel, severity };
-      printResult(data, json, () => {
-        return [
-          formatHeader("eGFR (CKD-EPI 2021)"),
-          formatTable([
-            ["eGFR", `${egfr} mL/min/1.73m\xB2`],
-            ["GFR Category", `${gfrCategory} \u2014 ${gfrLabel}`],
-            ["Severity", severity]
-          ])
-        ].join("\n");
-      });
+      printTable(data, values.json, "eGFR (CKD-EPI 2021)", [
+        ["eGFR", `${egfr} mL/min/1.73m\xB2`],
+        ["GFR Category", `${gfrCategory} \u2014 ${gfrLabel}`],
+        ["Severity", severity]
+      ]);
     };
-    runStage = (argv, json) => {
-      const { values } = (0, import_node_util9.parseArgs)({
-        args: argv,
-        options: {
-          creatinine: { type: "string" },
-          age: { type: "string" },
-          sex: { type: "string" },
-          acr: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE9 + "\n");
-        return;
-      }
+    runStage = (argv) => {
+      const values = parseFlags(argv, {
+        creatinine: { type: "string" },
+        age: { type: "string" },
+        sex: { type: "string" },
+        acr: { type: "string" }
+      }, USAGE9);
+      if (!values) return;
       if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE9)) return;
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
       if (egfr === 0) return failNotCalculated();
@@ -2896,38 +2720,24 @@ Examples:
         monitoringPerYear: monitoring,
         severity
       };
-      printResult(data, json, () => {
-        return [
-          formatHeader("CKD CGA Staging (KDIGO)"),
-          formatTable([
-            ["eGFR", `${egfr} mL/min/1.73m\xB2`],
-            ["GFR Category", `${gfrCategory} \u2014 ${gfrLabel}`],
-            ["ACR", `${values.acr} mg/g`],
-            ["Albuminuria", `${albCategory} \u2014 ${albLabel}`],
-            ["Risk Level", riskLevel],
-            ["Monitoring", `${monitoring}\xD7/year`],
-            ["Severity", severity]
-          ])
-        ].join("\n");
-      });
+      printTable(data, values.json, "CKD CGA Staging (KDIGO)", [
+        ["eGFR", `${egfr} mL/min/1.73m\xB2`],
+        ["GFR Category", `${gfrCategory} \u2014 ${gfrLabel}`],
+        ["ACR", `${values.acr} mg/g`],
+        ["Albuminuria", `${albCategory} \u2014 ${albLabel}`],
+        ["Risk Level", riskLevel],
+        ["Monitoring", `${monitoring}\xD7/year`],
+        ["Severity", severity]
+      ]);
     };
-    runKFRE = (argv, json) => {
-      const { values } = (0, import_node_util9.parseArgs)({
-        args: argv,
-        options: {
-          age: { type: "string" },
-          sex: { type: "string" },
-          egfr: { type: "string" },
-          acr: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE9 + "\n");
-        return;
-      }
+    runKFRE = (argv) => {
+      const values = parseFlags(argv, {
+        age: { type: "string" },
+        sex: { type: "string" },
+        egfr: { type: "string" },
+        acr: { type: "string" }
+      }, USAGE9);
+      if (!values) return;
       if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE9)) return;
       const kfre = calculateKFRE(values.age, values.sex, values.egfr, values.acr);
       const referral = assessReferralNeed(String(kfre.fiveYear));
@@ -2936,36 +2746,22 @@ Examples:
         fiveYearRisk: kfre.fiveYear,
         referral
       };
-      printResult(data, json, () => {
-        return [
-          formatHeader("Kidney Failure Risk (KFRE 4-var)"),
-          formatTable([
-            ["2-Year Risk", `${kfre.twoYear}%`],
-            ["5-Year Risk", `${kfre.fiveYear}%`],
-            ["Referral", referral]
-          ])
-        ].join("\n");
-      });
+      printTable(data, values.json, "Kidney Failure Risk (KFRE 4-var)", [
+        ["2-Year Risk", `${kfre.twoYear}%`],
+        ["5-Year Risk", `${kfre.fiveYear}%`],
+        ["Referral", referral]
+      ]);
     };
-    runTreatment = (argv, json) => {
-      const { values } = (0, import_node_util9.parseArgs)({
-        args: argv,
-        options: {
-          egfr: { type: "string" },
-          acr: { type: "string" },
-          diabetes: { type: "boolean", default: false },
-          "heart-failure": { type: "boolean", default: false },
-          "on-rasi": { type: "boolean", default: false },
-          "potassium-normal": { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE9 + "\n");
-        return;
-      }
+    runTreatment = (argv) => {
+      const values = parseFlags(argv, {
+        egfr: { type: "string" },
+        acr: { type: "string" },
+        diabetes: { type: "boolean", default: false },
+        "heart-failure": { type: "boolean", default: false },
+        "on-rasi": { type: "boolean", default: false },
+        "potassium-normal": { type: "boolean", default: false }
+      }, USAGE9);
+      if (!values) return;
       if (!requireFlags(values, ["egfr", "acr"], USAGE9)) return;
       const gfrCategory = classifyGFRCategory(values.egfr);
       const albCategory = classifyAlbuminuriaCategory(values.acr);
@@ -2986,79 +2782,51 @@ Examples:
         finerenone
       };
       const eligible = (r) => r.eligible ? `Criteria met (Grade ${r.grade})` : "Criteria not met";
-      printResult(data, json, () => {
-        return [
-          formatHeader("CKD Guideline Criteria"),
-          formatTable([
-            ["GFR Category", gfrCategory],
-            ["Albuminuria", albCategory],
-            ["ACEi/ARB (RASi)", eligible(rasi)],
-            ["SGLT2i", eligible(sglt2i)],
-            ["Finerenone", eligible(finerenone)]
-          ])
-        ].join("\n");
-      });
+      printTable(data, values.json, "CKD Guideline Criteria", [
+        ["GFR Category", gfrCategory],
+        ["Albuminuria", albCategory],
+        ["ACEi/ARB (RASi)", eligible(rasi)],
+        ["SGLT2i", eligible(sglt2i)],
+        ["Finerenone", eligible(finerenone)]
+      ]);
     };
-    runAnemia = (argv, json) => {
-      const { values } = (0, import_node_util9.parseArgs)({
-        args: argv,
-        options: {
-          hb: { type: "string" },
-          sex: { type: "string" },
-          ferritin: { type: "string" },
-          tsat: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE9 + "\n");
-        return;
-      }
+    runAnemia = (argv) => {
+      const values = parseFlags(argv, {
+        hb: { type: "string" },
+        sex: { type: "string" },
+        ferritin: { type: "string" },
+        tsat: { type: "string" }
+      }, USAGE9);
+      if (!values) return;
       if (!requireFlags(values, ["hb", "sex"], USAGE9)) return;
       const anemia = classifyAnemia(values.hb, values.sex);
       const iron = values.ferritin && values.tsat ? assessIronStatus(values.ferritin, values.tsat) : null;
       const esa = values.ferritin && values.tsat ? checkESAEligibility(values.hb, values.ferritin, values.tsat, values.sex) : null;
       const data = { anemia, iron, esa };
-      printResult(data, json, () => {
-        const rows = [
-          ["Anemic", anemia.anemic ? "Yes" : "No"],
-          ["Severity", anemia.severity]
-        ];
-        if (iron) {
-          rows.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
-          rows.push(["Iron Criteria", iron.recommendation]);
-        }
-        if (esa) {
-          rows.push(["ESA Criteria", esa.eligible ? "Met" : "Not met"]);
-          rows.push(["ESA Reason", esa.reason]);
-        }
-        return [
-          formatHeader("CKD Anemia Assessment"),
-          formatTable(rows)
-        ].join("\n");
-      });
-    };
-    runMBD = (argv, json) => {
-      const { values } = (0, import_node_util9.parseArgs)({
-        args: argv,
-        options: {
-          phosphate: { type: "string" },
-          calcium: { type: "string" },
-          albumin: { type: "string" },
-          pth: { type: "string" },
-          "vitamin-d": { type: "string" },
-          "gfr-category": { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE9 + "\n");
-        return;
+      const rows = [
+        ["Anemic", anemia.anemic ? "Yes" : "No"],
+        ["Severity", anemia.severity]
+      ];
+      if (iron) {
+        rows.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
+        rows.push(["Iron Criteria", iron.recommendation]);
       }
+      if (esa) {
+        rows.push(["ESA Criteria", esa.eligible ? "Met" : "Not met"]);
+        rows.push(["ESA Reason", esa.reason]);
+      }
+      printTable(data, values.json, "CKD Anemia Assessment", rows);
+    };
+    runMBD = (argv) => {
+      const values = parseFlags(argv, {
+        phosphate: { type: "string" },
+        calcium: { type: "string" },
+        albumin: { type: "string" },
+        pth: { type: "string" },
+        "vitamin-d": { type: "string" },
+        "gfr-category": { type: "string" }
+      }, USAGE9);
+      if (!values) return;
       if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE9);
       const gfrCat = values["gfr-category"];
       const phosphateResult = values.phosphate ? assessPhosphate(values.phosphate, gfrCat) : null;
@@ -3074,31 +2842,26 @@ Examples:
         vitaminD: vitDResult,
         monitoring
       };
-      printResult(data, json, () => {
-        const rows = [
-          ["GFR Category", gfrCat]
-        ];
-        if (phosphateResult) {
-          rows.push(["Phosphate", `${phosphateResult.status} \u2014 ${phosphateResult.recommendation}`]);
-        }
-        if (correctedCa !== null) {
-          rows.push(["Corrected Ca", `${correctedCa} mg/dL`]);
-        }
-        if (pthResult) {
-          rows.push(["PTH", `${pthResult.status} \u2014 ${pthResult.recommendation}`]);
-        }
-        if (vitDResult) {
-          rows.push(["Vitamin D", `${vitDResult.status} \u2014 ${vitDResult.recommendation}`]);
-        }
-        rows.push(["Monitor PO\u2084", monitoring.phosphate]);
-        rows.push(["Monitor Ca", monitoring.calcium]);
-        rows.push(["Monitor PTH", monitoring.pth]);
-        rows.push(["Monitor Vit D", monitoring.vitaminD]);
-        return [
-          formatHeader("CKD-MBD Assessment"),
-          formatTable(rows)
-        ].join("\n");
-      });
+      const rows = [
+        ["GFR Category", gfrCat]
+      ];
+      if (phosphateResult) {
+        rows.push(["Phosphate", `${phosphateResult.status} \u2014 ${phosphateResult.recommendation}`]);
+      }
+      if (correctedCa !== null) {
+        rows.push(["Corrected Ca", `${correctedCa} mg/dL`]);
+      }
+      if (pthResult) {
+        rows.push(["PTH", `${pthResult.status} \u2014 ${pthResult.recommendation}`]);
+      }
+      if (vitDResult) {
+        rows.push(["Vitamin D", `${vitDResult.status} \u2014 ${vitDResult.recommendation}`]);
+      }
+      rows.push(["Monitor PO\u2084", monitoring.phosphate]);
+      rows.push(["Monitor Ca", monitoring.calcium]);
+      rows.push(["Monitor PTH", monitoring.pth]);
+      rows.push(["Monitor Vit D", monitoring.vitaminD]);
+      printTable(data, values.json, "CKD-MBD Assessment", rows);
     };
     run9 = (argv) => runSubcommand(argv, USAGE9, {
       egfr: runEGFR,
@@ -3294,14 +3057,12 @@ var diabetes_exports = {};
 __export(diabetes_exports, {
   run: () => run10
 });
-var import_node_util10, USAGE10, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run10;
+var USAGE10, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run10;
 var init_diabetes = __esm({
   "src/commands/diabetes.ts"() {
     "use strict";
-    import_node_util10 = require("util");
     init_diabetes_dx();
     init_endocrine();
-    init_format();
     init_cli();
     USAGE10 = `Usage: medprotocol diabetes <sub-command> [options]
 
@@ -3368,24 +3129,15 @@ Examples:
   medprotocol diabetes t1-vs-t2 --age 25 --bmi 22 --autoantibodies --c-peptide 150
   medprotocol diabetes t2d-screen --age 40 --bmi 28 --hypertension
   medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160`;
-    runDiagnose = (argv, json) => {
-      const { values } = (0, import_node_util10.parseArgs)({
-        args: argv,
-        options: {
-          a1c: { type: "string", default: "" },
-          fpg: { type: "string", default: "" },
-          "2h-pg": { type: "string", default: "" },
-          "random-pg": { type: "string", default: "" },
-          symptoms: { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE10 + "\n");
-        return;
-      }
+    runDiagnose = (argv) => {
+      const values = parseFlags(argv, {
+        a1c: { type: "string", default: "" },
+        fpg: { type: "string", default: "" },
+        "2h-pg": { type: "string", default: "" },
+        "random-pg": { type: "string", default: "" },
+        symptoms: { type: "boolean", default: false }
+      }, USAGE10);
+      if (!values) return;
       const a1c = values.a1c;
       const fpg = values.fpg;
       const twohPG = values["2h-pg"];
@@ -3423,28 +3175,17 @@ Examples:
         diagnosis: diagnosis.label,
         category: diagnosis.category
       };
-      printResult(data, json, () => {
-        return [formatHeader("Diabetes Diagnosis (ADA 2026)"), formatTable(rows)].join("\n");
-      });
+      printTable(data, values.json, "Diabetes Diagnosis (ADA 2026)", rows);
     };
-    runT1DStage = (argv, json) => {
-      const { values } = (0, import_node_util10.parseArgs)({
-        args: argv,
-        options: {
-          autoantibodies: { type: "string" },
-          fpg: { type: "string", default: "" },
-          "2h-pg": { type: "string", default: "" },
-          a1c: { type: "string", default: "" },
-          symptoms: { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE10 + "\n");
-        return;
-      }
+    runT1DStage = (argv) => {
+      const values = parseFlags(argv, {
+        autoantibodies: { type: "string" },
+        fpg: { type: "string", default: "" },
+        "2h-pg": { type: "string", default: "" },
+        a1c: { type: "string", default: "" },
+        symptoms: { type: "boolean", default: false }
+      }, USAGE10);
+      if (!values) return;
       if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE10);
       const result = classifyT1DStage(
         values.autoantibodies,
@@ -3468,31 +3209,20 @@ Examples:
         classification: result.label,
         severity: result.severity
       };
-      printResult(data, json, () => {
-        return [formatHeader("T1D Staging (ADA Table 2.4)"), formatTable(rows)].join("\n");
-      });
+      printTable(data, values.json, "T1D Staging (ADA Table 2.4)", rows);
     };
-    runT1vsT2 = (argv, json) => {
-      const { values } = (0, import_node_util10.parseArgs)({
-        args: argv,
-        options: {
-          age: { type: "string" },
-          bmi: { type: "string" },
-          autoantibodies: { type: "boolean", default: false },
-          "c-peptide": { type: "string", default: "0" },
-          "fhx-t1d": { type: "boolean", default: false },
-          "fhx-t2d": { type: "boolean", default: false },
-          "dka-history": { type: "boolean", default: false },
-          autoimmune: { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE10 + "\n");
-        return;
-      }
+    runT1vsT2 = (argv) => {
+      const values = parseFlags(argv, {
+        age: { type: "string" },
+        bmi: { type: "string" },
+        autoantibodies: { type: "boolean", default: false },
+        "c-peptide": { type: "string", default: "0" },
+        "fhx-t1d": { type: "boolean", default: false },
+        "fhx-t2d": { type: "boolean", default: false },
+        "dka-history": { type: "boolean", default: false },
+        autoimmune: { type: "boolean", default: false }
+      }, USAGE10);
+      if (!values) return;
       if (!requireFlags(values, ["age", "bmi"], USAGE10)) return;
       const result = classifyT1vsT2(
         values.age,
@@ -3521,36 +3251,25 @@ Examples:
           cPeptide: parseFloat(values["c-peptide"])
         }
       };
-      printResult(data, json, () => {
-        return [formatHeader("T1 vs T2 Classification (AABBCC)"), formatTable(rows)].join("\n");
-      });
+      printTable(data, values.json, "T1 vs T2 Classification (AABBCC)", rows);
     };
-    runT2DScreen = (argv, json) => {
-      const { values } = (0, import_node_util10.parseArgs)({
-        args: argv,
-        options: {
-          age: { type: "string" },
-          bmi: { type: "string" },
-          ethnicity: { type: "string", default: "other" },
-          "first-degree": { type: "boolean", default: false },
-          "high-risk-ethnicity": { type: "boolean", default: false },
-          cvd: { type: "boolean", default: false },
-          hypertension: { type: "boolean", default: false },
-          dyslipidemia: { type: "boolean", default: false },
-          pcos: { type: "boolean", default: false },
-          inactive: { type: "boolean", default: false },
-          "insulin-resistance": { type: "boolean", default: false },
-          "prior-prediabetes": { type: "boolean", default: false },
-          "prior-gdm": { type: "boolean", default: false },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE10 + "\n");
-        return;
-      }
+    runT2DScreen = (argv) => {
+      const values = parseFlags(argv, {
+        age: { type: "string" },
+        bmi: { type: "string" },
+        ethnicity: { type: "string", default: "other" },
+        "first-degree": { type: "boolean", default: false },
+        "high-risk-ethnicity": { type: "boolean", default: false },
+        cvd: { type: "boolean", default: false },
+        hypertension: { type: "boolean", default: false },
+        dyslipidemia: { type: "boolean", default: false },
+        pcos: { type: "boolean", default: false },
+        inactive: { type: "boolean", default: false },
+        "insulin-resistance": { type: "boolean", default: false },
+        "prior-prediabetes": { type: "boolean", default: false },
+        "prior-gdm": { type: "boolean", default: false }
+      }, USAGE10);
+      if (!values) return;
       if (!requireFlags(values, ["age", "bmi"], USAGE10)) return;
       const riskFactors = {
         firstDegreeRelative: values["first-degree"],
@@ -3592,28 +3311,17 @@ Examples:
           ethnicity: values.ethnicity
         }
       };
-      printResult(data, json, () => {
-        return [formatHeader("T2D Screening (ADA Table 2.5)"), formatTable(rows)].join("\n");
-      });
+      printTable(data, values.json, "T2D Screening (ADA Table 2.5)", rows);
     };
-    runGDM = (argv, json) => {
-      const { values } = (0, import_node_util10.parseArgs)({
-        args: argv,
-        options: {
-          strategy: { type: "string" },
-          fasting: { type: "string" },
-          "1h": { type: "string" },
-          "2h": { type: "string" },
-          "3h": { type: "string", default: "0" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE10 + "\n");
-        return;
-      }
+    runGDM = (argv) => {
+      const values = parseFlags(argv, {
+        strategy: { type: "string" },
+        fasting: { type: "string" },
+        "1h": { type: "string" },
+        "2h": { type: "string" },
+        "3h": { type: "string", default: "0" }
+      }, USAGE10);
+      if (!values) return;
       const missing = [];
       if (!values.strategy) missing.push("--strategy");
       if (!values.fasting) missing.push("--fasting");
@@ -3648,12 +3356,7 @@ Examples:
           threeHour: strategy === "two-step" ? parseFloat(values["3h"]) : null
         }
       };
-      printResult(data, json, () => {
-        return [
-          formatHeader(`GDM Screening \u2014 ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`),
-          formatTable(rows)
-        ].join("\n");
-      });
+      printTable(data, values.json, `GDM Screening \u2014 ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`, rows);
     };
     run10 = (argv) => runSubcommand(argv, USAGE10, {
       diagnose: runDiagnose,
@@ -5582,16 +5285,16 @@ __export(overlay_exports, {
   isLocalOrigin: () => isLocalOrigin,
   run: () => run11
 });
-var import_node_util11, import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE11, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run11;
+var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE11, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run11;
 var init_overlay = __esm({
   "src/commands/overlay.ts"() {
     "use strict";
-    import_node_util11 = require("util");
     import_node_fs = require("fs");
     import_node_path = require("path");
     import_node_http = require("http");
     import_node_child_process2 = require("child_process");
     init_claude_spawn();
+    init_cli();
     init_overlay_client();
     USAGE11 = `Usage: medprotocol overlay [options]
 
@@ -6019,29 +5722,20 @@ Examples:
       });
     };
     run11 = (argv) => {
-      const { values } = (0, import_node_util11.parseArgs)({
-        args: argv,
-        options: {
-          serve: { type: "boolean", default: false },
-          port: { type: "string" },
-          auto: { type: "boolean", default: false },
-          // accepted for old commands; auto is now the default
-          manual: { type: "boolean", default: false },
-          action: { type: "string" },
-          list: { type: "boolean", default: false },
-          drain: { type: "boolean", default: false },
-          watch: { type: "boolean", default: false },
-          clear: { type: "boolean", default: false },
-          dir: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE11 + "\n");
-        return;
-      }
+      const values = parseFlags(argv, {
+        serve: { type: "boolean", default: false },
+        port: { type: "string" },
+        auto: { type: "boolean", default: false },
+        // accepted for old commands; auto is now the default
+        manual: { type: "boolean", default: false },
+        action: { type: "string" },
+        list: { type: "boolean", default: false },
+        drain: { type: "boolean", default: false },
+        watch: { type: "boolean", default: false },
+        clear: { type: "boolean", default: false },
+        dir: { type: "string" }
+      }, USAGE11);
+      if (!values) return;
       const dir = (0, import_node_path.resolve)(values.dir ?? (0, import_node_path.join)(".medprotocol", "queue"));
       const json = values.json;
       const pendingOrders = () => readQueue(dir).filter(
@@ -6115,7 +5809,7 @@ __export(extract_exports, {
   serve: () => serve2,
   stateOf: () => stateOf
 });
-var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, import_node_util12, USAGE12, saveNote, itemsError, scaleOf, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run12;
+var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE12, saveNote, itemsError, scaleOf, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run12;
 var init_extract = __esm({
   "src/commands/extract.ts"() {
     "use strict";
@@ -6125,7 +5819,6 @@ var init_extract = __esm({
     import_node_fs2 = require("fs");
     import_node_http2 = require("http");
     import_node_path2 = require("path");
-    import_node_util12 = require("util");
     init_acid_base();
     init_bmi();
     init_ckd();
@@ -6497,24 +6190,15 @@ ${check}`));
       return server;
     };
     run12 = (argv) => {
-      const { values } = (0, import_node_util12.parseArgs)({
-        args: argv,
-        options: {
-          serve: { type: "boolean", default: false },
-          port: { type: "string", default: "7332" },
-          save: { type: "string" },
-          note: { type: "string" },
-          items: { type: "string" },
-          artifact: { type: "string" },
-          json: { type: "boolean", default: false },
-          help: { type: "boolean", default: false }
-        },
-        strict: true
-      });
-      if (values.help) {
-        process.stdout.write(USAGE12 + "\n");
-        return;
-      }
+      const values = parseFlags(argv, {
+        serve: { type: "boolean", default: false },
+        port: { type: "string", default: "7332" },
+        save: { type: "string" },
+        note: { type: "string" },
+        items: { type: "string" },
+        artifact: { type: "string" }
+      }, USAGE12);
+      if (!values) return;
       if (values.serve) {
         const port = Number(values.port);
         if (values.save || values.note || values.items || values.artifact || values.json) {

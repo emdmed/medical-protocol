@@ -12,7 +12,7 @@ It's designed for two consumers:
 
 Each command wraps pure calculation functions from `plugin/lib/` with argument parsing, validation, and formatted output.
 
-Current commands (7):
+Current commands (12):
 
 | Command | Sub-commands | Lib file | Description |
 |---------|-------------|----------|-------------|
@@ -20,9 +20,14 @@ Current commands (7):
 | `abg` | — | `plugin/lib/acid-base/` | Arterial blood gas analysis |
 | `water-balance` | — | `plugin/lib/water-balance.ts` | Fluid intake/output balance |
 | `vitals` | — | `plugin/lib/vital-signs-validations/` | Vital signs evaluation |
-| `pafi` | — | `plugin/lib/pafi.ts` | PaO2/FiO2 ratio (ARDS) |
+| `pafi` | — | `plugin/lib/pafi.ts` | PaO2/FiO2 ratio (Berlin oxygenation range) |
 | `dka` | — | `plugin/lib/dka.ts` | DKA assessment |
 | `cardiology` | `ascvd`, `heart`, `chadsvasc` | `plugin/lib/cardiology.ts` | Cardiology risk scores |
+| `sepsis` | `sofa`, `qsofa`, `lactate` | `plugin/lib/sepsis.ts` | Sepsis assessment |
+| `ckd` | `egfr`, `stage`, `kfre`, `treatment`, `anemia`, `mbd` | `plugin/lib/ckd.ts` | CKD evaluation |
+| `diabetes` | `diagnose`, `t1d-stage`, `t1-vs-t2`, `t2d-screen`, `gdm` | `plugin/lib/diabetes-dx.ts`, `plugin/lib/endocrine.ts` | Diabetes diagnosis and classification |
+| `extract` | — | `plugin/lib/extraction.ts` | Check extracted values against the note they came from |
+| `overlay` | — | — | Drain the dev overlay work-order queue |
 
 ## Architecture
 
@@ -30,40 +35,32 @@ Current commands (7):
 packages/medprotocol/
 ├── src/
 │   ├── index.ts              # Entry point: command registry + routing
-│   ├── format.ts             # Output helpers: formatTable, formatHeader, printResult
+│   ├── cli.ts                # Shared helpers: parseFlags, printTable, requireFlags, fail, runSubcommand
 │   └── commands/             # One file per command
-│       ├── bmi.ts
-│       ├── abg.ts
-│       ├── water-balance.ts
-│       ├── vitals.ts
-│       ├── pafi.ts
-│       ├── dka.ts
-│       └── cardiology.ts
-├── dist/
-│   └── index.js              # Compiled bundle (tsup, CJS, node18)
-├── package.json              # bin: { "medprotocol": "./dist/index.js" }
+├── package.json
 └── tsconfig.json
 
 plugin/lib/                   # Pure calculation functions (copied into doctor projects as lib/medprotocol/)
+plugin/lib/format.ts          # Output helpers: formatTable, formatHeader, printResult
+plugin/scripts/medprotocol.cjs  # The built CLI, committed; `npm run build` rewrites it
 tests/cli/                    # CLI-specific tests (vitest)
 ```
 
 ## How to Invoke
 
 ```bash
-# From repo root (development)
-medprotocol <command> [flags]
-medprotocol bmi --weight 70 --height-m 1.75 --metric
-medprotocol pafi --pao2 60 --fio2 40 --json
+# From the repo root
+node plugin/scripts/medprotocol.cjs <command> [flags]
+node plugin/scripts/medprotocol.cjs bmi --weight 70 --height-m 1.75 --metric
+node plugin/scripts/medprotocol.cjs pafi --pao2 60 --fio2 40 --json
 
-# Sub-commands (cardiology)
-medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
-medprotocol cardiology heart --history 1 --ecg 0 --age 2 --risk-factors 1 --troponin 0
+# Sub-commands
+node plugin/scripts/medprotocol.cjs cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
 
 # Help
-medprotocol --help            # Global
-medprotocol bmi --help        # Per-command
-medprotocol --version
+node plugin/scripts/medprotocol.cjs --help            # Global
+node plugin/scripts/medprotocol.cjs bmi --help        # Per-command
+node plugin/scripts/medprotocol.cjs --version
 ```
 
 ## Command Anatomy
@@ -71,22 +68,22 @@ medprotocol --version
 Every command file exports a single `run(argv: string[]): void` function that follows this pattern:
 
 ```
-1. Parse args     → node:util parseArgs() with strict: true
-2. Handle --help  → write USAGE to stdout, return
-3. Validate       → check required flags, write errors to stderr, set exitCode = 1
+1. Parse args     → parseFlags(argv, options, USAGE); it adds --json and --help
+2. Handle --help  → parseFlags printed the usage and returned null: return
+3. Validate       → requireFlags() or fail(); errors go to stderr with exitCode = 1
 4. Calculate      → call pure function from plugin/lib/
-5. Handle error   → null result = invalid inputs, stderr + exitCode = 1
-6. Output         → printResult(data, isJson, humanFormatFn)
+5. Handle error   → null result = invalid inputs: fail()
+6. Output         → printTable(data, values.json, title, rows)
 ```
 
 ### Conventions
 
-- **Arguments**: `parseArgs()` from `node:util`, always `strict: true`
-- **Required flags**: Collect all missing into an array, report them together
+- **Arguments**: `parseFlags()` from `cli.ts`. It is strict: a mistyped flag is reported by `index.ts` as a short error
+- **Required flags**: `requireFlags()` reports all missing flags together
 - **Output**: `--json` for structured data, human-readable table by default
-- **Errors**: Always to `stderr`, always set `process.exitCode = 1`
-- **No side effects**: Commands are pure read-calculate-print pipelines
-- **Formatting**: Use `formatHeader()`, `formatTable()`, `printResult()` from `format.ts`
+- **Errors**: `fail()`: always to `stderr`, always sets `process.exitCode = 1`
+- **No side effects**: Commands are pure read-calculate-print pipelines (`extract` and `overlay` are the exceptions: they read and write files)
+- **Formatting**: `printTable()` for a title and one table. For anything else, `printResult()` with `formatHeader()` and `formatTable()` from `plugin/lib/format.ts`
 
 ## How to Add a New Command
 
@@ -107,9 +104,8 @@ export const getMyMetricCategory = (result: string | null): string => { /* ... *
 Create `packages/medprotocol/src/commands/<name>.ts`:
 
 ```typescript
-import { parseArgs } from "node:util";
 import { calculateMyMetric, getMyMetricCategory } from "../../../../plugin/lib/my-metric";
-import { formatHeader, formatTable, printResult, formatError } from "../format";
+import { fail, parseFlags, printTable, requireFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol my-metric [options]
 
@@ -123,41 +119,17 @@ Examples:
   medprotocol my-metric --input1 100 --input2 50`;
 
 export const run = (argv: string[]): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      input1: { type: "string" },
-      input2: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
+  const values = parseFlags(argv, {
+    input1: { type: "string" },
+    input2: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
-
-  const missing: string[] = [];
-  if (!values.input1) missing.push("--input1");
-  if (!values.input2) missing.push("--input2");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["input1", "input2"], USAGE)) return;
 
   const result = calculateMyMetric(values.input1!, values.input2!);
 
-  if (!result) {
-    process.stderr.write(formatError("Could not calculate — check input values") + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (!result) return fail("Could not calculate — check input values");
 
   const category = getMyMetricCategory(result);
 
@@ -168,17 +140,12 @@ export const run = (argv: string[]): void => {
     input2: parseFloat(values.input2!),
   };
 
-  printResult(data, values.json!, () => {
-    return [
-      formatHeader("My Metric"),
-      formatTable([
-        ["Result", result],
-        ["Category", category],
-        ["Input 1", values.input1!],
-        ["Input 2", values.input2!],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "My Metric", [
+    ["Result", result],
+    ["Category", category],
+    ["Input 1", values.input1!],
+    ["Input 2", values.input2!],
+  ]);
 };
 ```
 
@@ -246,31 +213,33 @@ describe('medprotocol my-metric', () => {
 });
 ```
 
-### Step 5: Verify
+### Step 5: Build and verify
 
 ```bash
+npm run build                           # Rewrites plugin/scripts/medprotocol.cjs; commit it with the source
 npx vitest run tests/cli/<name>-cli    # New CLI tests pass
 npm test                                # Full suite still passes
+npx tsc --noEmit                        # Types pass
 ```
+
+Add the command to `scripts/compare-cli.sh` too, so a later refactor is checked against it.
 
 ### Sub-command Pattern (optional)
 
-For commands with multiple calculators (like `cardiology`), use a router in the `run()` function:
+For commands with several calculators (like `cardiology`), write one function per sub-command and route with `runSubcommand()`. It prints the usage for `--help` or no name, and reports an unknown name:
 
 ```typescript
-export const run = (argv: string[]): void => {
-  const subcommand = argv[0];
-  const subArgs = argv.slice(1);
-  const json = subArgs.includes("--json");
-
-  switch (subcommand) {
-    case "sub1": runSub1(subArgs, json); break;
-    case "sub2": runSub2(subArgs, json); break;
-    default:
-      process.stderr.write(formatError(`Unknown sub-command: ${subcommand}`) + "\n");
-      process.exitCode = 1;
-  }
+const runSub1 = (argv: string[]): void => {
+  const values = parseFlags(argv, { input1: { type: "string" } }, USAGE);
+  if (!values) return;
+  // ... validate, calculate, printTable
 };
+
+export const run = (argv: string[]): void =>
+  runSubcommand(argv, USAGE, {
+    sub1: runSub1,
+    sub2: runSub2,
+  });
 ```
 
 ## Checklist: Adding a Command
@@ -278,8 +247,9 @@ export const run = (argv: string[]): void => {
 - [ ] Pure logic exists in `plugin/lib/<name>.ts` (with unit tests in `tests/<name>/`)
 - [ ] Command file at `packages/medprotocol/src/commands/<name>.ts`
 - [ ] Exports `run(argv: string[]): void`
-- [ ] `--json` and `--help` flags supported
+- [ ] Flags parsed with `parseFlags` (gives `--json` and `--help`)
 - [ ] Errors go to `stderr` with `process.exitCode = 1`
 - [ ] Registered in `packages/medprotocol/src/index.ts` (commands record + USAGE)
 - [ ] CLI tests at `tests/cli/<name>-cli.test.ts`
-- [ ] `npm test` passes
+- [ ] `npm run build` run and `plugin/scripts/medprotocol.cjs` committed
+- [ ] `npm test` and `npx tsc --noEmit` pass

@@ -1,7 +1,5 @@
-import { parseArgs } from "node:util";
 import { calculateBMI, getBMICategory } from "../../../../plugin/lib/bmi";
-import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { fail } from "../cli";
+import { fail, parseFlags, printTable } from "../cli";
 
 const USAGE = `Usage: medprotocol bmi [options]
 
@@ -19,24 +17,14 @@ Examples:
   medprotocol bmi --weight 70 --height-m 1.75 --metric`;
 
 export const run = (argv: string[]): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      weight: { type: "string" },
-      "height-ft": { type: "string" },
-      "height-in": { type: "string" },
-      "height-m": { type: "string" },
-      metric: { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+  const values = parseFlags(argv, {
+    weight: { type: "string" },
+    "height-ft": { type: "string" },
+    "height-in": { type: "string" },
+    "height-m": { type: "string" },
+    metric: { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   if (!values.weight) return fail("--weight is required", USAGE);
 
@@ -73,21 +61,16 @@ export const run = (argv: string[]): void => {
         }),
   };
 
-  printResult(data, values.json!, () => {
-    const heightDisplay = isMetric
-      ? `${values["height-m"]}m`
-      : `${values["height-ft"] || 0}'${values["height-in"] || 0}"`;
+  const heightDisplay = isMetric
+    ? `${values["height-m"]}m`
+    : `${values["height-ft"] || 0}'${values["height-in"] || 0}"`;
 
-    const weightUnit = isMetric ? "kg" : "lbs";
+  const weightUnit = isMetric ? "kg" : "lbs";
 
-    return [
-      formatHeader("BMI Calculator"),
-      formatTable([
-        ["BMI", bmi],
-        ["Category", category],
-        ["Weight", `${values.weight} ${weightUnit}`],
-        ["Height", heightDisplay],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "BMI Calculator", [
+    ["BMI", bmi],
+    ["Category", category],
+    ["Weight", `${values.weight} ${weightUnit}`],
+    ["Height", heightDisplay],
+  ]);
 };

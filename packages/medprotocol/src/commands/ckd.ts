@@ -1,4 +1,3 @@
-import { parseArgs } from "node:util";
 import {
   calculateEGFR,
   classifyGFRCategory,
@@ -22,8 +21,7 @@ import {
   assessVitaminD,
   getCKDMBDMonitoring,
 } from "../../../../plugin/lib/ckd";
-import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { fail, requireFlags, runSubcommand } from "../cli";
+import { fail, parseFlags, printTable, requireFlags, runSubcommand } from "../cli";
 
 const USAGE = `Usage: medprotocol ckd <sub-command> [options]
 
@@ -86,23 +84,13 @@ Examples:
 // calculateEGFR returns 0 when it cannot calculate; staging that 0 would report G5.
 const failNotCalculated = (): void => fail("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0");
 
-const runEGFR = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      creatinine: { type: "string" },
-      age: { type: "string" },
-      sex: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runEGFR = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    creatinine: { type: "string" },
+    age: { type: "string" },
+    sex: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE)) return;
 
@@ -114,36 +102,21 @@ const runEGFR = (argv: string[], json: boolean): void => {
 
   const data = { egfr, gfrCategory, gfrLabel, severity };
 
-  printResult(data, json, () => {
-    return [
-      formatHeader("eGFR (CKD-EPI 2021)"),
-      formatTable([
-        ["eGFR", `${egfr} mL/min/1.73m²`],
-        ["GFR Category", `${gfrCategory} — ${gfrLabel}`],
-        ["Severity", severity],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "eGFR (CKD-EPI 2021)", [
+    ["eGFR", `${egfr} mL/min/1.73m²`],
+    ["GFR Category", `${gfrCategory} — ${gfrLabel}`],
+    ["Severity", severity],
+  ]);
 };
 
-const runStage = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      creatinine: { type: "string" },
-      age: { type: "string" },
-      sex: { type: "string" },
-      acr: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runStage = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    creatinine: { type: "string" },
+    age: { type: "string" },
+    sex: { type: "string" },
+    acr: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE)) return;
 
@@ -163,40 +136,25 @@ const runStage = (argv: string[], json: boolean): void => {
     riskLevel, monitoringPerYear: monitoring, severity,
   };
 
-  printResult(data, json, () => {
-    return [
-      formatHeader("CKD CGA Staging (KDIGO)"),
-      formatTable([
-        ["eGFR", `${egfr} mL/min/1.73m²`],
-        ["GFR Category", `${gfrCategory} — ${gfrLabel}`],
-        ["ACR", `${values.acr} mg/g`],
-        ["Albuminuria", `${albCategory} — ${albLabel}`],
-        ["Risk Level", riskLevel],
-        ["Monitoring", `${monitoring}×/year`],
-        ["Severity", severity],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "CKD CGA Staging (KDIGO)", [
+    ["eGFR", `${egfr} mL/min/1.73m²`],
+    ["GFR Category", `${gfrCategory} — ${gfrLabel}`],
+    ["ACR", `${values.acr} mg/g`],
+    ["Albuminuria", `${albCategory} — ${albLabel}`],
+    ["Risk Level", riskLevel],
+    ["Monitoring", `${monitoring}×/year`],
+    ["Severity", severity],
+  ]);
 };
 
-const runKFRE = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      age: { type: "string" },
-      sex: { type: "string" },
-      egfr: { type: "string" },
-      acr: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runKFRE = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    age: { type: "string" },
+    sex: { type: "string" },
+    egfr: { type: "string" },
+    acr: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE)) return;
 
@@ -209,38 +167,23 @@ const runKFRE = (argv: string[], json: boolean): void => {
     referral,
   };
 
-  printResult(data, json, () => {
-    return [
-      formatHeader("Kidney Failure Risk (KFRE 4-var)"),
-      formatTable([
-        ["2-Year Risk", `${kfre.twoYear}%`],
-        ["5-Year Risk", `${kfre.fiveYear}%`],
-        ["Referral", referral],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "Kidney Failure Risk (KFRE 4-var)", [
+    ["2-Year Risk", `${kfre.twoYear}%`],
+    ["5-Year Risk", `${kfre.fiveYear}%`],
+    ["Referral", referral],
+  ]);
 };
 
-const runTreatment = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      egfr: { type: "string" },
-      acr: { type: "string" },
-      diabetes: { type: "boolean", default: false },
-      "heart-failure": { type: "boolean", default: false },
-      "on-rasi": { type: "boolean", default: false },
-      "potassium-normal": { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runTreatment = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    egfr: { type: "string" },
+    acr: { type: "string" },
+    diabetes: { type: "boolean", default: false },
+    "heart-failure": { type: "boolean", default: false },
+    "on-rasi": { type: "boolean", default: false },
+    "potassium-normal": { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["egfr", "acr"], USAGE)) return;
 
@@ -262,38 +205,23 @@ const runTreatment = (argv: string[], json: boolean): void => {
   const eligible = (r: { eligible: boolean; grade: string }) =>
     r.eligible ? `Criteria met (Grade ${r.grade})` : "Criteria not met";
 
-  printResult(data, json, () => {
-    return [
-      formatHeader("CKD Guideline Criteria"),
-      formatTable([
-        ["GFR Category", gfrCategory],
-        ["Albuminuria", albCategory],
-        ["ACEi/ARB (RASi)", eligible(rasi)],
-        ["SGLT2i", eligible(sglt2i)],
-        ["Finerenone", eligible(finerenone)],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "CKD Guideline Criteria", [
+    ["GFR Category", gfrCategory],
+    ["Albuminuria", albCategory],
+    ["ACEi/ARB (RASi)", eligible(rasi)],
+    ["SGLT2i", eligible(sglt2i)],
+    ["Finerenone", eligible(finerenone)],
+  ]);
 };
 
-const runAnemia = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      hb: { type: "string" },
-      sex: { type: "string" },
-      ferritin: { type: "string" },
-      tsat: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runAnemia = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    hb: { type: "string" },
+    sex: { type: "string" },
+    ferritin: { type: "string" },
+    tsat: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["hb", "sex"], USAGE)) return;
 
@@ -307,46 +235,31 @@ const runAnemia = (argv: string[], json: boolean): void => {
 
   const data = { anemia, iron, esa };
 
-  printResult(data, json, () => {
-    const rows: [string, string][] = [
-      ["Anemic", anemia.anemic ? "Yes" : "No"],
-      ["Severity", anemia.severity],
-    ];
-    if (iron) {
-      rows.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
-      rows.push(["Iron Criteria", iron.recommendation]);
-    }
-    if (esa) {
-      rows.push(["ESA Criteria", esa.eligible ? "Met" : "Not met"]);
-      rows.push(["ESA Reason", esa.reason]);
-    }
-    return [
-      formatHeader("CKD Anemia Assessment"),
-      formatTable(rows),
-    ].join("\n");
-  });
+  const rows: [string, string][] = [
+    ["Anemic", anemia.anemic ? "Yes" : "No"],
+    ["Severity", anemia.severity],
+  ];
+  if (iron) {
+    rows.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
+    rows.push(["Iron Criteria", iron.recommendation]);
+  }
+  if (esa) {
+    rows.push(["ESA Criteria", esa.eligible ? "Met" : "Not met"]);
+    rows.push(["ESA Reason", esa.reason]);
+  }
+  printTable(data, values.json, "CKD Anemia Assessment", rows);
 };
 
-const runMBD = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      phosphate: { type: "string" },
-      calcium: { type: "string" },
-      albumin: { type: "string" },
-      pth: { type: "string" },
-      "vitamin-d": { type: "string" },
-      "gfr-category": { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runMBD = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    phosphate: { type: "string" },
+    calcium: { type: "string" },
+    albumin: { type: "string" },
+    pth: { type: "string" },
+    "vitamin-d": { type: "string" },
+    "gfr-category": { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE);
 
@@ -368,31 +281,26 @@ const runMBD = (argv: string[], json: boolean): void => {
     monitoring,
   };
 
-  printResult(data, json, () => {
-    const rows: [string, string][] = [
-      ["GFR Category", gfrCat],
-    ];
-    if (phosphateResult) {
-      rows.push(["Phosphate", `${phosphateResult.status} — ${phosphateResult.recommendation}`]);
-    }
-    if (correctedCa !== null) {
-      rows.push(["Corrected Ca", `${correctedCa} mg/dL`]);
-    }
-    if (pthResult) {
-      rows.push(["PTH", `${pthResult.status} — ${pthResult.recommendation}`]);
-    }
-    if (vitDResult) {
-      rows.push(["Vitamin D", `${vitDResult.status} — ${vitDResult.recommendation}`]);
-    }
-    rows.push(["Monitor PO₄", monitoring.phosphate]);
-    rows.push(["Monitor Ca", monitoring.calcium]);
-    rows.push(["Monitor PTH", monitoring.pth]);
-    rows.push(["Monitor Vit D", monitoring.vitaminD]);
-    return [
-      formatHeader("CKD-MBD Assessment"),
-      formatTable(rows),
-    ].join("\n");
-  });
+  const rows: [string, string][] = [
+    ["GFR Category", gfrCat],
+  ];
+  if (phosphateResult) {
+    rows.push(["Phosphate", `${phosphateResult.status} — ${phosphateResult.recommendation}`]);
+  }
+  if (correctedCa !== null) {
+    rows.push(["Corrected Ca", `${correctedCa} mg/dL`]);
+  }
+  if (pthResult) {
+    rows.push(["PTH", `${pthResult.status} — ${pthResult.recommendation}`]);
+  }
+  if (vitDResult) {
+    rows.push(["Vitamin D", `${vitDResult.status} — ${vitDResult.recommendation}`]);
+  }
+  rows.push(["Monitor PO₄", monitoring.phosphate]);
+  rows.push(["Monitor Ca", monitoring.calcium]);
+  rows.push(["Monitor PTH", monitoring.pth]);
+  rows.push(["Monitor Vit D", monitoring.vitaminD]);
+  printTable(data, values.json, "CKD-MBD Assessment", rows);
 };
 
 export const run = (argv: string[]): void =>

@@ -1,4 +1,3 @@
-import { parseArgs } from "node:util";
 import {
   classifyA1C,
   classifyFPG,
@@ -13,8 +12,7 @@ import {
   classifyGDM_OneStep,
   classifyGDM_TwoStep,
 } from "../../../../plugin/lib/endocrine";
-import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { fail, requireFlags, runSubcommand } from "../cli";
+import { fail, parseFlags, printTable, requireFlags, runSubcommand } from "../cli";
 
 const USAGE = `Usage: medprotocol diabetes <sub-command> [options]
 
@@ -82,25 +80,15 @@ Examples:
   medprotocol diabetes t2d-screen --age 40 --bmi 28 --hypertension
   medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160`;
 
-const runDiagnose = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      a1c: { type: "string", default: "" },
-      fpg: { type: "string", default: "" },
-      "2h-pg": { type: "string", default: "" },
-      "random-pg": { type: "string", default: "" },
-      symptoms: { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runDiagnose = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    a1c: { type: "string", default: "" },
+    fpg: { type: "string", default: "" },
+    "2h-pg": { type: "string", default: "" },
+    "random-pg": { type: "string", default: "" },
+    symptoms: { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   const a1c = values.a1c!;
   const fpg = values.fpg!;
@@ -145,30 +133,18 @@ const runDiagnose = (argv: string[], json: boolean): void => {
     category: diagnosis.category,
   };
 
-  printResult(data, json, () => {
-    return [formatHeader("Diabetes Diagnosis (ADA 2026)"), formatTable(rows)].join("\n");
-  });
+  printTable(data, values.json, "Diabetes Diagnosis (ADA 2026)", rows);
 };
 
-const runT1DStage = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      autoantibodies: { type: "string" },
-      fpg: { type: "string", default: "" },
-      "2h-pg": { type: "string", default: "" },
-      a1c: { type: "string", default: "" },
-      symptoms: { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runT1DStage = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    autoantibodies: { type: "string" },
+    fpg: { type: "string", default: "" },
+    "2h-pg": { type: "string", default: "" },
+    a1c: { type: "string", default: "" },
+    symptoms: { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE);
 
@@ -197,33 +173,21 @@ const runT1DStage = (argv: string[], json: boolean): void => {
     severity: result.severity,
   };
 
-  printResult(data, json, () => {
-    return [formatHeader("T1D Staging (ADA Table 2.4)"), formatTable(rows)].join("\n");
-  });
+  printTable(data, values.json, "T1D Staging (ADA Table 2.4)", rows);
 };
 
-const runT1vsT2 = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      age: { type: "string" },
-      bmi: { type: "string" },
-      autoantibodies: { type: "boolean", default: false },
-      "c-peptide": { type: "string", default: "0" },
-      "fhx-t1d": { type: "boolean", default: false },
-      "fhx-t2d": { type: "boolean", default: false },
-      "dka-history": { type: "boolean", default: false },
-      autoimmune: { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runT1vsT2 = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    age: { type: "string" },
+    bmi: { type: "string" },
+    autoantibodies: { type: "boolean", default: false },
+    "c-peptide": { type: "string", default: "0" },
+    "fhx-t1d": { type: "boolean", default: false },
+    "fhx-t2d": { type: "boolean", default: false },
+    "dka-history": { type: "boolean", default: false },
+    autoimmune: { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["age", "bmi"], USAGE)) return;
 
@@ -257,38 +221,26 @@ const runT1vsT2 = (argv: string[], json: boolean): void => {
     },
   };
 
-  printResult(data, json, () => {
-    return [formatHeader("T1 vs T2 Classification (AABBCC)"), formatTable(rows)].join("\n");
-  });
+  printTable(data, values.json, "T1 vs T2 Classification (AABBCC)", rows);
 };
 
-const runT2DScreen = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      age: { type: "string" },
-      bmi: { type: "string" },
-      ethnicity: { type: "string", default: "other" },
-      "first-degree": { type: "boolean", default: false },
-      "high-risk-ethnicity": { type: "boolean", default: false },
-      cvd: { type: "boolean", default: false },
-      hypertension: { type: "boolean", default: false },
-      dyslipidemia: { type: "boolean", default: false },
-      pcos: { type: "boolean", default: false },
-      inactive: { type: "boolean", default: false },
-      "insulin-resistance": { type: "boolean", default: false },
-      "prior-prediabetes": { type: "boolean", default: false },
-      "prior-gdm": { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runT2DScreen = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    age: { type: "string" },
+    bmi: { type: "string" },
+    ethnicity: { type: "string", default: "other" },
+    "first-degree": { type: "boolean", default: false },
+    "high-risk-ethnicity": { type: "boolean", default: false },
+    cvd: { type: "boolean", default: false },
+    hypertension: { type: "boolean", default: false },
+    dyslipidemia: { type: "boolean", default: false },
+    pcos: { type: "boolean", default: false },
+    inactive: { type: "boolean", default: false },
+    "insulin-resistance": { type: "boolean", default: false },
+    "prior-prediabetes": { type: "boolean", default: false },
+    "prior-gdm": { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["age", "bmi"], USAGE)) return;
 
@@ -339,30 +291,18 @@ const runT2DScreen = (argv: string[], json: boolean): void => {
     },
   };
 
-  printResult(data, json, () => {
-    return [formatHeader("T2D Screening (ADA Table 2.5)"), formatTable(rows)].join("\n");
-  });
+  printTable(data, values.json, "T2D Screening (ADA Table 2.5)", rows);
 };
 
-const runGDM = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      strategy: { type: "string" },
-      fasting: { type: "string" },
-      "1h": { type: "string" },
-      "2h": { type: "string" },
-      "3h": { type: "string", default: "0" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runGDM = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    strategy: { type: "string" },
+    fasting: { type: "string" },
+    "1h": { type: "string" },
+    "2h": { type: "string" },
+    "3h": { type: "string", default: "0" },
+  }, USAGE);
+  if (!values) return;
 
   const missing: string[] = [];
   if (!values.strategy) missing.push("--strategy");
@@ -409,12 +349,7 @@ const runGDM = (argv: string[], json: boolean): void => {
     },
   };
 
-  printResult(data, json, () => {
-    return [
-      formatHeader(`GDM Screening — ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`),
-      formatTable(rows),
-    ].join("\n");
-  });
+  printTable(data, values.json, `GDM Screening — ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`, rows);
 };
 
 export const run = (argv: string[]): void =>

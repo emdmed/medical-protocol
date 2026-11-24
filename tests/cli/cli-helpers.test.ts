@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { fail, requireFlags, runSubcommand } from '../../packages/medprotocol/src/cli';
+import { fail, parseFlags, printTable, requireFlags, runSubcommand } from '../../packages/medprotocol/src/cli';
 
 let stdout: string;
 let stderr: string;
@@ -45,11 +45,49 @@ describe('requireFlags', () => {
   });
 });
 
+describe('parseFlags', () => {
+  const options = { weight: { type: 'string' }, metric: { type: 'boolean', default: false } } as const;
+
+  it('returns the flags, with --json and --help added', () => {
+    expect(parseFlags(['--weight', '70', '--json'], options, 'U')).toEqual({ weight: '70', metric: false, json: true, help: false });
+    expect(stdout + stderr).toBe('');
+  });
+
+  it('finds --json wherever it sits', () => {
+    expect(parseFlags(['--json', '--weight', '70'], options, 'U')?.json).toBe(true);
+    expect(parseFlags(['--weight', '70'], options, 'U')?.json).toBe(false);
+  });
+
+  it('prints the usage and returns null for --help', () => {
+    expect(parseFlags(['--weight', '70', '--help'], options, 'U')).toBeNull();
+    expect(stdout).toBe('U\n');
+    expect(process.exitCode).toBeUndefined();
+  });
+
+  it('throws on a flag it was not given', () => {
+    expect(() => parseFlags(['--height', '175'], options, 'U')).toThrow(/Unknown option '--height'/);
+  });
+});
+
+describe('printTable', () => {
+  const rows: [string, string][] = [['BMI', '22.9'], ['Category', 'Normal']];
+
+  it('prints the title, underlined, and the aligned rows', () => {
+    printTable({ bmi: 22.9 }, false, 'BMI', rows);
+    expect(stdout).toBe('\nBMI\n───\n  BMI       22.9\n  Category  Normal\n');
+  });
+
+  it('prints only the data with json', () => {
+    printTable({ bmi: 22.9 }, true, 'BMI', rows);
+    expect(JSON.parse(stdout)).toEqual({ bmi: 22.9 });
+  });
+});
+
 describe('runSubcommand', () => {
-  const calls: [string, string[], boolean][] = [];
+  const calls: [string, string[]][] = [];
   const subcommands = {
-    a: (argv: string[], json: boolean) => { calls.push(['a', argv, json]); },
-    b: (argv: string[], json: boolean) => { calls.push(['b', argv, json]); },
+    a: (argv: string[]) => { calls.push(['a', argv]); },
+    b: (argv: string[]) => { calls.push(['b', argv]); },
   };
 
   beforeEach(() => { calls.length = 0; });
@@ -74,10 +112,10 @@ describe('runSubcommand', () => {
     expect(process.exitCode).toBe(1);
   });
 
-  it('passes the remaining args, with json only when --json is among them', () => {
+  it('passes the remaining args to the named sub-command', () => {
     runSubcommand(['a', '--x', '1'], 'U', subcommands);
     runSubcommand(['b', '--json', '--x'], 'U', subcommands);
-    expect(calls).toEqual([['a', ['--x', '1'], false], ['b', ['--json', '--x'], true]]);
+    expect(calls).toEqual([['a', ['--x', '1']], ['b', ['--json', '--x']]]);
     expect(stdout + stderr).toBe('');
   });
 });

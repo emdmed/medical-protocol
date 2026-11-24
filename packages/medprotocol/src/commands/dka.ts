@@ -1,12 +1,10 @@
-import { parseArgs } from "node:util";
 import {
   calculateGlucoseReductionRate,
   isGlucoseOnTarget,
   assessDKAResolution,
   suggestInsulinAdjustment,
 } from "../../../../plugin/lib/dka";
-import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { fail } from "../cli";
+import { fail, parseFlags, printTable } from "../cli";
 
 const USAGE = `Usage: medprotocol dka [options]
 
@@ -27,27 +25,17 @@ Examples:
   medprotocol dka --glucose 350 --ketones 3.0 --bicarbonate 12 --ph 7.20 --unit mgdl`;
 
 export const run = (argv: string[]): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      glucose: { type: "string" },
-      "prev-glucose": { type: "string" },
-      hours: { type: "string", default: "1" },
-      ketones: { type: "string" },
-      bicarbonate: { type: "string" },
-      ph: { type: "string" },
-      "insulin-rate": { type: "string" },
-      unit: { type: "string", default: "mgdl" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+  const values = parseFlags(argv, {
+    glucose: { type: "string" },
+    "prev-glucose": { type: "string" },
+    hours: { type: "string", default: "1" },
+    ketones: { type: "string" },
+    bicarbonate: { type: "string" },
+    ph: { type: "string" },
+    "insulin-rate": { type: "string" },
+    unit: { type: "string", default: "mgdl" },
+  }, USAGE);
+  if (!values) return;
 
   if (!values.glucose) return fail("--glucose is required", USAGE);
 
@@ -126,7 +114,5 @@ export const run = (argv: string[]): void => {
     data.insulinSuggestion = suggestion;
   }
 
-  printResult(data, values.json!, () => {
-    return [formatHeader("DKA Assessment"), formatTable(rows)].join("\n");
-  });
+  printTable(data, values.json, "DKA Assessment", rows);
 };

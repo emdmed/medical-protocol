@@ -5,7 +5,6 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSyn
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { basename, dirname, extname, join, resolve } from "node:path";
-import { parseArgs } from "node:util";
 import { analyze, NORMAL_RANGES } from "../../../../plugin/lib/acid-base";
 import { BMI_BANDS, calculateBMI, getBMICategory } from "../../../../plugin/lib/bmi";
 import { ACR_BANDS, GFR_BANDS, calculateEGFR, calculateKFRE, classifyAlbuminuriaCategory, classifyAnemia, classifyGFRCategory, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getGFRCategoryLabel, getMonitoringFrequency } from "../../../../plugin/lib/ckd";
@@ -14,7 +13,7 @@ import { classifyBPInCKD } from "../../../../plugin/lib/nephrology";
 import { PAFI_BANDS, calculatePaFi, getPaFiClassification } from "../../../../plugin/lib/pafi";
 import { BERLIN_2012, CKD_EPI_2021, KDIGO_2012_ANEMIA, KDIGO_2021_BP, KDIGO_2024_CKD, KFRE_TANGRI, WHO_BMI_2000, WINTERS_1967 } from "../../../../plugin/lib/sources";
 import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { fail } from "../cli";
+import { fail, parseFlags } from "../cli";
 import { EXTRACT_ARTIFACT_HTML } from "../extract-artifact";
 import { isLocalOrigin } from "./overlay";
 
@@ -473,25 +472,15 @@ export const serve = (port: number, askModel: AskModel = askClaude): Server => {
 };
 
 export const run = (argv: string[]): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      serve: { type: "boolean", default: false },
-      port: { type: "string", default: "7332" },
-      save: { type: "string" },
-      note: { type: "string" },
-      items: { type: "string" },
-      artifact: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+  const values = parseFlags(argv, {
+    serve: { type: "boolean", default: false },
+    port: { type: "string", default: "7332" },
+    save: { type: "string" },
+    note: { type: "string" },
+    items: { type: "string" },
+    artifact: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (values.serve) {
     const port = Number(values.port);
@@ -514,7 +503,7 @@ export const run = (argv: string[]): void => {
     const { dir, existed } = saveNote(raw);
     // a pasted note staged at extractions/<file> is patient data; don't leave it behind
     if (dirname(resolve(values.save)) === resolve("extractions")) rmSync(values.save);
-    printResult({ dir, existed }, values.json!, () => dir + (existed ? "  (already saved)" : ""));
+    printResult({ dir, existed }, values.json, () => dir + (existed ? "  (already saved)" : ""));
     return;
   }
 
@@ -552,7 +541,7 @@ export const run = (argv: string[]): void => {
     }
   }
 
-  printResult({ items: checked, counts, inputs, ...(sex ? { sex } : {}), review }, values.json!, () =>
+  printResult({ items: checked, counts, inputs, ...(sex ? { sex } : {}), review }, values.json, () =>
     [
       formatHeader("Extraction vs note"),
       formatTable(checked.map((c) => [c.field, `${c.value}${c.unit ? ` ${c.unit}` : ""}  (${c.episode})  [${c.status}${c.distance ? `, ${c.distance} chars off` : ""}${c.ambiguous ? ", ambiguous" : ""}]  "${c.quote}"`])),

@@ -1,7 +1,5 @@
-import { parseArgs } from "node:util";
 import { calculatePaFi, getPaFiClassification, getPaFiSeverity } from "../../../../plugin/lib/pafi";
-import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { fail, requireFlags } from "../cli";
+import { fail, parseFlags, printTable, requireFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol pafi [options]
 
@@ -16,21 +14,11 @@ Examples:
   medprotocol pafi --pao2 90 --fio2 21`;
 
 export const run = (argv: string[]): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      pao2: { type: "string" },
-      fio2: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+  const values = parseFlags(argv, {
+    pao2: { type: "string" },
+    fio2: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["pao2", "fio2"], USAGE)) return;
 
@@ -49,16 +37,11 @@ export const run = (argv: string[]): void => {
     fiO2: parseFloat(values.fio2!),
   };
 
-  printResult(data, values.json!, () => {
-    return [
-      formatHeader("PaFi Calculator"),
-      formatTable([
-        ["PaFi Ratio", paFi],
-        ["Classification", classification],
-        ["Severity", severity],
-        ["PaO2", `${values.pao2} mmHg`],
-        ["FiO2", `${values.fio2}%`],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "PaFi Calculator", [
+    ["PaFi Ratio", paFi],
+    ["Classification", classification],
+    ["Severity", severity],
+    ["PaO2", `${values.pao2} mmHg`],
+    ["FiO2", `${values.fio2}%`],
+  ]);
 };

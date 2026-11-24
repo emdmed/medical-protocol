@@ -1,9 +1,9 @@
-import { parseArgs } from "node:util";
 import { readdirSync, readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync, watch } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import { createServer } from "node:http";
 import { spawn, spawnSync } from "node:child_process";
 import { claudeCommand } from "../claude-spawn";
+import { parseFlags } from "../cli";
 import { OVERLAY_CLIENT_JS } from "../overlay-client";
 
 const USAGE = `Usage: medprotocol overlay [options]
@@ -523,32 +523,22 @@ const serve = (dir: string, port: number, auto: boolean): void => {
 };
 
 export const run = (argv: string[]): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      serve: { type: "boolean", default: false },
-      port: { type: "string" },
-      auto: { type: "boolean", default: false }, // accepted for old commands; auto is now the default
-      manual: { type: "boolean", default: false },
-      action: { type: "string" },
-      list: { type: "boolean", default: false },
-      drain: { type: "boolean", default: false },
-      watch: { type: "boolean", default: false },
-      clear: { type: "boolean", default: false },
-      dir: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+  const values = parseFlags(argv, {
+    serve: { type: "boolean", default: false },
+    port: { type: "string" },
+    auto: { type: "boolean", default: false }, // accepted for old commands; auto is now the default
+    manual: { type: "boolean", default: false },
+    action: { type: "string" },
+    list: { type: "boolean", default: false },
+    drain: { type: "boolean", default: false },
+    watch: { type: "boolean", default: false },
+    clear: { type: "boolean", default: false },
+    dir: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   const dir = resolve(values.dir ?? join(".medprotocol", "queue"));
-  const json = values.json!;
+  const json = values.json;
   // --action narrows --list/--drain so a skill claims only its own orders and leaves the rest queued.
   const pendingOrders = (): QueueEntry[] =>
     readQueue(dir).filter(

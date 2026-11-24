@@ -1,4 +1,3 @@
-import { parseArgs } from "node:util";
 import {
   calculateASCVD,
   getASCVDCategory,
@@ -17,8 +16,7 @@ import type {
   HEARTInputs,
   CHADSVAScInputs,
 } from "../../../../plugin/lib/cardiology-types";
-import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { fail, requireFlags, runSubcommand } from "../cli";
+import { fail, parseFlags, printTable, requireFlags, runSubcommand } from "../cli";
 
 const USAGE = `Usage: medprotocol cardiology <sub-command> [options]
 
@@ -64,29 +62,19 @@ Examples:
   medprotocol cardiology heart --history 1 --ecg 0 --age 2 --risk-factors 1 --troponin 0
   medprotocol cardiology chadsvasc --hypertension --age75 --diabetes`;
 
-const runASCVD = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      age: { type: "string" },
-      sex: { type: "string" },
-      race: { type: "string", default: "white" },
-      tc: { type: "string" },
-      hdl: { type: "string" },
-      sbp: { type: "string" },
-      "bp-treatment": { type: "boolean", default: false },
-      diabetes: { type: "boolean", default: false },
-      smoker: { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runASCVD = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    age: { type: "string" },
+    sex: { type: "string" },
+    race: { type: "string", default: "white" },
+    tc: { type: "string" },
+    hdl: { type: "string" },
+    sbp: { type: "string" },
+    "bp-treatment": { type: "boolean", default: false },
+    diabetes: { type: "boolean", default: false },
+    smoker: { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["age", "sex", "tc", "hdl", "sbp"], USAGE)) return;
 
@@ -126,46 +114,31 @@ const runASCVD = (argv: string[], json: boolean): void => {
     },
   };
 
-  printResult(data, json, () => {
-    return [
-      formatHeader("ASCVD 10-Year Risk (Pooled Cohort Equations 2013, superseded by PREVENT)"),
-      formatTable([
-        ["Risk", `${risk}%`],
-        ["Category", category],
-        ["Severity", severity],
-        ["Age", inputs.age],
-        ["Sex", inputs.sex],
-        ["Race", inputs.race],
-        ["Total Cholesterol", `${inputs.totalCholesterol} mg/dL`],
-        ["HDL Cholesterol", `${inputs.hdlCholesterol} mg/dL`],
-        ["Systolic BP", `${inputs.systolicBP} mmHg`],
-        ["BP Treatment", inputs.bpTreatment ? "Yes" : "No"],
-        ["Diabetes", inputs.diabetes ? "Yes" : "No"],
-        ["Smoker", inputs.smoker ? "Yes" : "No"],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "ASCVD 10-Year Risk (Pooled Cohort Equations 2013, superseded by PREVENT)", [
+    ["Risk", `${risk}%`],
+    ["Category", category],
+    ["Severity", severity],
+    ["Age", inputs.age],
+    ["Sex", inputs.sex],
+    ["Race", inputs.race],
+    ["Total Cholesterol", `${inputs.totalCholesterol} mg/dL`],
+    ["HDL Cholesterol", `${inputs.hdlCholesterol} mg/dL`],
+    ["Systolic BP", `${inputs.systolicBP} mmHg`],
+    ["BP Treatment", inputs.bpTreatment ? "Yes" : "No"],
+    ["Diabetes", inputs.diabetes ? "Yes" : "No"],
+    ["Smoker", inputs.smoker ? "Yes" : "No"],
+  ]);
 };
 
-const runHEART = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      history: { type: "string" },
-      ecg: { type: "string" },
-      age: { type: "string" },
-      "risk-factors": { type: "string" },
-      troponin: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runHEART = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    history: { type: "string" },
+    ecg: { type: "string" },
+    age: { type: "string" },
+    "risk-factors": { type: "string" },
+    troponin: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["history", "ecg", "age", "risk-factors", "troponin"], USAGE)) return;
 
@@ -196,45 +169,30 @@ const runHEART = (argv: string[], json: boolean): void => {
     inputs,
   };
 
-  printResult(data, json, () => {
-    return [
-      formatHeader("HEART Score"),
-      formatTable([
-        ["Score", `${score}/10`],
-        ["Category", category],
-        ["Guideline", action],
-        ["History", `${inputs.history}`],
-        ["ECG", `${inputs.ecg}`],
-        ["Age", `${inputs.age}`],
-        ["Risk Factors", `${inputs.riskFactors}`],
-        ["Troponin", `${inputs.troponin}`],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "HEART Score", [
+    ["Score", `${score}/10`],
+    ["Category", category],
+    ["Guideline", action],
+    ["History", `${inputs.history}`],
+    ["ECG", `${inputs.ecg}`],
+    ["Age", `${inputs.age}`],
+    ["Risk Factors", `${inputs.riskFactors}`],
+    ["Troponin", `${inputs.troponin}`],
+  ]);
 };
 
-const runCHADSVASc = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      chf: { type: "boolean", default: false },
-      hypertension: { type: "boolean", default: false },
-      age75: { type: "boolean", default: false },
-      diabetes: { type: "boolean", default: false },
-      stroke: { type: "boolean", default: false },
-      vascular: { type: "boolean", default: false },
-      age65: { type: "boolean", default: false },
-      female: { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runCHADSVASc = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    chf: { type: "boolean", default: false },
+    hypertension: { type: "boolean", default: false },
+    age75: { type: "boolean", default: false },
+    diabetes: { type: "boolean", default: false },
+    stroke: { type: "boolean", default: false },
+    vascular: { type: "boolean", default: false },
+    age65: { type: "boolean", default: false },
+    female: { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   const inputs: CHADSVAScInputs = {
     chf: values.chf!,
@@ -260,22 +218,17 @@ const runCHADSVASc = (argv: string[], json: boolean): void => {
     inputs,
   };
 
-  printResult(data, json, () => {
-    const factors = Object.entries(inputs)
-      .filter(([, v]) => v)
-      .map(([k]) => k)
-      .join(", ");
+  const factors = Object.entries(inputs)
+    .filter(([, v]) => v)
+    .map(([k]) => k)
+    .join(", ");
 
-    return [
-      formatHeader("CHA₂DS₂-VASc Score"),
-      formatTable([
-        ["Score", `${score}/9`],
-        ["Category", category],
-        ["Guideline", action],
-        ["Factors", factors || "None"],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "CHA₂DS₂-VASc Score", [
+    ["Score", `${score}/9`],
+    ["Category", category],
+    ["Guideline", action],
+    ["Factors", factors || "None"],
+  ]);
 };
 
 export const run = (argv: string[]): void =>

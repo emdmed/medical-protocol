@@ -1,4 +1,3 @@
-import { parseArgs } from "node:util";
 import {
   calculateTotalSOFA,
   calculateSOFADelta,
@@ -12,8 +11,7 @@ import {
   calculateLactateClearance,
   isLactateClearanceAdequate,
 } from "../../../../plugin/lib/sepsis";
-import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { requireFlags, runSubcommand } from "../cli";
+import { parseFlags, printTable, requireFlags, runSubcommand } from "../cli";
 
 const USAGE = `Usage: medprotocol sepsis <sub-command> [options]
 
@@ -71,48 +69,38 @@ Examples:
   medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13
   medprotocol sepsis lactate --initial 4.2 --repeat 2.1`;
 
-const runSOFA = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      pao2: { type: "string", default: "" },
-      fio2: { type: "string", default: "" },
-      spo2: { type: "string", default: "" },
-      "advanced-support": { type: "boolean", default: false },
-      ecmo: { type: "boolean", default: false },
-      "other-vasopressor": { type: "boolean", default: false },
-      "mechanical-support": { type: "boolean", default: false },
-      "delirium-drugs": { type: "boolean", default: false },
-      rrt: { type: "boolean", default: false },
-      potassium: { type: "string", default: "" },
-      ph: { type: "string", default: "" },
-      bicarbonate: { type: "string", default: "" },
-      ceiling: { type: "boolean", default: false },
-      platelets: { type: "string", default: "" },
-      bilirubin: { type: "string", default: "" },
-      map: { type: "string", default: "" },
-      dopamine: { type: "string", default: "" },
-      dobutamine: { type: "string", default: "" },
-      epinephrine: { type: "string", default: "" },
-      norepinephrine: { type: "string", default: "" },
-      gcs: { type: "string", default: "" },
-      creatinine: { type: "string", default: "" },
-      "urine-output": { type: "string", default: "" },
-      weight: { type: "string", default: "" },
-      hours: { type: "string", default: "24" },
-      baseline: { type: "string", default: "0" },
-      infection: { type: "boolean", default: false },
-      lactate: { type: "string", default: "" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runSOFA = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    pao2: { type: "string", default: "" },
+    fio2: { type: "string", default: "" },
+    spo2: { type: "string", default: "" },
+    "advanced-support": { type: "boolean", default: false },
+    ecmo: { type: "boolean", default: false },
+    "other-vasopressor": { type: "boolean", default: false },
+    "mechanical-support": { type: "boolean", default: false },
+    "delirium-drugs": { type: "boolean", default: false },
+    rrt: { type: "boolean", default: false },
+    potassium: { type: "string", default: "" },
+    ph: { type: "string", default: "" },
+    bicarbonate: { type: "string", default: "" },
+    ceiling: { type: "boolean", default: false },
+    platelets: { type: "string", default: "" },
+    bilirubin: { type: "string", default: "" },
+    map: { type: "string", default: "" },
+    dopamine: { type: "string", default: "" },
+    dobutamine: { type: "string", default: "" },
+    epinephrine: { type: "string", default: "" },
+    norepinephrine: { type: "string", default: "" },
+    gcs: { type: "string", default: "" },
+    creatinine: { type: "string", default: "" },
+    "urine-output": { type: "string", default: "" },
+    weight: { type: "string", default: "" },
+    hours: { type: "string", default: "24" },
+    baseline: { type: "string", default: "0" },
+    infection: { type: "boolean", default: false },
+    lactate: { type: "string", default: "" },
+  }, USAGE);
+  if (!values) return;
 
   const reading = {
     paO2: values.pao2!,
@@ -180,28 +168,16 @@ const runSOFA = (argv: string[], json: boolean): void => {
     }
   }
 
-  printResult(data, json, () => {
-    return [formatHeader("SOFA-2 Score (Sepsis-3)"), formatTable(rows)].join("\n");
-  });
+  printTable(data, values.json, "SOFA-2 Score (Sepsis-3)", rows);
 };
 
-const runQSOFA = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      rr: { type: "string" },
-      sbp: { type: "string" },
-      gcs: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runQSOFA = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    rr: { type: "string" },
+    sbp: { type: "string" },
+    gcs: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["rr", "sbp", "gcs"], USAGE)) return;
 
@@ -216,36 +192,21 @@ const runQSOFA = (argv: string[], json: boolean): void => {
     gcs: parseFloat(values.gcs!),
   };
 
-  printResult(data, json, () => {
-    return [
-      formatHeader("Quick SOFA (qSOFA)"),
-      formatTable([
-        ["Score", `${score}/3`],
-        ["Positive", positive ? "Yes" : "No"],
-        ["Respiratory Rate", values.rr!],
-        ["Systolic BP", `${values.sbp} mmHg`],
-        ["GCS", values.gcs!],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "Quick SOFA (qSOFA)", [
+    ["Score", `${score}/3`],
+    ["Positive", positive ? "Yes" : "No"],
+    ["Respiratory Rate", values.rr!],
+    ["Systolic BP", `${values.sbp} mmHg`],
+    ["GCS", values.gcs!],
+  ]);
 };
 
-const runLactate = (argv: string[], json: boolean): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      initial: { type: "string" },
-      repeat: { type: "string" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+const runLactate = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    initial: { type: "string" },
+    repeat: { type: "string" },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["initial", "repeat"], USAGE)) return;
 
@@ -259,17 +220,12 @@ const runLactate = (argv: string[], json: boolean): void => {
     adequate,
   };
 
-  printResult(data, json, () => {
-    return [
-      formatHeader("Lactate Clearance"),
-      formatTable([
-        ["Initial", `${values.initial} mmol/L`],
-        ["Repeat", `${values.repeat} mmol/L`],
-        ["Clearance", clearance ? `${clearance}%` : "N/A"],
-        ["Adequate", adequate ? "Yes" : "No"],
-      ]),
-    ].join("\n");
-  });
+  printTable(data, values.json, "Lactate Clearance", [
+    ["Initial", `${values.initial} mmol/L`],
+    ["Repeat", `${values.repeat} mmol/L`],
+    ["Clearance", clearance ? `${clearance}%` : "N/A"],
+    ["Adequate", adequate ? "Yes" : "No"],
+  ]);
 };
 
 export const run = (argv: string[]): void =>

@@ -1,7 +1,5 @@
-import { parseArgs } from "node:util";
 import { analyze } from "../../../../plugin/lib/acid-base";
-import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { fail, requireFlags } from "../cli";
+import { fail, parseFlags, printTable, requireFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol abg [options]
 
@@ -21,26 +19,16 @@ Examples:
   medprotocol abg --ph 7.25 --pco2 29 --hco3 14 --na 140 --cl 105 --albumin 4.0`;
 
 export const run = (argv: string[]): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      ph: { type: "string" },
-      pco2: { type: "string" },
-      hco3: { type: "string" },
-      na: { type: "string" },
-      cl: { type: "string" },
-      albumin: { type: "string" },
-      chronic: { type: "boolean", default: false },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+  const values = parseFlags(argv, {
+    ph: { type: "string" },
+    pco2: { type: "string" },
+    hco3: { type: "string" },
+    na: { type: "string" },
+    cl: { type: "string" },
+    albumin: { type: "string" },
+    chronic: { type: "boolean", default: false },
+  }, USAGE);
+  if (!values) return;
 
   if (!requireFlags(values, ["ph", "pco2", "hco3"], USAGE)) return;
 
@@ -78,33 +66,31 @@ export const run = (argv: string[]): void => {
     }),
   };
 
-  printResult(data, values.json!, () => {
-    const rows: [string, string][] = [
-      ["Disorder", result.disorder],
-      ["Compensation", result.compensation],
-      ["Interpretation", result.interpretation],
-    ];
+  const rows: [string, string][] = [
+    ["Disorder", result.disorder],
+    ["Compensation", result.compensation],
+    ["Interpretation", result.interpretation],
+  ];
 
-    if (result.expectedValues?.low && result.expectedValues?.high) {
-      rows.push(["Expected range", `${result.expectedValues.low}–${result.expectedValues.high}`]);
-    }
+  if (result.expectedValues?.low && result.expectedValues?.high) {
+    rows.push(["Expected range", `${result.expectedValues.low}–${result.expectedValues.high}`]);
+  }
 
-    if (result.anionGap !== null) {
-      rows.push(["Anion Gap", `${result.anionGap} (${result.agStatus})`]);
-    }
+  if (result.anionGap !== null) {
+    rows.push(["Anion Gap", `${result.anionGap} (${result.agStatus})`]);
+  }
 
-    if (result.correctedAG !== null) {
-      rows.push(["Corrected AG", result.correctedAG]);
-    }
+  if (result.correctedAG !== null) {
+    rows.push(["Corrected AG", result.correctedAG]);
+  }
 
-    if (result.deltaRatio !== null) {
-      rows.push(["Delta Ratio", `${result.deltaRatio} — ${result.deltaRatioInterpretation}`]);
-    }
+  if (result.deltaRatio !== null) {
+    rows.push(["Delta Ratio", `${result.deltaRatio} — ${result.deltaRatioInterpretation}`]);
+  }
 
-    if (result.additionalDisorders.length > 0) {
-      rows.push(["Additional", result.additionalDisorders.join(", ")]);
-    }
+  if (result.additionalDisorders.length > 0) {
+    rows.push(["Additional", result.additionalDisorders.join(", ")]);
+  }
 
-    return [formatHeader("ABG Analysis"), formatTable(rows)].join("\n");
-  });
+  printTable(data, values.json, "ABG Analysis", rows);
 };

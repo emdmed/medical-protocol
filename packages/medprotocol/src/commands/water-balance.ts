@@ -1,4 +1,3 @@
-import { parseArgs } from "node:util";
 import {
   calculateWaterBalance,
   calculateInsensibleLoss,
@@ -7,7 +6,7 @@ import {
   safeParseFloat,
 } from "../../../../plugin/lib/water-balance";
 import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
-import { fail } from "../cli";
+import { fail, parseFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol water-balance [options]
 
@@ -25,24 +24,14 @@ Examples:
   medprotocol water-balance --weight 70 --oral 1500 --json`;
 
 export const run = (argv: string[]): void => {
-  const { values } = parseArgs({
-    args: argv,
-    options: {
-      weight: { type: "string" },
-      oral: { type: "string", default: "0" },
-      iv: { type: "string", default: "0" },
-      diuresis: { type: "string", default: "0" },
-      stools: { type: "string", default: "0" },
-      json: { type: "boolean", default: false },
-      help: { type: "boolean", default: false },
-    },
-    strict: true,
-  });
-
-  if (values.help) {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
+  const values = parseFlags(argv, {
+    weight: { type: "string" },
+    oral: { type: "string", default: "0" },
+    iv: { type: "string", default: "0" },
+    diuresis: { type: "string", default: "0" },
+    stools: { type: "string", default: "0" },
+  }, USAGE);
+  if (!values) return;
 
   if (!values.weight) return fail("--weight is required", USAGE);
 
@@ -84,7 +73,7 @@ export const run = (argv: string[]): void => {
     weight: weightNum,
   };
 
-  printResult(data, values.json!, () => {
+  printResult(data, values.json, () => {
     const sign = parseInt(balance, 10) > 0 ? "+" : "";
 
     return [
