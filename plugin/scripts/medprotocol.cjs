@@ -78,6 +78,25 @@ ${"\u2500".repeat(title.length)}`;
   }
 });
 
+// src/cli.ts
+var fail, requireFlags;
+var init_cli = __esm({
+  "src/cli.ts"() {
+    "use strict";
+    init_format();
+    fail = (message, usage) => {
+      process.stderr.write(formatError(message) + "\n" + (usage ? "\n" + usage + "\n" : ""));
+      process.exitCode = 1;
+    };
+    requireFlags = (values, names, usage) => {
+      const missing = names.filter((name) => !values[name]);
+      if (missing.length === 0) return true;
+      fail(`Missing required flags: ${missing.map((name) => `--${name}`).join(", ")}`, usage);
+      return false;
+    };
+  }
+});
+
 // src/commands/bmi.ts
 var bmi_exports = {};
 __export(bmi_exports, {
@@ -90,6 +109,7 @@ var init_bmi2 = __esm({
     import_node_util = require("util");
     init_bmi();
     init_format();
+    init_cli();
     USAGE = `Usage: medprotocol bmi [options]
 
 Options:
@@ -122,21 +142,11 @@ Examples:
         process.stdout.write(USAGE + "\n");
         return;
       }
-      if (!values.weight) {
-        process.stderr.write(formatError("--weight is required") + "\n\n" + USAGE + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (!values.weight) return fail("--weight is required", USAGE);
       const isMetric = values.metric;
-      if (isMetric && !values["height-m"]) {
-        process.stderr.write(formatError("--height-m is required with --metric") + "\n\n" + USAGE + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (isMetric && !values["height-m"]) return fail("--height-m is required with --metric", USAGE);
       if (!isMetric && !values["height-ft"] && !values["height-in"]) {
-        process.stderr.write(formatError("--height-ft and/or --height-in required (or use --metric --height-m)") + "\n\n" + USAGE + "\n");
-        process.exitCode = 1;
-        return;
+        return fail("--height-ft and/or --height-in required (or use --metric --height-m)", USAGE);
       }
       const bmi = calculateBMI(
         values.weight,
@@ -146,11 +156,7 @@ Examples:
         isMetric
       );
       const category = getBMICategory(bmi);
-      if (!bmi) {
-        process.stderr.write(formatError("Could not calculate BMI \u2014 check input values") + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (!bmi) return fail("Could not calculate BMI \u2014 check input values");
       const data = {
         bmi: parseFloat(bmi),
         category,
@@ -501,6 +507,7 @@ var init_abg = __esm({
     import_node_util2 = require("util");
     init_acid_base();
     init_format();
+    init_cli();
     USAGE2 = `Usage: medprotocol abg [options]
 
 Options:
@@ -537,17 +544,7 @@ Examples:
         process.stdout.write(USAGE2 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.ph) missing.push("--ph");
-      if (!values.pco2) missing.push("--pco2");
-      if (!values.hco3) missing.push("--hco3");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE2 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["ph", "pco2", "hco3"], USAGE2)) return;
       const result = analyze({
         values: {
           pH: values.ph,
@@ -559,11 +556,7 @@ Examples:
         },
         isChronic: values.chronic
       });
-      if (!result) {
-        process.stderr.write(formatError("Could not analyze ABG \u2014 check input values") + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (!result) return fail("Could not analyze ABG \u2014 check input values");
       const data = {
         disorder: result.disorder,
         compensation: result.compensation,
@@ -656,6 +649,7 @@ var init_water_balance2 = __esm({
     import_node_util3 = require("util");
     init_water_balance();
     init_format();
+    init_cli();
     USAGE3 = `Usage: medprotocol water-balance [options]
 
 Options:
@@ -688,11 +682,7 @@ Examples:
         process.stdout.write(USAGE3 + "\n");
         return;
       }
-      if (!values.weight) {
-        process.stderr.write(formatError("--weight is required") + "\n\n" + USAGE3 + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (!values.weight) return fail("--weight is required", USAGE3);
       const weightNum = safeParseFloat(values.weight);
       const insensible = calculateInsensibleLoss(weightNum);
       const endogenous = calculateEndogenousGeneration(weightNum);
@@ -1231,6 +1221,7 @@ var init_pafi2 = __esm({
     import_node_util5 = require("util");
     init_pafi();
     init_format();
+    init_cli();
     USAGE5 = `Usage: medprotocol pafi [options]
 
 Options:
@@ -1257,22 +1248,9 @@ Examples:
         process.stdout.write(USAGE5 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.pao2) missing.push("--pao2");
-      if (!values.fio2) missing.push("--fio2");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE5 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["pao2", "fio2"], USAGE5)) return;
       const paFi = calculatePaFi(values.pao2, values.fio2);
-      if (!paFi) {
-        process.stderr.write(formatError("Could not calculate PaFi \u2014 check input values (PaO2 > 0, FiO2 21-100)") + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (!paFi) return fail("Could not calculate PaFi \u2014 check input values (PaO2 > 0, FiO2 21-100)");
       const classification = getPaFiClassification(paFi);
       const severity = getPaFiSeverity(paFi);
       const data = {
@@ -1383,6 +1361,7 @@ var init_dka2 = __esm({
     import_node_util6 = require("util");
     init_dka();
     init_format();
+    init_cli();
     USAGE6 = `Usage: medprotocol dka [options]
 
 Options:
@@ -1421,11 +1400,7 @@ Examples:
         process.stdout.write(USAGE6 + "\n");
         return;
       }
-      if (!values.glucose) {
-        process.stderr.write(formatError("--glucose is required") + "\n\n" + USAGE6 + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (!values.glucose) return fail("--glucose is required", USAGE6);
       const unit = values.unit === "mmol" ? "mmol" : "mgdl";
       const unitLabel = unit === "mgdl" ? "mg/dL" : "mmol/L";
       const rows = [
@@ -6417,7 +6392,7 @@ Example:
     };
     children = /* @__PURE__ */ new Set();
     TIMEOUT_MS = 5 * 6e4;
-    askClaude = (prompt) => new Promise((done, fail) => {
+    askClaude = (prompt) => new Promise((done, fail2) => {
       const cmd = claudeCommand(["-p", "--output-format", "json", "--tools", "", "--no-session-persistence", "--system-prompt", "You read clinical notes and reply with JSON only."]);
       const child = (0, import_node_child_process3.spawn)(cmd.command, cmd.args, { shell: cmd.shell });
       children.add(child);
@@ -6430,20 +6405,20 @@ Example:
       }, TIMEOUT_MS);
       child.stdout.on("data", (d) => out += d);
       child.stderr.on("data", (d) => err += d);
-      child.on("error", (e) => fail(new Error(e.code === "ENOENT" ? "The 'claude' command was not found" : e.message)));
+      child.on("error", (e) => fail2(new Error(e.code === "ENOENT" ? "The 'claude' command was not found" : e.message)));
       child.on("close", (code) => {
         clearTimeout(timer);
         children.delete(child);
-        if (timedOut) return fail(new Error("The run took longer than 5 minutes"));
+        if (timedOut) return fail2(new Error("The run took longer than 5 minutes"));
         let reply;
         try {
           reply = JSON.parse(out);
         } catch {
-          return fail(new Error(`claude exited with code ${code}
+          return fail2(new Error(`claude exited with code ${code}
 ${err.trim().split("\n").slice(-20).join("\n")}`.trim()));
         }
-        if (reply.num_turns === 0 || String(reply.result).startsWith("UserPromptSubmit operation blocked by hook")) return fail(new Error("A hook blocked the prompt"));
-        if (code !== 0 || reply.is_error || typeof reply.result !== "string") return fail(new Error(`claude failed: ${reply.result ?? `exit code ${code}`}`));
+        if (reply.num_turns === 0 || String(reply.result).startsWith("UserPromptSubmit operation blocked by hook")) return fail2(new Error("A hook blocked the prompt"));
+        if (code !== 0 || reply.is_error || typeof reply.result !== "string") return fail2(new Error(`claude failed: ${reply.result ?? `exit code ${code}`}`));
         done(reply.result);
       });
       child.stdin.on("error", () => {

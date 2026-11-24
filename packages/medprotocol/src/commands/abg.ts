@@ -1,6 +1,7 @@
 import { parseArgs } from "node:util";
 import { analyze } from "../../../../plugin/lib/acid-base";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { fail, requireFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol abg [options]
 
@@ -41,18 +42,7 @@ export const run = (argv: string[]): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.ph) missing.push("--ph");
-  if (!values.pco2) missing.push("--pco2");
-  if (!values.hco3) missing.push("--hco3");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["ph", "pco2", "hco3"], USAGE)) return;
 
   const result = analyze({
     values: {
@@ -66,11 +56,7 @@ export const run = (argv: string[]): void => {
     isChronic: values.chronic!,
   });
 
-  if (!result) {
-    process.stderr.write(formatError("Could not analyze ABG — check input values") + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (!result) return fail("Could not analyze ABG — check input values");
 
   const data = {
     disorder: result.disorder,

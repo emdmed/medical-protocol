@@ -1,6 +1,7 @@
 import { parseArgs } from "node:util";
 import { calculateBMI, getBMICategory } from "../../../../plugin/lib/bmi";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { fail } from "../cli";
 
 const USAGE = `Usage: medprotocol bmi [options]
 
@@ -37,24 +38,14 @@ export const run = (argv: string[]): void => {
     return;
   }
 
-  if (!values.weight) {
-    process.stderr.write(formatError("--weight is required") + "\n\n" + USAGE + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (!values.weight) return fail("--weight is required", USAGE);
 
   const isMetric = values.metric!;
 
-  if (isMetric && !values["height-m"]) {
-    process.stderr.write(formatError("--height-m is required with --metric") + "\n\n" + USAGE + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (isMetric && !values["height-m"]) return fail("--height-m is required with --metric", USAGE);
 
   if (!isMetric && !values["height-ft"] && !values["height-in"]) {
-    process.stderr.write(formatError("--height-ft and/or --height-in required (or use --metric --height-m)") + "\n\n" + USAGE + "\n");
-    process.exitCode = 1;
-    return;
+    return fail("--height-ft and/or --height-in required (or use --metric --height-m)", USAGE);
   }
 
   const bmi = calculateBMI(
@@ -67,11 +58,7 @@ export const run = (argv: string[]): void => {
 
   const category = getBMICategory(bmi);
 
-  if (!bmi) {
-    process.stderr.write(formatError("Could not calculate BMI — check input values") + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (!bmi) return fail("Could not calculate BMI — check input values");
 
   const data = {
     bmi: parseFloat(bmi),

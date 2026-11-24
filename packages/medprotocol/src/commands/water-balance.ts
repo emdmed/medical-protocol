@@ -6,7 +6,8 @@ import {
   calculateDefecationLoss,
   safeParseFloat,
 } from "../../../../plugin/lib/water-balance";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { fail } from "../cli";
 
 const USAGE = `Usage: medprotocol water-balance [options]
 
@@ -43,11 +44,7 @@ export const run = (argv: string[]): void => {
     return;
   }
 
-  if (!values.weight) {
-    process.stderr.write(formatError("--weight is required") + "\n\n" + USAGE + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (!values.weight) return fail("--weight is required", USAGE);
 
   const weightNum = safeParseFloat(values.weight);
   const insensible = calculateInsensibleLoss(weightNum);

@@ -1,6 +1,7 @@
 import { parseArgs } from "node:util";
 import { calculatePaFi, getPaFiClassification, getPaFiSeverity } from "../../../../plugin/lib/pafi";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { fail, requireFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol pafi [options]
 
@@ -31,25 +32,11 @@ export const run = (argv: string[]): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.pao2) missing.push("--pao2");
-  if (!values.fio2) missing.push("--fio2");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["pao2", "fio2"], USAGE)) return;
 
   const paFi = calculatePaFi(values.pao2!, values.fio2!);
 
-  if (!paFi) {
-    process.stderr.write(formatError("Could not calculate PaFi — check input values (PaO2 > 0, FiO2 21-100)") + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (!paFi) return fail("Could not calculate PaFi — check input values (PaO2 > 0, FiO2 21-100)");
 
   const classification = getPaFiClassification(paFi);
   const severity = getPaFiSeverity(paFi);

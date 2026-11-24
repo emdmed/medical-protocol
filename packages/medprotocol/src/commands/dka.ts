@@ -5,7 +5,8 @@ import {
   assessDKAResolution,
   suggestInsulinAdjustment,
 } from "../../../../plugin/lib/dka";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { fail } from "../cli";
 
 const USAGE = `Usage: medprotocol dka [options]
 
@@ -48,11 +49,7 @@ export const run = (argv: string[]): void => {
     return;
   }
 
-  if (!values.glucose) {
-    process.stderr.write(formatError("--glucose is required") + "\n\n" + USAGE + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (!values.glucose) return fail("--glucose is required", USAGE);
 
   const unit = (values.unit === "mmol" ? "mmol" : "mgdl") as "mmol" | "mgdl";
   const unitLabel = unit === "mgdl" ? "mg/dL" : "mmol/L";
