@@ -47,4 +47,8 @@ describe("privacy-guard hook", () => {
   ])("allows PowerShell command: %s", (command) => {
     expect(decision("PowerShell", command)).toBeUndefined();
   });
+
+  it("still denies when the hook input is larger than a pipe buffer", () => {
+    expect(decision("Bash", `echo ${"x".repeat(2_000_000)} && git push`)).toBe("deny");
+  });
 });

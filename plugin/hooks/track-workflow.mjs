@@ -11,13 +11,14 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import { text } from "stream/consumers";
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR || ".";
 const stateDir = path.join(projectDir, ".claude", "hooks-state");
 
 let input = {};
 try {
-  input = JSON.parse((process.stdin.isTTY ? "" : fs.readFileSync(0, "utf8")) || "{}");
+  input = JSON.parse((process.stdin.isTTY ? "" : await text(process.stdin)) || "{}");
 } catch {
   input = {};
 }

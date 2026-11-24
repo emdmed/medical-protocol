@@ -7,7 +7,7 @@
 // Cross-platform: pure Node (no bash/jq/grep), runs identically on Windows, macOS, Linux.
 // Plugin version: no CLAUDE.md activation guard — plugin enabled = hooks active.
 
-import * as fs from "fs";
+import { text } from "stream/consumers";
 
 function deny(reason) {
   const out = {
@@ -26,7 +26,8 @@ function deny(reason) {
 
 let input = {};
 try {
-  input = JSON.parse((process.stdin.isTTY ? "" : fs.readFileSync(0, "utf8")) || "{}");
+  // Not readFileSync(0): on a pipe it throws EAGAIN for large input, and the guard would let the call through.
+  input = JSON.parse((process.stdin.isTTY ? "" : await text(process.stdin)) || "{}");
 } catch {
   input = {};
 }

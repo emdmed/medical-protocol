@@ -7,10 +7,12 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import { text } from "stream/consumers";
 
 let input = {};
 try {
-  input = JSON.parse(fs.readFileSync(0, "utf8") || "{}");
+  // Not readFileSync(0): on a pipe it throws EAGAIN for large input, and the guard would let the call through.
+  input = JSON.parse(await text(process.stdin) || "{}");
 } catch {
   process.exit(0);
 }

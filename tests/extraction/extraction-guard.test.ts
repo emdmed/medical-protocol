@@ -10,9 +10,9 @@ mkdirSync(join(dir, "data/extractions"), { recursive: true });
 mkdirSync(join(dir, "extractions/abc123def456"), { recursive: true });
 for (const f of ["extractions/abc123def456/note.md", "extractions/abc123def456/extraction.json", "extractions/abc123def456/corrected.json", "data/extractions/abc123def456.json"]) writeFileSync(join(dir, f), "x");
 
-const denied = (file: string) =>
+const denied = (file: string, content = "") =>
   execFileSync("node", [HOOK], {
-    input: JSON.stringify({ tool_name: "Write", cwd: dir, tool_input: { file_path: file } }),
+    input: JSON.stringify({ tool_name: "Write", cwd: dir, tool_input: { file_path: file, content } }),
     env: { ...process.env, CLAUDE_PROJECT_DIR: dir },
   })
     .toString()
@@ -41,5 +41,9 @@ describe("extraction-guard hook", () => {
     expect(denied("extractions/abc123def456/verify.json")).toBe(false);
     expect(denied("extractions/abc123def456/artifact.html")).toBe(false);
     expect(denied("data/extractions/abc123def456.json")).toBe(false);
+  });
+
+  it("still blocks when the written content is larger than a pipe buffer", () => {
+    expect(denied("extractions/abc123def456/note.md", "x".repeat(2_000_000))).toBe(true);
   });
 });
