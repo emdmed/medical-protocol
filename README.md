@@ -126,8 +126,9 @@ ABG Analysis
 ────────────
   Disorder        Metabolic Acidosis
   Compensation    Inadequate compensation
-  Interpretation  Primary Metabolic Acidosis, with Inadequate compensation by Respiratory Alkalosis.
+  Interpretation  Primary Metabolic Acidosis, with Inadequate compensation and Respiratory Acidosis.
   Expected range  24.0–28.0
+  Additional      Respiratory Acidosis
 ```
 
 ```bash

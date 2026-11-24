@@ -14,7 +14,7 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 This skill is the static export: one file of a finished extraction. The live page, where the doctor pastes a note and accepts or rejects corrections, is `medprotocol extract --serve` (`/medical-protocol:extract-page`).
 
-One page per extraction. Extraction only: the page shows what the note says and how each quote checked, never an interpretation.
+One page per extraction: what the note says and how each quote checked, then a "Calculated" section the CLI works out from the verified values (BMI, PaO2/FiO2, acid-base, when the note has their inputs). You add no interpretation of your own.
 
 ## Steps
 

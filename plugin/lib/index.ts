@@ -5,9 +5,9 @@
 
 export { safeParseFloat, safeParseFloatOrNull } from "./utils/safeParseFloat";
 
-export { calculateBMI, getBMICategory } from "./bmi";
+export { calculateBMI, getBMICategory, BMI_BANDS } from "./bmi";
 
-export { calculatePaFi, getPaFiClassification, getPaFiSeverity } from "./pafi";
+export { calculatePaFi, getPaFiClassification, getPaFiSeverity, PAFI_BANDS } from "./pafi";
 
 export {
   calculateInsensibleLoss,
@@ -16,7 +16,7 @@ export {
   calculateWaterBalance,
 } from "./water-balance";
 
-export { analyze } from "./acid-base";
+export { analyze, NORMAL_RANGES } from "./acid-base";
 export type { ABGValues, ABGResult } from "./acid-base";
 
 export type {
@@ -104,6 +104,8 @@ export {
   assessVitaminD,
   getCKDMBDMonitoring,
   getCKDSeverity,
+  GFR_BANDS,
+  ACR_BANDS,
 } from "./ckd";
 
 export {
@@ -158,5 +160,5 @@ export { Trace } from "./trace";
 export type { TraceEntry } from "./trace";
 export * as sources from "./sources";
 
-export { FIELDS, EPISODES, MAX_EDITS, checkItem, checkExtraction, noteSegments, valueInQuote, toInputs, applyFindings } from "./extraction";
-export type { FieldKey, Episode, ExtractedItem, CheckedItem, QuoteStatus, NoteSegment, ExtractedInput, ExtractionInputs, ReviewReason, Finding } from "./extraction";
+export { FIELDS, EPISODES, MAX_EDITS, checkItem, checkExtraction, noteSegments, valueInQuote, toInputs, applyFindings, SEX_WORDS, sexStated } from "./extraction";
+export type { FieldKey, Episode, ExtractedItem, CheckedItem, QuoteStatus, NoteSegment, ExtractedInput, ExtractionInputs, ReviewReason, Finding, Sex } from "./extraction";

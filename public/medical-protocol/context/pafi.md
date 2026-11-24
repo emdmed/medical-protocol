@@ -32,6 +32,7 @@ Logic: `lib/medprotocol/pafi.ts` — import from `@/lib/medprotocol/pafi`. Build
 ## Lib Functions
 
 - `calculatePaFi(paO2, fiO2)` → `string | null` (integer). Null if PaO2 ≤0 or FiO2 outside 21–100.
+- `PAFI_BANDS` → `{ cuts: [100, 200, 300], labels }`, the cut-offs and band names `getPaFiClassification` reads; use it to draw a scale.
 - `getPaFiClassification(paFi)` → `"Normal"` (>300) | `"Berlin mild range"` (201–300) | `"Berlin moderate range"` (101–200) | `"Berlin severe range"` (≤100) | `"Unknown"`.
 - `getPaFiSeverity(paFi)` → `"normal"` | `"mild"` | `"moderate"` | `"severe"` | `"default"`.
 

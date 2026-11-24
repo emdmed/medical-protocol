@@ -1,6 +1,9 @@
 import { safeParseFloatOrNull } from "../utils/safeParseFloat";
 import { Values, ExpectedValues } from "./interfaces";
 
+/** Normal range of each measured value, low to high. A value equal to a limit is inside the range. */
+export const NORMAL_RANGES = { pH: [7.35, 7.45], pCO2: [36, 44], HCO3: [22, 28] } as const;
+
 export const analyze = ({ values, isChronic }: { values: Values; isChronic: boolean }) => {
   const pH = safeParseFloatOrNull(values.pH);
   const pCO2 = safeParseFloatOrNull(values.pCO2);
@@ -37,12 +40,9 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
   const allDisorders: string[] = [];
 
   // Normal ranges
-  const pH_LOW = 7.35;
-  const pH_HIGH = 7.45;
-  const pCO2_LOW = 36;
-  const pCO2_HIGH = 44;
-  const HCO3_LOW = 22;
-  const HCO3_HIGH = 28;
+  const [pH_LOW, pH_HIGH] = NORMAL_RANGES.pH;
+  const [pCO2_LOW, pCO2_HIGH] = NORMAL_RANGES.pCO2;
+  const [HCO3_LOW, HCO3_HIGH] = NORMAL_RANGES.HCO3;
 
   // Determine primary disorder based on pH and which parameter moved first/most
   const isAcidemic = pH < pH_LOW;
@@ -137,7 +137,9 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
     }
   }
 
-  // Now calculate expected compensation based on primary disorder
+  // Now calculate expected compensation based on primary disorder.
+  // A response short of the expected range is a second disorder of its own, even while the value
+  // is still inside its normal range (e.g. pCO2 above Winters' range but under 44).
   // Compensation formulas: Adrogué & Madias, NEJM 1998; Narins & Emmett, Medicine 1980
   if (primaryDisorder === "Metabolic Acidosis") {
     // Winter's formula: Expected pCO2 = 1.5 × [HCO3-] + 8 ± 2 (Winter, Ann Intern Med 1967)
@@ -151,12 +153,8 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
       compensation = "Overcompensated";
       additionalDisorders.push("Respiratory Alkalosis");
     } else if (pCO2 > expectedPCO2 + 2) {
-      if (pCO2 > pCO2_HIGH) {
-        compensation = "Inadequate compensation";
-        additionalDisorders.push("Respiratory Acidosis");
-      } else {
-        compensation = "Inadequate compensation";
-      }
+      compensation = "Inadequate compensation";
+      additionalDisorders.push("Respiratory Acidosis");
     } else {
       compensation = "Compensated";
     }
@@ -173,12 +171,8 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
       compensation = "Overcompensated";
       additionalDisorders.push("Respiratory Acidosis");
     } else if (pCO2 < expectedPCO2 - 5) {
-      if (pCO2 < pCO2_LOW) {
-        compensation = "Inadequate compensation";
-        additionalDisorders.push("Respiratory Alkalosis");
-      } else {
-        compensation = "Inadequate compensation";
-      }
+      compensation = "Inadequate compensation";
+      additionalDisorders.push("Respiratory Alkalosis");
     } else {
       compensation = "Compensated";
     }
@@ -196,12 +190,8 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
         compensation = "Overcompensated";
         additionalDisorders.push("Metabolic Alkalosis");
       } else if (HCO3 < expectedHCO3 - 3) {
-        if (HCO3 < HCO3_LOW) {
-          compensation = "Inadequate compensation";
-          additionalDisorders.push("Metabolic Acidosis");
-        } else {
-          compensation = "Inadequate compensation";
-        }
+        compensation = "Inadequate compensation";
+        additionalDisorders.push("Metabolic Acidosis");
       } else {
         compensation = "Compensated";
       }
@@ -217,12 +207,8 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
         compensation = "Overcompensated";
         additionalDisorders.push("Metabolic Alkalosis");
       } else if (HCO3 < expectedHCO3 - 3) {
-        if (HCO3 < HCO3_LOW) {
-          compensation = "Inadequate compensation";
-          additionalDisorders.push("Metabolic Acidosis");
-        } else {
-          compensation = "Inadequate compensation";
-        }
+        compensation = "Inadequate compensation";
+        additionalDisorders.push("Metabolic Acidosis");
       } else {
         compensation = "Compensated";
       }
@@ -241,12 +227,8 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
         compensation = "Overcompensated";
         additionalDisorders.push("Metabolic Acidosis");
       } else if (HCO3 > expectedHCO3 + 2) {
-        if (HCO3 > HCO3_HIGH) {
-          compensation = "Inadequate compensation";
-          additionalDisorders.push("Metabolic Alkalosis");
-        } else {
-          compensation = "Inadequate compensation";
-        }
+        compensation = "Inadequate compensation";
+        additionalDisorders.push("Metabolic Alkalosis");
       } else {
         compensation = "Compensated";
       }
@@ -262,12 +244,8 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
         compensation = "Overcompensated";
         additionalDisorders.push("Metabolic Acidosis");
       } else if (HCO3 > expectedHCO3 + 2) {
-        if (HCO3 > HCO3_HIGH) {
-          compensation = "Inadequate compensation";
-          additionalDisorders.push("Metabolic Alkalosis");
-        } else {
-          compensation = "Inadequate compensation";
-        }
+        compensation = "Inadequate compensation";
+        additionalDisorders.push("Metabolic Alkalosis");
       } else {
         compensation = "Compensated";
       }
@@ -330,7 +308,9 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
   if (compensatoryResponse) {
     allDisorders.push(compensatoryResponse);
   }
-  allDisorders.push(...additionalDisorders);
+  // an overcompensation is named twice, as the response and as a disorder of its own: list it once
+  const beyondResponse = additionalDisorders.filter((d) => d !== compensatoryResponse);
+  allDisorders.push(...beyondResponse);
 
   // Build comprehensive interpretation
   let interpretation = "";
@@ -342,12 +322,15 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
       interpretation = `Primary ${primaryDisorder}`;
     }
 
-    if (compensatoryResponse && compensation !== "N/A") {
+    if (compensation === "Inadequate compensation") {
+      // the expected response did not happen, so naming it would contradict the disorder listed next
+      interpretation += `, with ${compensation}`;
+    } else if (compensatoryResponse && compensation !== "N/A") {
       interpretation += `, with ${compensation} by ${compensatoryResponse}`;
     }
 
-    if (additionalDisorders.length > 0) {
-      interpretation += ` and ${additionalDisorders.join(" and ")}`;
+    if (beyondResponse.length > 0) {
+      interpretation += ` and ${beyondResponse.join(" and ")}`;
     }
 
     interpretation += ".";
@@ -355,6 +338,10 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
     interpretation = "Complex Mixed Acid-Base Disorder.";
   } else {
     interpretation = "Normal acid-base status.";
+    // a high gap with a normal gas can hide two disorders that cancel out (HAGMA + metabolic alkalosis)
+    if (agStatus === "High") {
+      interpretation += " High anion gap: a mixed disorder may be hidden.";
+    }
   }
 
   const result = {

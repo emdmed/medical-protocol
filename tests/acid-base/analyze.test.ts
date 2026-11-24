@@ -380,3 +380,54 @@ describe('analyze — allDisorders includes delta-ratio disorders', () => {
     expect(result!.allDisorders).toContain('Metabolic Alkalosis');
   });
 });
+
+describe('analyze — an overcompensation is named once', () => {
+  it('does not repeat the compensating disorder in the sentence or the list', () => {
+    const result = analyze({ values: { pH: '7.34', pCO2: '60', HCO3: '31', Na: '140', Cl: '97', Albumin: '4' }, isChronic: false });
+    expect(result!.compensation).toBe('Overcompensated');
+    expect(result!.additionalDisorders).toEqual(['Metabolic Alkalosis']);
+    expect(result!.interpretation).toBe('Primary Respiratory Acidosis, with Overcompensated by Metabolic Alkalosis.');
+    expect(result!.allDisorders).toEqual(['Respiratory Acidosis', 'Metabolic Alkalosis']);
+  });
+});
+
+describe('analyze — a response short of the expected range is named as a second disorder', () => {
+  const run = (pH: string, pCO2: string, HCO3: string, isChronic = false) =>
+    analyze({ values: { pH, pCO2, HCO3, Na: '', Cl: '', Albumin: '' }, isChronic })!;
+
+  it('chronic respiratory acidosis, bicarbonate under the expected range but over 22', () => {
+    const r = run('7.26', '60', '26', true);
+    expect(r.compensation).toBe('Inadequate compensation');
+    expect(r.additionalDisorders).toEqual(['Metabolic Acidosis']);
+  });
+
+  it('metabolic acidosis, pCO2 over Winters\' range but under 44', () => {
+    const r = run('7.22', '38', '15');
+    expect(r.compensation).toBe('Inadequate compensation');
+    expect(r.additionalDisorders).toEqual(['Respiratory Acidosis']);
+    // the sentence must not name the response that did not happen
+    expect(r.interpretation).toBe('Primary Metabolic Acidosis, with Inadequate compensation and Respiratory Acidosis.');
+  });
+
+  it('normal gas with a high anion gap says so in the sentence', () => {
+    const r = analyze({ values: { pH: '7.38', pCO2: '38', HCO3: '23', Na: '145', Cl: '100', Albumin: '1.5' }, isChronic: false })!;
+    expect(r.disorder).toBe('Normal');
+    expect(r.interpretation).toBe('Normal acid-base status. High anion gap: a mixed disorder may be hidden.');
+  });
+
+  it('metabolic alkalosis, pCO2 under the expected range but over 36', () => {
+    const r = run('7.58', '40', '37');
+    expect(r.compensation).toBe('Inadequate compensation');
+    expect(r.additionalDisorders).toEqual(['Respiratory Alkalosis']);
+  });
+
+  it('chronic respiratory alkalosis, bicarbonate over the expected range but under 28', () => {
+    const r = run('7.58', '25', '23', true);
+    expect(r.compensation).toBe('Inadequate compensation');
+    expect(r.additionalDisorders).toEqual(['Metabolic Alkalosis']);
+  });
+
+  it('inside the expected range: no second disorder', () => {
+    expect(run('7.34', '60', '31', true).additionalDisorders).toEqual([]);
+  });
+});

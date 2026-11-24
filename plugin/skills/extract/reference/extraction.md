@@ -23,7 +23,7 @@ Run these steps in this order, every time. Each note gets its own folder, `extra
 | `corrected.json` | step 3 — the first pass with every proposed correction applied | step 4, if the doctor rejects a correction |
 | `decisions.json` | step 4, in the page only — `{ "<position in findings>": "accepted" \| "rejected" }` | each time the doctor decides a finding |
 | `.consent` | the doctor's yes to this note being read: the `note-consent` hook (chat) or the server (page) — the date | |
-| `artifact.html` | `/medical-protocol:extract-artifact` — the page | |
+| `artifact.html` | `/medical-protocol:extract-artifact` — the page, with its calculations (§ Calculations on the page) | |
 
 Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
 
@@ -31,6 +31,7 @@ Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
 2. Read `<dir>/note.md` and write one item per value the doctor asked for: `{ field, value, unit?, quote, episode, key?, lab?, time? }`. Save the JSON array to `<dir>/extraction.json`; that is the first pass.
    - `quote` is copied **character for character** from the note (the loose pass is a safety net for slips, not permission to paraphrase) — no fixing typos, case, accents or abbreviations. Quote enough words to be unique in the note.
    - `value` is what the note states, not a conversion or a calculation. No derived values (MAP unless the note writes it, BMI, eGFR, totals). For a keyed item, one number only.
+   - Age and sex of the patient: `key: "age"` with the number of years, and `key: "sex"` with `value` `"female"` or `"male"` (the one keyed value that is a word) and a `quote` holding the note's own word for it ("woman", "M", "varón"). Both are `"current"`. Never infer sex from a name, a pronoun or a diagnosis: no word for it in the note, no item.
    - `unit` as the note writes it; leave it out if the note gives none. Never fill in a unit you assume.
    - `key` when the value is one the calculators take (table below). Blood pressure is two items, `sbp` and `dbp`, with the same quote. Values with no key (medications, findings) are still extracted, just not handed on.
    - `lab: true` on every laboratory result, keyed or not: blood and urine tests, blood gases, cultures. Not vital signs, weight and height, exam findings, imaging or medications. It only tells the screen to list them apart.
@@ -95,19 +96,43 @@ Named after the calculator inputs (`cli.md`). The first unit is the one the calc
 | `egfr` | eGFR, only when the note states it | mL/min/1.73m², mL/min |
 | `acr` | Albumin-to-creatinine ratio | mg/g |
 | `urine-output` | Urine output | mL |
+| `age` | Age in years (months or days are held back) | years, year, yr, yrs, y, yo, y/o, años |
+| `sex` | `female` or `male`, quoted with the note's word for it | none |
 
 The source of truth is `FIELDS` in `extraction.ts`.
 
 ### Handing on to another tool
 
-`toInputs(checkExtraction(note, items))` → `{ inputs, review }`:
+`toInputs(checkExtraction(note, items))` → `{ inputs, sex?, review }`:
 
 - `inputs[key]` = `{ value: number, unit?, quote, time? }` — only `current`, `quoted` items with one number in an accepted unit, and only when the key was extracted once. Pass `inputs.sbp.value`, `inputs.creatinine.value`… to the calculator, checking `unit` first (e.g. `temp` in °F → the calculator's Fahrenheit option; `glucose` in mmol/L → its mmol option).
-- `review` = `{ item, reason }[]` for every keyed current item held back: `low-confidence` (`edited`, `approximate` or `reordered` — found, but not word for word; a later tool may use it only after the doctor confirms), `not-verified` (`mismatched`, `unverified` or `none`), `no-episode` (missing tag — the CLI rejects these, but a hand-edited data file may not), `not-a-number` (e.g. "120/80" under `sbp`, or an ambiguous "1,200"), `unit` (a unit not in the table), `repeated` (several readings for one key — the doctor or the next tool picks one by `time`).
+- `sex` = `"female" | "male"`, under the same rules as a number (`current`, `quoted`, extracted once), and only when the quote has a whole word from `SEX_WORDS` for that sex and none for the other. It is never in `inputs`.
+- `review` = `{ item, reason }[]` for every keyed current item held back: `low-confidence` (`edited`, `approximate` or `reordered` — found, but not word for word; a later tool may use it only after the doctor confirms), `not-verified` (`mismatched`, `unverified` or `none`), `no-episode` (missing tag — the CLI rejects these, but a hand-edited data file may not), `not-stated` (a `sex` that is not `female` or `male`, or whose quote has no word for it, or words for both), `not-a-number` (e.g. "120/80" under `sbp`, or an ambiguous "1,200"), `unit` (a unit not in the table), `repeated` (several readings for one key — the doctor or the next tool picks one by `time`).
 
 `history` items are in neither list. They stay in the checked items with their tag, so a later tool can read them on purpose (e.g. a baseline creatinine) with `checked.filter(c => c.episode === "history")`; they never count as a repeat of a current reading.
 
 Extraction stops here. Whatever reads `inputs` does the analysis; this module never does.
+
+### Calculations on the page
+
+The two local pages (`--artifact` and `--serve`) are the one place that reads `inputs` for the doctor: under the extracted values, a "Calculated" section, set apart and labelled as not in the note. The CLI works it out from `plugin/lib` when it writes the page; the page only draws it. No Next.js app is needed.
+
+| Result | Needs in `inputs` | Not calculated when |
+|---|---|---|
+| BMI and category | `weight`, `height` | either has no unit, or the units mix systems (kg with in). Accepted: kg with m or cm, lb with in |
+| PaO2/FiO2 and Berlin range | `pao2`, `fio2` | FiO2 is not a percentage from 21 to 100 (a fraction like 0.4 is not converted) |
+| eGFR from creatinine (CKD-EPI 2021) | `creatinine`, `age`, `sex` | creatinine has no unit (only mg/dL), or the age is under 18 |
+| CKD stage (KDIGO GFR and albuminuria categories, risk level, monitoring visits per year) | `acr`, and `egfr` or the eGFR calculated above | ACR is not in mg/g. A stated eGFR with no unit or in plain mL/min is not used (only mL/min/1.73m²). The eGFR the note states comes first; the calculated one is used only without it, and its scale is labelled "calculated" |
+| Kidney failure risk at 2 and 5 years (KFRE, 4 variables) | a CKD stage above, `age`, `sex` | the GFR category is G1 or G2, or the ACR is 0 |
+| Anemia in CKD | `hb`, `sex`, and a CKD stage above | hemoglobin has no unit (only g/dL), or the stage is G1 or G2 with A1 |
+| Blood pressure against the CKD target | `sbp`, `dbp`, and a CKD stage above | the stage is G1 or G2 with A1 (not CKD by these two values alone) |
+| Acid-base disorder, compensation, anion gap | `ph`, `pco2`, `hco3`; `na`, `cl`, `albumin` when stated | — . Compensation is worked out as acute and says so |
+
+- A value held back in `review` feeds nothing: the result is simply absent.
+- In the live page, nothing is calculated while a correction is still waiting for the doctor's answer.
+- Pointing at a result highlights the words its inputs came from.
+- Each value is drawn on a scale: the cut-offs, the band it falls in (marked and named in words), and for acid-base the normal range in a frame. The cut-offs are data from the lib (`PAFI_BANDS`, `BMI_BANDS`, `GFR_BANDS`, `ACR_BANDS`, `NORMAL_RANGES`); the page holds no clinical number of its own.
+- The generated extraction screen (§ Screen spec) stays extraction only.
 
 ---
 
@@ -184,7 +209,7 @@ medprotocol extract --note extractions/<hash>/note.md --items extractions/<hash>
 medprotocol extract --note extractions/<hash>/note.md --items extractions/<hash>/corrected.json --artifact extractions/<hash>/artifact.html
 ```
 
-`--serve` runs until stopped (Ctrl-C), listens on this computer only, and starts a `claude -p` run for each note pasted in the page (unattended, uses tokens). `--artifact` also writes a standalone page of the extraction (note beside items, same display rules as the Screen spec), for `/medical-protocol:extract-artifact`.
+`--serve` runs until stopped (Ctrl-C), listens on this computer only, and starts a `claude -p` run for each note pasted in the page (unattended, uses tokens). `--artifact` also writes a standalone page of the extraction (note beside items, same display rules as the Screen spec, plus § Calculations on the page), for `/medical-protocol:extract-artifact`.
 
 ---
 

@@ -38,6 +38,12 @@ export const calculateEGFR = (
 
 // ─── GFR Category ───────────────────────────────────────────────────
 
+/** The KDIGO cut-offs (mL/min/1.73m²) and the category of each band, low to high. An eGFR equal to a cut-off belongs to the band above it. */
+export const GFR_BANDS = {
+  cuts: [15, 30, 45, 60, 90],
+  labels: ["G5", "G4", "G3b", "G3a", "G2", "G1"],
+} as const;
+
 /**
  * Classify GFR into KDIGO categories G1–G5.
  */
@@ -45,12 +51,7 @@ export const classifyGFRCategory = (
   egfr: string,
 ): string => {
   const val = safeParseFloat(egfr);
-  if (val >= 90) return "G1";
-  if (val >= 60) return "G2";
-  if (val >= 45) return "G3a";
-  if (val >= 30) return "G3b";
-  if (val >= 15) return "G4";
-  return "G5";
+  return GFR_BANDS.labels[GFR_BANDS.cuts.filter((cut) => val >= cut).length];
 };
 
 /**
@@ -70,6 +71,12 @@ export const getGFRCategoryLabel = (category: string): string => {
 
 // ─── Albuminuria Category ───────────────────────────────────────────
 
+/** The KDIGO cut-offs (mg/g) and the category of each band, low to high. An ACR equal to a cut-off belongs to the band above it. */
+export const ACR_BANDS = {
+  cuts: [30, 300],
+  labels: ["A1", "A2", "A3"],
+} as const;
+
 /**
  * Classify ACR (mg/g) into KDIGO albuminuria categories A1–A3.
  */
@@ -77,9 +84,7 @@ export const classifyAlbuminuriaCategory = (
   acr: string,
 ): string => {
   const val = safeParseFloat(acr);
-  if (val < 30) return "A1";
-  if (val < 300) return "A2";
-  return "A3";
+  return ACR_BANDS.labels[ACR_BANDS.cuts.filter((cut) => val >= cut).length];
 };
 
 /**

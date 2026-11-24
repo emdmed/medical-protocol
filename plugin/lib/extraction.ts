@@ -45,6 +45,9 @@ export const FIELDS = {
   tc: { label: "Total cholesterol", units: ["mg/dL"] },
   hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
   "urine-output": { label: "Urine output", units: ["mL"] },
+  age: { label: "Age", units: ["years", "year", "yr", "yrs", "y", "yo", "y/o", "años"] },
+  /** The one key whose value is a word: `female` or `male`, see `sexStated`. */
+  sex: { label: "Sex", units: [] },
 } as const satisfies Record<string, { label: string; units: readonly string[] }>;
 
 export type FieldKey = keyof typeof FIELDS;
@@ -309,11 +312,28 @@ export interface ExtractedInput {
   time?: string;
 }
 
-export type ReviewReason = "not-verified" | "low-confidence" | "no-episode" | "not-a-number" | "unit" | "repeated";
+export type ReviewReason = "not-verified" | "low-confidence" | "no-episode" | "not-a-number" | "not-stated" | "unit" | "repeated";
+
+export type Sex = "female" | "male";
+
+/** The words of a note taken to state a sex, as whole words, any case, accents ignored. English and Spanish. */
+export const SEX_WORDS: Record<Sex, readonly string[]> = {
+  female: ["female", "woman", "f", "mujer", "femenino", "femenina"],
+  male: ["male", "man", "m", "hombre", "masculino", "varon"],
+};
+
+/** `value` when it is `female` or `male` and the quote has a word for that sex and none for the other; else null. */
+export const sexStated = (value: string, quote: string): Sex | null => {
+  const words = stripAccents(quote).toLowerCase().split(/[^a-z]+/);
+  const has = (s: Sex): boolean => SEX_WORDS[s].some((w) => words.includes(w));
+  return (value === "female" || value === "male") && has(value) && !has(value === "female" ? "male" : "female") ? value : null;
+};
 
 export interface ExtractionInputs {
   /** One verified number per key from the current illness, ready for a calculator. History never lands here. */
   inputs: Partial<Record<FieldKey, ExtractedInput>>;
+  /** The patient's sex, from the one `sex` item, held to the same rules as a number. Never in `inputs`. */
+  sex?: Sex;
   /** Keyed items held back, and why. Nothing here is guessed or dropped silently. */
   review: { item: CheckedItem; reason: ReviewReason }[];
 }
@@ -341,15 +361,18 @@ export const toInputs = (checked: CheckedItem[]): ExtractionInputs => {
   for (const item of keyed) {
     const key = item.key!;
     const value = toNumber(item.value);
+    const sex = key === "sex" ? sexStated(item.value, item.quote) : null;
     const reason: ReviewReason | null =
       item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence"
       : item.status !== "quoted" ? "not-verified"
       : item.episode !== "current" ? "no-episode"
-      : value === null ? "not-a-number"
+      : key === "sex" && !sex ? "not-stated"
+      : key !== "sex" && value === null ? "not-a-number"
       : !unitOk(key, item.unit) ? "unit"
       : count(key) > 1 ? "repeated"
       : null;
     if (reason) out.review.push({ item, reason });
+    else if (sex) out.sex = sex;
     else out.inputs[key] = { value: value!, ...(item.unit ? { unit: item.unit } : {}), quote: item.quote, ...(item.time ? { time: item.time } : {}) };
   }
   return out;

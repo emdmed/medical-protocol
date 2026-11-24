@@ -3,7 +3,8 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { run } from '../../packages/medprotocol/src/commands/extract';
+import { calculations, run } from '../../packages/medprotocol/src/commands/extract';
+import { checkExtraction } from '../../plugin/lib/extraction';
 
 let stdout: string;
 let stderr: string;
@@ -146,5 +147,82 @@ describe('medprotocol extract', () => {
     const out = join(sub, 'artifact.html');
     run(['--note', join(sub, 'note.md'), '--items', itemsPath, '--artifact', out]);
     expect(readFileSync(out, 'utf8')).toContain('<title>abc123def456 extraction</title>');
+  });
+});
+
+describe('calculations', () => {
+  const note = 'Weight 70 kg, height 175 cm. pH 7.25, pCO2 30 mmHg, HCO3 14 mEq/L. PaO2 60 mmHg on FiO2 40%. Last year: weight 90 kg.';
+  const cur = (field: string, key: string, value: string, quote: string, unit?: string) => ({ episode: 'current' as const, field, key: key as any, value, quote, ...(unit ? { unit } : {}) });
+  const items = [
+    cur('Weight', 'weight', '70', 'Weight 70 kg', 'kg'),
+    cur('Height', 'height', '175', 'height 175 cm', 'cm'),
+    cur('pH', 'ph', '7.25', 'pH 7.25'),
+    cur('pCO2', 'pco2', '30', 'pCO2 30 mmHg', 'mmHg'),
+    cur('HCO3', 'hco3', '14', 'HCO3 14 mEq/L', 'mEq/L'),
+    cur('PaO2', 'pao2', '60', 'PaO2 60 mmHg', 'mmHg'),
+    cur('FiO2', 'fio2', '40', 'FiO2 40%', '%'),
+    { ...cur('Weight', 'weight', '90', 'weight 90 kg', 'kg'), episode: 'history' as const },
+  ];
+
+  it('runs each calculator its inputs allow, pointing back at the items used', () => {
+    const calcs = calculations(checkExtraction(note, items));
+    expect(calcs.map((c) => c.title)).toEqual(['Body mass index', 'PaO2/FiO2', 'Acid-base']);
+    expect(calcs[0]).toMatchObject({ scales: [{ label: 'BMI', value: '22.9', unit: 'kg/m²', cuts: [18.5, 25, 30, 35, 40], at: 1, band: 'Normal' }], uses: [0, 1] });
+    expect(calcs[1]).toMatchObject({ scales: [{ value: '150', min: 0, max: 500, cuts: [100, 200, 300], at: 1, band: 'Berlin moderate range' }], uses: [5, 6] });
+    expect(calcs[2].scales.map((s) => [s.label, s.at, s.ref])).toEqual([['pH', 0, 1], ['pCO2', 0, 1], ['Bicarbonate', 0, 1]]);
+    expect(calcs[2].rows[0]).toEqual(['Disorder', 'Metabolic Acidosis']);
+    expect(calcs[2].uses).toEqual([2, 3, 4]);
+  });
+
+  it('stretches a scale to hold a value beyond its ends', () => {
+    const far = items.map((it, i) => (i === 5 ? { ...it, value: '590', quote: 'PaO2' } : it));
+    const [s] = calculations(checkExtraction(note.replace('PaO2 60', 'PaO2 590'), far.map((it, i) => (i === 5 ? { ...it, quote: 'PaO2 590 mmHg' } : it))))[1].scales;
+    expect(s).toMatchObject({ value: '1475', at: 3, band: 'Normal', min: 0 });
+    expect(s.max).toBeGreaterThan(1475);
+  });
+
+  it('calculates nothing from a value that is not verified, has no unit to tell the system, or is repeated', () => {
+    const drop = (n: number, change: object) => calculations(checkExtraction(note, items.map((it, i) => (i === n ? { ...it, ...change } : it)))).map((c) => c.title);
+    expect(drop(0, { quote: 'Weight 71 kg' })).not.toContain('Body mass index');
+    expect(drop(1, { unit: undefined })).not.toContain('Body mass index');
+    expect(drop(1, { unit: 'in' })).not.toContain('Body mass index');
+    expect(drop(7, { episode: 'current' })).not.toContain('Body mass index');
+  });
+
+  it('stages CKD from a stated eGFR per 1.73 m² and an ACR in mg/g', () => {
+    const ckd = (egfrUnit?: string, egfr = '30', acr = '420') => calculations(checkExtraction(`eGFR ${egfr} mL/min/1.73m², ACR ${acr} mg/g. BP 148/86 mmHg.`, [
+      cur('eGFR', 'egfr', egfr, `eGFR ${egfr}`, egfrUnit),
+      cur('ACR', 'acr', acr, `ACR ${acr} mg/g`, 'mg/g'),
+      cur('Systolic', 'sbp', '148', 'BP 148/86 mmHg', 'mmHg'),
+      cur('Diastolic', 'dbp', '86', 'BP 148/86 mmHg', 'mmHg'),
+    ]));
+    expect(ckd('mL/min/1.73m²')).toMatchObject([
+      { title: 'CKD staging', rows: [['Stage', 'G3b A3'], ['Risk level', 'deep-red'], ['Monitoring', '3', 'times a year']], scales: [{ cuts: [15, 30, 45, 60, 90], at: 2 }, { cuts: [30, 300], at: 2 }], uses: [0, 1] },
+      { title: 'Blood pressure in CKD', rows: [['Reading', '148/86', 'mmHg'], ['Against target', 'Uncontrolled']], uses: [2, 3] },
+    ]);
+    expect(ckd('mL/min')).toEqual([]);
+    expect(ckd()).toEqual([]);
+    // G1 A1: staged, but the CKD blood pressure target does not apply
+    expect(ckd('mL/min/1.73m²', '95', '10').map((c) => c.title)).toEqual(['CKD staging']);
+  });
+
+  it('works out eGFR, kidney failure risk and anemia once age and sex are stated', () => {
+    const note = '67-year-old woman. Creatinine 1.8 mg/dL, ACR 420 mg/g, hemoglobin 10.8 g/dL.';
+    const items = [
+      cur('Age', 'age', '67', '67-year-old'),
+      cur('Sex', 'sex', 'female', '67-year-old woman'),
+      cur('Creatinine', 'creatinine', '1.8', 'Creatinine 1.8 mg/dL', 'mg/dL'),
+      cur('ACR', 'acr', '420', 'ACR 420 mg/g', 'mg/g'),
+      cur('Hb', 'hb', '10.8', 'hemoglobin 10.8 g/dL', 'g/dL'),
+    ];
+    const calcs = calculations(checkExtraction(note, items));
+    expect(calcs.map((c) => c.title)).toEqual(['eGFR from creatinine', 'CKD staging', 'Kidney failure risk (KFRE)', 'Anemia in CKD']);
+    expect(calcs[0]).toMatchObject({ scales: [{ value: '30', at: 2 }], uses: [2, 0, 1] });
+    // no eGFR in the note: staged from the calculated one, and it says so
+    expect(calcs[1]).toMatchObject({ rows: [['Stage', 'G3b A3'], ['Risk level', 'deep-red'], ['Monitoring', '3', 'times a year']], scales: [{ label: 'eGFR, calculated' }, { label: 'ACR' }], uses: [2, 0, 1, 3] });
+    expect(calcs[2].rows).toEqual([['In 2 years', '4.6', '%'], ['In 5 years', '16.7', '%']]);
+    expect(calcs[3].rows[1]).toEqual(['Anemia', 'Yes, mild']);
+    // a sex the quote does not state feeds nothing
+    expect(calculations(checkExtraction(note, items.map((it, i) => (i === 1 ? { ...it, value: 'male' } : it))))).toEqual([]);
   });
 });

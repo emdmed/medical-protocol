@@ -114,6 +114,18 @@ describe('toInputs', () => {
     expect(twice.review.map((r) => r.reason)).toEqual(['repeated', 'repeated']);
   });
 
+  it('hands on the sex only when the quote has a word for it, and for no other', () => {
+    const sexOf = (value: string, quote: string, note = quote) => toInputs(checkExtraction(note, [{ episode: 'current', field: 'Sex', key: 'sex', value, quote }]));
+    expect(sexOf('female', '67-year-old woman')).toMatchObject({ inputs: {}, sex: 'female', review: [] });
+    expect(sexOf('male', 'Varón de 54 años').sex).toBe('male');
+    expect(sexOf('male', '54 y/o M').sex).toBe('male');
+    for (const [value, quote] of [['male', '67-year-old woman'], ['woman', '67-year-old woman'], ['female', '67-year-old'], ['female', 'woman, husband is a man']]) {
+      const { sex, review } = sexOf(value!, quote!);
+      expect(sex).toBeUndefined();
+      expect(review[0]!.reason).toBe('not-stated');
+    }
+  });
+
   it('does not read an ambiguous thousands comma as a number', () => {
     const { review } = toInputs(checkExtraction('UO 1,200 mL', [{ episode: 'current', field: 'UO', key: 'urine-output', value: '1,200', unit: 'mL', quote: 'UO 1,200 mL' }]));
     expect(review[0]!.reason).toBe('not-a-number');

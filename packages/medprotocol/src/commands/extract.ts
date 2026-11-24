@@ -6,7 +6,13 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { FIELDS, EPISODES, applyFindings, checkExtraction, checkItem, noteSegments, toInputs, type ExtractedItem, type Finding } from "../../../../plugin/lib/extraction";
+import { analyze, NORMAL_RANGES } from "../../../../plugin/lib/acid-base";
+import { BMI_BANDS, calculateBMI, getBMICategory } from "../../../../plugin/lib/bmi";
+import { ACR_BANDS, GFR_BANDS, calculateEGFR, calculateKFRE, classifyAlbuminuriaCategory, classifyAnemia, classifyGFRCategory, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getGFRCategoryLabel, getMonitoringFrequency } from "../../../../plugin/lib/ckd";
+import { FIELDS, EPISODES, applyFindings, checkExtraction, checkItem, noteSegments, toInputs, type CheckedItem, type ExtractedItem, type FieldKey, type Finding } from "../../../../plugin/lib/extraction";
+import { classifyBPInCKD } from "../../../../plugin/lib/nephrology";
+import { PAFI_BANDS, calculatePaFi, getPaFiClassification } from "../../../../plugin/lib/pafi";
+import { BERLIN_2012, CKD_EPI_2021, KDIGO_2012_ANEMIA, KDIGO_2021_BP, KDIGO_2024_CKD, KFRE_TANGRI, WHO_BMI_2000, WINTERS_1967 } from "../../../../plugin/lib/sources";
 import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 import { EXTRACT_ARTIFACT_HTML } from "../extract-artifact";
 import { isLocalOrigin } from "./overlay";
@@ -67,12 +73,142 @@ export const itemsError = (items: unknown): string | null => {
   return null;
 };
 
+/** A value drawn on its scale: the lib's cut-offs between `min` and `max`, and the band (`at`, from 0) the value falls in. */
+export interface Scale {
+  label: string;
+  value: string;
+  unit?: string;
+  min: number;
+  max: number;
+  cuts: number[];
+  at: number;
+  band: string;
+  /** The band to frame as the reference (a normal range), when the scale has one. */
+  ref?: number;
+}
+
+// `ends` is how much of the scale is drawn, a choice of the page; it stretches to hold a value beyond it
+const scaleOf = (label: string, value: string, unit: string | undefined, cuts: readonly number[], at: number, band: string, [lo, hi]: [number, number]): Scale => {
+  const v = Number(value);
+  const pad = (hi - lo) * 0.08;
+  return { label, value, ...(unit ? { unit } : {}), min: v < lo ? v - pad : lo, max: v > hi ? v + pad : hi, cuts: [...cuts], at, band };
+};
+
+/** One calculator result on the page. `uses`: the positions of the items it was worked out from. */
+export interface Calculation {
+  title: string;
+  rows: [label: string, value: string, unit?: string][];
+  scales: Scale[];
+  uses: number[];
+  source: string;
+}
+
+/**
+ * The calculators an extraction can feed with nothing else typed in, run on `toInputs` only: numbers
+ * found word for word in the current illness, one per key. A missing or held-back input means no
+ * result, never a guess. Every number and category comes from plugin/lib.
+ */
+export const calculations = (checked: CheckedItem[]): Calculation[] => {
+  const { inputs, sex } = toInputs(checked);
+  const str = (k: FieldKey): string => (inputs[k] ? String(inputs[k]!.value) : "");
+  const unit = (k: FieldKey): string | undefined => inputs[k]?.unit?.trim().toLowerCase();
+  // a key in `inputs` was extracted once in the current illness
+  const uses = (...keys: FieldKey[]): number[] => keys.filter((k) => (k === "sex" ? sex : inputs[k])).map((k) => checked.findIndex((c) => c.key === k && c.episode === "current"));
+  const out: Calculation[] = [];
+
+  // weight and height come in two systems: one with no unit is not guessed, and the two are not mixed
+  const w = unit("weight");
+  const h = unit("height");
+  const metric = w === "kg" && (h === "m" || h === "cm");
+  if (metric || ((w === "lb" || w === "lbs") && h === "in")) {
+    const bmi = calculateBMI(str("weight"), "0", str("height"), h === "cm" ? String(inputs.height!.value / 100) : str("height"), metric);
+    const category = getBMICategory(bmi);
+    if (bmi) out.push({ title: "Body mass index", rows: [], scales: [scaleOf("BMI", bmi, "kg/m²", BMI_BANDS.cuts, (BMI_BANDS.labels as readonly string[]).indexOf(category), category, [15, 45])], uses: uses("weight", "height"), source: WHO_BMI_2000 });
+  }
+
+  // an FiO2 written as a fraction (0.4) is refused by the lib, not converted
+  const pafi = inputs.pao2 && inputs.fio2 ? calculatePaFi(str("pao2"), str("fio2")) : null;
+  if (pafi) {
+    const range = getPaFiClassification(pafi);
+    out.push({ title: "PaO2/FiO2", rows: [], scales: [scaleOf("Ratio", pafi, "mmHg", PAFI_BANDS.cuts, (PAFI_BANDS.labels as readonly string[]).indexOf(range), range, [0, 500])], uses: uses("pao2", "fio2"), source: BERLIN_2012 });
+  }
+
+  const abg =
+    inputs.ph && inputs.pco2 && inputs.hco3
+      ? analyze({ values: { pH: str("ph"), pCO2: str("pco2"), HCO3: str("hco3"), Na: str("na"), Cl: str("cl"), Albumin: str("albumin") }, isChronic: false })
+      : null;
+  if (abg) {
+    // where a value stands against the lib's normal range, by the comparisons `analyze` makes: a limit is inside
+    const against = (label: string, k: "ph" | "pco2" | "hco3", [lo, hi]: readonly [number, number], ends: [number, number]): Scale => {
+      const at = inputs[k]!.value < lo ? 0 : inputs[k]!.value > hi ? 2 : 1;
+      return { ...scaleOf(label, str(k), inputs[k]!.unit, [lo, hi], at, ["Below the normal range", "In the normal range", "Above the normal range"][at], ends), ref: 1 };
+    };
+    out.push({
+      title: "Acid-base",
+      rows: [
+        ["Disorder", abg.disorder],
+        // the note does not say acute or chronic; same default as `medprotocol abg`
+        ["Compensation", `${abg.compensation} (taken as acute)`],
+        ...(abg.anionGap !== null ? [["Anion gap", abg.anionGap, `mEq/L, ${abg.agStatus}`] as [string, string, string]] : []),
+      ],
+      scales: [against("pH", "ph", NORMAL_RANGES.pH, [7.1, 7.7]), against("pCO2", "pco2", NORMAL_RANGES.pCO2, [20, 60]), against("Bicarbonate", "hco3", NORMAL_RANGES.HCO3, [10, 40])],
+      uses: uses("ph", "pco2", "hco3", "na", "cl", "albumin"),
+      source: WINTERS_1967,
+    });
+  }
+
+  const gfrScale = (label: string, value: string, u: string): Scale => {
+    const g = classifyGFRCategory(value);
+    return scaleOf(label, value, u, GFR_BANDS.cuts, (GFR_BANDS.labels as readonly string[]).indexOf(g), `${g}: ${getGFRCategoryLabel(g)}`, [0, 120]);
+  };
+  // a creatinine with no unit may be in µmol/L: not guessed. The lib gives 0 when it cannot calculate (under 18)
+  const made = inputs.creatinine && inputs.age && sex && unit("creatinine") === "mg/dl" ? calculateEGFR(str("creatinine"), str("age"), sex) : 0;
+  if (made) out.push({ title: "eGFR from creatinine", rows: [], scales: [gfrScale("eGFR", String(made), "mL/min/1.73m²")], uses: uses("creatinine", "age", "sex"), source: CKD_EPI_2021 });
+
+  // the categories are per 1.73 m²: an eGFR with no unit or in plain mL/min (it may be a clearance) is not staged.
+  // The eGFR the note states comes first; without one, the one worked out above
+  const stated = !!inputs.egfr && !!unit("egfr")?.includes("1.73");
+  const egfr = stated ? str("egfr") : made ? String(made) : "";
+  if (egfr && inputs.acr && unit("acr") === "mg/g") {
+    const g = classifyGFRCategory(egfr);
+    const a = classifyAlbuminuriaCategory(str("acr"));
+    const risk = getCKDRiskLevel(g, a);
+    const from = stated ? uses("egfr", "acr") : uses("creatinine", "age", "sex", "acr");
+    out.push({
+      title: "CKD staging",
+      rows: [["Stage", `${g} ${a}`], ["Risk level", risk], ["Monitoring", String(getMonitoringFrequency(g, a)), "times a year"]],
+      scales: [
+        stated ? gfrScale("eGFR", egfr, inputs.egfr!.unit!) : gfrScale("eGFR, calculated", egfr, "mL/min/1.73m²"),
+        scaleOf("ACR", str("acr"), inputs.acr.unit, ACR_BANDS.cuts, (ACR_BANDS.labels as readonly string[]).indexOf(a), `${a}: ${getAlbuminuriaCategoryLabel(a)}`, [0, 500]),
+      ],
+      uses: from,
+      source: KDIGO_2024_CKD,
+    });
+    // the equation was built in CKD G3 to G5; an ACR of 0 has no logarithm
+    if (sex && inputs.age && g !== "G1" && g !== "G2" && inputs.acr.value > 0) {
+      const kfre = calculateKFRE(str("age"), sex, egfr, str("acr"));
+      out.push({ title: "Kidney failure risk (KFRE)", rows: [["In 2 years", String(kfre.twoYear), "%"], ["In 5 years", String(kfre.fiveYear), "%"]], scales: [], uses: [...new Set([...from, ...uses("age", "sex")])], source: KFRE_TANGRI });
+    }
+    // the CKD target is for CKD: G1 or G2 with A1 (green) is not CKD by these two values alone
+    if (risk !== "green" && inputs.sbp && inputs.dbp) {
+      out.push({ title: "Blood pressure in CKD", rows: [["Reading", `${str("sbp")}/${str("dbp")}`, "mmHg"], ["Against target", classifyBPInCKD(str("sbp"), str("dbp")).label]], scales: [], uses: uses("sbp", "dbp"), source: KDIGO_2021_BP });
+    }
+    // a hemoglobin with no unit may be in g/L: not guessed
+    if (risk !== "green" && inputs.hb && sex && unit("hb") === "g/dl") {
+      const anemia = classifyAnemia(str("hb"), sex);
+      out.push({ title: "Anemia in CKD", rows: [["Hemoglobin", str("hb"), inputs.hb.unit], ["Anemia", anemia.anemic ? `Yes, ${anemia.severity}` : "No"]], scales: [], uses: uses("hb", "sex"), source: KDIGO_2012_ANEMIA });
+    }
+  }
+  return out;
+};
+
 /** The data block the extraction page renders. `items` are already checked against `note`. */
 export const pageData = (name: string, note: string, items: ReturnType<typeof checkExtraction>) => ({
   name,
   checkedAt: new Date().toLocaleDateString("sv"),
   items,
   segments: noteSegments(note, items),
+  calcs: calculations(items),
 });
 
 const readJson = (file: string): any => (existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : undefined);
@@ -95,7 +231,8 @@ export const stateOf = (dir: string, running: boolean) => {
   const undecided = findings.some((f) => (f.correction || f.index !== undefined) && !f.decision);
   const state = verify ? (undecided ? "review" : "done") : !running ? "failed" : firstPass ? "verifying" : "extracting";
   const items = verify ? checkExtraction(note, readJson(join(dir, "corrected.json")) ?? []) : [];
-  return { id: basename(dir), state, error: null as string | null, note, ...pageData(basename(dir), note, items), findings };
+  // nothing is calculated from a correction the doctor has not answered yet
+  return { id: basename(dir), state, error: null as string | null, note, ...pageData(basename(dir), note, items), ...(undecided ? { calcs: [] } : {}), findings };
 };
 
 export type AskModel = (prompt: string) => Promise<string>;
@@ -419,7 +556,7 @@ export const run = (argv: string[]): void => {
     (["quoted", "edited", "approximate", "reordered", "mismatched", "unverified", "none"] as const).map((s) => [s, checked.filter((c) => c.status === s).length]),
   );
 
-  const { inputs, review } = toInputs(checked);
+  const { inputs, sex, review } = toInputs(checked);
 
   if (values.artifact) {
     // extractions/<hash>/note.md is named by its folder
@@ -436,13 +573,13 @@ export const run = (argv: string[]): void => {
     }
   }
 
-  printResult({ items: checked, counts, inputs, review }, values.json!, () =>
+  printResult({ items: checked, counts, inputs, ...(sex ? { sex } : {}), review }, values.json!, () =>
     [
       formatHeader("Extraction vs note"),
       formatTable(checked.map((c) => [c.field, `${c.value}${c.unit ? ` ${c.unit}` : ""}  (${c.episode})  [${c.status}${c.distance ? `, ${c.distance} chars off` : ""}${c.ambiguous ? ", ambiguous" : ""}]  "${c.quote}"`])),
       "",
       formatTable(Object.entries(counts).map(([s, n]) => [s, String(n)])),
-      ...(Object.keys(inputs).length ? [formatHeader("Inputs for calculators"), formatTable(Object.entries(inputs).map(([k, v]) => [k, `${v!.value}${v!.unit ? ` ${v!.unit}` : ""}`]))] : []),
+      ...(Object.keys(inputs).length || sex ? [formatHeader("Inputs for calculators"), formatTable([...Object.entries(inputs).map(([k, v]): [string, string] => [k, `${v!.value}${v!.unit ? ` ${v!.unit}` : ""}`]), ...(sex ? [["sex", sex] as [string, string]] : [])])] : []),
       ...(review.length ? [formatHeader("Held back"), formatTable(review.map((r) => [r.item.key!, `${r.item.value}  [${r.reason}]`]))] : []),
     ].join("\n"),
   );

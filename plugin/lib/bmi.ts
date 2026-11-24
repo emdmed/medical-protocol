@@ -33,14 +33,14 @@ export const calculateBMI = (
   }
 };
 
+/** The WHO cut-offs and the name of each band, low to high. A BMI equal to a cut-off belongs to the band above it. */
+export const BMI_BANDS = {
+  cuts: [18.5, 25, 30, 35, 40],
+  labels: ["Underweight", "Normal", "Overweight", "Obese I", "Obese II", "Obese III"],
+} as const;
+
 export const getBMICategory = (bmi: string | null): string => {
   if (!bmi) return "Unknown";
   const bmiNum = parseFloat(bmi);
-  if (bmiNum < 18.5) return "Underweight";
-  if (bmiNum < 25) return "Normal";
-  if (bmiNum < 30) return "Overweight";
-  // WHO obesity classes
-  if (bmiNum < 35) return "Obese I";
-  if (bmiNum < 40) return "Obese II";
-  return "Obese III";
+  return BMI_BANDS.labels[BMI_BANDS.cuts.filter((cut) => bmiNum >= cut).length];
 };

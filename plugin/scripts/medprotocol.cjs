@@ -11,7 +11,7 @@ var __export = (target, all) => {
 };
 
 // ../../plugin/lib/bmi.ts
-var MAX_WEIGHT_KG, MAX_WEIGHT_LBS, MAX_HEIGHT_M, MAX_HEIGHT_IN, calculateBMI, getBMICategory;
+var MAX_WEIGHT_KG, MAX_WEIGHT_LBS, MAX_HEIGHT_M, MAX_HEIGHT_IN, calculateBMI, BMI_BANDS, getBMICategory;
 var init_bmi = __esm({
   "../../plugin/lib/bmi.ts"() {
     "use strict";
@@ -36,15 +36,14 @@ var init_bmi = __esm({
         return (weightNum / (totalInches * totalInches) * 703).toFixed(1);
       }
     };
+    BMI_BANDS = {
+      cuts: [18.5, 25, 30, 35, 40],
+      labels: ["Underweight", "Normal", "Overweight", "Obese I", "Obese II", "Obese III"]
+    };
     getBMICategory = (bmi) => {
       if (!bmi) return "Unknown";
       const bmiNum = parseFloat(bmi);
-      if (bmiNum < 18.5) return "Underweight";
-      if (bmiNum < 25) return "Normal";
-      if (bmiNum < 30) return "Overweight";
-      if (bmiNum < 35) return "Obese I";
-      if (bmiNum < 40) return "Obese II";
-      return "Obese III";
+      return BMI_BANDS.labels[BMI_BANDS.cuts.filter((cut) => bmiNum >= cut).length];
     };
   }
 });
@@ -198,11 +197,12 @@ var init_safeParseFloat = __esm({
 });
 
 // ../../plugin/lib/acid-base/analyze.ts
-var analyze;
+var NORMAL_RANGES, analyze;
 var init_analyze = __esm({
   "../../plugin/lib/acid-base/analyze.ts"() {
     "use strict";
     init_safeParseFloat();
+    NORMAL_RANGES = { pH: [7.35, 7.45], pCO2: [36, 44], HCO3: [22, 28] };
     analyze = ({ values, isChronic }) => {
       const pH = safeParseFloatOrNull(values.pH);
       const pCO2 = safeParseFloatOrNull(values.pCO2);
@@ -228,12 +228,9 @@ var init_analyze = __esm({
       let additionalDisorders = [];
       let compensation = "N/A";
       const allDisorders = [];
-      const pH_LOW = 7.35;
-      const pH_HIGH = 7.45;
-      const pCO2_LOW = 36;
-      const pCO2_HIGH = 44;
-      const HCO3_LOW = 22;
-      const HCO3_HIGH = 28;
+      const [pH_LOW, pH_HIGH] = NORMAL_RANGES.pH;
+      const [pCO2_LOW, pCO2_HIGH] = NORMAL_RANGES.pCO2;
+      const [HCO3_LOW, HCO3_HIGH] = NORMAL_RANGES.HCO3;
       const isAcidemic = pH < pH_LOW;
       const isAlkalemic = pH > pH_HIGH;
       const isNormalPH = pH >= pH_LOW && pH <= pH_HIGH;
@@ -317,12 +314,8 @@ var init_analyze = __esm({
           compensation = "Overcompensated";
           additionalDisorders.push("Respiratory Alkalosis");
         } else if (pCO2 > expectedPCO2 + 2) {
-          if (pCO2 > pCO2_HIGH) {
-            compensation = "Inadequate compensation";
-            additionalDisorders.push("Respiratory Acidosis");
-          } else {
-            compensation = "Inadequate compensation";
-          }
+          compensation = "Inadequate compensation";
+          additionalDisorders.push("Respiratory Acidosis");
         } else {
           compensation = "Compensated";
         }
@@ -336,12 +329,8 @@ var init_analyze = __esm({
           compensation = "Overcompensated";
           additionalDisorders.push("Respiratory Acidosis");
         } else if (pCO2 < expectedPCO2 - 5) {
-          if (pCO2 < pCO2_LOW) {
-            compensation = "Inadequate compensation";
-            additionalDisorders.push("Respiratory Alkalosis");
-          } else {
-            compensation = "Inadequate compensation";
-          }
+          compensation = "Inadequate compensation";
+          additionalDisorders.push("Respiratory Alkalosis");
         } else {
           compensation = "Compensated";
         }
@@ -355,12 +344,8 @@ var init_analyze = __esm({
             compensation = "Overcompensated";
             additionalDisorders.push("Metabolic Alkalosis");
           } else if (HCO3 < expectedHCO3 - 3) {
-            if (HCO3 < HCO3_LOW) {
-              compensation = "Inadequate compensation";
-              additionalDisorders.push("Metabolic Acidosis");
-            } else {
-              compensation = "Inadequate compensation";
-            }
+            compensation = "Inadequate compensation";
+            additionalDisorders.push("Metabolic Acidosis");
           } else {
             compensation = "Compensated";
           }
@@ -373,12 +358,8 @@ var init_analyze = __esm({
             compensation = "Overcompensated";
             additionalDisorders.push("Metabolic Alkalosis");
           } else if (HCO3 < expectedHCO3 - 3) {
-            if (HCO3 < HCO3_LOW) {
-              compensation = "Inadequate compensation";
-              additionalDisorders.push("Metabolic Acidosis");
-            } else {
-              compensation = "Inadequate compensation";
-            }
+            compensation = "Inadequate compensation";
+            additionalDisorders.push("Metabolic Acidosis");
           } else {
             compensation = "Compensated";
           }
@@ -393,12 +374,8 @@ var init_analyze = __esm({
             compensation = "Overcompensated";
             additionalDisorders.push("Metabolic Acidosis");
           } else if (HCO3 > expectedHCO3 + 2) {
-            if (HCO3 > HCO3_HIGH) {
-              compensation = "Inadequate compensation";
-              additionalDisorders.push("Metabolic Alkalosis");
-            } else {
-              compensation = "Inadequate compensation";
-            }
+            compensation = "Inadequate compensation";
+            additionalDisorders.push("Metabolic Alkalosis");
           } else {
             compensation = "Compensated";
           }
@@ -411,12 +388,8 @@ var init_analyze = __esm({
             compensation = "Overcompensated";
             additionalDisorders.push("Metabolic Acidosis");
           } else if (HCO3 > expectedHCO3 + 2) {
-            if (HCO3 > HCO3_HIGH) {
-              compensation = "Inadequate compensation";
-              additionalDisorders.push("Metabolic Alkalosis");
-            } else {
-              compensation = "Inadequate compensation";
-            }
+            compensation = "Inadequate compensation";
+            additionalDisorders.push("Metabolic Alkalosis");
           } else {
             compensation = "Compensated";
           }
@@ -461,7 +434,8 @@ var init_analyze = __esm({
       if (compensatoryResponse) {
         allDisorders.push(compensatoryResponse);
       }
-      allDisorders.push(...additionalDisorders);
+      const beyondResponse = additionalDisorders.filter((d) => d !== compensatoryResponse);
+      allDisorders.push(...beyondResponse);
       let interpretation = "";
       if (primaryDisorder !== "Normal" && primaryDisorder !== "Mixed Disorder") {
         if (primaryDisorder === "Metabolic Acidosis" && agStatus === "High") {
@@ -469,17 +443,22 @@ var init_analyze = __esm({
         } else {
           interpretation = `Primary ${primaryDisorder}`;
         }
-        if (compensatoryResponse && compensation !== "N/A") {
+        if (compensation === "Inadequate compensation") {
+          interpretation += `, with ${compensation}`;
+        } else if (compensatoryResponse && compensation !== "N/A") {
           interpretation += `, with ${compensation} by ${compensatoryResponse}`;
         }
-        if (additionalDisorders.length > 0) {
-          interpretation += ` and ${additionalDisorders.join(" and ")}`;
+        if (beyondResponse.length > 0) {
+          interpretation += ` and ${beyondResponse.join(" and ")}`;
         }
         interpretation += ".";
       } else if (primaryDisorder === "Mixed Disorder") {
         interpretation = "Complex Mixed Acid-Base Disorder.";
       } else {
         interpretation = "Normal acid-base status.";
+        if (agStatus === "High") {
+          interpretation += " High anion gap: a mixed disorder may be hidden.";
+        }
       }
       const result = {
         disorder: primaryDisorder,
@@ -1205,7 +1184,7 @@ Examples:
 });
 
 // ../../plugin/lib/pafi.ts
-var calculatePaFi, getPaFiClassification, getPaFiSeverity;
+var calculatePaFi, PAFI_BANDS, getPaFiClassification, getPaFiSeverity;
 var init_pafi = __esm({
   "../../plugin/lib/pafi.ts"() {
     "use strict";
@@ -1218,14 +1197,15 @@ var init_pafi = __esm({
       const ratio = paO2Num / (fiO2Num / 100);
       return ratio.toFixed(0);
     };
+    PAFI_BANDS = {
+      cuts: [100, 200, 300],
+      labels: ["Berlin severe range", "Berlin moderate range", "Berlin mild range", "Normal"]
+    };
     getPaFiClassification = (paFi) => {
       if (!paFi) return "Unknown";
       const value = parseFloat(paFi);
       if (isNaN(value)) return "Unknown";
-      if (value > 300) return "Normal";
-      if (value > 200) return "Berlin mild range";
-      if (value > 100) return "Berlin moderate range";
-      return "Berlin severe range";
+      return PAFI_BANDS.labels[PAFI_BANDS.cuts.filter((cut) => value > cut).length];
     };
     getPaFiSeverity = (paFi) => {
       if (!paFi) return "default";
@@ -2495,7 +2475,7 @@ Examples:
 });
 
 // ../../plugin/lib/ckd.ts
-var calculateEGFR, classifyGFRCategory, getGFRCategoryLabel, classifyAlbuminuriaCategory, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getMonitoringFrequency, calculateKFRE, assessReferralNeed, checkRASiEligibility, checkSGLT2iEligibility, checkFinerenoneEligibility, classifyAnemia, assessIronStatus, checkESAEligibility, assessPhosphate, correctCalcium, assessPTH, assessVitaminD, getCKDMBDMonitoring, getCKDSeverity;
+var calculateEGFR, GFR_BANDS, classifyGFRCategory, getGFRCategoryLabel, ACR_BANDS, classifyAlbuminuriaCategory, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getMonitoringFrequency, calculateKFRE, assessReferralNeed, checkRASiEligibility, checkSGLT2iEligibility, checkFinerenoneEligibility, classifyAnemia, assessIronStatus, checkESAEligibility, assessPhosphate, correctCalcium, assessPTH, assessVitaminD, getCKDMBDMonitoring, getCKDSeverity;
 var init_ckd = __esm({
   "../../plugin/lib/ckd.ts"() {
     "use strict";
@@ -2515,14 +2495,13 @@ var init_ckd = __esm({
       const egfr = 142 * minTerm * maxTerm * ageTerm * sexFactor;
       return Math.round(egfr);
     };
+    GFR_BANDS = {
+      cuts: [15, 30, 45, 60, 90],
+      labels: ["G5", "G4", "G3b", "G3a", "G2", "G1"]
+    };
     classifyGFRCategory = (egfr) => {
       const val = safeParseFloat(egfr);
-      if (val >= 90) return "G1";
-      if (val >= 60) return "G2";
-      if (val >= 45) return "G3a";
-      if (val >= 30) return "G3b";
-      if (val >= 15) return "G4";
-      return "G5";
+      return GFR_BANDS.labels[GFR_BANDS.cuts.filter((cut) => val >= cut).length];
     };
     getGFRCategoryLabel = (category) => {
       const labels = {
@@ -2535,11 +2514,13 @@ var init_ckd = __esm({
       };
       return labels[category] ?? "Unknown";
     };
+    ACR_BANDS = {
+      cuts: [30, 300],
+      labels: ["A1", "A2", "A3"]
+    };
     classifyAlbuminuriaCategory = (acr) => {
       const val = safeParseFloat(acr);
-      if (val < 30) return "A1";
-      if (val < 300) return "A2";
-      return "A3";
+      return ACR_BANDS.labels[ACR_BANDS.cuts.filter((cut) => val >= cut).length];
     };
     getAlbuminuriaCategoryLabel = (category) => {
       const labels = {
@@ -3827,7 +3808,7 @@ var init_claude_spawn = __esm({
 });
 
 // ../../plugin/lib/extraction.ts
-var FIELDS, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, prepared, checkItem, checkExtraction, noteSegments, toNumber, unitOk, toInputs, applyFindings;
+var FIELDS, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, prepared, checkItem, checkExtraction, noteSegments, SEX_WORDS, sexStated, toNumber, unitOk, toInputs, applyFindings;
 var init_extraction = __esm({
   "../../plugin/lib/extraction.ts"() {
     "use strict";
@@ -3863,7 +3844,10 @@ var init_extraction = __esm({
       acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g"] },
       tc: { label: "Total cholesterol", units: ["mg/dL"] },
       hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
-      "urine-output": { label: "Urine output", units: ["mL"] }
+      "urine-output": { label: "Urine output", units: ["mL"] },
+      age: { label: "Age", units: ["years", "year", "yr", "yrs", "y", "yo", "y/o", "a\xF1os"] },
+      /** The one key whose value is a word: `female` or `male`, see `sexStated`. */
+      sex: { label: "Sex", units: [] }
     };
     EPISODES = ["current", "history"];
     MAX_EDITS = 5;
@@ -4020,6 +4004,15 @@ var init_extraction = __esm({
       }
       return out;
     };
+    SEX_WORDS = {
+      female: ["female", "woman", "f", "mujer", "femenino", "femenina"],
+      male: ["male", "man", "m", "hombre", "masculino", "varon"]
+    };
+    sexStated = (value, quote) => {
+      const words = stripAccents(quote).toLowerCase().split(/[^a-z]+/);
+      const has = (s) => SEX_WORDS[s].some((w) => words.includes(w));
+      return (value === "female" || value === "male") && has(value) && !has(value === "female" ? "male" : "female") ? value : null;
+    };
     toNumber = (value) => {
       const v = value.trim();
       if (!/^-?\d+(?:[.,]\d+)?$/.test(v) || /,\d{3}$/.test(v)) return null;
@@ -4033,8 +4026,10 @@ var init_extraction = __esm({
       for (const item of keyed) {
         const key = item.key;
         const value = toNumber(item.value);
-        const reason = item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence" : item.status !== "quoted" ? "not-verified" : item.episode !== "current" ? "no-episode" : value === null ? "not-a-number" : !unitOk(key, item.unit) ? "unit" : count(key) > 1 ? "repeated" : null;
+        const sex = key === "sex" ? sexStated(item.value, item.quote) : null;
+        const reason = item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence" : item.status !== "quoted" ? "not-verified" : item.episode !== "current" ? "no-episode" : key === "sex" && !sex ? "not-stated" : key !== "sex" && value === null ? "not-a-number" : !unitOk(key, item.unit) ? "unit" : count(key) > 1 ? "repeated" : null;
         if (reason) out.review.push({ item, reason });
+        else if (sex) out.sex = sex;
         else out.inputs[key] = { value, ...item.unit ? { unit: item.unit } : {}, quote: item.quote, ...item.time ? { time: item.time } : {} };
       }
       return out;
@@ -4053,6 +4048,44 @@ var init_extraction = __esm({
   }
 });
 
+// ../../plugin/lib/nephrology.ts
+function classifyBPInCKD(sbp, dbp) {
+  const s = sf(sbp);
+  const d = sf(dbp);
+  if (s === 0 || d === 0) return { label: "\u2014", severity: "normal" };
+  if (s < 120 && d < 80) return { label: "On target", severity: "normal" };
+  if (s < 140 && d < 90) return { label: "Above target", severity: "warning" };
+  return { label: "Uncontrolled", severity: "critical" };
+}
+var sf;
+var init_nephrology = __esm({
+  "../../plugin/lib/nephrology.ts"() {
+    "use strict";
+    init_ckd();
+    init_ckd();
+    sf = (v) => {
+      const n = parseFloat(v);
+      return isNaN(n) ? 0 : n;
+    };
+  }
+});
+
+// ../../plugin/lib/sources.ts
+var KDIGO_2021_BP, KDIGO_2012_ANEMIA, KDIGO_2024_CKD, CKD_EPI_2021, KFRE_TANGRI, WINTERS_1967, BERLIN_2012, WHO_BMI_2000;
+var init_sources = __esm({
+  "../../plugin/lib/sources.ts"() {
+    "use strict";
+    KDIGO_2021_BP = "KDIGO 2021 Clinical Practice Guideline for Blood Pressure in CKD (Kidney Int 2021;99:S1-S87, doi:10.1016/j.kint.2020.11.003)";
+    KDIGO_2012_ANEMIA = "KDIGO 2012 Clinical Practice Guideline for Anemia in CKD (Kidney Int Suppl 2012;2:279)";
+    KDIGO_2024_CKD = "KDIGO 2024 Clinical Practice Guideline for CKD Evaluation and Management (Kidney Int 2024;105:S117-S314, doi:10.1016/j.kint.2023.10.018)";
+    CKD_EPI_2021 = "CKD-EPI 2021 Creatinine Equation (Inker et al. N Engl J Med 2021;385:1737-1749, doi:10.1056/NEJMoa2102953)";
+    KFRE_TANGRI = "Tangri et al. Kidney Failure Risk Equation, 4-variable, non-North American calibration (JAMA 2016;315:164-174, doi:10.1001/jama.2015.18202)";
+    WINTERS_1967 = "Albert, Dell, Winters. Winters' formula (Ann Intern Med 1967;66:312-322, doi:10.7326/0003-4819-66-2-312)";
+    BERLIN_2012 = "ARDS Definition Task Force. Berlin Definition (JAMA 2012;307:2526-2533, doi:10.1001/jama.2012.5669)";
+    WHO_BMI_2000 = "WHO. Obesity: preventing and managing the global epidemic (WHO Technical Report Series 894, 2000)";
+  }
+});
+
 // src/extract-artifact.ts
 var EXTRACT_ARTIFACT_HTML;
 var init_extract_artifact = __esm({
@@ -4064,12 +4097,13 @@ var init_extract_artifact = __esm({
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500;600&display=swap" media="print" onload="this.media='all'">
 <style>
 :root{
   --ground:#f1ebde; --sheet:#fbf8f2; --ink:#1d1a16; --ink-2:#5a534a; --line:#cdc3b0;
   --hl:#e3d9c3; --hl-line:#1d1a16;
   --bad:#b0182f; --bad-t:#f1d5d8;
+  --calc:#1f4f82; --calc-t:#d3deea; --warn:#8a5200; --warn-t:#f0d9a8;
   --ui:"Fira Sans",system-ui,sans-serif;
   --label:"Fira Sans Condensed","Arial Narrow",sans-serif;
   --text:"Spectral",Georgia,serif;
@@ -4080,11 +4114,13 @@ var init_extract_artifact = __esm({
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f;
   --hl:#3d372f; --hl-line:#f1ebde;
-  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark}}
+  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark;
+  --calc:#9dbfe6; --calc-t:#263a52; --warn:#e3b566; --warn-t:#4a3a1c}}
 :root[data-theme="dark"]{
   --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f;
   --hl:#3d372f; --hl-line:#f1ebde;
-  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark}
+  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark;
+  --calc:#9dbfe6; --calc-t:#263a52; --warn:#e3b566; --warn-t:#4a3a1c}
 @media (min-width:700px){:root{--gut:max(28px,env(safe-area-inset-left,0px))}}
 *{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--ink-2) transparent}
 body{display:grid;grid-template-rows:auto minmax(0,1fr);height:100dvh;overflow:hidden;margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.4 var(--ui);font-variant-numeric:tabular-nums;caret-color:var(--ink)}
@@ -4150,6 +4186,9 @@ h2 b{font:500 12px/1.3 var(--mono);color:var(--ink)}
 .rail h2,.ph{position:sticky;top:calc(var(--i,0)*40px);z-index:1;height:40px;padding-top:8px;background:var(--ground);box-shadow:-12px 0 var(--ground),12px 0 var(--ground)}
 .rail section{display:contents}
 .rail section>h2{cursor:pointer}
+/* the two heads that are not the note's own words take a colour: carmine = check this, blue = worked out, not in the note */
+.rail .rev>h2{color:var(--bad)}
+.rail .calc>h2{color:var(--calc)}
 .lead{padding-top:10px;font-size:14px;color:var(--ink-2);text-wrap:pretty}
 .empty{font-style:italic;color:var(--ink-2)}
 .card{margin-inline:-12px;padding:10px 12px 12px;border-bottom:1px solid var(--line);transition:background-color .3s var(--ease)}
@@ -4203,16 +4242,41 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
 .val{grid-column:4;text-align:right;white-space:nowrap}
 .e:not(.t)::after{content:"";grid-area:1/3;border-bottom:1px dotted;opacity:.45;transform:translateY(-3px)}
 /* a value in words is read, not compared: under its field, at text weight */
+/* the field is read in ink; its notes and the unit step back */
+.e:not(.bad)>.m+span{color:var(--ink)}
+.e small{color:var(--ink-2)}
 .e.t>span{grid-column:2/-1}
 .e.t .val{text-align:left;white-space:normal}
 /* the figure is the largest thing in an entry */
-.v{font:500 15px/1.3 var(--mono);color:var(--ink)}
+.v{font:600 15px/1.3 var(--mono);color:var(--ink)}
 .v.txt{font:400 14.5px/1.35 var(--ui)}
 .e small,.e .why{margin-left:5px;font-size:12px}
 .e .u{display:inline-block;min-width:5ch;text-align:left}
 .e.bad,.e.bad .v{color:var(--bad)}
 .e.close .why{color:var(--bad)}
 .e:hover.bad,.e.on.bad{background:var(--bad-t)}
+/* a calculated value on its scale. The band it falls in is marked the way a quote is: highlighter over a
+   heavier rule. The value is the page's own square, on a stem; the cut-offs hang below with their figures.
+   A normal range stands in a hairline frame, like a value from the history */
+/* blue is the calculators' ink; a value outside its reference range turns its scale amber (the words under it say so too) */
+.sc{margin-top:14px}
+.sc.out{--calc:var(--warn);--calc-t:var(--warn-t)}
+.sc .v,.card .res .n{color:var(--calc)}
+.card .res{color:var(--ink);font-weight:600}
+.res .k{color:var(--ink-2)}
+.card .sl{display:flex;align-items:baseline;gap:6px;margin:0;font-size:13px}
+.sl i{flex:1;border-bottom:1px dotted;opacity:.45;transform:translateY(-3px)}
+.sl small{margin-left:5px;font-size:12px}
+.rule{display:block;width:100%;height:36px;margin-top:8px;overflow:visible}
+.rule line{stroke:var(--ink);stroke-width:1;shape-rendering:crispEdges}
+.rule .in{fill:var(--calc-t)}
+.rule .at{stroke:var(--calc);stroke-width:3}
+.rule .stem{stroke:var(--calc)}
+.rule .ref{fill:none;stroke:var(--ink);stroke-width:1;shape-rendering:crispEdges}
+.rule .pt{fill:var(--calc)}
+.rule text{font:500 11px/1 var(--mono);fill:var(--ink-2)}
+.card .band{margin:2px 0 0;font-size:13px;font-weight:600;color:var(--calc)}
+.card .src{margin-top:14px;font-size:12px}
 @media (prefers-reduced-motion:no-preference){
   /* the highlighter is drawn across each quote once, when the note first appears */
   .fresh mark{animation:stroke .9s var(--ease) .1s both}
@@ -4510,6 +4574,62 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return li;
   }
 
+  function svg(tag, at) {
+    var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in at) e.setAttribute(k, at[k]);
+    return e;
+  }
+  // a value on its scale: the figure, the rule with the cut-offs, and the band it falls in, in words.
+  // Every place on the rule is a share of its width, so it holds at any width of the card
+  function scale(s) {
+    var d = el("div", s.ref != null && s.at !== s.ref ? "sc out" : "sc"), p = el("p", "sl"), val = el("span"), span = s.max - s.min;
+    function x(v) { return (v - s.min) / span * 100 + "%"; }
+    p.appendChild(el("span", "", s.label)); p.appendChild(el("i"));
+    val.appendChild(el("b", "v", s.value));
+    if (s.unit) val.appendChild(el("small", "", s.unit));
+    p.appendChild(val); d.appendChild(p);
+    var g = svg("svg", { "class": "rule", "aria-hidden": "true" });
+    var edge = [s.min].concat(s.cuts, [s.max]);
+    g.appendChild(svg("rect", { "class": "in", x: x(edge[s.at]), y: 4, width: (edge[s.at + 1] - edge[s.at]) / span * 100 + "%", height: 11 }));
+    if (s.ref != null) g.appendChild(svg("rect", { "class": "ref", x: x(edge[s.ref]), y: 4.5, width: (edge[s.ref + 1] - edge[s.ref]) / span * 100 + "%", height: 11 }));
+    g.appendChild(svg("line", { x1: 0, x2: "100%", y1: 15.5, y2: 15.5 }));
+    g.appendChild(svg("line", { "class": "at", x1: x(edge[s.at]), x2: x(edge[s.at + 1]), y1: 15.5, y2: 15.5 }));
+    s.cuts.forEach(function (c, i) {
+      g.appendChild(svg("line", { x1: x(c), x2: x(c), y1: 15, y2: 21 }));
+      // two cut-offs close together: their figures stand apart, each on its outer side
+      var near = span * 0.14, t = svg("text", { x: x(c), y: 33, "text-anchor": s.cuts[i + 1] - c < near ? "end" : c - s.cuts[i - 1] < near ? "start" : "middle" });
+      t.textContent = c; g.appendChild(t);
+    });
+    g.appendChild(svg("line", { "class": "stem", x1: x(+s.value), x2: x(+s.value), y1: 7, y2: 15 }));
+    g.appendChild(svg("rect", { "class": "pt", x: x(+s.value), y: 0, width: 7, height: 7, transform: "translate(-3.5 0)" }));
+    d.appendChild(g);
+    d.appendChild(el("p", "band", s.band));
+    return d;
+  }
+
+  // a calculator result: its rows, its source. Pointing at it lights the words its inputs came from
+  function calc(c) {
+    var li = el("li", "card");
+    li.tabIndex = 0;
+    li.appendChild(el("h3", "", c.title));
+    c.rows.forEach(function (r) {
+      var p = line(r[0], "res");
+      p.appendChild(FIG.test(r[1]) ? el("span", "n", r[1]) : document.createTextNode(r[1]));
+      if (r[2]) p.appendChild(document.createTextNode(" " + r[2]));
+      li.appendChild(p);
+    });
+    c.scales.forEach(function (s) { li.appendChild(scale(s)); });
+    li.appendChild(el("p", "src", c.source));
+    function lit() { clear(); c.uses.forEach(function (n) { on(n); }); }
+    li.addEventListener("mouseenter", lit);
+    li.addEventListener("focusin", lit);
+    li.addEventListener("mouseleave", clear);
+    li.addEventListener("focusout", clear);
+    // first, so a click on a quote still brings the value's own row, the last one
+    c.uses.forEach(function (n) { rows[n].unshift(li); });
+    return li;
+  }
+
   // numbers the heads of the rail for the stack; a click on one brings its section up under the stack
   function stack() {
     rail.querySelectorAll("h2").forEach(function (h, i) {
@@ -4562,8 +4682,8 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
 
     if (!items.length) { rail.appendChild(el("p", "empty", "Nothing was extracted from this note.")); return; }
     // a section of the rail: its head, then its body
-    function sec(title, n, body, lead) {
-      var s = el("section"); s.appendChild(head(title, n));
+    function sec(title, n, body, lead, cls) {
+      var s = el("section", cls); s.appendChild(head(title, n));
       if (lead) s.appendChild(el("p", "lead", lead));
       s.appendChild(body); rail.appendChild(s);
     }
@@ -4571,7 +4691,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     if (flagged) {
       var ol = el("ol", "cards");
       items.forEach(function (it, n) { if (it.status !== "quoted") ol.appendChild(card(it, n)); });
-      sec("Needs review", flagged, ol, "The quote is missing, inexact, or doesn't state the value. Check each against the note.");
+      sec("Needs review", flagged, ol, "The quote is missing, inexact, or doesn't state the value. Check each against the note.", "rev");
     }
     // then every item once, in its group, in note order; in the labs, this illness before the history
     [
@@ -4583,6 +4703,12 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       g.slice(1).forEach(function (is) { items.forEach(function (it, n) { if (is(it)) ul.appendChild(entry(it, n)); }); });
       if (ul.firstChild) sec(g[0], ul.children.length, ul);
     });
+    // last, apart from what the note says: what the calculators make of it
+    if (data.calcs && data.calcs.length) {
+      var cl = el("ol", "cards");
+      data.calcs.forEach(function (c) { cl.appendChild(calc(c)); });
+      sec("Calculated", data.calcs.length, cl, "Worked out from the values found word for word in the current illness. Not in the note. For learning and prototyping, never patient care.", "calc");
+    }
     stack();
     // the legend: the counts by mark
     [["", "current illness, found word for word"], ["his", "history, found word for word"], ["close", "close match"], ["bad", "missing, or the quote doesn't state the value"]].forEach(function (g) {
@@ -4633,7 +4759,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   var STEPS = [
     ["Pull out the values", "Each value is copied with the exact words it came from."],
     ["Second check", "A second run re-reads the note and proposes corrections."],
-    ["You review", "Accept or reject each correction. Nothing is interpreted."]
+    ["You review", "Accept or reject each correction. Calculations appear once all are answered."]
   ];
   // at: the step running now; -1 before the start
   function stepList(at) {
@@ -6107,6 +6233,7 @@ Waiting for the overlay to create it\u2026
 // src/commands/extract.ts
 var extract_exports = {};
 __export(extract_exports, {
+  calculations: () => calculations,
   itemsError: () => itemsError,
   pageData: () => pageData,
   run: () => run12,
@@ -6114,7 +6241,7 @@ __export(extract_exports, {
   serve: () => serve2,
   stateOf: () => stateOf
 });
-var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, import_node_util12, USAGE12, saveNote, itemsError, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run12;
+var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, import_node_util12, USAGE12, saveNote, itemsError, scaleOf, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run12;
 var init_extract = __esm({
   "src/commands/extract.ts"() {
     "use strict";
@@ -6125,7 +6252,13 @@ var init_extract = __esm({
     import_node_http2 = require("http");
     import_node_path2 = require("path");
     import_node_util12 = require("util");
+    init_acid_base();
+    init_bmi();
+    init_ckd();
     init_extraction();
+    init_nephrology();
+    init_pafi();
+    init_sources();
     init_format();
     init_extract_artifact();
     init_overlay();
@@ -6179,11 +6312,92 @@ Example:
       if (badKey) return `unknown key "${badKey.key}" \u2014 use one of: ${Object.keys(FIELDS).join(", ")}`;
       return null;
     };
+    scaleOf = (label, value, unit, cuts, at, band, [lo, hi]) => {
+      const v = Number(value);
+      const pad = (hi - lo) * 0.08;
+      return { label, value, ...unit ? { unit } : {}, min: v < lo ? v - pad : lo, max: v > hi ? v + pad : hi, cuts: [...cuts], at, band };
+    };
+    calculations = (checked) => {
+      const { inputs, sex } = toInputs(checked);
+      const str = (k) => inputs[k] ? String(inputs[k].value) : "";
+      const unit = (k) => inputs[k]?.unit?.trim().toLowerCase();
+      const uses = (...keys) => keys.filter((k) => k === "sex" ? sex : inputs[k]).map((k) => checked.findIndex((c) => c.key === k && c.episode === "current"));
+      const out = [];
+      const w = unit("weight");
+      const h = unit("height");
+      const metric = w === "kg" && (h === "m" || h === "cm");
+      if (metric || (w === "lb" || w === "lbs") && h === "in") {
+        const bmi = calculateBMI(str("weight"), "0", str("height"), h === "cm" ? String(inputs.height.value / 100) : str("height"), metric);
+        const category = getBMICategory(bmi);
+        if (bmi) out.push({ title: "Body mass index", rows: [], scales: [scaleOf("BMI", bmi, "kg/m\xB2", BMI_BANDS.cuts, BMI_BANDS.labels.indexOf(category), category, [15, 45])], uses: uses("weight", "height"), source: WHO_BMI_2000 });
+      }
+      const pafi = inputs.pao2 && inputs.fio2 ? calculatePaFi(str("pao2"), str("fio2")) : null;
+      if (pafi) {
+        const range = getPaFiClassification(pafi);
+        out.push({ title: "PaO2/FiO2", rows: [], scales: [scaleOf("Ratio", pafi, "mmHg", PAFI_BANDS.cuts, PAFI_BANDS.labels.indexOf(range), range, [0, 500])], uses: uses("pao2", "fio2"), source: BERLIN_2012 });
+      }
+      const abg = inputs.ph && inputs.pco2 && inputs.hco3 ? analyze({ values: { pH: str("ph"), pCO2: str("pco2"), HCO3: str("hco3"), Na: str("na"), Cl: str("cl"), Albumin: str("albumin") }, isChronic: false }) : null;
+      if (abg) {
+        const against = (label, k, [lo, hi], ends) => {
+          const at = inputs[k].value < lo ? 0 : inputs[k].value > hi ? 2 : 1;
+          return { ...scaleOf(label, str(k), inputs[k].unit, [lo, hi], at, ["Below the normal range", "In the normal range", "Above the normal range"][at], ends), ref: 1 };
+        };
+        out.push({
+          title: "Acid-base",
+          rows: [
+            ["Disorder", abg.disorder],
+            // the note does not say acute or chronic; same default as `medprotocol abg`
+            ["Compensation", `${abg.compensation} (taken as acute)`],
+            ...abg.anionGap !== null ? [["Anion gap", abg.anionGap, `mEq/L, ${abg.agStatus}`]] : []
+          ],
+          scales: [against("pH", "ph", NORMAL_RANGES.pH, [7.1, 7.7]), against("pCO2", "pco2", NORMAL_RANGES.pCO2, [20, 60]), against("Bicarbonate", "hco3", NORMAL_RANGES.HCO3, [10, 40])],
+          uses: uses("ph", "pco2", "hco3", "na", "cl", "albumin"),
+          source: WINTERS_1967
+        });
+      }
+      const gfrScale = (label, value, u) => {
+        const g = classifyGFRCategory(value);
+        return scaleOf(label, value, u, GFR_BANDS.cuts, GFR_BANDS.labels.indexOf(g), `${g}: ${getGFRCategoryLabel(g)}`, [0, 120]);
+      };
+      const made = inputs.creatinine && inputs.age && sex && unit("creatinine") === "mg/dl" ? calculateEGFR(str("creatinine"), str("age"), sex) : 0;
+      if (made) out.push({ title: "eGFR from creatinine", rows: [], scales: [gfrScale("eGFR", String(made), "mL/min/1.73m\xB2")], uses: uses("creatinine", "age", "sex"), source: CKD_EPI_2021 });
+      const stated = !!inputs.egfr && !!unit("egfr")?.includes("1.73");
+      const egfr = stated ? str("egfr") : made ? String(made) : "";
+      if (egfr && inputs.acr && unit("acr") === "mg/g") {
+        const g = classifyGFRCategory(egfr);
+        const a = classifyAlbuminuriaCategory(str("acr"));
+        const risk = getCKDRiskLevel(g, a);
+        const from = stated ? uses("egfr", "acr") : uses("creatinine", "age", "sex", "acr");
+        out.push({
+          title: "CKD staging",
+          rows: [["Stage", `${g} ${a}`], ["Risk level", risk], ["Monitoring", String(getMonitoringFrequency(g, a)), "times a year"]],
+          scales: [
+            stated ? gfrScale("eGFR", egfr, inputs.egfr.unit) : gfrScale("eGFR, calculated", egfr, "mL/min/1.73m\xB2"),
+            scaleOf("ACR", str("acr"), inputs.acr.unit, ACR_BANDS.cuts, ACR_BANDS.labels.indexOf(a), `${a}: ${getAlbuminuriaCategoryLabel(a)}`, [0, 500])
+          ],
+          uses: from,
+          source: KDIGO_2024_CKD
+        });
+        if (sex && inputs.age && g !== "G1" && g !== "G2" && inputs.acr.value > 0) {
+          const kfre = calculateKFRE(str("age"), sex, egfr, str("acr"));
+          out.push({ title: "Kidney failure risk (KFRE)", rows: [["In 2 years", String(kfre.twoYear), "%"], ["In 5 years", String(kfre.fiveYear), "%"]], scales: [], uses: [.../* @__PURE__ */ new Set([...from, ...uses("age", "sex")])], source: KFRE_TANGRI });
+        }
+        if (risk !== "green" && inputs.sbp && inputs.dbp) {
+          out.push({ title: "Blood pressure in CKD", rows: [["Reading", `${str("sbp")}/${str("dbp")}`, "mmHg"], ["Against target", classifyBPInCKD(str("sbp"), str("dbp")).label]], scales: [], uses: uses("sbp", "dbp"), source: KDIGO_2021_BP });
+        }
+        if (risk !== "green" && inputs.hb && sex && unit("hb") === "g/dl") {
+          const anemia = classifyAnemia(str("hb"), sex);
+          out.push({ title: "Anemia in CKD", rows: [["Hemoglobin", str("hb"), inputs.hb.unit], ["Anemia", anemia.anemic ? `Yes, ${anemia.severity}` : "No"]], scales: [], uses: uses("hb", "sex"), source: KDIGO_2012_ANEMIA });
+        }
+      }
+      return out;
+    };
     pageData = (name, note, items) => ({
       name,
       checkedAt: (/* @__PURE__ */ new Date()).toLocaleDateString("sv"),
       items,
-      segments: noteSegments(note, items)
+      segments: noteSegments(note, items),
+      calcs: calculations(items)
     });
     readJson = (file) => (0, import_node_fs2.existsSync)(file) ? JSON.parse((0, import_node_fs2.readFileSync)(file, "utf8")) : void 0;
     stateOf = (dir, running) => {
@@ -6199,7 +6413,7 @@ Example:
       const undecided = findings.some((f) => (f.correction || f.index !== void 0) && !f.decision);
       const state = verify ? undecided ? "review" : "done" : !running ? "failed" : firstPass ? "verifying" : "extracting";
       const items = verify ? checkExtraction(note, readJson((0, import_node_path2.join)(dir, "corrected.json")) ?? []) : [];
-      return { id: (0, import_node_path2.basename)(dir), state, error: null, note, ...pageData((0, import_node_path2.basename)(dir), note, items), findings };
+      return { id: (0, import_node_path2.basename)(dir), state, error: null, note, ...pageData((0, import_node_path2.basename)(dir), note, items), ...undecided ? { calcs: [] } : {}, findings };
     };
     children = /* @__PURE__ */ new Set();
     TIMEOUT_MS = 5 * 6e4;
@@ -6483,7 +6697,7 @@ ${check}`));
       const counts = Object.fromEntries(
         ["quoted", "edited", "approximate", "reordered", "mismatched", "unverified", "none"].map((s) => [s, checked.filter((c) => c.status === s).length])
       );
-      const { inputs, review } = toInputs(checked);
+      const { inputs, sex, review } = toInputs(checked);
       if (values.artifact) {
         const name = (0, import_node_path2.basename)(values.note) === "note.md" ? (0, import_node_path2.basename)((0, import_node_path2.dirname)((0, import_node_path2.resolve)(values.note))) : (0, import_node_path2.basename)(values.note, (0, import_node_path2.extname)(values.note));
         const data = pageData(name, note, checked);
@@ -6497,14 +6711,14 @@ ${check}`));
         }
       }
       printResult(
-        { items: checked, counts, inputs, review },
+        { items: checked, counts, inputs, ...sex ? { sex } : {}, review },
         values.json,
         () => [
           formatHeader("Extraction vs note"),
           formatTable(checked.map((c) => [c.field, `${c.value}${c.unit ? ` ${c.unit}` : ""}  (${c.episode})  [${c.status}${c.distance ? `, ${c.distance} chars off` : ""}${c.ambiguous ? ", ambiguous" : ""}]  "${c.quote}"`])),
           "",
           formatTable(Object.entries(counts).map(([s, n]) => [s, String(n)])),
-          ...Object.keys(inputs).length ? [formatHeader("Inputs for calculators"), formatTable(Object.entries(inputs).map(([k, v]) => [k, `${v.value}${v.unit ? ` ${v.unit}` : ""}`]))] : [],
+          ...Object.keys(inputs).length || sex ? [formatHeader("Inputs for calculators"), formatTable([...Object.entries(inputs).map(([k, v]) => [k, `${v.value}${v.unit ? ` ${v.unit}` : ""}`]), ...sex ? [["sex", sex]] : []])] : [],
           ...review.length ? [formatHeader("Held back"), formatTable(review.map((r) => [r.item.key, `${r.item.value}  [${r.reason}]`]))] : []
         ].join("\n")
       );

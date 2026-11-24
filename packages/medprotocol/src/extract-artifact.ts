@@ -1,6 +1,9 @@
 // The page `medprotocol extract --artifact <file>` writes: one extraction as a marked-up proof. Every
 // value is listed at left in one place (what needs review, then current illness, history, labs); the note
 // stands at right as it was written, with the words each value came from highlighted.
+// Under the values, what the calculators make of them (BMI, PaO2/FiO2, acid-base): worked out by the CLI
+// from plugin/lib when the page is written; the page only draws the results, each value on a scale whose
+// cut-offs come with the data. Nothing clinical is typed into this file.
 // The field sheet of the landing page (claude-medical-protocol/DESIGN.md): warm paper, ink, one carmine.
 // A standalone local file: it holds the full note and is never published.
 // __TITLE__ and __DATA__ are filled by the CLI. Kept as String.raw with no backticks or `${`.
@@ -13,12 +16,13 @@ export const EXTRACT_ARTIFACT_HTML = String.raw`<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500;600&display=swap" media="print" onload="this.media='all'">
 <style>
 :root{
   --ground:#f1ebde; --sheet:#fbf8f2; --ink:#1d1a16; --ink-2:#5a534a; --line:#cdc3b0;
   --hl:#e3d9c3; --hl-line:#1d1a16;
   --bad:#b0182f; --bad-t:#f1d5d8;
+  --calc:#1f4f82; --calc-t:#d3deea; --warn:#8a5200; --warn-t:#f0d9a8;
   --ui:"Fira Sans",system-ui,sans-serif;
   --label:"Fira Sans Condensed","Arial Narrow",sans-serif;
   --text:"Spectral",Georgia,serif;
@@ -29,11 +33,13 @@ export const EXTRACT_ARTIFACT_HTML = String.raw`<!doctype html>
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f;
   --hl:#3d372f; --hl-line:#f1ebde;
-  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark}}
+  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark;
+  --calc:#9dbfe6; --calc-t:#263a52; --warn:#e3b566; --warn-t:#4a3a1c}}
 :root[data-theme="dark"]{
   --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f;
   --hl:#3d372f; --hl-line:#f1ebde;
-  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark}
+  --bad:#e7959f; --bad-t:#4a2228; --mark:var(--ink); color-scheme:dark;
+  --calc:#9dbfe6; --calc-t:#263a52; --warn:#e3b566; --warn-t:#4a3a1c}
 @media (min-width:700px){:root{--gut:max(28px,env(safe-area-inset-left,0px))}}
 *{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--ink-2) transparent}
 body{display:grid;grid-template-rows:auto minmax(0,1fr);height:100dvh;overflow:hidden;margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.4 var(--ui);font-variant-numeric:tabular-nums;caret-color:var(--ink)}
@@ -99,6 +105,9 @@ h2 b{font:500 12px/1.3 var(--mono);color:var(--ink)}
 .rail h2,.ph{position:sticky;top:calc(var(--i,0)*40px);z-index:1;height:40px;padding-top:8px;background:var(--ground);box-shadow:-12px 0 var(--ground),12px 0 var(--ground)}
 .rail section{display:contents}
 .rail section>h2{cursor:pointer}
+/* the two heads that are not the note's own words take a colour: carmine = check this, blue = worked out, not in the note */
+.rail .rev>h2{color:var(--bad)}
+.rail .calc>h2{color:var(--calc)}
 .lead{padding-top:10px;font-size:14px;color:var(--ink-2);text-wrap:pretty}
 .empty{font-style:italic;color:var(--ink-2)}
 .card{margin-inline:-12px;padding:10px 12px 12px;border-bottom:1px solid var(--line);transition:background-color .3s var(--ease)}
@@ -152,16 +161,41 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
 .val{grid-column:4;text-align:right;white-space:nowrap}
 .e:not(.t)::after{content:"";grid-area:1/3;border-bottom:1px dotted;opacity:.45;transform:translateY(-3px)}
 /* a value in words is read, not compared: under its field, at text weight */
+/* the field is read in ink; its notes and the unit step back */
+.e:not(.bad)>.m+span{color:var(--ink)}
+.e small{color:var(--ink-2)}
 .e.t>span{grid-column:2/-1}
 .e.t .val{text-align:left;white-space:normal}
 /* the figure is the largest thing in an entry */
-.v{font:500 15px/1.3 var(--mono);color:var(--ink)}
+.v{font:600 15px/1.3 var(--mono);color:var(--ink)}
 .v.txt{font:400 14.5px/1.35 var(--ui)}
 .e small,.e .why{margin-left:5px;font-size:12px}
 .e .u{display:inline-block;min-width:5ch;text-align:left}
 .e.bad,.e.bad .v{color:var(--bad)}
 .e.close .why{color:var(--bad)}
 .e:hover.bad,.e.on.bad{background:var(--bad-t)}
+/* a calculated value on its scale. The band it falls in is marked the way a quote is: highlighter over a
+   heavier rule. The value is the page's own square, on a stem; the cut-offs hang below with their figures.
+   A normal range stands in a hairline frame, like a value from the history */
+/* blue is the calculators' ink; a value outside its reference range turns its scale amber (the words under it say so too) */
+.sc{margin-top:14px}
+.sc.out{--calc:var(--warn);--calc-t:var(--warn-t)}
+.sc .v,.card .res .n{color:var(--calc)}
+.card .res{color:var(--ink);font-weight:600}
+.res .k{color:var(--ink-2)}
+.card .sl{display:flex;align-items:baseline;gap:6px;margin:0;font-size:13px}
+.sl i{flex:1;border-bottom:1px dotted;opacity:.45;transform:translateY(-3px)}
+.sl small{margin-left:5px;font-size:12px}
+.rule{display:block;width:100%;height:36px;margin-top:8px;overflow:visible}
+.rule line{stroke:var(--ink);stroke-width:1;shape-rendering:crispEdges}
+.rule .in{fill:var(--calc-t)}
+.rule .at{stroke:var(--calc);stroke-width:3}
+.rule .stem{stroke:var(--calc)}
+.rule .ref{fill:none;stroke:var(--ink);stroke-width:1;shape-rendering:crispEdges}
+.rule .pt{fill:var(--calc)}
+.rule text{font:500 11px/1 var(--mono);fill:var(--ink-2)}
+.card .band{margin:2px 0 0;font-size:13px;font-weight:600;color:var(--calc)}
+.card .src{margin-top:14px;font-size:12px}
 @media (prefers-reduced-motion:no-preference){
   /* the highlighter is drawn across each quote once, when the note first appears */
   .fresh mark{animation:stroke .9s var(--ease) .1s both}
@@ -459,6 +493,62 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return li;
   }
 
+  function svg(tag, at) {
+    var e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in at) e.setAttribute(k, at[k]);
+    return e;
+  }
+  // a value on its scale: the figure, the rule with the cut-offs, and the band it falls in, in words.
+  // Every place on the rule is a share of its width, so it holds at any width of the card
+  function scale(s) {
+    var d = el("div", s.ref != null && s.at !== s.ref ? "sc out" : "sc"), p = el("p", "sl"), val = el("span"), span = s.max - s.min;
+    function x(v) { return (v - s.min) / span * 100 + "%"; }
+    p.appendChild(el("span", "", s.label)); p.appendChild(el("i"));
+    val.appendChild(el("b", "v", s.value));
+    if (s.unit) val.appendChild(el("small", "", s.unit));
+    p.appendChild(val); d.appendChild(p);
+    var g = svg("svg", { "class": "rule", "aria-hidden": "true" });
+    var edge = [s.min].concat(s.cuts, [s.max]);
+    g.appendChild(svg("rect", { "class": "in", x: x(edge[s.at]), y: 4, width: (edge[s.at + 1] - edge[s.at]) / span * 100 + "%", height: 11 }));
+    if (s.ref != null) g.appendChild(svg("rect", { "class": "ref", x: x(edge[s.ref]), y: 4.5, width: (edge[s.ref + 1] - edge[s.ref]) / span * 100 + "%", height: 11 }));
+    g.appendChild(svg("line", { x1: 0, x2: "100%", y1: 15.5, y2: 15.5 }));
+    g.appendChild(svg("line", { "class": "at", x1: x(edge[s.at]), x2: x(edge[s.at + 1]), y1: 15.5, y2: 15.5 }));
+    s.cuts.forEach(function (c, i) {
+      g.appendChild(svg("line", { x1: x(c), x2: x(c), y1: 15, y2: 21 }));
+      // two cut-offs close together: their figures stand apart, each on its outer side
+      var near = span * 0.14, t = svg("text", { x: x(c), y: 33, "text-anchor": s.cuts[i + 1] - c < near ? "end" : c - s.cuts[i - 1] < near ? "start" : "middle" });
+      t.textContent = c; g.appendChild(t);
+    });
+    g.appendChild(svg("line", { "class": "stem", x1: x(+s.value), x2: x(+s.value), y1: 7, y2: 15 }));
+    g.appendChild(svg("rect", { "class": "pt", x: x(+s.value), y: 0, width: 7, height: 7, transform: "translate(-3.5 0)" }));
+    d.appendChild(g);
+    d.appendChild(el("p", "band", s.band));
+    return d;
+  }
+
+  // a calculator result: its rows, its source. Pointing at it lights the words its inputs came from
+  function calc(c) {
+    var li = el("li", "card");
+    li.tabIndex = 0;
+    li.appendChild(el("h3", "", c.title));
+    c.rows.forEach(function (r) {
+      var p = line(r[0], "res");
+      p.appendChild(FIG.test(r[1]) ? el("span", "n", r[1]) : document.createTextNode(r[1]));
+      if (r[2]) p.appendChild(document.createTextNode(" " + r[2]));
+      li.appendChild(p);
+    });
+    c.scales.forEach(function (s) { li.appendChild(scale(s)); });
+    li.appendChild(el("p", "src", c.source));
+    function lit() { clear(); c.uses.forEach(function (n) { on(n); }); }
+    li.addEventListener("mouseenter", lit);
+    li.addEventListener("focusin", lit);
+    li.addEventListener("mouseleave", clear);
+    li.addEventListener("focusout", clear);
+    // first, so a click on a quote still brings the value's own row, the last one
+    c.uses.forEach(function (n) { rows[n].unshift(li); });
+    return li;
+  }
+
   // numbers the heads of the rail for the stack; a click on one brings its section up under the stack
   function stack() {
     rail.querySelectorAll("h2").forEach(function (h, i) {
@@ -511,8 +601,8 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
 
     if (!items.length) { rail.appendChild(el("p", "empty", "Nothing was extracted from this note.")); return; }
     // a section of the rail: its head, then its body
-    function sec(title, n, body, lead) {
-      var s = el("section"); s.appendChild(head(title, n));
+    function sec(title, n, body, lead, cls) {
+      var s = el("section", cls); s.appendChild(head(title, n));
       if (lead) s.appendChild(el("p", "lead", lead));
       s.appendChild(body); rail.appendChild(s);
     }
@@ -520,7 +610,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     if (flagged) {
       var ol = el("ol", "cards");
       items.forEach(function (it, n) { if (it.status !== "quoted") ol.appendChild(card(it, n)); });
-      sec("Needs review", flagged, ol, "The quote is missing, inexact, or doesn't state the value. Check each against the note.");
+      sec("Needs review", flagged, ol, "The quote is missing, inexact, or doesn't state the value. Check each against the note.", "rev");
     }
     // then every item once, in its group, in note order; in the labs, this illness before the history
     [
@@ -532,6 +622,12 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       g.slice(1).forEach(function (is) { items.forEach(function (it, n) { if (is(it)) ul.appendChild(entry(it, n)); }); });
       if (ul.firstChild) sec(g[0], ul.children.length, ul);
     });
+    // last, apart from what the note says: what the calculators make of it
+    if (data.calcs && data.calcs.length) {
+      var cl = el("ol", "cards");
+      data.calcs.forEach(function (c) { cl.appendChild(calc(c)); });
+      sec("Calculated", data.calcs.length, cl, "Worked out from the values found word for word in the current illness. Not in the note. For learning and prototyping, never patient care.", "calc");
+    }
     stack();
     // the legend: the counts by mark
     [["", "current illness, found word for word"], ["his", "history, found word for word"], ["close", "close match"], ["bad", "missing, or the quote doesn't state the value"]].forEach(function (g) {
@@ -582,7 +678,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   var STEPS = [
     ["Pull out the values", "Each value is copied with the exact words it came from."],
     ["Second check", "A second run re-reads the note and proposes corrections."],
-    ["You review", "Accept or reject each correction. Nothing is interpreted."]
+    ["You review", "Accept or reject each correction. Calculations appear once all are answered."]
   ];
   // at: the step running now; -1 before the start
   function stepList(at) {

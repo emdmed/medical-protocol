@@ -46,6 +46,8 @@ Logic: `lib/medprotocol/acid-base/` — import from `@/lib/medprotocol/acid-base
 
 Inputs are parsed internally via `safeParseFloatOrNull`.
 
+Compensation outside the expected range always names a second disorder in `additionalDisorders`: too much is the compensating disorder itself (listed once in `allDisorders`), too little is the opposite one (e.g. bicarbonate under the expected range in respiratory acidosis → `Metabolic Acidosis`), even when the value is still inside its normal range.
+
 ---
 
 ## Cross-Tool Data

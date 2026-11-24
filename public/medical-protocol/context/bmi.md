@@ -30,6 +30,7 @@ Logic: `lib/medprotocol/bmi.ts` — import from `@/lib/medprotocol/bmi`. Build: 
 ## Lib Functions
 
 - `calculateBMI(w, hFt, hIn, hM, metric)` → `string | null` (1 decimal). All inputs `string`, `metric: boolean`. Returns `null` for weight ≤0 or >700 kg / >1500 lb, height ≤0 or >2.75 m / >108 in.
+- `BMI_BANDS` → `{ cuts: [18.5, 25, 30, 35, 40], labels }`, the cut-offs and band names `getBMICategory` reads; use it to draw a scale.
 - `getBMICategory(bmi: string | null)` → `"Underweight"` (<18.5) | `"Normal"` (18.5–24.9) | `"Overweight"` (25–29.9) | `"Obese I"` (30–34.9) | `"Obese II"` (35–39.9) | `"Obese III"` (≥40) | `"Unknown"`.
 
 The lib does not split obesity into classes I–III. Do not derive them in the UI.
