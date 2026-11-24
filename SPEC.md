@@ -1,6 +1,6 @@
 # Medical Protocol — System Specification
 
-> Status: descriptive spec of the system as built (v1.3.0). This document is the
+> Status: descriptive spec of the system as built (v1.4.0). This document is the
 > authoritative description of *what the system is and how its parts contract
 > with each other*. Per-module clinical math, thresholds, and edge cases are
 > captured by the test suite (`tests/`) and the per-module context docs
