@@ -26,6 +26,26 @@ describe('medprotocol vitals', () => {
     expect(result.bloodPressure.diastolic).toBe(80);
   });
 
+  it('marks dangerous values as critical, not just high or low', () => {
+    run(['--bp', '190/125', '--hr', '190', '--rr', '40', '--temp', '41.5', '--json']);
+    const result = JSON.parse(stdout);
+    expect(result.bloodPressure).toMatchObject({ category: 'High', severity: 'critical', alert: 'Hypertensive crisis' });
+    expect(result.heartRate).toMatchObject({ severity: 'critical', alert: 'Severe tachycardia' });
+    expect(result.respiratoryRate).toMatchObject({ severity: 'critical', alert: 'Severe tachypnea' });
+    expect(result.temperature).toMatchObject({ severity: 'critical', alert: 'Hyperpyrexia' });
+    stdout = '';
+    run(['--bp', '70/40']);
+    expect(stdout).toContain('70/40 mmHg (Severe hypotension, critical)');
+  });
+
+  it('keeps the plain category below the critical limits', () => {
+    run(['--bp', '150/95', '--json']);
+    expect(JSON.parse(stdout).bloodPressure).toEqual({ systolic: 150, diastolic: 95, category: 'High', severity: 'warning' });
+    stdout = '';
+    run(['--bp', '150/95']);
+    expect(stdout).toContain('150/95 mmHg (High)');
+  });
+
   it('detects high BP', () => {
     run(['--bp', '150/95', '--json']);
     const result = JSON.parse(stdout);

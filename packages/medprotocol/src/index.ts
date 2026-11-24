@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { version as VERSION } from "../package.json";
+import { fail } from "./cli";
 
 const USAGE = `medprotocol — Medical calculations from the terminal
 
@@ -86,5 +87,14 @@ if (!loader) {
   );
   process.exitCode = 1;
 } else {
-  loader().then((mod) => mod.run(commandArgs));
+  loader().then((mod) => {
+    try {
+      mod.run(commandArgs);
+    } catch (error) {
+      // A mistyped flag is the user's error, not a crash: no stack trace.
+      const { code, message } = error as { code?: string; message: string };
+      if (!code?.startsWith("ERR_PARSE_ARGS")) throw error;
+      fail(`${message.split(". To specify")[0]}. Run "medprotocol ${command} --help" for the options.`);
+    }
+  });
 }

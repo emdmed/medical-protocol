@@ -81,3 +81,13 @@ describe('runSubcommand', () => {
     expect(stdout + stderr).toBe('');
   });
 });
+
+describe("mistyped flag", () => {
+  it("prints a short error instead of a stack trace", async () => {
+    const { spawnSync } = await import("node:child_process");
+    const { join } = await import("node:path");
+    const r = spawnSync("node", [join(__dirname, "../../plugin/scripts/medprotocol.cjs"), "bmi", "--weight", "70", "--height", "175"], { encoding: "utf8" });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toBe(`Error: Unknown option '--height'. Run "medprotocol bmi --help" for the options.\n`);
+  });
+});

@@ -104,6 +104,8 @@ medprotocol vitals --bp 120/80 --hr 72 --temp 37.0
 medprotocol vitals --bp 90/60 --hr 110 --rr 24 --temp 38.5 --spo2 92 --fio2 40
 ```
 
+Each vital in `--json` carries `severity` (`normal`, `warning`, `critical`; SpO2 keeps `normal`, `low`, `critical`). A critical blood pressure, heart rate, respiratory rate or temperature also carries `alert` with the severity label above (e.g. `"Hypertensive crisis"`), and the plain output shows it in place of the category.
+
 ---
 
 ## Guideline Reference

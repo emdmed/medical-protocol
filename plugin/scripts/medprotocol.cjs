@@ -10,44 +10,6 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// ../../plugin/lib/bmi.ts
-var MAX_WEIGHT_KG, MAX_WEIGHT_LBS, MAX_HEIGHT_M, MAX_HEIGHT_IN, calculateBMI, BMI_BANDS, getBMICategory;
-var init_bmi = __esm({
-  "../../plugin/lib/bmi.ts"() {
-    "use strict";
-    MAX_WEIGHT_KG = 700;
-    MAX_WEIGHT_LBS = 1500;
-    MAX_HEIGHT_M = 2.75;
-    MAX_HEIGHT_IN = 108;
-    calculateBMI = (w, hFt, hIn, hM, metric) => {
-      const weightNum = parseFloat(w);
-      if (isNaN(weightNum) || weightNum <= 0) return null;
-      if (metric) {
-        if (weightNum > MAX_WEIGHT_KG) return null;
-        const heightNum = parseFloat(hM);
-        if (isNaN(heightNum) || heightNum <= 0 || heightNum > MAX_HEIGHT_M) return null;
-        return (weightNum / (heightNum * heightNum)).toFixed(1);
-      } else {
-        if (weightNum > MAX_WEIGHT_LBS) return null;
-        const feet = parseFloat(hFt) || 0;
-        const inches = parseFloat(hIn) || 0;
-        const totalInches = feet * 12 + inches;
-        if (totalInches <= 0 || totalInches > MAX_HEIGHT_IN) return null;
-        return (weightNum / (totalInches * totalInches) * 703).toFixed(1);
-      }
-    };
-    BMI_BANDS = {
-      cuts: [18.5, 25, 30, 35, 40],
-      labels: ["Underweight", "Normal", "Overweight", "Obese I", "Obese II", "Obese III"]
-    };
-    getBMICategory = (bmi) => {
-      if (!bmi) return "Unknown";
-      const bmiNum = parseFloat(bmi);
-      return BMI_BANDS.labels[BMI_BANDS.cuts.filter((cut) => bmiNum >= cut).length];
-    };
-  }
-});
-
 // ../../plugin/lib/format.ts
 var formatTable, formatHeader, formatError, printResult;
 var init_format = __esm({
@@ -108,6 +70,44 @@ Available: ${Object.keys(subcommands).join(", ")}
         return;
       }
       subcommands[subcommand](subArgs, subArgs.includes("--json"));
+    };
+  }
+});
+
+// ../../plugin/lib/bmi.ts
+var MAX_WEIGHT_KG, MAX_WEIGHT_LBS, MAX_HEIGHT_M, MAX_HEIGHT_IN, calculateBMI, BMI_BANDS, getBMICategory;
+var init_bmi = __esm({
+  "../../plugin/lib/bmi.ts"() {
+    "use strict";
+    MAX_WEIGHT_KG = 700;
+    MAX_WEIGHT_LBS = 1500;
+    MAX_HEIGHT_M = 2.75;
+    MAX_HEIGHT_IN = 108;
+    calculateBMI = (w, hFt, hIn, hM, metric) => {
+      const weightNum = parseFloat(w);
+      if (isNaN(weightNum) || weightNum <= 0) return null;
+      if (metric) {
+        if (weightNum > MAX_WEIGHT_KG) return null;
+        const heightNum = parseFloat(hM);
+        if (isNaN(heightNum) || heightNum <= 0 || heightNum > MAX_HEIGHT_M) return null;
+        return (weightNum / (heightNum * heightNum)).toFixed(1);
+      } else {
+        if (weightNum > MAX_WEIGHT_LBS) return null;
+        const feet = parseFloat(hFt) || 0;
+        const inches = parseFloat(hIn) || 0;
+        const totalInches = feet * 12 + inches;
+        if (totalInches <= 0 || totalInches > MAX_HEIGHT_IN) return null;
+        return (weightNum / (totalInches * totalInches) * 703).toFixed(1);
+      }
+    };
+    BMI_BANDS = {
+      cuts: [18.5, 25, 30, 35, 40],
+      labels: ["Underweight", "Normal", "Overweight", "Obese I", "Obese II", "Obese III"]
+    };
+    getBMICategory = (bmi) => {
+      if (!bmi) return "Unknown";
+      const bmiNum = parseFloat(bmi);
+      return BMI_BANDS.labels[BMI_BANDS.cuts.filter((cut) => bmiNum >= cut).length];
     };
   }
 });
@@ -819,7 +819,7 @@ var init_heart_rate_validations = __esm({
 });
 
 // ../../plugin/lib/vital-signs-validations/respiratory-rate-validations.ts
-var RESPIRATORY_RATE_LIMITS, getRespiratoryRateCategory;
+var RESPIRATORY_RATE_LIMITS, getRespiratoryRateCategory, parseRespiratoryRateValue;
 var init_respiratory_rate_validations = __esm({
   "../../plugin/lib/vital-signs-validations/respiratory-rate-validations.ts"() {
     "use strict";
@@ -842,11 +842,15 @@ var init_respiratory_rate_validations = __esm({
       }
       return { category: "Normal" };
     };
+    parseRespiratoryRateValue = (value) => {
+      const parsed = parseInt(value?.toString() || "");
+      return isNaN(parsed) ? null : parsed;
+    };
   }
 });
 
 // ../../plugin/lib/vital-signs-validations/temperature-validations.ts
-var TEMPERATURE_LIMITS, validateTemperatureInput, isElevatedTemperature, isLowTemperature, getTemperatureStatusCli;
+var TEMPERATURE_LIMITS, validateTemperatureInput, isElevatedTemperature, isLowTemperature, getTemperatureStatus, parseTemperatureValue, getTemperatureStatusCli;
 var init_temperature_validations = __esm({
   "../../plugin/lib/vital-signs-validations/temperature-validations.ts"() {
     "use strict";
@@ -885,6 +889,32 @@ var init_temperature_validations = __esm({
       const temp = parseFloat(temperature.toString());
       const lowThreshold = useFahrenheit ? TEMPERATURE_LIMITS.FAHRENHEIT.LOW : TEMPERATURE_LIMITS.CELSIUS.LOW;
       return temp < lowThreshold;
+    };
+    getTemperatureStatus = (temperature, useFahrenheit = true) => {
+      if (isElevatedTemperature(temperature, useFahrenheit)) {
+        return {
+          type: "fever",
+          label: "Fever",
+          icon: "triangle-alert",
+          color: "text-destructive",
+          bgColor: "border-destructive"
+        };
+      }
+      if (isLowTemperature(temperature, useFahrenheit)) {
+        return {
+          type: "hypothermia",
+          label: "Low",
+          icon: "thermometer",
+          color: "text-destructive",
+          bgColor: "border-destructive"
+        };
+      }
+      return null;
+    };
+    parseTemperatureValue = (value) => {
+      if (!value) return null;
+      const parsed = parseFloat(value.toString());
+      return isNaN(parsed) ? null : parsed;
     };
     getTemperatureStatusCli = (temperature, useFahrenheit = true) => {
       if (isElevatedTemperature(temperature, useFahrenheit)) {
@@ -996,12 +1026,96 @@ var init_blood_oxygen_validations = __esm({
   }
 });
 
+// ../../plugin/lib/vital-signs-validations/severity.ts
+var NORMAL, critical, warning, CRITICAL_LIMITS, getBloodPressureSeverity, getHeartRateSeverity, getRespiratoryRateSeverity, getTemperatureSeverity;
+var init_severity = __esm({
+  "../../plugin/lib/vital-signs-validations/severity.ts"() {
+    "use strict";
+    init_blood_pressure_validations();
+    init_heart_rate_validations();
+    init_respiratory_rate_validations();
+    init_temperature_validations();
+    init_blood_oxygen_validations();
+    NORMAL = { severity: "normal", label: null };
+    critical = (label) => ({
+      severity: "critical",
+      label
+    });
+    warning = (label) => ({
+      severity: "warning",
+      label
+    });
+    CRITICAL_LIMITS = {
+      BLOOD_PRESSURE: {
+        HIGH_SYSTOLIC: 180,
+        HIGH_DIASTOLIC: 120,
+        LOW_SYSTOLIC: 80,
+        LOW_DIASTOLIC: 50
+      },
+      HEART_RATE: { HIGH: 130, LOW: 45 },
+      RESPIRATORY_RATE: { HIGH: 30, LOW: 8 },
+      TEMPERATURE: {
+        FAHRENHEIT: { HIGH: 105.8, LOW: 89.6 },
+        CELSIUS: { HIGH: 41, LOW: 32 }
+      }
+    };
+    getBloodPressureSeverity = (systolic, diastolic) => {
+      if (systolic == null || diastolic == null) return NORMAL;
+      const limits = CRITICAL_LIMITS.BLOOD_PRESSURE;
+      if (systolic >= limits.HIGH_SYSTOLIC || diastolic >= limits.HIGH_DIASTOLIC) {
+        return critical("Hypertensive crisis");
+      }
+      if (systolic < limits.LOW_SYSTOLIC || diastolic < limits.LOW_DIASTOLIC) {
+        return critical("Severe hypotension");
+      }
+      const category = getBloodPressureCategory(systolic, diastolic);
+      if (!category || category.category === "Normal") return NORMAL;
+      return warning(category.category);
+    };
+    getHeartRateSeverity = (heartRate) => {
+      if (heartRate == null) return NORMAL;
+      if (heartRate > CRITICAL_LIMITS.HEART_RATE.HIGH) {
+        return critical("Severe tachycardia");
+      }
+      if (heartRate < CRITICAL_LIMITS.HEART_RATE.LOW) {
+        return critical("Severe bradycardia");
+      }
+      const category = getHeartRateCategory(heartRate);
+      if (!category || category.category === "Normal") return NORMAL;
+      return warning(category.category);
+    };
+    getRespiratoryRateSeverity = (respiratoryRate) => {
+      const rate = parseRespiratoryRateValue(respiratoryRate ?? null);
+      if (rate === null) return NORMAL;
+      if (rate > CRITICAL_LIMITS.RESPIRATORY_RATE.HIGH) {
+        return critical("Severe tachypnea");
+      }
+      if (rate < CRITICAL_LIMITS.RESPIRATORY_RATE.LOW) {
+        return critical("Severe bradypnea");
+      }
+      const category = getRespiratoryRateCategory(rate);
+      if (!category || category.category === "Normal") return NORMAL;
+      return warning(category.category);
+    };
+    getTemperatureSeverity = (temperature, useFahrenheit = true) => {
+      const value = parseTemperatureValue(temperature ?? "");
+      if (value === null) return NORMAL;
+      const limits = useFahrenheit ? CRITICAL_LIMITS.TEMPERATURE.FAHRENHEIT : CRITICAL_LIMITS.TEMPERATURE.CELSIUS;
+      if (value >= limits.HIGH) return critical("Hyperpyrexia");
+      if (value < limits.LOW) return critical("Severe hypothermia");
+      const status = getTemperatureStatus(value, useFahrenheit);
+      if (!status || status.type === "normal") return NORMAL;
+      return warning(status.label);
+    };
+  }
+});
+
 // src/commands/vitals.ts
 var vitals_exports = {};
 __export(vitals_exports, {
   run: () => run4
 });
-var import_node_util4, USAGE4, run4;
+var import_node_util4, USAGE4, severityFields, severityLabel, run4;
 var init_vitals = __esm({
   "src/commands/vitals.ts"() {
     "use strict";
@@ -1011,6 +1125,7 @@ var init_vitals = __esm({
     init_respiratory_rate_validations();
     init_temperature_validations();
     init_blood_oxygen_validations();
+    init_severity();
     init_format();
     init_cli();
     USAGE4 = `Usage: medprotocol vitals [options]
@@ -1030,6 +1145,8 @@ Examples:
   medprotocol vitals --bp 120/80 --hr 72 --temp 37.0
   medprotocol vitals --bp 150/95 --hr 110 --rr 22 --temp 101.2 --fahrenheit
   medprotocol vitals --spo2 92 --fio2 40 --json`;
+    severityFields = (s) => ({ severity: s.severity, ...s.severity === "critical" && { alert: s.label } });
+    severityLabel = (label, s) => s.severity === "critical" ? `${s.label}, critical` : label;
     run4 = (argv) => {
       const { values } = (0, import_node_util4.parseArgs)({
         args: argv,
@@ -1077,13 +1194,14 @@ Examples:
             errors.push("Systolic must be higher than diastolic");
           } else {
             const category = getBloodPressureCategory(systolic, diastolic);
+            const severity = getBloodPressureSeverity(systolic, diastolic);
             results.bloodPressure = {
               systolic,
               diastolic,
-              category: category?.category || "Normal"
+              category: category?.category || "Normal",
+              ...severityFields(severity)
             };
-            const catLabel = category?.category ? ` (${category.category})` : " (Normal)";
-            humanRows.push(["Blood Pressure", `${systolic}/${diastolic} mmHg${catLabel}`]);
+            humanRows.push(["Blood Pressure", `${systolic}/${diastolic} mmHg (${severityLabel(category?.category || "Normal", severity)})`]);
           }
         }
       }
@@ -1093,11 +1211,13 @@ Examples:
           errors.push(`Heart rate must be ${HEART_RATE_LIMITS.MIN}\u2013${HEART_RATE_LIMITS.MAX} bpm`);
         } else {
           const category = getHeartRateCategory(hr);
+          const severity = getHeartRateSeverity(hr);
           results.heartRate = {
             value: hr,
-            category: category?.category || "Normal"
+            category: category?.category || "Normal",
+            ...severityFields(severity)
           };
-          humanRows.push(["Heart Rate", `${hr} bpm (${category?.category || "Normal"})`]);
+          humanRows.push(["Heart Rate", `${hr} bpm (${severityLabel(category?.category || "Normal", severity)})`]);
         }
       }
       if (values.rr) {
@@ -1108,13 +1228,15 @@ Examples:
           );
         } else {
           const category = getRespiratoryRateCategory(rr);
+          const severity = getRespiratoryRateSeverity(rr);
           results.respiratoryRate = {
             value: rr,
-            category: category?.category || "Normal"
+            category: category?.category || "Normal",
+            ...severityFields(severity)
           };
           humanRows.push([
             "Respiratory Rate",
-            `${rr} breaths/min (${category?.category || "Normal"})`
+            `${rr} breaths/min (${severityLabel(category?.category || "Normal", severity)})`
           ]);
         }
       }
@@ -1128,15 +1250,17 @@ Examples:
           const temp = parseFloat(values.temp);
           const status = getTemperatureStatusCli(temp, useFahrenheit);
           const unit = useFahrenheit ? "\xB0F" : "\xB0C";
+          const severity = getTemperatureSeverity(temp, useFahrenheit);
           results.temperature = {
             value: temp,
             unit,
             status: status?.type || "normal",
-            label: status?.label || "Normal"
+            label: status?.label || "Normal",
+            ...severityFields(severity)
           };
           humanRows.push([
             "Temperature",
-            `${temp}${unit} (${status?.label || "Normal"})`
+            `${temp}${unit} (${severityLabel(status?.label || "Normal", severity)})`
           ]);
         }
       }
@@ -6466,6 +6590,7 @@ ${check}`));
 var version = "1.4.0";
 
 // src/index.ts
+init_cli();
 var USAGE13 = `medprotocol \u2014 Medical calculations from the terminal
 
 Usage: medprotocol <command> [options]
@@ -6548,5 +6673,13 @@ Available commands: ${Object.keys(commands).join(", ")}
   );
   process.exitCode = 1;
 } else {
-  loader().then((mod) => mod.run(commandArgs));
+  loader().then((mod) => {
+    try {
+      mod.run(commandArgs);
+    } catch (error) {
+      const { code, message } = error;
+      if (!code?.startsWith("ERR_PARSE_ARGS")) throw error;
+      fail(`${message.split(". To specify")[0]}. Run "medprotocol ${command} --help" for the options.`);
+    }
+  });
 }

@@ -17,6 +17,13 @@ import {
   validateTemperatureInput,
 } from "../../../../plugin/lib/vital-signs-validations/temperature-validations";
 import { bloodOxygenValidations } from "../../../../plugin/lib/vital-signs-validations/blood-oxygen-validations";
+import {
+  getBloodPressureSeverity,
+  getHeartRateSeverity,
+  getRespiratoryRateSeverity,
+  getTemperatureSeverity,
+  type SeverityResult,
+} from "../../../../plugin/lib/vital-signs-validations/severity";
 import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
 import { fail } from "../cli";
 
@@ -37,6 +44,10 @@ Examples:
   medprotocol vitals --bp 120/80 --hr 72 --temp 37.0
   medprotocol vitals --bp 150/95 --hr 110 --rr 22 --temp 101.2 --fahrenheit
   medprotocol vitals --spo2 92 --fio2 40 --json`;
+
+// A critical value must not read like a mild one: "190/125 (High)" looks the same as "150/95 (High)".
+const severityFields = (s: SeverityResult) => ({ severity: s.severity, ...(s.severity === "critical" && { alert: s.label }) });
+const severityLabel = (label: string, s: SeverityResult) => (s.severity === "critical" ? `${s.label}, critical` : label);
 
 export const run = (argv: string[]): void => {
   const { values } = parseArgs({
@@ -97,13 +108,14 @@ export const run = (argv: string[]): void => {
         errors.push("Systolic must be higher than diastolic");
       } else {
         const category = getBloodPressureCategory(systolic, diastolic);
+        const severity = getBloodPressureSeverity(systolic, diastolic);
         results.bloodPressure = {
           systolic,
           diastolic,
           category: category?.category || "Normal",
+          ...severityFields(severity),
         };
-        const catLabel = category?.category ? ` (${category.category})` : " (Normal)";
-        humanRows.push(["Blood Pressure", `${systolic}/${diastolic} mmHg${catLabel}`]);
+        humanRows.push(["Blood Pressure", `${systolic}/${diastolic} mmHg (${severityLabel(category?.category || "Normal", severity)})`]);
       }
     }
   }
@@ -115,11 +127,13 @@ export const run = (argv: string[]): void => {
       errors.push(`Heart rate must be ${HEART_RATE_LIMITS.MIN}–${HEART_RATE_LIMITS.MAX} bpm`);
     } else {
       const category = getHeartRateCategory(hr);
+      const severity = getHeartRateSeverity(hr);
       results.heartRate = {
         value: hr,
         category: category?.category || "Normal",
+        ...severityFields(severity),
       };
-      humanRows.push(["Heart Rate", `${hr} bpm (${category?.category || "Normal"})`]);
+      humanRows.push(["Heart Rate", `${hr} bpm (${severityLabel(category?.category || "Normal", severity)})`]);
     }
   }
 
@@ -132,13 +146,15 @@ export const run = (argv: string[]): void => {
       );
     } else {
       const category = getRespiratoryRateCategory(rr);
+      const severity = getRespiratoryRateSeverity(rr);
       results.respiratoryRate = {
         value: rr,
         category: category?.category || "Normal",
+        ...severityFields(severity),
       };
       humanRows.push([
         "Respiratory Rate",
-        `${rr} breaths/min (${category?.category || "Normal"})`,
+        `${rr} breaths/min (${severityLabel(category?.category || "Normal", severity)})`,
       ]);
     }
   }
@@ -154,15 +170,17 @@ export const run = (argv: string[]): void => {
       const temp = parseFloat(values.temp);
       const status = getTemperatureStatusCli(temp, useFahrenheit);
       const unit = useFahrenheit ? "°F" : "°C";
+      const severity = getTemperatureSeverity(temp, useFahrenheit);
       results.temperature = {
         value: temp,
         unit,
         status: status?.type || "normal",
         label: status?.label || "Normal",
+        ...severityFields(severity),
       };
       humanRows.push([
         "Temperature",
-        `${temp}${unit} (${status?.label || "Normal"})`,
+        `${temp}${unit} (${severityLabel(status?.label || "Normal", severity)})`,
       ]);
     }
   }
