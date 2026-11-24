@@ -6587,7 +6587,7 @@ ${check}`));
 });
 
 // package.json
-var version = "1.4.0";
+var version = "1.5.0";
 
 // src/index.ts
 init_cli();
