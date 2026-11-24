@@ -21,6 +21,12 @@ if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
   exit 1
 fi
 
+# No release without its changelog entry: checked before anything is changed.
+if ! grep -qE "^## ${VERSION//./\\.}( |$)" "$ROOT/CHANGELOG.md"; then
+  echo "Error: CHANGELOG.md has no '## $VERSION' entry. Write it first, then run this again."
+  exit 1
+fi
+
 CURRENT=$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")
 echo "Bumping version: $CURRENT -> $VERSION"
 echo ""
