@@ -11,20 +11,3 @@ export interface ExpectedValues {
   low?: string;
   high?: string;
 }
-
-export interface Result {
-  disorder: string;
-  compensation: string;
-  expectedValues: ExpectedValues;
-  anionGap: string | null;
-  agStatus: string | null;
-  allDisorders: string[];
-  compensatoryResponse: string;
-  hhConsistency?: {
-    expectedPH: string;
-    measured: string;
-    deviation: string;
-    isCoherent: boolean;
-    warning: string | null;
-  };
-}

@@ -3,7 +3,6 @@ import {
   validateHeartRateInput,
   getHeartRateCategory,
   parseHeartRateValue,
-  HEART_RATE_LIMITS,
 } from '../../plugin/lib/vital-signs-validations/heart-rate-validations';
 
 describe('validateHeartRateInput', () => {

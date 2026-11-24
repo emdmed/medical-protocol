@@ -4,7 +4,6 @@ import {
   isValidRespiratoryRateInput,
   getRespiratoryRateCategory,
   parseRespiratoryRateValue,
-  RESPIRATORY_RATE_LIMITS,
 } from '../../plugin/lib/vital-signs-validations/respiratory-rate-validations';
 
 describe('validateRespiratoryRateInput', () => {

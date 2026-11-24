@@ -59,7 +59,6 @@ export function classifyT1vsT2(
   familyHxT2D: boolean,
   dkaHistory: boolean,
   otherAutoimmune: boolean,
-  onInsulin: boolean,
 ): { classification: string; label: string; severity: Severity; features: { t1: string[]; t2: string[] } } {
   const ageVal = safeParseFloat(age);
   const bmiVal = safeParseFloat(bmi);

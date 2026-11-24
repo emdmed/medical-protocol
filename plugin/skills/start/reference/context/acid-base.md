@@ -42,7 +42,7 @@ Logic: `lib/medprotocol/acid-base/` — import from `@/lib/medprotocol/acid-base
 
 - `values: Values` — `{ pH, pCO2, HCO3, Na, Cl, Albumin }`, all `string`. Pass `""` for absent Na/Cl/Albumin (AG and delta ratio come back `null`).
 - `isChronic: boolean` — chronic vs acute respiratory compensation. The standalone screen uses `true`; DKA uses `false`.
-- Types: `Values`, `Result` in `acid-base/interfaces.ts`; `ABGValues`, `ABGResult` in `acid-base/index.ts`.
+- Types: `Values` in `acid-base/interfaces.ts`; the result type is `ReturnType<typeof analyze>`.
 
 Inputs are parsed internally via `safeParseFloatOrNull`.
 

@@ -48,7 +48,6 @@ T1 vs T2 options:
   --fhx-t2d               Family history of T2D
   --dka-history            History of DKA
   --autoimmune             Other autoimmune conditions
-  --on-insulin             Currently on insulin
 
 T2D Screen options:
   --age <number>          Age (required)
@@ -215,7 +214,6 @@ const runT1vsT2 = (argv: string[], json: boolean): void => {
       "fhx-t2d": { type: "boolean", default: false },
       "dka-history": { type: "boolean", default: false },
       autoimmune: { type: "boolean", default: false },
-      "on-insulin": { type: "boolean", default: false },
       json: { type: "boolean", default: false },
       help: { type: "boolean", default: false },
     },
@@ -238,7 +236,6 @@ const runT1vsT2 = (argv: string[], json: boolean): void => {
     values["fhx-t2d"]!,
     values["dka-history"]!,
     values.autoimmune!,
-    values["on-insulin"]!,
   );
 
   const rows: [string, string][] = [

@@ -56,7 +56,7 @@ interface MasldScreeningReading {
 `Severity = "normal" | "warning" | "critical"`. Inputs are strings, parsed internally (invalid → 0).
 
 - `calculateFIB4(age, ast, alt, platelets)` → `{ score, tier: "low" | "indeterminate" | "high", severity }`. FIB-4 = (age × AST) / (platelets × √ALT), 2 decimals. Returns score 0 / low when any input ≤0.
-- `getMASLDRiskStratification(fib4Score, fib4Tier, age, lsm?, elf?)` → `{ stage, action, severity, referral, interval }`
+- `getMASLDRiskStratification(fib4Tier, lsm?, elf?)` → `{ stage, action, severity, referral, interval }`
 - `getMASLDTreatmentRecommendation(referral, severity)` → `{ obesity, diabetes, mash }`
 - `countRiskFactors(riskFactors: Record<string, boolean>)` → number of `true` values
 

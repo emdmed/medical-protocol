@@ -34,31 +34,31 @@ describe("calculateFIB4", () => {
 
 describe("getMASLDRiskStratification", () => {
   it("high FIB-4 tier refers immediately", () => {
-    const r = getMASLDRiskStratification(3.0, "high", "55");
+    const r = getMASLDRiskStratification("high");
     expect(r.referral).toBe(true);
     expect(r.severity).toBe("critical");
   });
 
   it("low FIB-4 tier reassesses, no referral", () => {
-    const r = getMASLDRiskStratification(0.8, "low", "55");
+    const r = getMASLDRiskStratification("low");
     expect(r.referral).toBe(false);
     expect(r.severity).toBe("normal");
   });
 
   it("indeterminate + LSM < 8.0 is low risk", () => {
-    expect(getMASLDRiskStratification(1.8, "indeterminate", "55", "6.0").severity).toBe("normal");
+    expect(getMASLDRiskStratification("indeterminate", "6.0").severity).toBe("normal");
   });
 
   it("indeterminate + LSM >= 8.0 refers", () => {
-    expect(getMASLDRiskStratification(1.8, "indeterminate", "55", "9.0").referral).toBe(true);
+    expect(getMASLDRiskStratification("indeterminate", "9.0").referral).toBe(true);
   });
 
   it("indeterminate + ELF >= 9.8 refers", () => {
-    expect(getMASLDRiskStratification(1.8, "indeterminate", "55", undefined, "10.5").referral).toBe(true);
+    expect(getMASLDRiskStratification("indeterminate", undefined, "10.5").referral).toBe(true);
   });
 
   it("indeterminate without phase-2 data needs workup", () => {
-    const r = getMASLDRiskStratification(1.8, "indeterminate", "55");
+    const r = getMASLDRiskStratification("indeterminate");
     expect(r.severity).toBe("warning");
     expect(r.referral).toBe(false);
   });

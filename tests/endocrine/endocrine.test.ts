@@ -81,30 +81,30 @@ describe('classifyT1DStage', () => {
 
 describe('classifyT1vsT2', () => {
   it('classifies Type 1 with autoantibodies + young + low BMI', () => {
-    const result = classifyT1vsT2('25', '22', true, '150', true, false, true, false, true);
+    const result = classifyT1vsT2('25', '22', true, '150', true, false, true, false);
     expect(result.classification).toBe('Type 1');
     expect(result.features.t1.length).toBeGreaterThan(0);
   });
 
   it('classifies Type 2 with no autoantibodies + older + obese', () => {
-    const result = classifyT1vsT2('55', '32', false, '700', false, true, false, false, false);
+    const result = classifyT1vsT2('55', '32', false, '700', false, true, false, false);
     expect(result.classification).toBe('Type 2');
     expect(result.features.t2.length).toBeGreaterThan(0);
   });
 
   it('classifies Type 1 when C-peptide < 200', () => {
-    const result = classifyT1vsT2('45', '28', false, '150', false, true, false, false, false);
+    const result = classifyT1vsT2('45', '28', false, '150', false, true, false, false);
     expect(result.classification).toBe('Type 1');
   });
 
   it('classifies Type 2 when C-peptide > 600 and no autoantibodies', () => {
-    const result = classifyT1vsT2('55', '32', false, '700', false, true, false, false, false);
+    const result = classifyT1vsT2('55', '32', false, '700', false, true, false, false);
     expect(result.classification).toBe('Type 2');
   });
 
   it('classifies Type 1 when C-peptide < 200 overrides feature scoring', () => {
     // C-peptide < 200 triggers T1D classification regardless of other features
-    const result = classifyT1vsT2('25', '22', true, '150', true, false, false, false, false);
+    const result = classifyT1vsT2('25', '22', true, '150', true, false, false, false);
     expect(result.classification).toBe('Type 1');
   });
 
@@ -112,14 +112,14 @@ describe('classifyT1vsT2', () => {
     // age 35 = no age feature, BMI 27 = no BMI feature, no autoantibodies → T2 gets "Autoantibody−"
     // With 1 T2 feature vs 0 T1, algorithm favors T2 when !hasAutoantibodies
     // To get Indeterminate: need equal features with autoantibodies but no cpClassification
-    const result = classifyT1vsT2('35', '27', true, '0', false, true, false, false, false);
+    const result = classifyT1vsT2('35', '27', true, '0', false, true, false, false);
     // t1: Autoantibody+, t2: Family Hx T2D — balanced at 1:1
     // hasAutoantibodies but t1 !> t2 → Indeterminate
     expect(result.classification).toBe('Indeterminate');
   });
 
   it('includes AABBCC features', () => {
-    const result = classifyT1vsT2('25', '22', true, '0', true, false, true, true, false);
+    const result = classifyT1vsT2('25', '22', true, '0', true, false, true, true);
     expect(result.features.t1).toContain('Young onset');
     expect(result.features.t1).toContain('Autoantibody+');
     expect(result.features.t1).toContain('Normal BMI');
@@ -129,7 +129,7 @@ describe('classifyT1vsT2', () => {
   });
 
   it('includes T2 features', () => {
-    const result = classifyT1vsT2('55', '32', false, '0', false, true, false, false, false);
+    const result = classifyT1vsT2('55', '32', false, '0', false, true, false, false);
     expect(result.features.t2).toContain('Older onset');
     expect(result.features.t2).toContain('Autoantibody−');
     expect(result.features.t2).toContain('Obese');

@@ -254,7 +254,6 @@ var init_analyze = __esm({
       const [HCO3_LOW, HCO3_HIGH] = NORMAL_RANGES.HCO3;
       const isAcidemic = pH < pH_LOW;
       const isAlkalemic = pH > pH_HIGH;
-      const isNormalPH = pH >= pH_LOW && pH <= pH_HIGH;
       const pCO2_midpoint = (pCO2_LOW + pCO2_HIGH) / 2;
       const HCO3_midpoint = (HCO3_LOW + HCO3_HIGH) / 2;
       if (isAcidemic) {
@@ -467,7 +466,7 @@ var init_analyze = __esm({
         if (compensation === "Inadequate compensation") {
           interpretation += `, with ${compensation}`;
         } else if (compensatoryResponse && compensation !== "N/A") {
-          interpretation += `, with ${compensation} by ${compensatoryResponse}`;
+          interpretation += `, ${compensation.toLowerCase()} by ${compensatoryResponse}`;
         }
         if (beyondResponse.length > 0) {
           interpretation += ` and ${beyondResponse.join(" and ")}`;
@@ -3180,7 +3179,7 @@ function classifyT1DStage(autoantibodyCount, fpg, twohPG, a1c, hasSymptoms) {
   }
   return { stage: 1, label: "Stage 1 \u2014 Normoglycemia", severity: "normal" };
 }
-function classifyT1vsT2(age, bmi, hasAutoantibodies, cPeptide, familyHxT1D, familyHxT2D, dkaHistory, otherAutoimmune, onInsulin) {
+function classifyT1vsT2(age, bmi, hasAutoantibodies, cPeptide, familyHxT1D, familyHxT2D, dkaHistory, otherAutoimmune) {
   const ageVal = safeParseFloat(age);
   const bmiVal = safeParseFloat(bmi);
   const cp = safeParseFloat(cPeptide);
@@ -3336,7 +3335,6 @@ T1 vs T2 options:
   --fhx-t2d               Family history of T2D
   --dka-history            History of DKA
   --autoimmune             Other autoimmune conditions
-  --on-insulin             Currently on insulin
 
 T2D Screen options:
   --age <number>          Age (required)
@@ -3486,7 +3484,6 @@ Examples:
           "fhx-t2d": { type: "boolean", default: false },
           "dka-history": { type: "boolean", default: false },
           autoimmune: { type: "boolean", default: false },
-          "on-insulin": { type: "boolean", default: false },
           json: { type: "boolean", default: false },
           help: { type: "boolean", default: false }
         },
@@ -3505,8 +3502,7 @@ Examples:
         values["fhx-t1d"],
         values["fhx-t2d"],
         values["dka-history"],
-        values.autoimmune,
-        values["on-insulin"]
+        values.autoimmune
       );
       const rows = [
         ["Classification", result.classification],
@@ -6115,10 +6111,7 @@ Waiting for the overlay to create it\u2026
 var extract_exports = {};
 __export(extract_exports, {
   calculations: () => calculations,
-  itemsError: () => itemsError,
-  pageData: () => pageData,
   run: () => run12,
-  saveNote: () => saveNote,
   serve: () => serve2,
   stateOf: () => stateOf
 });

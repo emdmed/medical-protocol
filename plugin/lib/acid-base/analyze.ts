@@ -47,7 +47,6 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
   // Determine primary disorder based on pH and which parameter moved first/most
   const isAcidemic = pH < pH_LOW;
   const isAlkalemic = pH > pH_HIGH;
-  const isNormalPH = pH >= pH_LOW && pH <= pH_HIGH;
 
   // Calculate how far each parameter has moved from normal
   const pCO2_midpoint = (pCO2_LOW + pCO2_HIGH) / 2; // 40
@@ -326,7 +325,7 @@ export const analyze = ({ values, isChronic }: { values: Values; isChronic: bool
       // the expected response did not happen, so naming it would contradict the disorder listed next
       interpretation += `, with ${compensation}`;
     } else if (compensatoryResponse && compensation !== "N/A") {
-      interpretation += `, with ${compensation} by ${compensatoryResponse}`;
+      interpretation += `, ${compensation.toLowerCase()} by ${compensatoryResponse}`;
     }
 
     if (beyondResponse.length > 0) {

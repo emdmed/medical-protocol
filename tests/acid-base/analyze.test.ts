@@ -386,7 +386,7 @@ describe('analyze — an overcompensation is named once', () => {
     const result = analyze({ values: { pH: '7.34', pCO2: '60', HCO3: '31', Na: '140', Cl: '97', Albumin: '4' }, isChronic: false });
     expect(result!.compensation).toBe('Overcompensated');
     expect(result!.additionalDisorders).toEqual(['Metabolic Alkalosis']);
-    expect(result!.interpretation).toBe('Primary Respiratory Acidosis, with Overcompensated by Metabolic Alkalosis.');
+    expect(result!.interpretation).toBe('Primary Respiratory Acidosis, overcompensated by Metabolic Alkalosis.');
     expect(result!.allDisorders).toEqual(['Respiratory Acidosis', 'Metabolic Alkalosis']);
   });
 });

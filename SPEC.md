@@ -105,7 +105,7 @@ import each function from its own module, e.g.
 | Module | File(s) | Public surface (representative) |
 |--------|---------|-------------------------------|
 | **BMI** | `plugin/lib/bmi.ts` | `calculateBMI`, `getBMICategory` (WHO tiers) |
-| **Acid-Base / ABG** | `plugin/lib/acid-base/` (`analyze.ts`, `interfaces.ts`, `index.ts`) | `analyze({ values, isChronic })` → primary disorder, compensation (Winter's), anion gap, delta ratio; types `ABGValues`, `ABGResult` |
+| **Acid-Base / ABG** | `plugin/lib/acid-base/` (`analyze.ts`, `interfaces.ts`, `index.ts`) | `analyze({ values, isChronic })` → primary disorder, compensation (Winter's), anion gap, delta ratio |
 | **PaFi (ARDS)** | `plugin/lib/pafi.ts` | `calculatePaFi`, `getPaFiClassification` (Berlin), `getPaFiSeverity` |
 | **Water Balance** | `plugin/lib/water-balance.ts` | `calculateInsensibleLoss`, `calculateEndogenousGeneration`, `calculateDefecationLoss`, `calculateWaterBalance` |
 | **DKA** | `plugin/lib/dka.ts` | glucose/ketone/HCO3 rate calcs + on-target checks, `classifyPotassium`, `classifyGCS`, `assessDKAResolution`, `suggestInsulinAdjustment` |

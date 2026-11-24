@@ -65,9 +65,7 @@ export interface MASLDRiskResult {
 }
 
 export function getMASLDRiskStratification(
-  fib4Score: number,
   fib4Tier: "low" | "indeterminate" | "high",
-  age: string,
   lsm?: string,
   elf?: string,
 ): MASLDRiskResult {

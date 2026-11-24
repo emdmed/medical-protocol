@@ -34,7 +34,7 @@ All five screens are reading-based: latest result on top, history table below, a
 | Screen | Inputs | Output |
 |---|---|---|
 | T1D Staging | Autoantibodies: GAD65, IA-2, ZnT8, insulin Ab checkboxes (count = checked boxes unless entered), FPG, 2h-PG (mg/dL), A1C (%), symptoms | Stage 0–3 + label |
-| T1 vs T2 | Age, BMI, autoantibodies, C-peptide (pmol/L), family Hx T1D, family Hx T2D, DKA history, other autoimmune, on insulin | Classification + T1/T2 feature lists |
+| T1 vs T2 | Age, BMI, autoantibodies, C-peptide (pmol/L), family Hx T1D, family Hx T2D, DKA history, other autoimmune | Classification + T1/T2 feature lists |
 | T2D Screening | Age, BMI, ethnicity (free text; "Asian" lowers BMI threshold to 23), 10 risk-factor checkboxes (see T2D Screening below) | Action, interval, risk-factor count |
 | GDM Screening | Strategy (Segmented Control: one-step / two-step), gestational age (weeks), fasting, 1-h, 2-h, 3-h (two-step only) (mg/dL) | Positive/negative, exceeded values |
 
@@ -107,7 +107,7 @@ All inputs `string` unless noted. `Severity = "normal" | "warning" | "critical"`
 
 `endocrine.ts`:
 - `classifyT1DStage(autoantibodyCount, fpg, twohPG, a1c, hasSymptoms)` → `{ stage: 0 | 1 | 2 | 3; label; severity }`
-- `classifyT1vsT2(age, bmi, hasAutoantibodies, cPeptide, familyHxT1D, familyHxT2D, dkaHistory, otherAutoimmune, onInsulin)` → `{ classification, label, severity, features: { t1: string[]; t2: string[] } }`
+- `classifyT1vsT2(age, bmi, hasAutoantibodies, cPeptide, familyHxT1D, familyHxT2D, dkaHistory, otherAutoimmune)` → `{ classification, label, severity, features: { t1: string[]; t2: string[] } }`
 - `getT2DScreeningRecommendation(age, bmi, ethnicity, riskFactors: Record<string, boolean>)` → `{ action, interval, severity, riskFactorCount }`
 - `classifyGDM_OneStep(fasting, oneHour, twoHour)`, `classifyGDM_TwoStep(fasting, oneHour, twoHour, threeHour)` → `{ positive, exceededValues, exceededCount }`
 

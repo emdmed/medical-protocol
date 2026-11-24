@@ -50,7 +50,7 @@ Example:
   medprotocol extract --note note.txt --items extraction.json --json`;
 
 /** Stores a raw note as extractions/<hash>/note.md, once. */
-export const saveNote = (raw: Buffer): { dir: string; existed: boolean } => {
+const saveNote = (raw: Buffer): { dir: string; existed: boolean } => {
   // CRLF vs LF or a trailing newline must not split one note into two folders; note.md keeps the raw bytes
   const canonical = raw.toString("utf8").replace(/^﻿/, "").replace(/\r\n?/g, "\n").trimEnd();
   const dir = join("extractions", createHash("sha256").update(canonical).digest("hex").slice(0, 12));
@@ -63,7 +63,7 @@ export const saveNote = (raw: Buffer): { dir: string; existed: boolean } => {
 };
 
 /** Why `items` is not a usable extraction, or null when it is. */
-export const itemsError = (items: unknown): string | null => {
+const itemsError = (items: unknown): string | null => {
   if (!Array.isArray(items) || items.some((i) => typeof i?.field !== "string" || typeof i?.value !== "string" || typeof i?.quote !== "string")) {
     return "--items must be a JSON array of { field, value, unit?, quote } strings";
   }
@@ -204,7 +204,7 @@ export const calculations = (checked: CheckedItem[]): Calculation[] => {
 };
 
 /** The data block the extraction page renders. `items` are already checked against `note`. */
-export const pageData = (name: string, note: string, items: ReturnType<typeof checkExtraction>) => ({
+const pageData = (name: string, note: string, items: ReturnType<typeof checkExtraction>) => ({
   name,
   checkedAt: new Date().toLocaleDateString("sv"),
   items,

@@ -113,8 +113,3 @@ export const hasValidBloodOxygenInput = bloodOxygenValidations.spo2.isValid;
 export const hasValidFio2Input = bloodOxygenValidations.fio2.isValid;
 
 export const { spo2, fio2, utils } = bloodOxygenValidations;
-
-/** @deprecated Use bloodOxygenValidations instead */
-export const BloodOxygenValidations = bloodOxygenValidations;
-
-export default bloodOxygenValidations;

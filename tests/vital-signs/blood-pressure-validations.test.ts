@@ -4,7 +4,6 @@ import {
   isValidBloodPressureInput,
   getBloodPressureCategory,
   parseBloodPressureValues,
-  BLOOD_PRESSURE_LIMITS,
 } from '../../plugin/lib/vital-signs-validations/blood-pressure-validations';
 
 describe('validateBloodPressureInput', () => {
