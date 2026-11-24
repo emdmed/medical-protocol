@@ -2,10 +2,6 @@
  * Output formatters for CLI tools — human-readable and JSON.
  */
 
-export const formatJson = (data: Record<string, unknown>): string => {
-  return JSON.stringify(data, null, 2);
-};
-
 export const formatTable = (rows: [string, string][]): string => {
   const maxLabel = Math.max(...rows.map(([label]) => label.length));
   return rows
@@ -27,7 +23,7 @@ export const printResult = (
   humanFn: () => string,
 ): void => {
   if (json) {
-    process.stdout.write(formatJson(data) + "\n");
+    process.stdout.write(JSON.stringify(data, null, 2) + "\n");
   } else {
     process.stdout.write(humanFn() + "\n");
   }

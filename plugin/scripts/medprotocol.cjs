@@ -49,13 +49,10 @@ var init_bmi = __esm({
 });
 
 // ../../plugin/lib/format.ts
-var formatJson, formatTable, formatHeader, formatError, printResult;
+var formatTable, formatHeader, formatError, printResult;
 var init_format = __esm({
   "../../plugin/lib/format.ts"() {
     "use strict";
-    formatJson = (data) => {
-      return JSON.stringify(data, null, 2);
-    };
     formatTable = (rows) => {
       const maxLabel = Math.max(...rows.map(([label]) => label.length));
       return rows.map(([label, value]) => `  ${label.padEnd(maxLabel)}  ${value}`).join("\n");
@@ -70,7 +67,7 @@ ${"\u2500".repeat(title.length)}`;
     };
     printResult = (data, json, humanFn) => {
       if (json) {
-        process.stdout.write(formatJson(data) + "\n");
+        process.stdout.write(JSON.stringify(data, null, 2) + "\n");
       } else {
         process.stdout.write(humanFn() + "\n");
       }

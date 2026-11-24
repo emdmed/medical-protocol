@@ -120,7 +120,7 @@ re-exports every public function, giving one import point:
 | **Patient** | `plugin/lib/patient.ts` | `calculateAge` |
 | **Severity** | `plugin/lib/vital-signs-validations/severity.ts` | shared vital-sign severity levels for UI display |
 | **Sources / Trace** | `plugin/lib/sources.ts`, `plugin/lib/trace.ts` | guideline citations shown in the UI; calculation trace |
-| **Formatting** | `plugin/lib/format.ts` | `formatJson`, `formatTable`, `formatHeader`, `formatError`, `printResult` — CLI output helpers (not clinical) |
+| **Formatting** | `plugin/lib/format.ts` | `formatTable`, `formatHeader`, `formatError`, `printResult` — CLI output helpers (not clinical) |
 
 > Per-module clinical detail (formulas, thresholds, tiers) is documented in
 > `public/medical-protocol/context/<module>.md` and pinned by `tests/`.
