@@ -13,6 +13,7 @@ import {
   isLactateClearanceAdequate,
 } from "../../../../plugin/lib/sepsis";
 import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { requireFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol sepsis <sub-command> [options]
 
@@ -202,18 +203,7 @@ const runQSOFA = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.rr) missing.push("--rr");
-  if (!values.sbp) missing.push("--sbp");
-  if (!values.gcs) missing.push("--gcs");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["rr", "sbp", "gcs"], USAGE)) return;
 
   const score = calculateQSOFA(values.rr!, values.sbp!, values.gcs!);
   const positive = isQSOFAPositive(score);
@@ -257,17 +247,7 @@ const runLactate = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.initial) missing.push("--initial");
-  if (!values.repeat) missing.push("--repeat");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["initial", "repeat"], USAGE)) return;
 
   const clearance = calculateLactateClearance(values.initial!, values.repeat!);
   const adequate = isLactateClearanceAdequate(clearance);

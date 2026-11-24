@@ -13,7 +13,8 @@ import { FIELDS, EPISODES, applyFindings, checkExtraction, checkItem, noteSegmen
 import { classifyBPInCKD } from "../../../../plugin/lib/nephrology";
 import { PAFI_BANDS, calculatePaFi, getPaFiClassification } from "../../../../plugin/lib/pafi";
 import { BERLIN_2012, CKD_EPI_2021, KDIGO_2012_ANEMIA, KDIGO_2021_BP, KDIGO_2024_CKD, KFRE_TANGRI, WHO_BMI_2000, WINTERS_1967 } from "../../../../plugin/lib/sources";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { fail } from "../cli";
 import { EXTRACT_ARTIFACT_HTML } from "../extract-artifact";
 import { isLocalOrigin } from "./overlay";
 
@@ -495,30 +496,20 @@ export const run = (argv: string[]): void => {
   if (values.serve) {
     const port = Number(values.port);
     if (values.save || values.note || values.items || values.artifact || values.json) {
-      process.stderr.write(formatError("--serve takes no other options but --port") + "\n");
-    } else if (!Number.isInteger(port) || port < 0 || port > 65535) {
-      process.stderr.write(formatError("--port must be a number from 0 to 65535") + "\n");
-    } else {
-      serve(port);
-      return;
+      return fail("--serve takes no other options but --port");
     }
-    process.exitCode = 1;
+    if (!Number.isInteger(port) || port < 0 || port > 65535) return fail("--port must be a number from 0 to 65535");
+    serve(port);
     return;
   }
 
   if (values.save) {
-    if (values.note || values.items || values.artifact) {
-      process.stderr.write(formatError("--save takes no other options but --json") + "\n");
-      process.exitCode = 1;
-      return;
-    }
+    if (values.note || values.items || values.artifact) return fail("--save takes no other options but --json");
     let raw: Buffer;
     try {
       raw = readFileSync(values.save);
     } catch (e) {
-      process.stderr.write(formatError((e as Error).message) + "\n");
-      process.exitCode = 1;
-      return;
+      return fail((e as Error).message);
     }
     const { dir, existed } = saveNote(raw);
     // a pasted note staged at extractions/<file> is patient data; don't leave it behind
@@ -527,11 +518,7 @@ export const run = (argv: string[]): void => {
     return;
   }
 
-  if (!values.note || !values.items) {
-    process.stderr.write(formatError("--note and --items are required") + "\n\n" + USAGE + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (!values.note || !values.items) return fail("--note and --items are required", USAGE);
 
   let note: string;
   let items: ExtractedItem[];
@@ -539,17 +526,11 @@ export const run = (argv: string[]): void => {
     note = readFileSync(values.note, "utf8");
     items = JSON.parse(readFileSync(values.items, "utf8"));
   } catch (e) {
-    process.stderr.write(formatError((e as Error).message) + "\n");
-    process.exitCode = 1;
-    return;
+    return fail((e as Error).message);
   }
 
   const bad = itemsError(items);
-  if (bad) {
-    process.stderr.write(formatError(bad) + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (bad) return fail(bad);
 
   const checked = checkExtraction(note, items);
   const counts = Object.fromEntries(
@@ -567,9 +548,7 @@ export const run = (argv: string[]): void => {
     try {
       writeFileSync(values.artifact, html);
     } catch (e) {
-      process.stderr.write(formatError((e as Error).message) + "\n");
-      process.exitCode = 1;
-      return;
+      return fail((e as Error).message);
     }
   }
 

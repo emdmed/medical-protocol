@@ -14,6 +14,7 @@ import {
   classifyGDM_TwoStep,
 } from "../../../../plugin/lib/endocrine";
 import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { fail, requireFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol diabetes <sub-command> [options]
 
@@ -109,14 +110,7 @@ const runDiagnose = (argv: string[], json: boolean): void => {
   const hasSymptoms = values.symptoms!;
 
   if (!a1c && !fpg && !twohPG && !randomPG) {
-    process.stderr.write(
-      formatError("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)") +
-        "\n\n" +
-        USAGE +
-        "\n",
-    );
-    process.exitCode = 1;
-    return;
+    return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE);
   }
 
   const diagnosis = getDiagnosis(a1c, fpg, twohPG, randomPG, hasSymptoms);
@@ -177,13 +171,7 @@ const runT1DStage = (argv: string[], json: boolean): void => {
     return;
   }
 
-  if (!values.autoantibodies) {
-    process.stderr.write(
-      formatError("--autoantibodies is required") + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE);
 
   const result = classifyT1DStage(
     values.autoantibodies!,
@@ -239,17 +227,7 @@ const runT1vsT2 = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.age) missing.push("--age");
-  if (!values.bmi) missing.push("--bmi");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["age", "bmi"], USAGE)) return;
 
   const result = classifyT1vsT2(
     values.age!,
@@ -315,17 +293,7 @@ const runT2DScreen = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.age) missing.push("--age");
-  if (!values.bmi) missing.push("--bmi");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["age", "bmi"], USAGE)) return;
 
   const riskFactors: Record<string, boolean> = {
     firstDegreeRelative: values["first-degree"]!,
@@ -409,13 +377,7 @@ const runGDM = (argv: string[], json: boolean): void => {
     missing.push("--3h");
   }
 
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE);
 
   const strategy = values.strategy as "one-step" | "two-step";
 

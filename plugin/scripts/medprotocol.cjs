@@ -997,6 +997,7 @@ var init_vitals = __esm({
     init_temperature_validations();
     init_blood_oxygen_validations();
     init_format();
+    init_cli();
     USAGE4 = `Usage: medprotocol vitals [options]
 
 Options:
@@ -1035,13 +1036,7 @@ Examples:
         return;
       }
       const hasAny = values.bp || values.hr || values.rr || values.temp || values.spo2 || values.fio2;
-      if (!hasAny) {
-        process.stderr.write(
-          formatError("At least one vital sign is required") + "\n\n" + USAGE4 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!hasAny) return fail("At least one vital sign is required", USAGE4);
       const useFahrenheit = values.fahrenheit;
       const results = {};
       const humanRows = [];
@@ -1671,6 +1666,7 @@ var init_cardiology2 = __esm({
     import_node_util7 = require("util");
     init_cardiology();
     init_format();
+    init_cli();
     USAGE7 = `Usage: medprotocol cardiology <sub-command> [options]
 
 Sub-commands:
@@ -1736,19 +1732,7 @@ Examples:
         process.stdout.write(USAGE7 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.age) missing.push("--age");
-      if (!values.sex) missing.push("--sex");
-      if (!values.tc) missing.push("--tc");
-      if (!values.hdl) missing.push("--hdl");
-      if (!values.sbp) missing.push("--sbp");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE7 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["age", "sex", "tc", "hdl", "sbp"], USAGE7)) return;
       const inputs = {
         age: values.age,
         sex: values.sex,
@@ -1761,11 +1745,7 @@ Examples:
         smoker: values.smoker
       };
       const risk = calculateASCVD(inputs);
-      if (!risk) {
-        process.stderr.write(formatError("Could not calculate ASCVD risk \u2014 check input values (age 40-79, cholesterol/BP > 0)") + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (!risk) return fail("Could not calculate ASCVD risk \u2014 check input values (age 40-79, cholesterol/BP > 0)");
       const category = getASCVDCategory(risk);
       const severity = getASCVDSeverity(risk);
       const data = {
@@ -1822,19 +1802,7 @@ Examples:
         process.stdout.write(USAGE7 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.history) missing.push("--history");
-      if (!values.ecg) missing.push("--ecg");
-      if (!values.age) missing.push("--age");
-      if (!values["risk-factors"]) missing.push("--risk-factors");
-      if (!values.troponin) missing.push("--troponin");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE7 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["history", "ecg", "age", "risk-factors", "troponin"], USAGE7)) return;
       const parseScore = (v) => {
         const n = parseInt(v, 10);
         if (n === 0 || n === 1 || n === 2) return n;
@@ -2167,6 +2135,7 @@ var init_sepsis2 = __esm({
     import_node_util8 = require("util");
     init_sepsis();
     init_format();
+    init_cli();
     USAGE8 = `Usage: medprotocol sepsis <sub-command> [options]
 
 Sub-commands:
@@ -2343,17 +2312,7 @@ Examples:
         process.stdout.write(USAGE8 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.rr) missing.push("--rr");
-      if (!values.sbp) missing.push("--sbp");
-      if (!values.gcs) missing.push("--gcs");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE8 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["rr", "sbp", "gcs"], USAGE8)) return;
       const score = calculateQSOFA(values.rr, values.sbp, values.gcs);
       const positive = isQSOFAPositive(score);
       const data = {
@@ -2391,16 +2350,7 @@ Examples:
         process.stdout.write(USAGE8 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.initial) missing.push("--initial");
-      if (!values.repeat) missing.push("--repeat");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE8 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["initial", "repeat"], USAGE8)) return;
       const clearance = calculateLactateClearance(values.initial, values.repeat);
       const adequate = isLactateClearanceAdequate(clearance);
       const data = {
@@ -2717,6 +2667,7 @@ var init_ckd2 = __esm({
     import_node_util9 = require("util");
     init_ckd();
     init_format();
+    init_cli();
     USAGE9 = `Usage: medprotocol ckd <sub-command> [options]
 
 Sub-commands:
@@ -2774,12 +2725,7 @@ Examples:
   medprotocol ckd treatment --egfr 35 --acr 300 --diabetes
   medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
   medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4`;
-    failNotCalculated = () => {
-      process.stderr.write(
-        formatError("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0") + "\n"
-      );
-      process.exitCode = 1;
-    };
+    failNotCalculated = () => fail("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0");
     runEGFR = (argv, json) => {
       const { values } = (0, import_node_util9.parseArgs)({
         args: argv,
@@ -2796,17 +2742,7 @@ Examples:
         process.stdout.write(USAGE9 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.creatinine) missing.push("--creatinine");
-      if (!values.age) missing.push("--age");
-      if (!values.sex) missing.push("--sex");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE9 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE9)) return;
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
       if (egfr === 0) return failNotCalculated();
       const gfrCategory = classifyGFRCategory(String(egfr));
@@ -2841,18 +2777,7 @@ Examples:
         process.stdout.write(USAGE9 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.creatinine) missing.push("--creatinine");
-      if (!values.age) missing.push("--age");
-      if (!values.sex) missing.push("--sex");
-      if (!values.acr) missing.push("--acr");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE9 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE9)) return;
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
       if (egfr === 0) return failNotCalculated();
       const gfrCategory = classifyGFRCategory(String(egfr));
@@ -2905,18 +2830,7 @@ Examples:
         process.stdout.write(USAGE9 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.age) missing.push("--age");
-      if (!values.sex) missing.push("--sex");
-      if (!values.egfr) missing.push("--egfr");
-      if (!values.acr) missing.push("--acr");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE9 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE9)) return;
       const kfre = calculateKFRE(values.age, values.sex, values.egfr, values.acr);
       const referral = assessReferralNeed(String(kfre.fiveYear));
       const data = {
@@ -2954,16 +2868,7 @@ Examples:
         process.stdout.write(USAGE9 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.egfr) missing.push("--egfr");
-      if (!values.acr) missing.push("--acr");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE9 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["egfr", "acr"], USAGE9)) return;
       const gfrCategory = classifyGFRCategory(values.egfr);
       const albCategory = classifyAlbuminuriaCategory(values.acr);
       const rasi = checkRASiEligibility(gfrCategory, albCategory, values.diabetes);
@@ -3013,16 +2918,7 @@ Examples:
         process.stdout.write(USAGE9 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.hb) missing.push("--hb");
-      if (!values.sex) missing.push("--sex");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE9 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["hb", "sex"], USAGE9)) return;
       const anemia = classifyAnemia(values.hb, values.sex);
       const iron = values.ferritin && values.tsat ? assessIronStatus(values.ferritin, values.tsat) : null;
       const esa = values.ferritin && values.tsat ? checkESAEligibility(values.hb, values.ferritin, values.tsat, values.sex) : null;
@@ -3065,13 +2961,7 @@ Examples:
         process.stdout.write(USAGE9 + "\n");
         return;
       }
-      if (!values["gfr-category"]) {
-        process.stderr.write(
-          formatError("Missing required flag: --gfr-category") + "\n\n" + USAGE9 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE9);
       const gfrCat = values["gfr-category"];
       const phosphateResult = values.phosphate ? assessPhosphate(values.phosphate, gfrCat) : null;
       const correctedCa = values.calcium && values.albumin ? correctCalcium(values.calcium, values.albumin) : null;
@@ -3340,6 +3230,7 @@ var init_diabetes = __esm({
     init_diabetes_dx();
     init_endocrine();
     init_format();
+    init_cli();
     USAGE10 = `Usage: medprotocol diabetes <sub-command> [options]
 
 Sub-commands:
@@ -3430,11 +3321,7 @@ Examples:
       const randomPG = values["random-pg"];
       const hasSymptoms = values.symptoms;
       if (!a1c && !fpg && !twohPG && !randomPG) {
-        process.stderr.write(
-          formatError("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)") + "\n\n" + USAGE10 + "\n"
-        );
-        process.exitCode = 1;
-        return;
+        return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE10);
       }
       const diagnosis = getDiagnosis(a1c, fpg, twohPG, randomPG, hasSymptoms);
       const rows = [];
@@ -3487,13 +3374,7 @@ Examples:
         process.stdout.write(USAGE10 + "\n");
         return;
       }
-      if (!values.autoantibodies) {
-        process.stderr.write(
-          formatError("--autoantibodies is required") + "\n\n" + USAGE10 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE10);
       const result = classifyT1DStage(
         values.autoantibodies,
         values.fpg,
@@ -3542,16 +3423,7 @@ Examples:
         process.stdout.write(USAGE10 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.age) missing.push("--age");
-      if (!values.bmi) missing.push("--bmi");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE10 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["age", "bmi"], USAGE10)) return;
       const result = classifyT1vsT2(
         values.age,
         values.bmi,
@@ -3610,16 +3482,7 @@ Examples:
         process.stdout.write(USAGE10 + "\n");
         return;
       }
-      const missing = [];
-      if (!values.age) missing.push("--age");
-      if (!values.bmi) missing.push("--bmi");
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE10 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (!requireFlags(values, ["age", "bmi"], USAGE10)) return;
       const riskFactors = {
         firstDegreeRelative: values["first-degree"],
         highRiskEthnicity: values["high-risk-ethnicity"],
@@ -3690,13 +3553,7 @@ Examples:
       if (values.strategy === "two-step" && !values["3h"]) {
         missing.push("--3h");
       }
-      if (missing.length > 0) {
-        process.stderr.write(
-          formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE10 + "\n"
-        );
-        process.exitCode = 1;
-        return;
-      }
+      if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE10);
       const strategy = values.strategy;
       const result = strategy === "one-step" ? classifyGDM_OneStep(values.fasting, values["1h"], values["2h"]) : classifyGDM_TwoStep(values.fasting, values["1h"], values["2h"], values["3h"]);
       const rows = [
@@ -6235,6 +6092,7 @@ var init_extract = __esm({
     init_pafi();
     init_sources();
     init_format();
+    init_cli();
     init_extract_artifact();
     init_overlay();
     USAGE12 = `Usage: medprotocol extract --note <file> --items <file> [options]
@@ -6618,56 +6476,36 @@ ${check}`));
       if (values.serve) {
         const port = Number(values.port);
         if (values.save || values.note || values.items || values.artifact || values.json) {
-          process.stderr.write(formatError("--serve takes no other options but --port") + "\n");
-        } else if (!Number.isInteger(port) || port < 0 || port > 65535) {
-          process.stderr.write(formatError("--port must be a number from 0 to 65535") + "\n");
-        } else {
-          serve2(port);
-          return;
+          return fail("--serve takes no other options but --port");
         }
-        process.exitCode = 1;
+        if (!Number.isInteger(port) || port < 0 || port > 65535) return fail("--port must be a number from 0 to 65535");
+        serve2(port);
         return;
       }
       if (values.save) {
-        if (values.note || values.items || values.artifact) {
-          process.stderr.write(formatError("--save takes no other options but --json") + "\n");
-          process.exitCode = 1;
-          return;
-        }
+        if (values.note || values.items || values.artifact) return fail("--save takes no other options but --json");
         let raw;
         try {
           raw = (0, import_node_fs2.readFileSync)(values.save);
         } catch (e) {
-          process.stderr.write(formatError(e.message) + "\n");
-          process.exitCode = 1;
-          return;
+          return fail(e.message);
         }
         const { dir, existed } = saveNote(raw);
         if ((0, import_node_path2.dirname)((0, import_node_path2.resolve)(values.save)) === (0, import_node_path2.resolve)("extractions")) (0, import_node_fs2.rmSync)(values.save);
         printResult({ dir, existed }, values.json, () => dir + (existed ? "  (already saved)" : ""));
         return;
       }
-      if (!values.note || !values.items) {
-        process.stderr.write(formatError("--note and --items are required") + "\n\n" + USAGE12 + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (!values.note || !values.items) return fail("--note and --items are required", USAGE12);
       let note;
       let items;
       try {
         note = (0, import_node_fs2.readFileSync)(values.note, "utf8");
         items = JSON.parse((0, import_node_fs2.readFileSync)(values.items, "utf8"));
       } catch (e) {
-        process.stderr.write(formatError(e.message) + "\n");
-        process.exitCode = 1;
-        return;
+        return fail(e.message);
       }
       const bad = itemsError(items);
-      if (bad) {
-        process.stderr.write(formatError(bad) + "\n");
-        process.exitCode = 1;
-        return;
-      }
+      if (bad) return fail(bad);
       const checked = checkExtraction(note, items);
       const counts = Object.fromEntries(
         ["quoted", "edited", "approximate", "reordered", "mismatched", "unverified", "none"].map((s) => [s, checked.filter((c) => c.status === s).length])
@@ -6680,9 +6518,7 @@ ${check}`));
         try {
           (0, import_node_fs2.writeFileSync)(values.artifact, html);
         } catch (e) {
-          process.stderr.write(formatError(e.message) + "\n");
-          process.exitCode = 1;
-          return;
+          return fail(e.message);
         }
       }
       printResult(

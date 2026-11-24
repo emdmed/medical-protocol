@@ -18,6 +18,7 @@ import {
 } from "../../../../plugin/lib/vital-signs-validations/temperature-validations";
 import { bloodOxygenValidations } from "../../../../plugin/lib/vital-signs-validations/blood-oxygen-validations";
 import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { fail } from "../cli";
 
 const USAGE = `Usage: medprotocol vitals [options]
 
@@ -60,13 +61,7 @@ export const run = (argv: string[]): void => {
   }
 
   const hasAny = values.bp || values.hr || values.rr || values.temp || values.spo2 || values.fio2;
-  if (!hasAny) {
-    process.stderr.write(
-      formatError("At least one vital sign is required") + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!hasAny) return fail("At least one vital sign is required", USAGE);
 
   const useFahrenheit = values.fahrenheit!;
   const results: Record<string, unknown> = {};

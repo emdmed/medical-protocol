@@ -18,6 +18,7 @@ import type {
   CHADSVAScInputs,
 } from "../../../../plugin/lib/cardiology-types";
 import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { fail, requireFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol cardiology <sub-command> [options]
 
@@ -87,20 +88,7 @@ const runASCVD = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.age) missing.push("--age");
-  if (!values.sex) missing.push("--sex");
-  if (!values.tc) missing.push("--tc");
-  if (!values.hdl) missing.push("--hdl");
-  if (!values.sbp) missing.push("--sbp");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["age", "sex", "tc", "hdl", "sbp"], USAGE)) return;
 
   const inputs: ASCVDInputs = {
     age: values.age!,
@@ -116,11 +104,7 @@ const runASCVD = (argv: string[], json: boolean): void => {
 
   const risk = calculateASCVD(inputs);
 
-  if (!risk) {
-    process.stderr.write(formatError("Could not calculate ASCVD risk — check input values (age 40-79, cholesterol/BP > 0)") + "\n");
-    process.exitCode = 1;
-    return;
-  }
+  if (!risk) return fail("Could not calculate ASCVD risk — check input values (age 40-79, cholesterol/BP > 0)");
 
   const category = getASCVDCategory(risk);
   const severity = getASCVDSeverity(risk);
@@ -183,20 +167,7 @@ const runHEART = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.history) missing.push("--history");
-  if (!values.ecg) missing.push("--ecg");
-  if (!values.age) missing.push("--age");
-  if (!values["risk-factors"]) missing.push("--risk-factors");
-  if (!values.troponin) missing.push("--troponin");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["history", "ecg", "age", "risk-factors", "troponin"], USAGE)) return;
 
   const parseScore = (v: string): 0 | 1 | 2 => {
     const n = parseInt(v, 10);

@@ -23,6 +23,7 @@ import {
   getCKDMBDMonitoring,
 } from "../../../../plugin/lib/ckd";
 import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
+import { fail, requireFlags } from "../cli";
 
 const USAGE = `Usage: medprotocol ckd <sub-command> [options]
 
@@ -83,12 +84,7 @@ Examples:
   medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4`;
 
 // calculateEGFR returns 0 when it cannot calculate; staging that 0 would report G5.
-const failNotCalculated = (): void => {
-  process.stderr.write(
-    formatError("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0") + "\n",
-  );
-  process.exitCode = 1;
-};
+const failNotCalculated = (): void => fail("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0");
 
 const runEGFR = (argv: string[], json: boolean): void => {
   const { values } = parseArgs({
@@ -108,18 +104,7 @@ const runEGFR = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.creatinine) missing.push("--creatinine");
-  if (!values.age) missing.push("--age");
-  if (!values.sex) missing.push("--sex");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE)) return;
 
   const egfr = calculateEGFR(values.creatinine!, values.age!, values.sex!);
   if (egfr === 0) return failNotCalculated();
@@ -160,19 +145,7 @@ const runStage = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.creatinine) missing.push("--creatinine");
-  if (!values.age) missing.push("--age");
-  if (!values.sex) missing.push("--sex");
-  if (!values.acr) missing.push("--acr");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE)) return;
 
   const egfr = calculateEGFR(values.creatinine!, values.age!, values.sex!);
   if (egfr === 0) return failNotCalculated();
@@ -225,19 +198,7 @@ const runKFRE = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.age) missing.push("--age");
-  if (!values.sex) missing.push("--sex");
-  if (!values.egfr) missing.push("--egfr");
-  if (!values.acr) missing.push("--acr");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE)) return;
 
   const kfre = calculateKFRE(values.age!, values.sex!, values.egfr!, values.acr!);
   const referral = assessReferralNeed(String(kfre.fiveYear));
@@ -281,17 +242,7 @@ const runTreatment = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.egfr) missing.push("--egfr");
-  if (!values.acr) missing.push("--acr");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["egfr", "acr"], USAGE)) return;
 
   const gfrCategory = classifyGFRCategory(values.egfr!);
   const albCategory = classifyAlbuminuriaCategory(values.acr!);
@@ -344,17 +295,7 @@ const runAnemia = (argv: string[], json: boolean): void => {
     return;
   }
 
-  const missing: string[] = [];
-  if (!values.hb) missing.push("--hb");
-  if (!values.sex) missing.push("--sex");
-
-  if (missing.length > 0) {
-    process.stderr.write(
-      formatError(`Missing required flags: ${missing.join(", ")}`) + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!requireFlags(values, ["hb", "sex"], USAGE)) return;
 
   const anemia = classifyAnemia(values.hb!, values.sex!);
   const iron = values.ferritin && values.tsat
@@ -407,13 +348,7 @@ const runMBD = (argv: string[], json: boolean): void => {
     return;
   }
 
-  if (!values["gfr-category"]) {
-    process.stderr.write(
-      formatError("Missing required flag: --gfr-category") + "\n\n" + USAGE + "\n",
-    );
-    process.exitCode = 1;
-    return;
-  }
+  if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE);
 
   const gfrCat = values["gfr-category"]!;
   const phosphateResult = values.phosphate ? assessPhosphate(values.phosphate, gfrCat) : null;
