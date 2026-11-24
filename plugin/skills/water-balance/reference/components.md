@@ -54,7 +54,7 @@ Clinical logic lives in `lib/medprotocol/` in the doctor's project (copied from 
 | extraction | `extraction.ts` | `extraction.md` |
 | dashboard | any of the above | `composition.md` |
 
-Shared by all: `utils/safeParseFloat.ts`, `sources.ts` (guideline citations), `trace.ts` (calculation audit trail), `index.ts` (barrel export).
+Shared by all: `utils/safeParseFloat.ts`, `sources.ts` (guideline citations), `trace.ts` (calculation audit trail), `severity.ts` (shared `Severity` type).
 
 ---
 

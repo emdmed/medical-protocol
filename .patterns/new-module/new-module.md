@@ -2,7 +2,7 @@
 
 A clinical module is logic plus the docs and entry points that let agents find it. There is no UI step — screens are generated in the doctor's project from the module's context doc (see `../logic-ui-split/logic-ui-split.md`).
 
-1. **Logic** — `plugin/lib/{module}.ts`: pure functions, string inputs parsed internally, label + severity for classifications, citations in `plugin/lib/sources.ts`. Export it from `plugin/lib/index.ts`.
+1. **Logic** — `plugin/lib/{module}.ts`: pure functions, string inputs parsed internally, label + severity for classifications, citations in `plugin/lib/sources.ts`.
 2. **Tests** — `tests/{module}/*.test.ts` (Vitest), importing from `../../plugin/lib/{module}`. Cover boundaries of every classification tier, empty/invalid input, extreme values.
 3. **Context doc** — `public/medical-protocol/context/{module}.md` with the function signatures, thresholds, and a **Screen spec** (inputs with units, outputs, display rules). Add the module to `context/components.md` (Available Tools + dependencies) and a signal-word row to `context/classification.md`. If the module name differs from the domain (e.g. domain `diabetes` → module `diabetes-dx`), note it.
 4. **CLI command** — `packages/medprotocol/src/commands/{module}.ts`, registered in `packages/medprotocol/src/index.ts`, documented in `context/cli.md`. See `../medprotocol/medprotocol.md`.

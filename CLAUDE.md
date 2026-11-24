@@ -50,7 +50,7 @@ plugin/                            # Claude plugin source
 ├── lib/                           # Shared calculation + validation logic (copied into doctor projects)
 │   ├── acid-base/                 # analyze.ts, interfaces.ts, index.ts
 │   ├── vital-signs-validations/   # validation files per vital sign, severity.ts, types.ts
-│   └── *.ts                       # bmi, cardiology, ckd, diabetes-dx, dka, endocrine, format, hepatology, nephrology, pafi, patient, sepsis, sources, trace, water-balance
+│   └── *.ts                       # bmi, cardiology, ckd, diabetes-dx, dka, endocrine, format, hepatology, nephrology, pafi, patient, sepsis, severity, sources, trace, water-balance
 ├── agents/                        # qa-runner (Haiku): browser QA report; extraction-verifier: re-checks a first-pass extraction
 ├── hooks/                         # privacy-guard, extraction-guard, note-consent, qa-reminder, track-workflow
 ├── scripts/medprotocol.cjs        # Built CLI (skills run it via node; nothing is published to npm)

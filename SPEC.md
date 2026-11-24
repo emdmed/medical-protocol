@@ -77,9 +77,9 @@ These are hard constraints. Violations are bugs.
 
 ## 4. The `plugin/lib/` Contract — Source of Truth
 
-`plugin/lib/` is pure calculation + validation logic. A single barrel (`plugin/lib/index.ts`)
-re-exports every public function, giving one import point:
-`import { calculateBMI, analyze, ... } from "../lib"`.
+`plugin/lib/` is pure calculation + validation logic. There is no barrel:
+import each function from its own module, e.g.
+`import { calculateBMI } from "../lib/bmi"`.
 
 ### 4.1 Conventions
 
@@ -297,7 +297,7 @@ serves `plugin/` from the repo.
 
 Per `.patterns/new-module/` and the README contributing section:
 
-1. **Pure logic** in `plugin/lib/<module>.ts`, exported from `plugin/lib/index.ts`.
+1. **Pure logic** in `plugin/lib/<module>.ts`.
 2. **Tests** in `tests/<module>/`.
 3. **CLI command** in `packages/medprotocol/src/commands/<module>.ts` (+ register
    in `index.ts`, add `--json`), with `tests/cli/<module>-cli.test.ts`.
