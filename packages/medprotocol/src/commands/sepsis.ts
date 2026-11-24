@@ -12,8 +12,8 @@ import {
   calculateLactateClearance,
   isLactateClearanceAdequate,
 } from "../../../../plugin/lib/sepsis";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
-import { requireFlags } from "../cli";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { requireFlags, runSubcommand } from "../cli";
 
 const USAGE = `Usage: medprotocol sepsis <sub-command> [options]
 
@@ -272,32 +272,9 @@ const runLactate = (argv: string[], json: boolean): void => {
   });
 };
 
-export const run = (argv: string[]): void => {
-  const subcommand = argv[0];
-  const subArgs = argv.slice(1);
-
-  const json = subArgs.includes("--json");
-
-  if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
-
-  switch (subcommand) {
-    case "sofa":
-      runSOFA(subArgs, json);
-      break;
-    case "qsofa":
-      runQSOFA(subArgs, json);
-      break;
-    case "lactate":
-      runLactate(subArgs, json);
-      break;
-    default:
-      process.stderr.write(
-        formatError(`Unknown sub-command: ${subcommand}`) +
-          "\n\nAvailable: sofa, qsofa, lactate\n",
-      );
-      process.exitCode = 1;
-  }
-};
+export const run = (argv: string[]): void =>
+  runSubcommand(argv, USAGE, {
+    sofa: runSOFA,
+    qsofa: runQSOFA,
+    lactate: runLactate,
+  });

@@ -79,7 +79,7 @@ ${"\u2500".repeat(title.length)}`;
 });
 
 // src/cli.ts
-var fail, requireFlags;
+var fail, requireFlags, runSubcommand;
 var init_cli = __esm({
   "src/cli.ts"() {
     "use strict";
@@ -93,6 +93,24 @@ var init_cli = __esm({
       if (missing.length === 0) return true;
       fail(`Missing required flags: ${missing.map((name) => `--${name}`).join(", ")}`, usage);
       return false;
+    };
+    runSubcommand = (argv, usage, subcommands) => {
+      const [subcommand, ...subArgs] = argv;
+      if (!subcommand || subcommand === "--help" || subcommand === "-h") {
+        process.stdout.write(usage + "\n");
+        return;
+      }
+      if (!Object.hasOwn(subcommands, subcommand)) {
+        process.stderr.write(
+          formatError(`Unknown sub-command: ${subcommand}`) + `
+
+Available: ${Object.keys(subcommands).join(", ")}
+`
+        );
+        process.exitCode = 1;
+        return;
+      }
+      subcommands[subcommand](subArgs, subArgs.includes("--json"));
     };
   }
 });
@@ -1897,31 +1915,11 @@ Examples:
         ].join("\n");
       });
     };
-    run7 = (argv) => {
-      const subcommand = argv[0];
-      const subArgs = argv.slice(1);
-      const json = subArgs.includes("--json");
-      if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-        process.stdout.write(USAGE7 + "\n");
-        return;
-      }
-      switch (subcommand) {
-        case "ascvd":
-          runASCVD(subArgs, json);
-          break;
-        case "heart":
-          runHEART(subArgs, json);
-          break;
-        case "chadsvasc":
-          runCHADSVASc(subArgs, json);
-          break;
-        default:
-          process.stderr.write(
-            formatError(`Unknown sub-command: ${subcommand}`) + "\n\nAvailable: ascvd, heart, chadsvasc\n"
-          );
-          process.exitCode = 1;
-      }
-    };
+    run7 = (argv) => runSubcommand(argv, USAGE7, {
+      ascvd: runASCVD,
+      heart: runHEART,
+      chadsvasc: runCHADSVASc
+    });
   }
 });
 
@@ -2371,31 +2369,11 @@ Examples:
         ].join("\n");
       });
     };
-    run8 = (argv) => {
-      const subcommand = argv[0];
-      const subArgs = argv.slice(1);
-      const json = subArgs.includes("--json");
-      if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-        process.stdout.write(USAGE8 + "\n");
-        return;
-      }
-      switch (subcommand) {
-        case "sofa":
-          runSOFA(subArgs, json);
-          break;
-        case "qsofa":
-          runQSOFA(subArgs, json);
-          break;
-        case "lactate":
-          runLactate(subArgs, json);
-          break;
-        default:
-          process.stderr.write(
-            formatError(`Unknown sub-command: ${subcommand}`) + "\n\nAvailable: sofa, qsofa, lactate\n"
-          );
-          process.exitCode = 1;
-      }
-    };
+    run8 = (argv) => runSubcommand(argv, USAGE8, {
+      sofa: runSOFA,
+      qsofa: runQSOFA,
+      lactate: runLactate
+    });
   }
 });
 
@@ -3002,40 +2980,14 @@ Examples:
         ].join("\n");
       });
     };
-    run9 = (argv) => {
-      const subcommand = argv[0];
-      const subArgs = argv.slice(1);
-      const json = subArgs.includes("--json");
-      if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-        process.stdout.write(USAGE9 + "\n");
-        return;
-      }
-      switch (subcommand) {
-        case "egfr":
-          runEGFR(subArgs, json);
-          break;
-        case "stage":
-          runStage(subArgs, json);
-          break;
-        case "kfre":
-          runKFRE(subArgs, json);
-          break;
-        case "treatment":
-          runTreatment(subArgs, json);
-          break;
-        case "anemia":
-          runAnemia(subArgs, json);
-          break;
-        case "mbd":
-          runMBD(subArgs, json);
-          break;
-        default:
-          process.stderr.write(
-            formatError(`Unknown sub-command: ${subcommand}`) + "\n\nAvailable: egfr, stage, kfre, treatment, anemia, mbd\n"
-          );
-          process.exitCode = 1;
-      }
-    };
+    run9 = (argv) => runSubcommand(argv, USAGE9, {
+      egfr: runEGFR,
+      stage: runStage,
+      kfre: runKFRE,
+      treatment: runTreatment,
+      anemia: runAnemia,
+      mbd: runMBD
+    });
   }
 });
 
@@ -3586,37 +3538,13 @@ Examples:
         ].join("\n");
       });
     };
-    run10 = (argv) => {
-      const subcommand = argv[0];
-      const subArgs = argv.slice(1);
-      const json = subArgs.includes("--json");
-      if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-        process.stdout.write(USAGE10 + "\n");
-        return;
-      }
-      switch (subcommand) {
-        case "diagnose":
-          runDiagnose(subArgs, json);
-          break;
-        case "t1d-stage":
-          runT1DStage(subArgs, json);
-          break;
-        case "t1-vs-t2":
-          runT1vsT2(subArgs, json);
-          break;
-        case "t2d-screen":
-          runT2DScreen(subArgs, json);
-          break;
-        case "gdm":
-          runGDM(subArgs, json);
-          break;
-        default:
-          process.stderr.write(
-            formatError(`Unknown sub-command: ${subcommand}`) + "\n\nAvailable: diagnose, t1d-stage, t1-vs-t2, t2d-screen, gdm\n"
-          );
-          process.exitCode = 1;
-      }
-    };
+    run10 = (argv) => runSubcommand(argv, USAGE10, {
+      diagnose: runDiagnose,
+      "t1d-stage": runT1DStage,
+      "t1-vs-t2": runT1vsT2,
+      "t2d-screen": runT2DScreen,
+      gdm: runGDM
+    });
   }
 });
 

@@ -17,8 +17,8 @@ import type {
   HEARTInputs,
   CHADSVAScInputs,
 } from "../../../../plugin/lib/cardiology-types";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
-import { fail, requireFlags } from "../cli";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { fail, requireFlags, runSubcommand } from "../cli";
 
 const USAGE = `Usage: medprotocol cardiology <sub-command> [options]
 
@@ -278,33 +278,9 @@ const runCHADSVASc = (argv: string[], json: boolean): void => {
   });
 };
 
-export const run = (argv: string[]): void => {
-  const subcommand = argv[0];
-  const subArgs = argv.slice(1);
-
-  // Check for --json in the remaining args
-  const json = subArgs.includes("--json");
-
-  if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
-
-  switch (subcommand) {
-    case "ascvd":
-      runASCVD(subArgs, json);
-      break;
-    case "heart":
-      runHEART(subArgs, json);
-      break;
-    case "chadsvasc":
-      runCHADSVASc(subArgs, json);
-      break;
-    default:
-      process.stderr.write(
-        formatError(`Unknown sub-command: ${subcommand}`) +
-          "\n\nAvailable: ascvd, heart, chadsvasc\n",
-      );
-      process.exitCode = 1;
-  }
-};
+export const run = (argv: string[]): void =>
+  runSubcommand(argv, USAGE, {
+    ascvd: runASCVD,
+    heart: runHEART,
+    chadsvasc: runCHADSVASc,
+  });

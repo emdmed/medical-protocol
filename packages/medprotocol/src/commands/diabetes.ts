@@ -13,8 +13,8 @@ import {
   classifyGDM_OneStep,
   classifyGDM_TwoStep,
 } from "../../../../plugin/lib/endocrine";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
-import { fail, requireFlags } from "../cli";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { fail, requireFlags, runSubcommand } from "../cli";
 
 const USAGE = `Usage: medprotocol diabetes <sub-command> [options]
 
@@ -420,38 +420,11 @@ const runGDM = (argv: string[], json: boolean): void => {
   });
 };
 
-export const run = (argv: string[]): void => {
-  const subcommand = argv[0];
-  const subArgs = argv.slice(1);
-
-  const json = subArgs.includes("--json");
-
-  if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
-
-  switch (subcommand) {
-    case "diagnose":
-      runDiagnose(subArgs, json);
-      break;
-    case "t1d-stage":
-      runT1DStage(subArgs, json);
-      break;
-    case "t1-vs-t2":
-      runT1vsT2(subArgs, json);
-      break;
-    case "t2d-screen":
-      runT2DScreen(subArgs, json);
-      break;
-    case "gdm":
-      runGDM(subArgs, json);
-      break;
-    default:
-      process.stderr.write(
-        formatError(`Unknown sub-command: ${subcommand}`) +
-          "\n\nAvailable: diagnose, t1d-stage, t1-vs-t2, t2d-screen, gdm\n",
-      );
-      process.exitCode = 1;
-  }
-};
+export const run = (argv: string[]): void =>
+  runSubcommand(argv, USAGE, {
+    diagnose: runDiagnose,
+    "t1d-stage": runT1DStage,
+    "t1-vs-t2": runT1vsT2,
+    "t2d-screen": runT2DScreen,
+    gdm: runGDM,
+  });

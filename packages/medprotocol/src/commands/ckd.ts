@@ -22,8 +22,8 @@ import {
   assessVitaminD,
   getCKDMBDMonitoring,
 } from "../../../../plugin/lib/ckd";
-import { formatHeader, formatTable, printResult, formatError } from "../../../../plugin/lib/format";
-import { fail, requireFlags } from "../cli";
+import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
+import { fail, requireFlags, runSubcommand } from "../cli";
 
 const USAGE = `Usage: medprotocol ckd <sub-command> [options]
 
@@ -395,41 +395,12 @@ const runMBD = (argv: string[], json: boolean): void => {
   });
 };
 
-export const run = (argv: string[]): void => {
-  const subcommand = argv[0];
-  const subArgs = argv.slice(1);
-
-  const json = subArgs.includes("--json");
-
-  if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-    process.stdout.write(USAGE + "\n");
-    return;
-  }
-
-  switch (subcommand) {
-    case "egfr":
-      runEGFR(subArgs, json);
-      break;
-    case "stage":
-      runStage(subArgs, json);
-      break;
-    case "kfre":
-      runKFRE(subArgs, json);
-      break;
-    case "treatment":
-      runTreatment(subArgs, json);
-      break;
-    case "anemia":
-      runAnemia(subArgs, json);
-      break;
-    case "mbd":
-      runMBD(subArgs, json);
-      break;
-    default:
-      process.stderr.write(
-        formatError(`Unknown sub-command: ${subcommand}`) +
-          "\n\nAvailable: egfr, stage, kfre, treatment, anemia, mbd\n",
-      );
-      process.exitCode = 1;
-  }
-};
+export const run = (argv: string[]): void =>
+  runSubcommand(argv, USAGE, {
+    egfr: runEGFR,
+    stage: runStage,
+    kfre: runKFRE,
+    treatment: runTreatment,
+    anemia: runAnemia,
+    mbd: runMBD,
+  });
