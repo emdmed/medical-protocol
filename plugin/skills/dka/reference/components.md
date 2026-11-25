@@ -17,6 +17,7 @@
 | sepsis | SOFA, qSOFA, septic shock, hour-1 bundle |
 | shock | Shock category from the bedside examination (skin temperature by JVP) |
 | volume | Volume overload from the bedside examination (congestion signs; no BNP, film or echo) |
+| heart-failure | Heart failure from the bedside examination (left or right congestion; not ventricular function) |
 | diabetes-dx | ADA diabetes diagnosis, T1D staging, T1 vs T2, T2D/GDM screening |
 | hepatology | MASLD/MASH screening: FIB-4, LSM/ELF, referral |
 | extraction | Values pulled from a clinical note, each quote checked and highlighted in the note (no analysis) |
@@ -53,6 +54,7 @@ Clinical logic lives in `lib/medprotocol/` in the doctor's project (copied from 
 | sepsis | `sepsis.ts` | `sepsis.md` |
 | shock | `shock.ts` | `shock.md` |
 | volume | `volume.ts` + `shock.ts` | `volume.md` |
+| heart-failure | `heart-failure.ts` + `cardiology.ts`, `cardiology-types.ts`, `shock.ts`, `volume.ts` | `heart-failure.md` |
 | diabetes-dx | `diabetes-dx.ts`, `endocrine.ts` | `diabetes.md` |
 | hepatology | `hepatology.ts` | `hepatology.md` |
 | extraction | `extraction.ts` | `extraction.md` |
@@ -69,6 +71,7 @@ Tools that share data. Wire them with props (see `composition.md`) instead of as
 - **patient** provides age, sex, weight, height. When patient and a dependent tool (ckd, nephrology, cardiology, diabetes-dx, hepatology, dka, sepsis, water-balance, bmi) share a dashboard, pass patient fields down instead of duplicating inline fields.
 - **dka** uses **acid-base**: it calls `analyze()` on each reading. Both modules are always copied together.
 - **volume** imports `binJvp` from **shock**: copy `shock.ts` with `volume.ts`.
+- **heart-failure** imports the JVP from **cardiology** and types from **shock** and **volume**: copy `cardiology.ts`, `cardiology-types.ts`, `shock.ts` and `volume.ts` with it.
 - **sepsis** uses **vital-signs** (RR, SBP, FiO2 → qSOFA / respiration SOFA) and **water-balance** (urine output, fluid status).
 - **nephrology** is a companion to **ckd**. Wire `sex` from CKD to Anemia, `gfrCategory` (latest CKD reading) to PhosphoCalcic and CardioMetabolic, plus `age`, `hasDiabetes`, `hasPriorCVD`, `hasKidneyTransplant` to CardioMetabolic.
 - **diabetes-dx** uses `diabetes-dx.ts` for the diagnosis screen and `endocrine.ts` for the sub-screens (T1D staging, T1 vs T2, T2D screening, GDM screening). The tool name is `diabetes-dx`, not `diabetes`.

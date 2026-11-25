@@ -2471,7 +2471,7 @@ var init_shock = __esm({
 });
 
 // ../../plugin/lib/sources.ts
-var KDIGO_2021_BP, KDIGO_2012_ANEMIA, KDIGO_2024_CKD, CKD_EPI_2021, KFRE_TANGRI, WINTERS_1967, VAZQUEZ_2010, MCKEE_1971, BERLIN_2012, WHO_BMI_2000;
+var KDIGO_2021_BP, KDIGO_2012_ANEMIA, KDIGO_2024_CKD, CKD_EPI_2021, KFRE_TANGRI, WINTERS_1967, VAZQUEZ_2010, MCKEE_1971, IBRAHIM_2016, ESC_HF_2021, STATPEARLS_RHF, BERLIN_2012, WHO_BMI_2000;
 var init_sources = __esm({
   "../../plugin/lib/sources.ts"() {
     "use strict";
@@ -2483,6 +2483,9 @@ var init_sources = __esm({
     WINTERS_1967 = "Albert, Dell, Winters. Winters' formula (Ann Intern Med 1967;66:312-322, doi:10.7326/0003-4819-66-2-312)";
     VAZQUEZ_2010 = "Vazquez et al. Accuracy of bedside physical examination in distinguishing categories of shock: a pilot study (J Hosp Med 2010;5:471-474, doi:10.1002/jhm.695)";
     MCKEE_1971 = "McKee et al. The natural history of congestive heart failure: the Framingham study (N Engl J Med 1971;285:1441-1446, doi:10.1056/NEJM197112232852601)";
+    IBRAHIM_2016 = "Ibrahim BS. Right ventricular failure (ESC e-Journal of Cardiology Practice, Vol 14, 12 Dec 2016)";
+    ESC_HF_2021 = "McDonagh et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure (Eur Heart J 2021;42:3599-3726, doi:10.1093/eurheartj/ehab368)";
+    STATPEARLS_RHF = "StatPearls. Right Heart Failure (NCBI Bookshelf NBK459381)";
     BERLIN_2012 = "ARDS Definition Task Force. Berlin Definition (JAMA 2012;307:2526-2533, doi:10.1001/jama.2012.5669)";
     WHO_BMI_2000 = "WHO. Obesity: preventing and managing the global epidemic (WHO Technical Report Series 894, 2000)";
   }
@@ -2713,6 +2716,226 @@ Examples:
         ...result.pivotal.length ? [["Would settle it", result.pivotal.join(", ")]] : [],
         ["Note", VOLUME_CAVEAT],
         ["Source", MCKEE_1971]
+      ]);
+    };
+  }
+});
+
+// ../../plugin/lib/heart-failure.ts
+var LEFT_SIDED_SIGNS, RIGHT_SIDED_SIGNS, SYSTEMIC_SIGNS, RIGHT_VENTRICULAR_SIGNS, SYMPTOMS, NEXT, HF_LABELS, HF_REASONS, HF_SYNDROME_LABELS, HF_NEXT_LABELS, HF_CAVEAT, HEART_FAILURE_FINDINGS, VERDICTS, assessHeartFailure;
+var init_heart_failure = __esm({
+  "../../plugin/lib/heart-failure.ts"() {
+    "use strict";
+    init_cardiology();
+    LEFT_SIDED_SIGNS = ["bilateral_crackles", "third_heart_sound"];
+    RIGHT_SIDED_SIGNS = ["jugular_venous_pressure", "hepatojugular_reflux", "pulsatile_liver", "right_ventricular_and_systemic_signs"];
+    SYSTEMIC_SIGNS = ["hepatojugular_reflux", "hepatomegaly", "ascites", "peripheral_oedema"];
+    RIGHT_VENTRICULAR_SIGNS = ["parasternal_heave", "loud_p2", "right_ventricular_gallop", "tricuspid_regurgitation_murmur", "pulmonary_regurgitation_murmur", "kussmaul_sign"];
+    SYMPTOMS = ["breathlessness", "leg_swelling"];
+    NEXT = ["chest_auscultation", "jugular_venous_pressure"];
+    HF_LABELS = {
+      left: "Left-sided congestion",
+      right: "Right-sided congestion",
+      biventricular: "Left- and right-sided congestion",
+      no_congestion: "No congestion on examination",
+      indeterminate: "Indeterminate"
+    };
+    HF_REASONS = {
+      left_sided_not_determined: "The chest was not auscultated",
+      right_sided_not_determined: "The neck was not assessed and no other right-sided route was met",
+      neither_determined: "Neither the chest nor the neck was assessed"
+    };
+    HF_SYNDROME_LABELS = {
+      heart_failure: "Congestion with a cardinal symptom: the heart failure syndrome",
+      congestion_without_symptoms: "Congestion, with breathlessness and leg swelling both denied",
+      symptoms_not_recorded: "Congestion, symptoms not recorded",
+      no_congestion_found: "No congestion found"
+    };
+    HF_NEXT_LABELS = {
+      chest_auscultation: "Auscultate the chest",
+      jugular_venous_pressure: "Assess the jugular venous pressure"
+    };
+    HF_CAVEAT = "Left and right are bedside congestion patterns, not ventricular function. No study measured this rule. Not a diagnosis.";
+    HEART_FAILURE_FINDINGS = {
+      legSwelling: ["present", "one_leg_only", "absent", "not_assessed"],
+      crackles: ["bilateral", "unilateral", "none", "not_assessed"],
+      thirdHeartSound: ["left_or_unsided", "right_ventricular", "absent", "not_assessed"],
+      hepatomegaly: ["present", "pulsatile", "absent", "not_assessed"],
+      peripheralOedema: ["dependent", "unilateral", "absent", "not_assessed"]
+    };
+    VERDICTS = {
+      present: { present: "biventricular", absent: "left" },
+      absent: { present: "right", absent: "no_congestion" }
+    };
+    assessHeartFailure = (exam) => {
+      const notCalculated = [];
+      let cmH2O = null;
+      const height = exam.jvpHeightCm?.trim();
+      if (height && !exam.jvpReference) {
+        notCalculated.push(`jugular venous pressure ${height} cm: no reference point written (right atrium or sternal angle)`);
+      } else if (height && exam.jvpReference) {
+        cmH2O = calculateJVPcmH2O(height, exam.jvpReference);
+        if (cmH2O === null) notCalculated.push(`jugular venous pressure ${height} cm (${exam.jvpReference}): not a plausible height`);
+      }
+      const jvp = cmH2O !== null ? getJVPCategory(cmH2O) === "Elevated" ? "elevated" : "normal_or_low" : exam.jvp ?? "not_assessed";
+      const crackles = exam.crackles ?? "not_assessed";
+      const leftMet = {
+        bilateral_crackles: crackles === "bilateral",
+        third_heart_sound: exam.thirdHeartSound === "left_or_unsided"
+      };
+      const leftSigns = LEFT_SIDED_SIGNS.filter((s) => leftMet[s]);
+      const left = leftSigns.length ? "present" : crackles !== "not_assessed" ? "absent" : "not_determined";
+      const systemicMet = {
+        hepatojugular_reflux: exam.hepatojugularReflux === "present",
+        hepatomegaly: exam.hepatomegaly === "present" || exam.hepatomegaly === "pulsatile",
+        ascites: exam.ascites === "present",
+        peripheral_oedema: exam.peripheralOedema === "dependent"
+      };
+      const rvMet = {
+        parasternal_heave: exam.parasternalHeave === "present",
+        loud_p2: exam.loudP2 === "present",
+        right_ventricular_gallop: exam.thirdHeartSound === "right_ventricular",
+        tricuspid_regurgitation_murmur: exam.tricuspidRegurgitationMurmur === "present",
+        pulmonary_regurgitation_murmur: exam.pulmonaryRegurgitationMurmur === "present",
+        kussmaul_sign: exam.kussmaulSign === "present"
+      };
+      const unseen = jvp === "not_assessed";
+      const loaded = rvMet.parasternal_heave || rvMet.loud_p2 || rvMet.right_ventricular_gallop || rvMet.tricuspid_regurgitation_murmur;
+      const congested = systemicMet.hepatomegaly || systemicMet.ascites || systemicMet.peripheral_oedema;
+      const rightMet = {
+        jugular_venous_pressure: jvp === "elevated",
+        hepatojugular_reflux: unseen && systemicMet.hepatojugular_reflux,
+        pulsatile_liver: unseen && exam.hepatomegaly === "pulsatile",
+        right_ventricular_and_systemic_signs: unseen && loaded && congested
+      };
+      const rightSigns = RIGHT_SIDED_SIGNS.filter((s) => rightMet[s]);
+      const right = rightSigns.length ? "present" : jvp === "normal_or_low" ? "absent" : "not_determined";
+      const symptoms = SYMPTOMS.filter((s) => (s === "breathlessness" ? exam.breathlessness : exam.legSwelling) === "present");
+      const denied = exam.breathlessness === "absent" && exam.legSwelling === "absent";
+      const syndrome = left !== "present" && right !== "present" ? "no_congestion_found" : symptoms.length ? "heart_failure" : denied ? "congestion_without_symptoms" : "symptoms_not_recorded";
+      let verdict = "indeterminate";
+      let reason = null;
+      if (left !== "not_determined" && right !== "not_determined") verdict = VERDICTS[left][right];
+      else reason = left === right ? "neither_determined" : left === "not_determined" ? "left_sided_not_determined" : "right_sided_not_determined";
+      return {
+        verdict,
+        reason,
+        left,
+        right,
+        leftSigns,
+        rightSigns,
+        systemicSigns: SYSTEMIC_SIGNS.filter((s) => systemicMet[s]),
+        rightVentricularSigns: RIGHT_VENTRICULAR_SIGNS.filter((s) => rvMet[s]),
+        symptoms,
+        syndrome,
+        jvp,
+        notCalculated,
+        next: NEXT.filter((n) => (n === "chest_auscultation" ? left : right) === "not_determined")
+      };
+    };
+  }
+});
+
+// src/commands/heart-failure.ts
+var heart_failure_exports = {};
+__export(heart_failure_exports, {
+  run: () => run11
+});
+var H, FLAGS3, list, USAGE11, run11;
+var init_heart_failure2 = __esm({
+  "src/commands/heart-failure.ts"() {
+    "use strict";
+    init_heart_failure();
+    init_shock();
+    init_sources();
+    init_volume();
+    init_cli();
+    H = HEART_FAILURE_FINDINGS;
+    FLAGS3 = {
+      breathlessness: ["breathlessness", PRESENCE],
+      "leg-swelling": ["legSwelling", H.legSwelling],
+      crackles: ["crackles", H.crackles],
+      s3: ["thirdHeartSound", H.thirdHeartSound],
+      heave: ["parasternalHeave", PRESENCE],
+      p2: ["loudP2", PRESENCE],
+      "tr-murmur": ["tricuspidRegurgitationMurmur", PRESENCE],
+      "pr-murmur": ["pulmonaryRegurgitationMurmur", PRESENCE],
+      jvp: ["jvp", SHOCK_FINDINGS.jvp],
+      "jvp-ref": ["jvpReference", ["right-atrium", "sternal-angle"]],
+      kussmaul: ["kussmaulSign", PRESENCE],
+      hjr: ["hepatojugularReflux", PRESENCE],
+      liver: ["hepatomegaly", H.hepatomegaly],
+      ascites: ["ascites", PRESENCE],
+      oedema: ["peripheralOedema", H.peripheralOedema]
+    };
+    list = (flag) => FLAGS3[flag][1].join(" | ");
+    USAGE11 = `Usage: medprotocol heart-failure [options]
+
+Heart failure from the bedside examination: which side is congested (left: the lungs, right: the
+systemic veins), and whether a cardinal symptom makes that congestion the syndrome. Left and right
+are congestion patterns, not ventricular function. No study measured this rule: not a diagnosis.
+
+Options (a finding left out is not_assessed):
+  --breathlessness <v>   ${list("breathlessness")}
+  --leg-swelling <v>     ${list("leg-swelling")} (the history)
+  --crackles <v>         ${list("crackles")}
+  --s3 <v>               ${list("s3")}
+  --heave <v>            Parasternal heave: ${list("heave")}
+  --p2 <v>               Loud P2: ${list("p2")}
+  --tr-murmur <v>        Tricuspid regurgitation murmur: ${list("tr-murmur")}
+  --pr-murmur <v>        Pulmonary regurgitation murmur: ${list("pr-murmur")}
+  --jvp <v>              ${list("jvp")} (the impression; a usable --jvp-cm wins)
+  --jvp-cm <number>      Measured JVP height in cm
+  --jvp-ref <v>          ${list("jvp-ref")}: where --jvp-cm was measured from
+  --kussmaul <v>         Kussmaul's sign: ${list("kussmaul")}
+  --hjr <v>              Hepatojugular reflux: ${list("hjr")}
+  --liver <v>            ${list("liver")}
+  --ascites <v>          ${list("ascites")}
+  --oedema <v>           ${list("oedema")} (on examination)
+  --json                 Output as JSON
+  --help                 Show this help
+
+A height with no --jvp-ref, or an implausible one, is not used: the impression decides the neck and
+the height is listed under "Not calculated".
+
+Examples:
+  medprotocol heart-failure --breathlessness present --crackles bilateral --jvp elevated
+  medprotocol heart-failure --crackles none --jvp-cm 4 --jvp-ref sternal-angle`;
+    run11 = (argv) => {
+      const options = { "jvp-cm": { type: "string" } };
+      for (const flag of Object.keys(FLAGS3)) options[flag] = { type: "string" };
+      const values = parseFlags(argv, options, USAGE11);
+      if (!values) return;
+      const exam = { jvpHeightCm: values["jvp-cm"] };
+      for (const [flag, [key, allowed]] of Object.entries(FLAGS3)) {
+        const value = values[flag];
+        if (value !== void 0 && !allowed.includes(value)) return fail(`--${flag} must be one of: ${allowed.join(", ")}`);
+        exam[key] = value;
+      }
+      const result = assessHeartFailure(exam);
+      const sources = [IBRAHIM_2016, ESC_HF_2021, STATPEARLS_RHF];
+      const data = {
+        ...result,
+        label: HF_LABELS[result.verdict],
+        reasonText: result.reason ? HF_REASONS[result.reason] : null,
+        syndromeText: HF_SYNDROME_LABELS[result.syndrome],
+        nextText: result.next.map((n) => HF_NEXT_LABELS[n]),
+        caveat: HF_CAVEAT,
+        sources
+      };
+      const row = (label, items) => items.length ? [[label, items.join(", ")]] : [];
+      printTable(data, Boolean(values.json), "Heart Failure (bedside examination)", [
+        ["Verdict", data.label],
+        ...row("Why", data.reasonText ? [data.reasonText] : []),
+        ["Syndrome", data.syndromeText],
+        ...row("Left signs", result.leftSigns),
+        ...row("Right signs", result.rightSigns),
+        ...row("Systemic signs", result.systemicSigns),
+        ...row("RV signs", result.rightVentricularSigns),
+        ...row("Not calculated", result.notCalculated),
+        ...row("Would decide it", data.nextText),
+        ["Note", HF_CAVEAT],
+        ["Sources", sources.join("; ")]
       ]);
     };
   }
@@ -2988,15 +3211,15 @@ var init_ckd = __esm({
 // src/commands/ckd.ts
 var ckd_exports = {};
 __export(ckd_exports, {
-  run: () => run11
+  run: () => run12
 });
-var USAGE11, failNotCalculated, badAcrUnit, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run11;
+var USAGE12, failNotCalculated, badAcrUnit, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run12;
 var init_ckd2 = __esm({
   "src/commands/ckd.ts"() {
     "use strict";
     init_ckd();
     init_cli();
-    USAGE11 = `Usage: medprotocol ckd <sub-command> [options]
+    USAGE12 = `Usage: medprotocol ckd <sub-command> [options]
 
 Sub-commands:
   egfr         Calculate eGFR (CKD-EPI 2021)
@@ -3068,9 +3291,9 @@ Examples:
         creatinine: { type: "string" },
         age: { type: "string" },
         sex: { type: "string" }
-      }, USAGE11);
+      }, USAGE12);
       if (!values) return;
-      if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE11)) return;
+      if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE12)) return;
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
       if (egfr === 0) return failNotCalculated();
       const gfrCategory = classifyGFRCategory(String(egfr));
@@ -3090,9 +3313,9 @@ Examples:
         sex: { type: "string" },
         acr: { type: "string" },
         "acr-unit": { type: "string", default: "mg/g" }
-      }, USAGE11);
+      }, USAGE12);
       if (!values) return;
-      if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE11)) return;
+      if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE12)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const acrUnit = values["acr-unit"];
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
@@ -3132,9 +3355,9 @@ Examples:
         egfr: { type: "string" },
         acr: { type: "string" },
         "acr-unit": { type: "string", default: "mg/g" }
-      }, USAGE11);
+      }, USAGE12);
       if (!values) return;
-      if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE11)) return;
+      if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE12)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const kfre = calculateKFRE(values.age, values.sex, values.egfr, String(acrInMgPerG(values.acr, values["acr-unit"])));
       const referral = assessReferralNeed(String(kfre.fiveYear));
@@ -3158,9 +3381,9 @@ Examples:
         "heart-failure": { type: "boolean", default: false },
         "on-rasi": { type: "boolean", default: false },
         "potassium-normal": { type: "boolean", default: false }
-      }, USAGE11);
+      }, USAGE12);
       if (!values) return;
-      if (!requireFlags(values, ["egfr", "acr"], USAGE11)) return;
+      if (!requireFlags(values, ["egfr", "acr"], USAGE12)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const acrUnit = values["acr-unit"];
       const gfrCategory = classifyGFRCategory(values.egfr);
@@ -3197,9 +3420,9 @@ Examples:
         sex: { type: "string" },
         ferritin: { type: "string" },
         tsat: { type: "string" }
-      }, USAGE11);
+      }, USAGE12);
       if (!values) return;
-      if (!requireFlags(values, ["hb", "sex"], USAGE11)) return;
+      if (!requireFlags(values, ["hb", "sex"], USAGE12)) return;
       const anemia = classifyAnemia(values.hb, values.sex);
       const iron = values.ferritin && values.tsat ? assessIronStatus(values.ferritin, values.tsat) : null;
       const esa = values.ferritin && values.tsat ? checkESAEligibility(values.hb, values.ferritin, values.tsat, values.sex) : null;
@@ -3226,9 +3449,9 @@ Examples:
         pth: { type: "string" },
         "vitamin-d": { type: "string" },
         "gfr-category": { type: "string" }
-      }, USAGE11);
+      }, USAGE12);
       if (!values) return;
-      if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE11);
+      if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE12);
       const gfrCat = values["gfr-category"];
       const phosphateResult = values.phosphate ? assessPhosphate(values.phosphate, gfrCat) : null;
       const correctedCa = values.calcium && values.albumin ? correctCalcium(values.calcium, values.albumin) : null;
@@ -3264,7 +3487,7 @@ Examples:
       rows.push(["Monitor Vit D", monitoring.vitaminD]);
       printTable(data, values.json, "CKD-MBD Assessment", rows);
     };
-    run11 = (argv) => runSubcommand(argv, USAGE11, {
+    run12 = (argv) => runSubcommand(argv, USAGE12, {
       egfr: runEGFR,
       stage: runStage,
       kfre: runKFRE,
@@ -3456,16 +3679,16 @@ var init_endocrine = __esm({
 // src/commands/diabetes.ts
 var diabetes_exports = {};
 __export(diabetes_exports, {
-  run: () => run12
+  run: () => run13
 });
-var USAGE12, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run12;
+var USAGE13, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run13;
 var init_diabetes = __esm({
   "src/commands/diabetes.ts"() {
     "use strict";
     init_diabetes_dx();
     init_endocrine();
     init_cli();
-    USAGE12 = `Usage: medprotocol diabetes <sub-command> [options]
+    USAGE13 = `Usage: medprotocol diabetes <sub-command> [options]
 
 Sub-commands:
   diagnose     Diabetes diagnosis classifier (ADA Table 2.1/2.2)
@@ -3537,7 +3760,7 @@ Examples:
         "2h-pg": { type: "string", default: "" },
         "random-pg": { type: "string", default: "" },
         symptoms: { type: "boolean", default: false }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
       const a1c = values.a1c;
       const fpg = values.fpg;
@@ -3545,7 +3768,7 @@ Examples:
       const randomPG = values["random-pg"];
       const hasSymptoms = values.symptoms;
       if (!a1c && !fpg && !twohPG && !randomPG) {
-        return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE12);
+        return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE13);
       }
       const diagnosis = getDiagnosis(a1c, fpg, twohPG, randomPG, hasSymptoms);
       const rows = [];
@@ -3585,9 +3808,9 @@ Examples:
         "2h-pg": { type: "string", default: "" },
         a1c: { type: "string", default: "" },
         symptoms: { type: "boolean", default: false }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
-      if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE12);
+      if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE13);
       const result = classifyT1DStage(
         values.autoantibodies,
         values.fpg,
@@ -3622,9 +3845,9 @@ Examples:
         "fhx-t2d": { type: "boolean", default: false },
         "dka-history": { type: "boolean", default: false },
         autoimmune: { type: "boolean", default: false }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
-      if (!requireFlags(values, ["age", "bmi"], USAGE12)) return;
+      if (!requireFlags(values, ["age", "bmi"], USAGE13)) return;
       const result = classifyT1vsT2(
         values.age,
         values.bmi,
@@ -3669,9 +3892,9 @@ Examples:
         "insulin-resistance": { type: "boolean", default: false },
         "prior-prediabetes": { type: "boolean", default: false },
         "prior-gdm": { type: "boolean", default: false }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
-      if (!requireFlags(values, ["age", "bmi"], USAGE12)) return;
+      if (!requireFlags(values, ["age", "bmi"], USAGE13)) return;
       const riskFactors = {
         firstDegreeRelative: values["first-degree"],
         highRiskEthnicity: values["high-risk-ethnicity"],
@@ -3721,7 +3944,7 @@ Examples:
         "1h": { type: "string" },
         "2h": { type: "string" },
         "3h": { type: "string", default: "0" }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
       const missing = [];
       if (!values.strategy) missing.push("--strategy");
@@ -3731,7 +3954,7 @@ Examples:
       if (values.strategy === "two-step" && !values["3h"]) {
         missing.push("--3h");
       }
-      if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE12);
+      if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE13);
       const strategy = values.strategy;
       const result = strategy === "one-step" ? classifyGDM_OneStep(values.fasting, values["1h"], values["2h"]) : classifyGDM_TwoStep(values.fasting, values["1h"], values["2h"], values["3h"]);
       const rows = [
@@ -3759,7 +3982,7 @@ Examples:
       };
       printTable(data, values.json, `GDM Screening \u2014 ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`, rows);
     };
-    run12 = (argv) => runSubcommand(argv, USAGE12, {
+    run13 = (argv) => runSubcommand(argv, USAGE13, {
       diagnose: runDiagnose,
       "t1d-stage": runT1DStage,
       "t1-vs-t2": runT1vsT2,
@@ -5918,9 +6141,9 @@ var init_overlay_client = __esm({
 var overlay_exports = {};
 __export(overlay_exports, {
   isLocalOrigin: () => isLocalOrigin,
-  run: () => run13
+  run: () => run14
 });
-var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE13, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run13;
+var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE14, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run14;
 var init_overlay = __esm({
   "src/commands/overlay.ts"() {
     "use strict";
@@ -5931,7 +6154,7 @@ var init_overlay = __esm({
     init_claude_spawn();
     init_cli();
     init_overlay_client();
-    USAGE13 = `Usage: medprotocol overlay [options]
+    USAGE14 = `Usage: medprotocol overlay [options]
 
 The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
@@ -6356,7 +6579,7 @@ Examples:
         }
       });
     };
-    run13 = (argv) => {
+    run14 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string" },
@@ -6369,7 +6592,7 @@ Examples:
         watch: { type: "boolean", default: false },
         clear: { type: "boolean", default: false },
         dir: { type: "string" }
-      }, USAGE13);
+      }, USAGE14);
       if (!values) return;
       const dir = (0, import_node_path.resolve)(values.dir ?? (0, import_node_path.join)(".medprotocol", "queue"));
       const json = values.json;
@@ -6440,11 +6663,11 @@ Waiting for the overlay to create it\u2026
 var extract_exports = {};
 __export(extract_exports, {
   calculations: () => calculations,
-  run: () => run14,
+  run: () => run15,
   serve: () => serve2,
   stateOf: () => stateOf
 });
-var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE14, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run14;
+var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE15, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run15;
 var init_extract = __esm({
   "src/commands/extract.ts"() {
     "use strict";
@@ -6467,7 +6690,7 @@ var init_extract = __esm({
     init_cli();
     init_extract_artifact();
     init_overlay();
-    USAGE14 = `Usage: medprotocol extract --note <file> --items <file> [options]
+    USAGE15 = `Usage: medprotocol extract --note <file> --items <file> [options]
        medprotocol extract --save <file>
        medprotocol extract --serve [--port <number>]
 
@@ -6535,7 +6758,7 @@ Example:
       const jvp = read && shock.jvp !== "not_assessed" ? shock.jvp : void 0;
       const found = Object.keys(SECONDARY).filter((n) => said[n]);
       const text = (n) => `${SECONDARY[n]}: ${said[n]}`;
-      const list = (names) => names.map(text).join("; ");
+      const list2 = (names) => names.map(text).join("; ");
       const points = (n) => SHOCK_SUGGESTS[`${n}:${exam[n]}`];
       const inStudy = { systolic: String(SHOCK_LIMITS.systolicBelow - 1), durationMinutes: String(SHOCK_LIMITS.minutesAtLeast) };
       const cells = ["warm", "cool"].map(
@@ -6556,7 +6779,7 @@ Example:
       const why = shock.reason === null ? void 0 : shock.reason === "outside_studied_cohort" ? `${minutes ? `Low for ${minutes} minutes.` : "The note does not say how long the pressure has been low."} The rule was studied only after ${SHOCK_LIMITS.minutesAtLeast} minutes below ${SHOCK_LIMITS.systolicBelow} mmHg.` : shock.reason === "discordant_primary_findings" ? "Warm skin with an elevated neck: the study gives this pair no category." : `No ${[!skin && "skin temperature", !jvp && "neck vein"].filter(Boolean).join(" or ")} finding was found in the note${open.length === 2 ? `, so the rule cannot choose between ${open.join(" and ")}` : ""}.`;
       const ledger = [
         ["Pressure", `${exam.systolic} mmHg, ${minutes ? `low for ${minutes} min` : "duration not stated"}`],
-        ...shock.reason === null ? [["Agrees", list(shock.supporting)], ["Points elsewhere", list(shock.discordant), true], ["Fits more than one", list(found.filter((n) => !points(n)))]] : [["Also found", list(found)]],
+        ...shock.reason === null ? [["Agrees", list2(shock.supporting)], ["Points elsewhere", list2(shock.discordant), true], ["Fits more than one", list2(found.filter((n) => !points(n)))]] : [["Also found", list2(found)]],
         ["Not in the note", Object.keys(SECONDARY).filter((n) => !said[n]).map((n) => SECONDARY[n]).join(", ")]
       ];
       return {
@@ -6831,12 +7054,12 @@ ${check}`));
             return send(200, { id: (0, import_node_path2.basename)(dir2) });
           }
           if (req.method === "GET" && path === "/api/extractions") {
-            const list = (0, import_node_fs2.readdirSync)("extractions").filter((id) => /^[0-9a-f]{12}$/.test(id) && (0, import_node_fs2.existsSync)((0, import_node_path2.join)("extractions", id, "note.md"))).map((id) => {
+            const list2 = (0, import_node_fs2.readdirSync)("extractions").filter((id) => /^[0-9a-f]{12}$/.test(id) && (0, import_node_fs2.existsSync)((0, import_node_path2.join)("extractions", id, "note.md"))).map((id) => {
               const dir2 = (0, import_node_path2.join)("extractions", id);
               const { state, note } = stateOf(dir2, running.has(dir2));
               return { id, state, saved: (0, import_node_fs2.statSync)((0, import_node_path2.join)(dir2, "note.md")).mtime.toISOString(), first: note.trim().split("\n")[0].slice(0, 80) };
             }).sort((a, b) => b.saved.localeCompare(a.saved));
-            return send(200, list);
+            return send(200, list2);
           }
           const [, hash, decisions] = /^\/api\/extractions\/([0-9a-f]{12})(\/decisions)?$/.exec(path) ?? [];
           const dir = hash && (0, import_node_path2.join)("extractions", hash);
@@ -6891,7 +7114,7 @@ ${check}`));
       });
       return server;
     };
-    run14 = (argv) => {
+    run15 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string", default: "7332" },
@@ -6899,7 +7122,7 @@ ${check}`));
         note: { type: "string" },
         items: { type: "string" },
         artifact: { type: "string" }
-      }, USAGE14);
+      }, USAGE15);
       if (!values) return;
       if (values.serve) {
         const port = Number(values.port);
@@ -6923,7 +7146,7 @@ ${check}`));
         printResult({ dir, existed }, values.json, () => dir + (existed ? "  (already saved)" : ""));
         return;
       }
-      if (!values.note || !values.items) return fail("--note and --items are required", USAGE14);
+      if (!values.note || !values.items) return fail("--note and --items are required", USAGE15);
       let note;
       let items;
       try {
@@ -6970,7 +7193,7 @@ var version = "1.5.1";
 
 // src/index.ts
 init_cli();
-var USAGE15 = `medprotocol \u2014 Medical calculations from the terminal
+var USAGE16 = `medprotocol \u2014 Medical calculations from the terminal
 
 Usage: medprotocol <command> [options]
 
@@ -6985,6 +7208,7 @@ Commands:
   sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)
   shock            Shock category from the bedside examination (skin temperature by JVP)
   volume           Volume overload from the bedside examination (congestion signs)
+  heart-failure    Heart failure from the bedside examination (left or right congestion)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
@@ -7027,7 +7251,7 @@ if (command === "--version" || command === "-v") {
   process.exit(0);
 }
 if (!command || command === "--help" || command === "-h") {
-  process.stdout.write(USAGE15 + "\n");
+  process.stdout.write(USAGE16 + "\n");
   process.exit(0);
 }
 var commands = {
@@ -7041,6 +7265,7 @@ var commands = {
   sepsis: () => Promise.resolve().then(() => (init_sepsis2(), sepsis_exports)),
   shock: () => Promise.resolve().then(() => (init_shock2(), shock_exports)),
   volume: () => Promise.resolve().then(() => (init_volume2(), volume_exports)),
+  "heart-failure": () => Promise.resolve().then(() => (init_heart_failure2(), heart_failure_exports)),
   ckd: () => Promise.resolve().then(() => (init_ckd2(), ckd_exports)),
   diabetes: () => Promise.resolve().then(() => (init_diabetes(), diabetes_exports)),
   extract: () => Promise.resolve().then(() => (init_extract(), extract_exports)),

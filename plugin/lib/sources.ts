@@ -39,6 +39,12 @@ export const VAZQUEZ_2010 = "Vazquez et al. Accuracy of bedside physical examina
 // Volume overload
 export const MCKEE_1971 = "McKee et al. The natural history of congestive heart failure: the Framingham study (N Engl J Med 1971;285:1441-1446, doi:10.1056/NEJM197112232852601)";
 
+// Heart failure
+export const IBRAHIM_2016 = "Ibrahim BS. Right ventricular failure (ESC e-Journal of Cardiology Practice, Vol 14, 12 Dec 2016)";
+export const ESC_HF_2021 = "McDonagh et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure (Eur Heart J 2021;42:3599-3726, doi:10.1093/eurheartj/ehab368)";
+// shortcut: authors not verified (NCBI page bot-gated); add them when the page is read
+export const STATPEARLS_RHF = "StatPearls. Right Heart Failure (NCBI Bookshelf NBK459381)";
+
 // Respiratory, vital signs, BMI
 export const BERLIN_2012 = "ARDS Definition Task Force. Berlin Definition (JAMA 2012;307:2526-2533, doi:10.1001/jama.2012.5669)";
 export const ACC_AHA_2017_BP = "2017 ACC/AHA High Blood Pressure Guideline (Hypertension 2018;71, doi:10.1161/HYP.0000000000000065)";

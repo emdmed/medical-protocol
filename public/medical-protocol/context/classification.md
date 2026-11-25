@@ -26,6 +26,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **sepsis** | sepsis, SOFA, qSOFA, septic shock, organ failure, lactate, vasopressors, hour-1 bundle, resuscitation |
 | **shock** | shock category, type of shock, undifferentiated shock, cardiogenic, hypovolemic, hypotension, cool or warm skin, JVP, jugular venous pressure, syndromic assessment |
 | **volume** | volume overload, fluid overload, congestion, congestive, hypervolemia, crackles, rales, S3, gallop, hepatojugular reflux, ankle edema, leg swelling, Framingham |
+| **heart-failure** | heart failure, left-sided, right-sided, biventricular, right heart failure, congestive heart failure, CHF, RV infarct, parasternal heave, loud P2, tricuspid regurgitation, Kussmaul, pulsatile liver, ascites, breathlessness, dyspnoea, orthopnoea |
 
 ## Endocrinology / Diabetes
 

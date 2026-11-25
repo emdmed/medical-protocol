@@ -51,6 +51,35 @@ export type Symptom = (typeof SYMPTOMS)[number];
 export type HeartFailureSyndrome = (typeof SYNDROMES)[number];
 export type Next = (typeof NEXT)[number];
 
+export const HF_LABELS: Record<HeartFailureVerdict, string> = {
+  left: "Left-sided congestion",
+  right: "Right-sided congestion",
+  biventricular: "Left- and right-sided congestion",
+  no_congestion: "No congestion on examination",
+  indeterminate: "Indeterminate",
+};
+
+export const HF_REASONS: Record<HeartFailureReason, string> = {
+  left_sided_not_determined: "The chest was not auscultated",
+  right_sided_not_determined: "The neck was not assessed and no other right-sided route was met",
+  neither_determined: "Neither the chest nor the neck was assessed",
+};
+
+export const HF_SYNDROME_LABELS: Record<HeartFailureSyndrome, string> = {
+  heart_failure: "Congestion with a cardinal symptom: the heart failure syndrome",
+  congestion_without_symptoms: "Congestion, with breathlessness and leg swelling both denied",
+  symptoms_not_recorded: "Congestion, symptoms not recorded",
+  no_congestion_found: "No congestion found",
+};
+
+export const HF_NEXT_LABELS: Record<Next, string> = {
+  chest_auscultation: "Auscultate the chest",
+  jugular_venous_pressure: "Assess the jugular venous pressure",
+};
+
+/** Say this wherever the result is shown. */
+export const HF_CAVEAT = "Left and right are bedside congestion patterns, not ventricular function. No study measured this rule. Not a diagnosis.";
+
 /** Allowed values beyond plain presence, from medextract's heart-failure schema. */
 export const HEART_FAILURE_FINDINGS = {
   legSwelling: ["present", "one_leg_only", "absent", "not_assessed"],
