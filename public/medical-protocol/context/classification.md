@@ -25,6 +25,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking |
 | **sepsis** | sepsis, SOFA, qSOFA, septic shock, organ failure, lactate, vasopressors, hour-1 bundle, resuscitation |
 | **shock** | shock category, type of shock, undifferentiated shock, cardiogenic, hypovolemic, hypotension, cool or warm skin, JVP, jugular venous pressure, syndromic assessment |
+| **volume** | volume overload, fluid overload, congestion, congestive, hypervolemia, crackles, rales, S3, gallop, hepatojugular reflux, ankle edema, leg swelling, Framingham |
 
 ## Endocrinology / Diabetes
 

@@ -14,7 +14,8 @@ import { binJvp, type JugularVenousPressure } from "./shock";
 import { safeParseFloatOrNull } from "./utils/safeParseFloat";
 
 /** `absent` is assessed and negative; without it `no_overload` would be unreachable. */
-export type Presence = "present" | "absent" | "not_assessed";
+export const PRESENCE = ["present", "absent", "not_assessed"] as const;
+export type Presence = (typeof PRESENCE)[number];
 
 /** Framingham's counts (McKee et al. 1971): two majors, or one major and two minors. */
 export const VOLUME_LIMITS = {
@@ -36,6 +37,20 @@ const FINDINGS: readonly VolumeFinding[] = [...MAJOR_FINDINGS, ...MINOR_FINDINGS
 export type VolumeStatus = "overload" | "no_overload" | "indeterminate";
 
 export type VolumeReason = "no_exam_documented" | "unassessed_findings_could_change_verdict";
+
+export const VOLUME_LABELS: Record<VolumeStatus, string> = {
+  overload: "Volume overload",
+  no_overload: "No volume overload on examination",
+  indeterminate: "Indeterminate",
+};
+
+export const VOLUME_REASONS: Record<VolumeReason, string> = {
+  no_exam_documented: "None of the seven congestion signs was assessed",
+  unassessed_findings_could_change_verdict: "Signs not assessed could still reach the threshold",
+};
+
+/** Say this wherever the result is shown. */
+export const VOLUME_CAVEAT = "Examination subset of the Framingham criteria, never validated on its own. Not a diagnosis.";
 
 /** Every finding left out counts as `not_assessed`. No vital signs: the heart-rate minor is dropped. */
 export interface VolumeExam {

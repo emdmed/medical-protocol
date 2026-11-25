@@ -36,6 +36,9 @@ export const CHADSVASC_2010 = "Lip et al. CHA2DS2-VASc (Chest 2010;137:263-272, 
 // Shock
 export const VAZQUEZ_2010 = "Vazquez et al. Accuracy of bedside physical examination in distinguishing categories of shock: a pilot study (J Hosp Med 2010;5:471-474, doi:10.1002/jhm.695)";
 
+// Volume overload
+export const MCKEE_1971 = "McKee et al. The natural history of congestive heart failure: the Framingham study (N Engl J Med 1971;285:1441-1446, doi:10.1056/NEJM197112232852601)";
+
 // Respiratory, vital signs, BMI
 export const BERLIN_2012 = "ARDS Definition Task Force. Berlin Definition (JAMA 2012;307:2526-2533, doi:10.1001/jama.2012.5669)";
 export const ACC_AHA_2017_BP = "2017 ACC/AHA High Blood Pressure Guideline (Hypertension 2018;71, doi:10.1161/HYP.0000000000000065)";
