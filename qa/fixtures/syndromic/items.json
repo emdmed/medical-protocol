@@ -1,0 +1,23 @@
+[
+  { "field": "Respiratory rate", "key": "rr", "value": "32", "quote": "RR 32", "episode": "current" },
+  { "field": "SpO2", "key": "spo2", "value": "88", "unit": "%", "quote": "SpO2 88%", "episode": "current" },
+  { "field": "Temperature", "key": "temp", "value": "38.6", "unit": "°C", "quote": "Temp 38.6 °C", "episode": "current" },
+  { "field": "Creatinine", "key": "creatinine", "value": "1.4", "unit": "mg/dL", "quote": "baseline creatinine 1.4 mg/dL", "episode": "history", "lab": true },
+  { "field": "Creatinine", "key": "creatinine", "value": "1.9", "unit": "mg/dL", "quote": "creatinine 1.9 mg/dL", "episode": "current", "lab": true },
+  { "field": "Heart rate", "key": "hr", "value": "110", "quote": "RR 32", "episode": "current" },
+  { "field": "Weight", "key": "weight", "value": "80", "unit": "kg", "quote": "weighs 80 kg", "episode": "current" },
+  { "field": "Age", "key": "age", "value": "68", "quote": "MR X, 68", "episode": "current" },
+  { "field": "Chest pain", "value": "denies chest pain", "quote": "Denies chest pain", "episode": "current", "absent": true },
+  { "field": "Cough", "value": "cough", "quote": "cough", "episode": "current", "exam": "cough", "reads": "present" },
+  { "field": "Sputum", "value": "purulent sputum", "quote": "purulent sputum", "episode": "current", "exam": "sputum", "reads": "purulent" },
+  { "field": "Fever", "value": "fever at home", "quote": "fever at home", "episode": "current", "exam": "fever", "reads": "present" },
+  { "field": "Oxygen", "value": "room air", "quote": "on room air", "episode": "current", "exam": "oxygenSupport", "reads": "room_air" },
+  { "field": "Accessory muscles", "value": "using accessory muscles", "quote": "Using accessory muscles", "episode": "current", "exam": "accessoryMuscles", "reads": "present" },
+  { "field": "JVP", "value": "not raised", "quote": "JVP not raised", "episode": "current", "absent": true, "exam": "jvp", "reads": "normal_or_low" },
+  { "field": "Third heart sound", "value": "no S3", "quote": "No S3", "episode": "current", "absent": true, "exam": "thirdHeartSound", "reads": "absent" },
+  { "field": "Trachea", "value": "central", "quote": "Trachea central", "episode": "current", "exam": "trachea", "reads": "central" },
+  { "field": "Right percussion", "value": "dull to percussion", "quote": "Right base dull to percussion", "episode": "current", "exam": "rightPercussion", "reads": "dull" },
+  { "field": "Right breath sounds", "value": "bronchial breathing", "quote": "bronchial breathing", "episode": "current", "exam": "rightBreathSounds", "reads": "bronchial" },
+  { "field": "Left percussion", "value": "resonant", "quote": "Left chest resonant", "episode": "current", "exam": "leftPercussion", "reads": "resonant" },
+  { "field": "Left breath sounds", "value": "vesicular breath sounds", "quote": "vesicular breath sounds", "episode": "current", "exam": "leftBreathSounds", "reads": "vesicular" }
+]
