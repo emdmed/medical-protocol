@@ -27,6 +27,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **shock** | shock category, type of shock, undifferentiated shock, cardiogenic, hypovolemic, hypotension, cool or warm skin, JVP, jugular venous pressure, syndromic assessment |
 | **volume** | volume overload, fluid overload, congestion, congestive, hypervolemia, crackles, rales, S3, gallop, hepatojugular reflux, ankle edema, leg swelling, Framingham |
 | **heart-failure** | heart failure, left-sided, right-sided, biventricular, right heart failure, congestive heart failure, CHF, RV infarct, parasternal heave, loud P2, tricuspid regurgitation, Kussmaul, pulsatile liver, ascites, breathlessness, dyspnoea, orthopnoea |
+| **chest-exam** | chest examination, chest exam, respiratory examination, percussion, dullness, stony dull, hyperresonant, breath sounds, bronchial breathing, vocal resonance, tracheal deviation, consolidation, pleural effusion, atelectasis, collapse, pneumothorax, wheeze, semiology |
 
 ## Endocrinology / Diabetes
 

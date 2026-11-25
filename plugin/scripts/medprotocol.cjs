@@ -2941,6 +2941,204 @@ Examples:
   }
 });
 
+// ../../plugin/lib/chest-exam.ts
+var CHEST_EXAMINATION, TRACHEA, SIDES, SIDE_FIELDS, SIDE_FINDINGS, FOCAL_SYNDROMES, SIDE_VERDICTS, PATTERNS, CHEST_LABELS, CHEST_PATTERN_LABELS, CHEST_REASONS, CHEST_SIGN_LABELS, CHEST_CAVEAT, CRACKLES, WHEEZE, QUIET, trachealPull, examined, patternsOf, unexplainedSigns, rowConditions, unrecordedSigns, classifySide, assessChestExam;
+var init_chest_exam = __esm({
+  "../../plugin/lib/chest-exam.ts"() {
+    "use strict";
+    CHEST_EXAMINATION = ["performed", "documented_not_performed", "not_mentioned"];
+    TRACHEA = ["central", "deviated_left", "deviated_right"];
+    SIDES = ["right", "left"];
+    SIDE_FIELDS = ["expansion", "percussion", "breathSounds", "addedSounds", "vocalResonance"];
+    SIDE_FINDINGS = {
+      expansion: ["normal", "reduced"],
+      percussion: ["resonant", "dull", "stony_dull", "hyperresonant"],
+      breathSounds: ["vesicular", "bronchial", "reduced", "absent"],
+      addedSounds: ["none", "crackles", "crackles_clearing_on_cough", "wheeze", "crackles_and_wheeze"],
+      vocalResonance: ["normal", "increased", "reduced"]
+    };
+    FOCAL_SYNDROMES = ["consolidation", "pleural_effusion", "atelectasis", "pneumothorax"];
+    SIDE_VERDICTS = [...FOCAL_SYNDROMES, "no_syndrome", "indeterminate", "not_examined"];
+    PATTERNS = ["bronchial_obstruction", "diffuse_crackles"];
+    CHEST_LABELS = {
+      consolidation: "Consolidation",
+      pleural_effusion: "Pleural effusion",
+      atelectasis: "Atelectasis",
+      pneumothorax: "Pneumothorax",
+      no_syndrome: "No focal syndrome",
+      indeterminate: "Indeterminate",
+      not_examined: "Not examined"
+    };
+    CHEST_PATTERN_LABELS = {
+      bronchial_obstruction: "Bronchial obstruction (wheeze on both sides)",
+      diffuse_crackles: "Diffuse crackles (both sides)"
+    };
+    CHEST_REASONS = {
+      sign_not_recorded: "A syndrome waits on a sign that was not recorded",
+      no_row_explains: "No syndrome explains the recorded signs"
+    };
+    CHEST_SIGN_LABELS = {
+      expansion: "Expansion",
+      percussion: "Percussion",
+      breathSounds: "Breath sounds",
+      addedSounds: "Added sounds",
+      vocalResonance: "Vocal resonance",
+      trachea: "Trachea"
+    };
+    CHEST_CAVEAT = "A bedside semiology pattern, one side at a time. Examination only: imaging is not an input. Not a diagnosis: pneumonia, infarction and tumour all consolidate.";
+    CRACKLES = ["crackles", "crackles_and_wheeze"];
+    WHEEZE = ["wheeze", "crackles_and_wheeze"];
+    QUIET = ["reduced", "absent"];
+    trachealPull = (trachea, side) => trachea === void 0 ? null : trachea === "central" ? "central" : trachea === `deviated_${side}` ? "toward" : "away";
+    examined = (e) => e.examination === void 0 || e.examination === "performed";
+    patternsOf = (e) => {
+      if (!examined(e)) return [];
+      const both = (set) => SIDES.every((s) => set.includes(e[s]?.addedSounds ?? ""));
+      return PATTERNS.filter((p) => both(p === "bronchial_obstruction" ? WHEEZE : CRACKLES));
+    };
+    unexplainedSigns = (s, patterns) => {
+      const out = [];
+      const add = (sign) => out.push({ sign, value: s[sign] });
+      if (s.expansion === "reduced") add("expansion");
+      if (["dull", "stony_dull", "hyperresonant"].includes(s.percussion ?? "")) add("percussion");
+      if (["bronchial", ...QUIET].includes(s.breathSounds ?? "")) add("breathSounds");
+      if (s.vocalResonance === "increased" || s.vocalResonance === "reduced") add("vocalResonance");
+      const a = s.addedSounds;
+      if (a === "crackles_clearing_on_cough") add("addedSounds");
+      else if (a !== void 0 && a !== "none") {
+        const crackles = CRACKLES.includes(a) && !patterns.includes("diffuse_crackles");
+        const wheeze = WHEEZE.includes(a) && !patterns.includes("bronchial_obstruction");
+        if (a === "crackles_and_wheeze" && crackles !== wheeze) out.push({ sign: "addedSounds", value: crackles ? "crackles" : "wheeze" });
+        else if (crackles || wheeze) add("addedSounds");
+      }
+      return out;
+    };
+    rowConditions = (s, pull, side) => {
+      const is = (sign2, values) => s[sign2] === void 0 ? { met: false, missing: [{ sign: sign2, values: [...values] }] } : values.includes(s[sign2]) ? { met: true, recorded: true } : { met: false, missing: [] };
+      const notToward = pull === "toward" ? { met: false, missing: [] } : { met: true, recorded: pull !== null };
+      const toward = pull === null ? { met: false, missing: [{ sign: "trachea", values: [`deviated_${side}`] }] } : pull === "toward" ? { met: true, recorded: true } : { met: false, missing: [] };
+      const percussion = s.percussion === void 0 ? { met: true, recorded: false } : is("percussion", ["dull"]);
+      const b = is("breathSounds", ["bronchial"]);
+      const v = is("vocalResonance", ["increased"]);
+      const sign = b.met ? b : v.met ? v : { met: false, missing: [...b.missing, ...v.missing] };
+      return [
+        ["pneumothorax", [is("percussion", ["hyperresonant"]), is("breathSounds", QUIET), notToward]],
+        ["pleural_effusion", [is("percussion", ["stony_dull"]), notToward]],
+        ["consolidation", [percussion, sign]],
+        ["atelectasis", [is("percussion", ["dull"]), is("breathSounds", QUIET), toward]]
+      ];
+    };
+    unrecordedSigns = (s, pull, side) => rowConditions(s, pull, side).flatMap(([syndrome, conditions]) => {
+      const contradicted = conditions.some((c) => !c.met && !c.missing.length);
+      const anchored = conditions.some((c) => c.met && c.recorded);
+      if (contradicted || !anchored) return [];
+      return conditions.flatMap((c) => c.met ? [] : c.missing).map((m) => ({ syndrome, ...m }));
+    });
+    classifySide = (e, side, patterns) => {
+      const decided = (verdict) => ({ verdict, reason: null, unexplained: [], unrecorded: [] });
+      const s = e[side] ?? {};
+      if (!examined(e) || SIDE_FIELDS.every((f) => s[f] === void 0)) return decided("not_examined");
+      const pull = trachealPull(e.trachea, side);
+      const quiet = QUIET.includes(s.breathSounds ?? "");
+      if (s.percussion === "hyperresonant" && quiet && pull !== "toward") return decided("pneumothorax");
+      if (s.percussion === "stony_dull" && pull !== "toward") return decided("pleural_effusion");
+      if ((s.percussion === "dull" || s.percussion === void 0) && (s.breathSounds === "bronchial" || s.vocalResonance === "increased")) {
+        return decided("consolidation");
+      }
+      if (s.percussion === "dull" && quiet && pull === "toward") return decided("atelectasis");
+      const unexplained = unexplainedSigns(s, patterns);
+      if (!unexplained.length) return decided("no_syndrome");
+      const unrecorded = unrecordedSigns(s, pull, side);
+      return { verdict: "indeterminate", reason: unrecorded.length ? "sign_not_recorded" : "no_row_explains", unexplained, unrecorded };
+    };
+    assessChestExam = (exam) => {
+      const patterns = patternsOf(exam);
+      return { right: classifySide(exam, "right", patterns), left: classifySide(exam, "left", patterns), patterns };
+    };
+  }
+});
+
+// src/commands/chest.ts
+var chest_exports = {};
+__export(chest_exports, {
+  run: () => run12
+});
+var SIGN_FLAGS, signLines, USAGE12, run12;
+var init_chest = __esm({
+  "src/commands/chest.ts"() {
+    "use strict";
+    init_chest_exam();
+    init_cli();
+    SIGN_FLAGS = {
+      expansion: "expansion",
+      percussion: "percussion",
+      "breath-sounds": "breathSounds",
+      "added-sounds": "addedSounds",
+      "vocal-resonance": "vocalResonance"
+    };
+    signLines = Object.entries(SIGN_FLAGS).map(([flag, sign]) => `    ${flag.padEnd(28)}${SIDE_FINDINGS[sign].join(" | ")}`).join("\n");
+    USAGE12 = `Usage: medprotocol chest [options]
+
+Chest examination syndromes, one side at a time: consolidation, pleural effusion, atelectasis or
+pneumothorax by the classic semiology table, plus wheeze or crackles on both sides. Examination
+only: a film is not an input. Not a diagnosis.
+
+Options (a sign left out was not recorded):
+  --examination <v>             ${CHEST_EXAMINATION.join(" | ")} (left out, the signs decide)
+  --trachea <v>                 ${TRACHEA.join(" | ")}
+  --right-<sign> <v>            One flag per side and sign, e.g. --left-percussion dull:
+  --left-<sign> <v>
+${signLines}
+  --json                        Output as JSON
+  --help                        Show this help
+
+A side with no sign recorded is not_examined. A side whose signs no row fits is indeterminate, with
+the unexplained signs and any unrecorded sign that would complete a row.
+
+Examples:
+  medprotocol chest --right-percussion dull --right-breath-sounds bronchial --left-percussion resonant
+  medprotocol chest --trachea deviated_left --left-percussion dull --left-breath-sounds absent`;
+    run12 = (argv) => {
+      const options = { examination: { type: "string" }, trachea: { type: "string" } };
+      for (const side2 of SIDES) for (const flag of Object.keys(SIGN_FLAGS)) options[`${side2}-${flag}`] = { type: "string" };
+      const values = parseFlags(argv, options, USAGE12);
+      if (!values) return;
+      const checks = [["examination", CHEST_EXAMINATION], ["trachea", TRACHEA]];
+      for (const side2 of SIDES) for (const [flag, sign] of Object.entries(SIGN_FLAGS)) checks.push([`${side2}-${flag}`, SIDE_FINDINGS[sign]]);
+      for (const [flag, allowed] of checks) {
+        const value = values[flag];
+        if (value !== void 0 && !allowed.includes(value)) return fail(`--${flag} must be one of: ${allowed.join(", ")}`);
+      }
+      const side = (s) => Object.fromEntries(Object.entries(SIGN_FLAGS).map(([flag, sign]) => [sign, values[`${s}-${flag}`]]));
+      const exam = { examination: values.examination, trachea: values.trachea, right: side("right"), left: side("left") };
+      const result = assessChestExam(exam);
+      const describe = (a) => ({ label: CHEST_LABELS[a.verdict], reasonText: a.reason ? CHEST_REASONS[a.reason] : null });
+      const data = {
+        ...result,
+        rightText: describe(result.right),
+        leftText: describe(result.left),
+        patternText: result.patterns.map((p) => CHEST_PATTERN_LABELS[p]),
+        caveat: CHEST_CAVEAT
+      };
+      const sideRows = (side2) => {
+        const a = result[side2];
+        const name = side2 === "right" ? "Right" : "Left";
+        const rows = [[name, CHEST_LABELS[a.verdict]]];
+        if (a.reason) rows.push([`  Why`, CHEST_REASONS[a.reason]]);
+        if (a.unexplained.length) rows.push([`  Unexplained`, a.unexplained.map((u) => `${CHEST_SIGN_LABELS[u.sign]} ${u.value}`).join(", ")]);
+        for (const u of a.unrecorded) rows.push([`  ${CHEST_LABELS[u.syndrome]} if`, `${CHEST_SIGN_LABELS[u.sign]} ${u.values.join(" or ")}`]);
+        return rows;
+      };
+      printTable(data, Boolean(values.json), "Chest Examination (bedside syndromes)", [
+        ...sideRows("right"),
+        ...sideRows("left"),
+        ...data.patternText.length ? [["Both sides", data.patternText.join(", ")]] : [],
+        ["Note", CHEST_CAVEAT]
+      ]);
+    };
+  }
+});
+
 // ../../plugin/lib/ckd.ts
 var calculateEGFR, GFR_BANDS, classifyGFRCategory, getGFRCategoryLabel, ACR_BANDS, ACR_BANDS_MMOL, classifyAlbuminuriaCategory, acrInMgPerG, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getMonitoringFrequency, calculateKFRE, assessReferralNeed, checkRASiEligibility, ACR_TREATMENT_CUTS, checkSGLT2iEligibility, checkFinerenoneEligibility, classifyAnemia, assessIronStatus, checkESAEligibility, assessPhosphate, correctCalcium, assessPTH, assessVitaminD, getCKDMBDMonitoring, getCKDSeverity;
 var init_ckd = __esm({
@@ -3211,15 +3409,15 @@ var init_ckd = __esm({
 // src/commands/ckd.ts
 var ckd_exports = {};
 __export(ckd_exports, {
-  run: () => run12
+  run: () => run13
 });
-var USAGE12, failNotCalculated, badAcrUnit, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run12;
+var USAGE13, failNotCalculated, badAcrUnit, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run13;
 var init_ckd2 = __esm({
   "src/commands/ckd.ts"() {
     "use strict";
     init_ckd();
     init_cli();
-    USAGE12 = `Usage: medprotocol ckd <sub-command> [options]
+    USAGE13 = `Usage: medprotocol ckd <sub-command> [options]
 
 Sub-commands:
   egfr         Calculate eGFR (CKD-EPI 2021)
@@ -3291,9 +3489,9 @@ Examples:
         creatinine: { type: "string" },
         age: { type: "string" },
         sex: { type: "string" }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
-      if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE12)) return;
+      if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE13)) return;
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
       if (egfr === 0) return failNotCalculated();
       const gfrCategory = classifyGFRCategory(String(egfr));
@@ -3313,9 +3511,9 @@ Examples:
         sex: { type: "string" },
         acr: { type: "string" },
         "acr-unit": { type: "string", default: "mg/g" }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
-      if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE12)) return;
+      if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE13)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const acrUnit = values["acr-unit"];
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
@@ -3355,9 +3553,9 @@ Examples:
         egfr: { type: "string" },
         acr: { type: "string" },
         "acr-unit": { type: "string", default: "mg/g" }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
-      if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE12)) return;
+      if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE13)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const kfre = calculateKFRE(values.age, values.sex, values.egfr, String(acrInMgPerG(values.acr, values["acr-unit"])));
       const referral = assessReferralNeed(String(kfre.fiveYear));
@@ -3381,9 +3579,9 @@ Examples:
         "heart-failure": { type: "boolean", default: false },
         "on-rasi": { type: "boolean", default: false },
         "potassium-normal": { type: "boolean", default: false }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
-      if (!requireFlags(values, ["egfr", "acr"], USAGE12)) return;
+      if (!requireFlags(values, ["egfr", "acr"], USAGE13)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const acrUnit = values["acr-unit"];
       const gfrCategory = classifyGFRCategory(values.egfr);
@@ -3420,9 +3618,9 @@ Examples:
         sex: { type: "string" },
         ferritin: { type: "string" },
         tsat: { type: "string" }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
-      if (!requireFlags(values, ["hb", "sex"], USAGE12)) return;
+      if (!requireFlags(values, ["hb", "sex"], USAGE13)) return;
       const anemia = classifyAnemia(values.hb, values.sex);
       const iron = values.ferritin && values.tsat ? assessIronStatus(values.ferritin, values.tsat) : null;
       const esa = values.ferritin && values.tsat ? checkESAEligibility(values.hb, values.ferritin, values.tsat, values.sex) : null;
@@ -3449,9 +3647,9 @@ Examples:
         pth: { type: "string" },
         "vitamin-d": { type: "string" },
         "gfr-category": { type: "string" }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
-      if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE12);
+      if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE13);
       const gfrCat = values["gfr-category"];
       const phosphateResult = values.phosphate ? assessPhosphate(values.phosphate, gfrCat) : null;
       const correctedCa = values.calcium && values.albumin ? correctCalcium(values.calcium, values.albumin) : null;
@@ -3487,7 +3685,7 @@ Examples:
       rows.push(["Monitor Vit D", monitoring.vitaminD]);
       printTable(data, values.json, "CKD-MBD Assessment", rows);
     };
-    run12 = (argv) => runSubcommand(argv, USAGE12, {
+    run13 = (argv) => runSubcommand(argv, USAGE13, {
       egfr: runEGFR,
       stage: runStage,
       kfre: runKFRE,
@@ -3679,16 +3877,16 @@ var init_endocrine = __esm({
 // src/commands/diabetes.ts
 var diabetes_exports = {};
 __export(diabetes_exports, {
-  run: () => run13
+  run: () => run14
 });
-var USAGE13, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run13;
+var USAGE14, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run14;
 var init_diabetes = __esm({
   "src/commands/diabetes.ts"() {
     "use strict";
     init_diabetes_dx();
     init_endocrine();
     init_cli();
-    USAGE13 = `Usage: medprotocol diabetes <sub-command> [options]
+    USAGE14 = `Usage: medprotocol diabetes <sub-command> [options]
 
 Sub-commands:
   diagnose     Diabetes diagnosis classifier (ADA Table 2.1/2.2)
@@ -3760,7 +3958,7 @@ Examples:
         "2h-pg": { type: "string", default: "" },
         "random-pg": { type: "string", default: "" },
         symptoms: { type: "boolean", default: false }
-      }, USAGE13);
+      }, USAGE14);
       if (!values) return;
       const a1c = values.a1c;
       const fpg = values.fpg;
@@ -3768,7 +3966,7 @@ Examples:
       const randomPG = values["random-pg"];
       const hasSymptoms = values.symptoms;
       if (!a1c && !fpg && !twohPG && !randomPG) {
-        return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE13);
+        return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE14);
       }
       const diagnosis = getDiagnosis(a1c, fpg, twohPG, randomPG, hasSymptoms);
       const rows = [];
@@ -3808,9 +4006,9 @@ Examples:
         "2h-pg": { type: "string", default: "" },
         a1c: { type: "string", default: "" },
         symptoms: { type: "boolean", default: false }
-      }, USAGE13);
+      }, USAGE14);
       if (!values) return;
-      if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE13);
+      if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE14);
       const result = classifyT1DStage(
         values.autoantibodies,
         values.fpg,
@@ -3845,9 +4043,9 @@ Examples:
         "fhx-t2d": { type: "boolean", default: false },
         "dka-history": { type: "boolean", default: false },
         autoimmune: { type: "boolean", default: false }
-      }, USAGE13);
+      }, USAGE14);
       if (!values) return;
-      if (!requireFlags(values, ["age", "bmi"], USAGE13)) return;
+      if (!requireFlags(values, ["age", "bmi"], USAGE14)) return;
       const result = classifyT1vsT2(
         values.age,
         values.bmi,
@@ -3892,9 +4090,9 @@ Examples:
         "insulin-resistance": { type: "boolean", default: false },
         "prior-prediabetes": { type: "boolean", default: false },
         "prior-gdm": { type: "boolean", default: false }
-      }, USAGE13);
+      }, USAGE14);
       if (!values) return;
-      if (!requireFlags(values, ["age", "bmi"], USAGE13)) return;
+      if (!requireFlags(values, ["age", "bmi"], USAGE14)) return;
       const riskFactors = {
         firstDegreeRelative: values["first-degree"],
         highRiskEthnicity: values["high-risk-ethnicity"],
@@ -3944,7 +4142,7 @@ Examples:
         "1h": { type: "string" },
         "2h": { type: "string" },
         "3h": { type: "string", default: "0" }
-      }, USAGE13);
+      }, USAGE14);
       if (!values) return;
       const missing = [];
       if (!values.strategy) missing.push("--strategy");
@@ -3954,7 +4152,7 @@ Examples:
       if (values.strategy === "two-step" && !values["3h"]) {
         missing.push("--3h");
       }
-      if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE13);
+      if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE14);
       const strategy = values.strategy;
       const result = strategy === "one-step" ? classifyGDM_OneStep(values.fasting, values["1h"], values["2h"]) : classifyGDM_TwoStep(values.fasting, values["1h"], values["2h"], values["3h"]);
       const rows = [
@@ -3982,7 +4180,7 @@ Examples:
       };
       printTable(data, values.json, `GDM Screening \u2014 ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`, rows);
     };
-    run13 = (argv) => runSubcommand(argv, USAGE13, {
+    run14 = (argv) => runSubcommand(argv, USAGE14, {
       diagnose: runDiagnose,
       "t1d-stage": runT1DStage,
       "t1-vs-t2": runT1vsT2,
@@ -6141,9 +6339,9 @@ var init_overlay_client = __esm({
 var overlay_exports = {};
 __export(overlay_exports, {
   isLocalOrigin: () => isLocalOrigin,
-  run: () => run14
+  run: () => run15
 });
-var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE14, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run14;
+var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE15, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run15;
 var init_overlay = __esm({
   "src/commands/overlay.ts"() {
     "use strict";
@@ -6154,7 +6352,7 @@ var init_overlay = __esm({
     init_claude_spawn();
     init_cli();
     init_overlay_client();
-    USAGE14 = `Usage: medprotocol overlay [options]
+    USAGE15 = `Usage: medprotocol overlay [options]
 
 The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
@@ -6579,7 +6777,7 @@ Examples:
         }
       });
     };
-    run14 = (argv) => {
+    run15 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string" },
@@ -6592,7 +6790,7 @@ Examples:
         watch: { type: "boolean", default: false },
         clear: { type: "boolean", default: false },
         dir: { type: "string" }
-      }, USAGE14);
+      }, USAGE15);
       if (!values) return;
       const dir = (0, import_node_path.resolve)(values.dir ?? (0, import_node_path.join)(".medprotocol", "queue"));
       const json = values.json;
@@ -6663,11 +6861,11 @@ Waiting for the overlay to create it\u2026
 var extract_exports = {};
 __export(extract_exports, {
   calculations: () => calculations,
-  run: () => run15,
+  run: () => run16,
   serve: () => serve2,
   stateOf: () => stateOf
 });
-var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE15, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run15;
+var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE16, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run16;
 var init_extract = __esm({
   "src/commands/extract.ts"() {
     "use strict";
@@ -6690,7 +6888,7 @@ var init_extract = __esm({
     init_cli();
     init_extract_artifact();
     init_overlay();
-    USAGE15 = `Usage: medprotocol extract --note <file> --items <file> [options]
+    USAGE16 = `Usage: medprotocol extract --note <file> --items <file> [options]
        medprotocol extract --save <file>
        medprotocol extract --serve [--port <number>]
 
@@ -7114,7 +7312,7 @@ ${check}`));
       });
       return server;
     };
-    run15 = (argv) => {
+    run16 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string", default: "7332" },
@@ -7122,7 +7320,7 @@ ${check}`));
         note: { type: "string" },
         items: { type: "string" },
         artifact: { type: "string" }
-      }, USAGE15);
+      }, USAGE16);
       if (!values) return;
       if (values.serve) {
         const port = Number(values.port);
@@ -7146,7 +7344,7 @@ ${check}`));
         printResult({ dir, existed }, values.json, () => dir + (existed ? "  (already saved)" : ""));
         return;
       }
-      if (!values.note || !values.items) return fail("--note and --items are required", USAGE15);
+      if (!values.note || !values.items) return fail("--note and --items are required", USAGE16);
       let note;
       let items;
       try {
@@ -7193,7 +7391,7 @@ var version = "1.5.1";
 
 // src/index.ts
 init_cli();
-var USAGE16 = `medprotocol \u2014 Medical calculations from the terminal
+var USAGE17 = `medprotocol \u2014 Medical calculations from the terminal
 
 Usage: medprotocol <command> [options]
 
@@ -7209,6 +7407,7 @@ Commands:
   shock            Shock category from the bedside examination (skin temperature by JVP)
   volume           Volume overload from the bedside examination (congestion signs)
   heart-failure    Heart failure from the bedside examination (left or right congestion)
+  chest            Chest examination syndromes, per side (consolidation, effusion, collapse, pneumothorax)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
@@ -7251,7 +7450,7 @@ if (command === "--version" || command === "-v") {
   process.exit(0);
 }
 if (!command || command === "--help" || command === "-h") {
-  process.stdout.write(USAGE16 + "\n");
+  process.stdout.write(USAGE17 + "\n");
   process.exit(0);
 }
 var commands = {
@@ -7266,6 +7465,7 @@ var commands = {
   shock: () => Promise.resolve().then(() => (init_shock2(), shock_exports)),
   volume: () => Promise.resolve().then(() => (init_volume2(), volume_exports)),
   "heart-failure": () => Promise.resolve().then(() => (init_heart_failure2(), heart_failure_exports)),
+  chest: () => Promise.resolve().then(() => (init_chest(), chest_exports)),
   ckd: () => Promise.resolve().then(() => (init_ckd2(), ckd_exports)),
   diabetes: () => Promise.resolve().then(() => (init_diabetes(), diabetes_exports)),
   extract: () => Promise.resolve().then(() => (init_extract(), extract_exports)),

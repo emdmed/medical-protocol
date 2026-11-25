@@ -51,6 +51,38 @@ export type SideVerdict = (typeof SIDE_VERDICTS)[number];
 export type ChestPattern = (typeof PATTERNS)[number];
 export type IndeterminateReason = (typeof INDETERMINATE_REASONS)[number];
 
+export const CHEST_LABELS: Record<SideVerdict, string> = {
+  consolidation: "Consolidation",
+  pleural_effusion: "Pleural effusion",
+  atelectasis: "Atelectasis",
+  pneumothorax: "Pneumothorax",
+  no_syndrome: "No focal syndrome",
+  indeterminate: "Indeterminate",
+  not_examined: "Not examined",
+};
+
+export const CHEST_PATTERN_LABELS: Record<ChestPattern, string> = {
+  bronchial_obstruction: "Bronchial obstruction (wheeze on both sides)",
+  diffuse_crackles: "Diffuse crackles (both sides)",
+};
+
+export const CHEST_REASONS: Record<IndeterminateReason, string> = {
+  sign_not_recorded: "A syndrome waits on a sign that was not recorded",
+  no_row_explains: "No syndrome explains the recorded signs",
+};
+
+export const CHEST_SIGN_LABELS: Record<SideField | "trachea", string> = {
+  expansion: "Expansion",
+  percussion: "Percussion",
+  breathSounds: "Breath sounds",
+  addedSounds: "Added sounds",
+  vocalResonance: "Vocal resonance",
+  trachea: "Trachea",
+};
+
+/** Say this wherever the result is shown. */
+export const CHEST_CAVEAT = "A bedside semiology pattern, one side at a time. Examination only: imaging is not an input. Not a diagnosis: pneumonia, infarction and tumour all consolidate.";
+
 export type ChestSide = { [F in SideField]?: (typeof SIDE_FINDINGS)[F][number] };
 
 export interface ChestExam {

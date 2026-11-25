@@ -19,6 +19,7 @@ Commands:
   shock            Shock category from the bedside examination (skin temperature by JVP)
   volume           Volume overload from the bedside examination (congestion signs)
   heart-failure    Heart failure from the bedside examination (left or right congestion)
+  chest            Chest examination syndromes, per side (consolidation, effusion, collapse, pneumothorax)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
@@ -79,6 +80,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   shock: () => import("./commands/shock"),
   volume: () => import("./commands/volume"),
   "heart-failure": () => import("./commands/heart-failure"),
+  chest: () => import("./commands/chest"),
   ckd: () => import("./commands/ckd"),
   diabetes: () => import("./commands/diabetes"),
   extract: () => import("./commands/extract"),
