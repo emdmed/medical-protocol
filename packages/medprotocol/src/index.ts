@@ -20,6 +20,7 @@ Commands:
   volume           Volume overload from the bedside examination (congestion signs)
   heart-failure    Heart failure from the bedside examination (left or right congestion)
   chest            Chest examination syndromes, per side (consolidation, effusion, collapse, pneumothorax)
+  pulmonary        Focal pulmonary syndrome from history, chest signs and imaging (pneumonia evidence level)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
@@ -81,6 +82,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   volume: () => import("./commands/volume"),
   "heart-failure": () => import("./commands/heart-failure"),
   chest: () => import("./commands/chest"),
+  pulmonary: () => import("./commands/pulmonary"),
   ckd: () => import("./commands/ckd"),
   diabetes: () => import("./commands/diabetes"),
   extract: () => import("./commands/extract"),

@@ -188,3 +188,43 @@ export const assessFocalPulmonary = (input: FocalPulmonaryInput): FocalPulmonary
   const focalSide = filmSide ?? exam ?? (bilateralFilm ? "bilateral" : null);
   return { verdict, reason, focalSide, pneumoniaEvidence, differential, next, conflict };
 };
+
+export const FOCAL_LABELS: Record<FocalPulmonaryVerdict, string> = {
+  supported: "Focal pulmonary syndrome supported",
+  unsupported: "Focal pulmonary syndrome not supported",
+  indeterminate: "Indeterminate",
+};
+
+export const FOCAL_REASONS: Record<FocalPulmonaryReason, string> = {
+  focal_imaging: "Current imaging shows a one-sided finding",
+  focal_signs_with_symptoms: "One-sided chest signs with respiratory symptoms or fever",
+  focal_signs_without_symptoms: "One-sided chest signs but no symptom or fever stated",
+  bilateral_findings: "The findings are on both sides, not focal",
+  no_focal_sign: "The chest was examined and no focal sign was found",
+  no_chest_evidence: "No chest examination and no current imaging",
+};
+
+export const FOCAL_EVIDENCE_LABELS: Record<PneumoniaEvidence, string> = {
+  "imaging-supported": "Imaging-supported (current film shows consolidation)",
+  "clinically-suspected": "Clinically suspected (consolidation signs with symptoms)",
+  "physical-sign-only": "Physical sign only (consolidation signs, no symptoms)",
+  none: "None",
+};
+
+export const FOCAL_DIFFERENTIAL_LABELS: Record<Differential, string> = {
+  pneumonia: "Pneumonia",
+  atelectasis: "Atelectasis",
+  pleural_effusion: "Pleural effusion",
+  pulmonary_oedema: "Pulmonary oedema",
+};
+
+export const FOCAL_NEXT_LABELS: Record<Next, string> = {
+  chest_imaging: "Chest imaging",
+  chest_examination: "Examine the chest",
+  re_examine_chest: "Re-examine the chest (examination and imaging disagree)",
+  oxygen_saturation: "Measure oxygen saturation",
+  symptom_duration: "Ask how many days the symptoms have lasted",
+};
+
+/** Say this wherever the result is shown. */
+export const FOCAL_CAVEAT = "A bounded syndromic read of history, chest signs and imaging. Not a diagnosis and not a treatment: the evidence level says where pneumonia's support comes from, never that it is pneumonia.";

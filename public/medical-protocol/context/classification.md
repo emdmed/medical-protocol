@@ -28,6 +28,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **volume** | volume overload, fluid overload, congestion, congestive, hypervolemia, crackles, rales, S3, gallop, hepatojugular reflux, ankle edema, leg swelling, Framingham |
 | **heart-failure** | heart failure, left-sided, right-sided, biventricular, right heart failure, congestive heart failure, CHF, RV infarct, parasternal heave, loud P2, tricuspid regurgitation, Kussmaul, pulsatile liver, ascites, breathlessness, dyspnoea, orthopnoea |
 | **chest-exam** | chest examination, chest exam, respiratory examination, percussion, dullness, stony dull, hyperresonant, breath sounds, bronchial breathing, vocal resonance, tracheal deviation, consolidation, pleural effusion, atelectasis, collapse, pneumothorax, wheeze, semiology |
+| **focal-pulmonary** | pneumonia, community-acquired pneumonia, CAP, chest infection, lower respiratory tract infection, LRTI, focal chest signs, cough with fever, purulent sputum, pleuritic pain, chest X-ray consolidation, lobar, focal pulmonary syndrome |
 
 ## Endocrinology / Diabetes
 

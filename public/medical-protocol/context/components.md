@@ -19,6 +19,7 @@
 | volume | Volume overload from the bedside examination (congestion signs; no BNP, film or echo) |
 | heart-failure | Heart failure from the bedside examination (left or right congestion; not ventricular function) |
 | chest-exam | Chest examination syndromes, one side at a time (consolidation, effusion, atelectasis, pneumothorax; no imaging) |
+| focal-pulmonary | Focal pulmonary syndrome from history, chest signs and imaging (pneumonia evidence level, differential; no treatment) |
 | diabetes-dx | ADA diabetes diagnosis, T1D staging, T1 vs T2, T2D/GDM screening |
 | hepatology | MASLD/MASH screening: FIB-4, LSM/ELF, referral |
 | extraction | Values pulled from a clinical note, each quote checked and highlighted in the note (no analysis) |
@@ -57,6 +58,7 @@ Clinical logic lives in `lib/medprotocol/` in the doctor's project (copied from 
 | volume | `volume.ts` + `shock.ts` | `volume.md` |
 | heart-failure | `heart-failure.ts` + `cardiology.ts`, `cardiology-types.ts`, `shock.ts`, `volume.ts` | `heart-failure.md` |
 | chest-exam | `chest-exam.ts` | `chest-exam.md` |
+| focal-pulmonary | `focal-pulmonary.ts` + `chest-exam.ts` | `focal-pulmonary.md` |
 | diabetes-dx | `diabetes-dx.ts`, `endocrine.ts` | `diabetes.md` |
 | hepatology | `hepatology.ts` | `hepatology.md` |
 | extraction | `extraction.ts` | `extraction.md` |
