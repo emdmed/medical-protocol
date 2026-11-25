@@ -33,6 +33,9 @@ export const PCE_2013 = "Goff et al. 2013 ACC/AHA Guideline on the Assessment of
 export const HEART_2008 = "Six et al. Chest pain in the emergency room: value of the HEART score (Neth Heart J 2008;16:191-196, doi:10.1007/BF03086144)";
 export const CHADSVASC_2010 = "Lip et al. CHA2DS2-VASc (Chest 2010;137:263-272, doi:10.1378/chest.09-1584)";
 
+// Shock
+export const VAZQUEZ_2010 = "Vazquez et al. Accuracy of bedside physical examination in distinguishing categories of shock: a pilot study (J Hosp Med 2010;5:471-474, doi:10.1002/jhm.695)";
+
 // Respiratory, vital signs, BMI
 export const BERLIN_2012 = "ARDS Definition Task Force. Berlin Definition (JAMA 2012;307:2526-2533, doi:10.1001/jama.2012.5669)";
 export const ACC_AHA_2017_BP = "2017 ACC/AHA High Blood Pressure Guideline (Hypertension 2018;71, doi:10.1161/HYP.0000000000000065)";

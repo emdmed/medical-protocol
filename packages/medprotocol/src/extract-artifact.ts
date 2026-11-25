@@ -196,6 +196,57 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
 .rule text{font:500 11px/1 var(--mono);fill:var(--ink-2)}
 .card .band{margin:2px 0 0;font-size:13px;font-weight:600;color:var(--calc)}
 .card .src{margin-top:14px;font-size:12px}
+.card .src+.src{margin-top:3px}
+/* a syndromic assessment is drawn as its rule: a table of the two findings it reads. The cell they land in is
+   marked like the band of a scale; a cell still possible with a finding missing takes the highlighter; the pair
+   the rule names nothing for is hatched. The other findings stand in the cell they point at, in amber when that
+   is not the cell marked. The state classes are not "on": pointing clears that one everywhere */
+.cards.wide{grid-template-columns:minmax(0,34rem)}
+.gt{flex-wrap:wrap;justify-content:space-between;gap:2px 14px}
+.pat{font:600 15px/1.6 var(--ui);color:var(--calc)}
+.pat.no,.card .says{color:var(--ink)}
+.gx{display:grid;grid-template-columns:minmax(5.2rem,.7fr) 1fr 1fr;margin-top:14px;border-top:1px solid var(--ink)}
+.gx>*{min-width:0;padding:8px 10px 9px;border-bottom:1px solid var(--line)}
+.gh{font:700 11.5px/1.25 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.gh.lit{color:var(--ink)}
+.gh q{display:block;margin-top:3px;font:italic 400 14px/1.3 var(--text);letter-spacing:0;text-transform:none}
+.gc{min-height:70px;border-left:1px solid var(--line);font:400 17px/1.2 var(--text);color:var(--ink-2)}
+.gc>span:first-child{display:flex;align-items:center;gap:6px}
+.gc.at{background:var(--calc-t);box-shadow:inset 0 -3px var(--calc);color:var(--ink)}
+.gc.at .m{background-image:linear-gradient(var(--calc),var(--calc))}
+.gc.open{background:var(--hl);color:var(--ink)}
+.gc.none{background-image:repeating-linear-gradient(135deg,transparent 0 6px,var(--line) 6px 7px);font-style:italic}
+.gc.none.at{background-color:var(--hl);box-shadow:inset 0 -3px var(--ink)}
+.tg{display:flex;gap:6px;margin-top:5px;font:400 12.5px/1.25 var(--ui);color:var(--ink-2)}
+.tg::before{content:"";flex:none;width:7px;height:7px;margin-top:4px;box-shadow:inset 0 0 0 1px currentColor}
+.gc.at .tg{color:var(--ink)}
+.led{display:grid;gap:5px;margin-top:12px}
+.ic{display:inline-flex;flex:none;width:16px;height:16px;color:var(--calc)}
+.ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.led .sl{align-items:center;gap:10px;font-size:13.5px}
+.led .sl .lv{max-width:none;text-align:left}
+.sl.gone,.sl.gone .lv,.sl.gone .ic{color:var(--ink-2)}
+.sl.gone .lv{font-style:italic}
+.sl.off .ic{color:var(--warn)}
+.cite{display:flex;gap:10px;margin-top:14px;font-size:12px;color:var(--ink-2)}
+.cite .ic{width:14px;height:14px;margin-top:1px;color:var(--ink-2)}
+.cite a{color:var(--ink);text-underline-offset:3px}
+.gtog{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:4px 0;font:700 12px/1 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--calc);cursor:pointer;transition:color .3s var(--ease)}
+.gtog:hover{color:var(--ink)}
+.gtog:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.gx[hidden]{display:none}
+.calc .box,.calc .empty{margin:12px 0 26px}
+/* the left column has two tabs: the extracted data, and what a bedside rule reads from it. They are set like the
+   bar's other controls, uppercase text, the current one on an ink rule; the heads of the data stack under them */
+.tabs{position:sticky;top:0;z-index:2;display:flex;gap:28px;height:40px;border-bottom:1px solid var(--line);background:var(--ground);box-shadow:-12px 0 var(--ground),12px 0 var(--ground)}
+.tabs button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:7px;height:100%;border-bottom:2px solid transparent;font:700 12.5px/1 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;transition:color .3s var(--ease)}
+.tabs button:hover,.tabs button[aria-selected="true"]{color:var(--ink)}
+.tabs button[aria-selected="true"]{border-bottom-color:var(--ink)}
+.tabs button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.tabs b{font:500 12px/1 var(--mono);letter-spacing:0}
+.rail:has(>.tabs)[data-tab="syn"]>:not(.tabs):not(.syn),.rail:has(>.tabs):not([data-tab="syn"])>.syn{display:none}
+.sl .lv{max-width:62%;text-align:right;color:var(--ink)}
+.tg.off,.sl.off,.sl.off .lv{color:var(--warn)}
 @media (prefers-reduced-motion:no-preference){
   /* the highlighter is drawn across each quote once, when the note first appears */
   .fresh mark{animation:stroke .9s var(--ease) .1s both}
@@ -245,6 +296,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   .rail{overflow:visible;padding:0 var(--gut) 22px;border-right:0}
   /* a stack would take too much of a small screen: each head gives way to the next */
   .rail h2{top:0}
+  .tabs{position:static}
   /* the note is pasted first; what happens next comes after it */
   .in .rail{order:1}
   .proof{padding:0 var(--gut) 22px}
@@ -291,6 +343,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       <textarea id="paste" required placeholder="A made-up or de-identified note. Nothing is sent until you press Extract."></textarea>
       <div class="send">
         <label class="agree"><input type="checkbox" id="agree" required><span>This note is sent to the AI model, which runs on external servers. I confirm it is made up or de-identified: no names, record numbers, addresses or dates.</span></label>
+        <label class="agree"><input type="checkbox" id="syn"><span>Run the syndromic evaluation automatically after the extraction. Left off, a button in the Syndromic evaluation tab runs it when you want it.</span></label>
         <p class="go"><button class="btn fill" id="go" type="submit" aria-describedby="why" disabled>Extract</button><span id="why"></span></p>
       </div>
     </section>
@@ -435,8 +488,9 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     if (!m || (e.type === "keydown" && e.key !== "Enter")) return;
     var n = +m.dataset.items.split(" ")[0], r = rows[n];
     pinned = n; clear();
-    // below the stacked heads
-    if (r.length) bring(r[r.length - 1], rail.querySelectorAll("h2").length * 40 + 8);
+    // the value's own row is in the data tab; below the tabs and the stacked heads
+    showTab("");
+    if (r.length) bring(r[r.length - 1], (rail.querySelectorAll("h2").length + 1) * 40 + 8);
   }
   note.addEventListener("click", toRow);
   note.addEventListener("keydown", toRow);
@@ -451,6 +505,8 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     if (it.lab === true && it.episode === "history") name.appendChild(el("small", "", "history"));
     // the note says the patient does not have it
     if (it.absent === true) name.appendChild(el("small", "", "absent"));
+    // an examination finding: what its words were read as, a judgement the check cannot confirm
+    if (it.reads) name.appendChild(el("small", "", "read as " + it.reads.replace(/_/g, " ")));
     // when it was taken: the one thing the check cannot verify, so it is always shown
     if (it.time) name.appendChild(el("small", "", it.time));
     if (k === "close" || k === "bad") name.appendChild(el("span", "why", k === "close" ? "close match" : it.status === "mismatched" ? "not stated" : "not found"));
@@ -489,6 +545,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     }
     var meta = [(it.lab === true ? "Labs · " : "") + (it.episode === "history" ? "History" : "Current illness")];
     if (it.absent === true) meta.push("Absent");
+    if (it.reads) meta.push("Read as " + it.reads.replace(/_/g, " "));
     if (it.time) meta.push(it.time);
     if (it.ambiguous) meta.push("Appears more than once: first occurrence marked");
     li.appendChild(el("p", "", meta.join(" · ")));
@@ -529,11 +586,89 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return d;
   }
 
+  // the icons of a syndromic assessment, one stroke on a 16 grid; a ledger line takes the one of its label
+  var ICON = {
+    "Pressure": '<path d="M2.5 11.5a5.5 5.5 0 0 1 11 0"/><path d="M8 11.5l2.6-3.2"/>',
+    "Agrees": '<path d="M3 8.5l3.2 3.2L13 4.5"/>',
+    "Points elsewhere": '<path d="M4 12l8-8M6.5 4H12v5.5"/>',
+    "Fits more than one": '<path d="M8 14V8.5M8 8.5L4 3.5M8 8.5l4-5"/>',
+    "Also found": '<path d="M8 3.5v9M3.5 8h9"/>',
+    "Not in the note": '<circle cx="8" cy="8" r="5" stroke-dasharray="2.2 2"/>',
+    grid: '<path d="M2.5 2.5h11v11h-11zM8 2.5v11M2.5 8h11"/>',
+    info: '<circle cx="8" cy="8" r="5.5"/><path d="M8 7.5V11M8 5h0"/>'
+  };
+  // motion on request only, through the page's one ease: run by a click, so a redraw or a tab switch never replays
+  // it. Reduced motion keeps the fade and drops the rise
+  function rise(e, delay) {
+    var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    e.animate(still ? { opacity: [0, 1] } : { opacity: [0, 1], transform: ["translateY(6px)", "none"] },
+      { duration: 300, delay: delay || 0, easing: "cubic-bezier(.16,1,.3,1)", fill: "backwards" });
+  }
+  function ic(name) {
+    var i = el("span", "ic"); i.setAttribute("aria-hidden", "true");
+    i.innerHTML = '<svg viewBox="0 0 16 16">' + (ICON[name] || "") + "</svg>";
+    return i;
+  }
+
+  // a syndromic assessment as its rule: why it declined, what else the note says, the table on request, then
+  // the caveat and the study. The ledger's labels are icons, kept for screen readers and as the tooltip
+  function grid(g, source) {
+    var f = document.createDocumentFragment(), t = el("div", "gx"), l = el("div", "led");
+    function hd(h) { var d = el("div", h.on ? "gh lit" : "gh", h.label); if (h.quote) d.appendChild(el("q", "", h.quote)); return d; }
+    if (g.why) f.appendChild(el("p", "says", g.why));
+    g.ledger.forEach(function (r) {
+      var p = el("p", r[2] ? "sl off" : r[0] === "Not in the note" ? "sl gone" : "sl");
+      p.title = r[0];
+      p.appendChild(ic(r[0])); p.appendChild(el("span", "sr", r[0] + ": ")); p.appendChild(el("span", "lv", r[1]));
+      l.appendChild(p);
+    });
+    f.appendChild(l);
+    // the table is the long form: shut until the doctor asks for it, and kept that way across notes
+    var tg = el("button", "gtog"), tl = el("span", "", gridOpen ? "Hide the grid" : "Show the full grid");
+    tg.appendChild(ic("grid")); tg.appendChild(tl);
+    tg.type = "button"; tg.setAttribute("aria-expanded", String(gridOpen)); t.hidden = !gridOpen;
+    tg.onclick = function () {
+      gridOpen = t.hidden; t.hidden = !gridOpen;
+      if (gridOpen) rise(t);
+      tl.textContent = gridOpen ? "Hide the grid" : "Show the full grid"; tg.setAttribute("aria-expanded", String(gridOpen));
+    };
+    f.appendChild(tg);
+    t.appendChild(el("div", "gh"));
+    g.cols.forEach(function (h) { t.appendChild(hd(h)); });
+    g.rows.forEach(function (h, r) {
+      t.appendChild(hd(h));
+      g.cells[r].forEach(function (c) {
+        var d = el("div", "gc" + (c.none ? " none" : "") + (c.state ? " " + c.state : "")), s = el("span");
+        if (c.state === "at" && !c.none) s.appendChild(mk(""));
+        s.appendChild(document.createTextNode(c.label)); d.appendChild(s);
+        c.tags.forEach(function (x) { d.appendChild(el("span", x.off ? "tg off" : "tg", x.text)); });
+        t.appendChild(d);
+      });
+    });
+    f.appendChild(t);
+    // the caveat, then the study by author, journal and year, linked by its doi; the full reference is its tooltip
+    var cv = el("p", "cite"), m = /^(.+?)\. .*\(([^;(]+?) (\d{4});.*doi:(\S+?)\)$/.exec(source);
+    cv.appendChild(ic("info"));
+    var ct = el("span", "", g.caveat + " ");
+    if (m) {
+      var a = el("a", "", m[1] + "., " + m[2] + " " + m[3]);
+      a.href = "https://doi.org/" + m[4]; a.target = "_blank"; a.rel = "noopener"; a.title = source;
+      ct.appendChild(a);
+    } else ct.appendChild(document.createTextNode(source));
+    cv.appendChild(ct); f.appendChild(cv);
+    return f;
+  }
+
+  // the doctor's choice to run the syndromic evaluation without being asked; off until they tick the box
+  var ran = null, gridOpen = false, tabNow = "", tabFor = null, showTab = function () {};
+  function auto() { try { return localStorage.getItem("syndromic") === "on"; } catch (e) { return false; } }
+
   // a calculator result: its rows, its source. Pointing at it lights the words its inputs came from
   function calc(c) {
-    var li = el("li", "card");
+    var li = el("li", "card"), h = el("h3", c.grid ? "gt" : "", c.title);
     li.tabIndex = 0;
-    li.appendChild(el("h3", "", c.title));
+    if (c.grid) h.appendChild(el("span", c.grid.named ? "pat" : "pat no", c.grid.result));
+    li.appendChild(h);
     c.rows.forEach(function (r) {
       var p = line(r[0], "res");
       p.appendChild(FIG.test(r[1]) ? el("span", "n", r[1]) : document.createTextNode(r[1]));
@@ -541,7 +676,8 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       li.appendChild(p);
     });
     c.scales.forEach(function (s) { li.appendChild(scale(s)); });
-    li.appendChild(el("p", "src", c.source));
+    if (c.grid) li.appendChild(grid(c.grid, c.source));
+    else li.appendChild(el("p", "src", c.source));
     function lit() { clear(); c.uses.forEach(function (n) { on(n); }); }
     li.addEventListener("mouseenter", lit);
     li.addEventListener("focusin", lit);
@@ -554,9 +690,11 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
 
   // numbers the heads of the rail for the stack; a click on one brings its section up under the stack
   function stack() {
+    // the tabs, when drawn, are the first stop
+    var t = rail.querySelector(".tabs") ? 1 : 0;
     rail.querySelectorAll("h2").forEach(function (h, i) {
-      h.style.setProperty("--i", i);
-      h.onclick = function () { bring(h.nextElementSibling, (i + 1) * 40); };
+      h.style.setProperty("--i", i + t);
+      h.onclick = function () { bring(h.nextElementSibling, (i + t + 1) * 40); };
     });
   }
 
@@ -577,7 +715,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     // copies the items as extracted; status and offsets are computed, never stored
     json = JSON.stringify(items.map(function (i) {
       var o = {};
-      ["field", "key", "value", "unit", "quote", "episode", "lab", "time", "absent"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
+      ["field", "key", "value", "unit", "quote", "episode", "lab", "time", "absent", "exam", "reads"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
       return o;
     }), null, 2);
 
@@ -603,6 +741,34 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     var f = el("li"); f.appendChild(mk("")); f.appendChild(el("b", "", found + "/" + items.length)); f.appendChild(el("span", "", "found word for word")); tally.appendChild(f);
 
     if (!items.length) { rail.appendChild(el("p", "empty", "Nothing was extracted from this note.")); return; }
+    // two tabs over the left column: the extracted data, and what a bedside rule reads from it.
+    // The tab open stays open through a redraw of the same note; the arrow keys move between them
+    var tabs = el("div", "tabs");
+    tabs.setAttribute("role", "tablist");
+    function tabBtn(txt, id, n) {
+      var b = el("button", "", txt);
+      b.type = "button"; b.setAttribute("role", "tab");
+      if (n != null) b.appendChild(el("b", "", String(n)));
+      b.onclick = function () { showTab(id); rail.scrollTop = 0; };
+      tabs.appendChild(b);
+      return b;
+    }
+    var tData = tabBtn("Extracted data", "", items.length), tSyn = tabBtn("Syndromic evaluation", "syn");
+    showTab = function (id) {
+      tabNow = id; rail.dataset.tab = id;
+      [tData, tSyn].forEach(function (b, i) {
+        var sel = (i === 1) === (id === "syn");
+        b.setAttribute("aria-selected", String(sel)); b.tabIndex = sel ? 0 : -1;
+      });
+    };
+    tabs.onkeydown = function (e) {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      showTab(tabNow === "syn" ? "" : "syn"); rail.scrollTop = 0;
+      (tabNow === "syn" ? tSyn : tData).focus();
+    };
+    if (tabFor !== data.name) { tabNow = ""; tabFor = data.name; }
+    showTab(tabNow);
+    rail.appendChild(tabs);
     // a section of the rail: its head, then its body
     function sec(title, n, body, lead, cls) {
       var s = el("section", cls); s.appendChild(head(title, n));
@@ -626,11 +792,41 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       if (ul.firstChild) sec(g[0], ul.children.length, ul);
     });
     // last, apart from what the note says: what the calculators make of it
-    if (data.calcs && data.calcs.length) {
+    var cs = (data.calcs || []).filter(function (c) { return !c.grid; }), as = (data.calcs || []).filter(function (c) { return !!c.grid; });
+    if (cs.length) {
       var cl = el("ol", "cards");
-      data.calcs.forEach(function (c) { cl.appendChild(calc(c)); });
-      sec("Calculated", data.calcs.length, cl, "Worked out from the values found word for word in the current illness. Not in the note. For learning and prototyping, never patient care.", "calc");
+      cs.forEach(function (c) { cl.appendChild(calc(c)); });
+      sec("Calculated", cs.length, cl, "Worked out from the values found word for word in the current illness. Not in the note. For learning and prototyping, never patient care.", "calc");
     }
+    // the other tab: what a bedside rule reads from the examination, drawn as the rule. It is never forced on the
+    // doctor: drawn at once only when they chose that (the box of the intake form, kept for next time), or already
+    // ran it for this note; otherwise a button runs it. The results come with the data either way, so the button
+    // asks nobody. The tab is its title, so the section has no head
+    var syn = el("section", "calc syn");
+    syn.appendChild(el("p", "lead", "A bedside rule read from the exam findings of the current illness. Not a diagnosis; for learning, never patient care."));
+    function assessed() {
+      var ol = el("ol", "cards wide");
+      as.forEach(function (c) { ol.appendChild(calc(c)); });
+      if (as.length) tSyn.appendChild(el("b", "", String(as.length)));
+      return as.length ? ol : el("p", "empty", "No bedside rule applies to the values found in this note.");
+    }
+    if (auto() || ran === data.name) syn.appendChild(assessed());
+    else {
+      var box = el("div", "box"), run = el("button", "btn", "Run syndromic evaluation");
+      run.type = "button";
+      // nothing is worked out while a correction waits for its answer
+      run.disabled = !!data.held;
+      box.appendChild(run);
+      if (data.held) box.appendChild(el("p", "empty", "Decide the corrections first."));
+      run.onclick = function () {
+        ran = data.name; var a = assessed(); box.replaceWith(a);
+        // the result first, then its lines one after another; "no rule applies" rises alone
+        var parts = [].slice.call(a.querySelectorAll("h3, .says, .led>p, .gtog, .gx:not([hidden]), .cite"));
+        (parts.length ? parts : [a]).forEach(function (e, i) { rise(e, i * 40); });
+      };
+      syn.appendChild(box);
+    }
+    rail.appendChild(syn);
     stack();
     // the legend: the counts by mark
     [["", "current illness, found word for word"], ["his", "history, found word for word"], ["close", "close match"], ["bad", "missing, or the quote doesn't state the value"]].forEach(function (g) {
@@ -835,7 +1031,9 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       if (at >= 0) point(li, at);
     });
     sec.appendChild(ol);
-    rail.insertBefore(sec, rail.firstChild);
+    // under the tabs
+    var tb = rail.querySelector(".tabs");
+    rail.insertBefore(sec, tb ? tb.nextSibling : rail.firstChild);
     stack();
   }
 
@@ -884,13 +1082,16 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   }
   paste.addEventListener("input", sync);
   agree.addEventListener("change", sync);
+  var syn = document.getElementById("syn");
+  syn.checked = auto();
+  syn.addEventListener("change", function () { try { localStorage.setItem("syndromic", syn.checked ? "on" : "off"); } catch (e) {} });
   intake.addEventListener("submit", function (e) {
     e.preventDefault();
     if (go.disabled) return;
     go.disabled = true; go.setAttribute("aria-busy", "true"); go.textContent = "Sending"; why.textContent = "";
     send(paste.value).then(function (r) {
       if (!r.id) { sync(); why.textContent = "The note could not be sent: " + r.error; return; }
-      conn.hidden = true; intake.reset(); sync();
+      conn.hidden = true; intake.reset(); syn.checked = auto(); sync();
       location.hash = r.id;
     }, function () { sync(); conn.hidden = false; });
   });

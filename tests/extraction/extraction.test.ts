@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { checkItem, checkExtraction, noteSegments, valueInQuote, toInputs, applyFindings } from '../../plugin/lib/extraction';
+import { checkItem, checkExtraction, noteSegments, valueInQuote, toInputs, toExam, readsOk, applyFindings } from '../../plugin/lib/extraction';
 import type { ExtractedItem, Finding } from '../../plugin/lib/extraction';
 
 const note = 'Seen on the ward.\nBP 120/80, HR 88 bpm,\ntemp 37,5 °C. Presión arterial estable.\nCreatinine 1.4 mg/dL.';
@@ -307,5 +307,31 @@ describe('applyFindings', () => {
     applyFindings(input, [{ index: 0, problem: 'x', correction: null }, { index: 1, problem: 'x', correction: item('RR', '28') }, { problem: 'x', correction: item('K', '4') }], none);
     expect(input).toEqual(first);
     expect(input).toHaveLength(3);
+  });
+});
+
+describe('toExam', () => {
+  const exam = 'Extremities cold and mottled. No JVD. Crackles at both bases. Last admission: skin warm.';
+  const skin = { episode: 'current' as const, field: 'Skin', value: 'cold and mottled', quote: 'Extremities cold and mottled', exam: 'skin' as const, reads: 'cool' };
+  const neck = { episode: 'current' as const, field: 'JVD', value: 'No JVD', quote: 'No JVD', absent: true, exam: 'jvp' as const, reads: 'normal_or_low' };
+
+  it('hands on one reading per finding, with the position of its item; a denied finding counts', () => {
+    expect(toExam(checkExtraction(exam, [skin, neck]))).toEqual({ skin: { reads: 'cool', index: 0 }, jvp: { reads: 'normal_or_low', index: 1 } });
+  });
+
+  it('leaves out a finding that is not word for word, from the history, repeated, or read as something off the list', () => {
+    const run = (...items: Parameters<typeof checkExtraction>[1]) => toExam(checkExtraction(exam, items));
+    expect(run({ ...skin, quote: 'Extremities cold, mottled' })).toEqual({});
+    expect(run({ ...skin, episode: 'history', value: 'warm', quote: 'skin warm', reads: 'warm' })).toEqual({});
+    expect(run(skin, { ...skin, quote: 'cold and mottled' })).toEqual({});
+    expect(run({ ...skin, reads: 'cold' })).toEqual({});
+    expect(run({ ...skin, reads: 'not_assessed' })).toEqual({});
+  });
+
+  it('readsOk takes only a listed reading of a listed finding', () => {
+    expect(readsOk('lungExam', 'bilateral_crackles')).toBe(true);
+    expect(readsOk('lungs', 'clear')).toBe(false);
+    expect(readsOk('toString', 'clear')).toBe(false);
+    expect(readsOk(undefined, 'cool')).toBe(false);
   });
 });

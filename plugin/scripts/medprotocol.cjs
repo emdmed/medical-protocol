@@ -2346,6 +2346,174 @@ Examples:
   }
 });
 
+// ../../plugin/lib/shock.ts
+var SHOCK_LIMITS, SHOCK_FINDINGS, SHOCK_LABELS, SHOCK_REASONS, binJvp, SHOCK_CAVEAT, SHOCK_SUGGESTS, classifyShock;
+var init_shock = __esm({
+  "../../plugin/lib/shock.ts"() {
+    "use strict";
+    init_safeParseFloat();
+    SHOCK_LIMITS = {
+      /** Systolic below this, in mmHg. */
+      systolicBelow: 90,
+      /** For at least this many minutes. */
+      minutesAtLeast: 30,
+      /** A measured JVP above this, in cmH2O, is elevated. Strictly above. */
+      jvpElevatedAboveCmH2O: 7
+    };
+    SHOCK_FINDINGS = {
+      skin: ["warm", "cool", "not_assessed"],
+      jvp: ["elevated", "normal_or_low", "not_assessed"],
+      capillaryRefill: ["brisk", "delayed", "not_assessed"],
+      pulseVolume: ["bounding", "normal", "thready", "not_assessed"],
+      lungExam: ["clear", "bilateral_crackles", "unilateral_crackles", "not_assessed"]
+    };
+    SHOCK_LABELS = {
+      septic: "Septic pattern",
+      cardiogenic: "Cardiogenic pattern",
+      hypovolemic: "Hypovolemic pattern",
+      indeterminate: "Indeterminate"
+    };
+    SHOCK_REASONS = {
+      outside_studied_cohort: `Not the studied patients: needs systolic below ${SHOCK_LIMITS.systolicBelow} mmHg for at least ${SHOCK_LIMITS.minutesAtLeast} minutes`,
+      primary_finding_not_assessed: "Skin temperature or JVP was not assessed",
+      discordant_primary_findings: "Warm skin with an elevated JVP: the study assigns no category"
+    };
+    binJvp = (jvp, cmH2O) => {
+      if (jvp !== "not_assessed" || cmH2O === null) return jvp;
+      return cmH2O > SHOCK_LIMITS.jvpElevatedAboveCmH2O ? "elevated" : "normal_or_low";
+    };
+    SHOCK_CAVEAT = "Bedside heuristic, right in 52 of its 68 study patients (76%). Not a diagnosis.";
+    SHOCK_SUGGESTS = {
+      "capillaryRefill:brisk": "septic",
+      "pulseVolume:bounding": "septic",
+      "lungExam:bilateral_crackles": "cardiogenic"
+    };
+    classifyShock = (exam) => {
+      const systolic = safeParseFloatOrNull(exam.systolic);
+      const minutes = safeParseFloatOrNull(exam.durationMinutes);
+      const cm = safeParseFloatOrNull(exam.jvpCmH2O);
+      if (systolic === null || systolic <= 0) return null;
+      if (exam.durationMinutes?.trim() && (minutes === null || minutes < 0) || exam.jvpCmH2O?.trim() && (cm === null || cm < 0)) return null;
+      const skin = exam.skin ?? "not_assessed";
+      const jvp = binJvp(exam.jvp ?? "not_assessed", cm);
+      const declined = (reason) => ({ category: "indeterminate", reason, jvp, supporting: [], discordant: [] });
+      if (systolic >= SHOCK_LIMITS.systolicBelow || minutes === null || minutes < SHOCK_LIMITS.minutesAtLeast) return declined("outside_studied_cohort");
+      if (skin === "not_assessed" || jvp === "not_assessed") return declined("primary_finding_not_assessed");
+      if (skin === "warm" && jvp === "elevated") return declined("discordant_primary_findings");
+      const category = skin === "warm" ? "septic" : jvp === "elevated" ? "cardiogenic" : "hypovolemic";
+      const pointing = ["capillaryRefill", "pulseVolume", "lungExam"].filter((name) => SHOCK_SUGGESTS[`${name}:${exam[name]}`]);
+      return {
+        category,
+        reason: null,
+        jvp,
+        supporting: pointing.filter((name) => SHOCK_SUGGESTS[`${name}:${exam[name]}`] === category),
+        discordant: pointing.filter((name) => SHOCK_SUGGESTS[`${name}:${exam[name]}`] !== category)
+      };
+    };
+  }
+});
+
+// ../../plugin/lib/sources.ts
+var KDIGO_2021_BP, KDIGO_2012_ANEMIA, KDIGO_2024_CKD, CKD_EPI_2021, KFRE_TANGRI, WINTERS_1967, VAZQUEZ_2010, BERLIN_2012, WHO_BMI_2000;
+var init_sources = __esm({
+  "../../plugin/lib/sources.ts"() {
+    "use strict";
+    KDIGO_2021_BP = "KDIGO 2021 Clinical Practice Guideline for Blood Pressure in CKD (Kidney Int 2021;99:S1-S87, doi:10.1016/j.kint.2020.11.003)";
+    KDIGO_2012_ANEMIA = "KDIGO 2012 Clinical Practice Guideline for Anemia in CKD (Kidney Int Suppl 2012;2:279)";
+    KDIGO_2024_CKD = "KDIGO 2024 Clinical Practice Guideline for CKD Evaluation and Management (Kidney Int 2024;105:S117-S314, doi:10.1016/j.kint.2023.10.018)";
+    CKD_EPI_2021 = "CKD-EPI 2021 Creatinine Equation (Inker et al. N Engl J Med 2021;385:1737-1749, doi:10.1056/NEJMoa2102953)";
+    KFRE_TANGRI = "Tangri et al. Kidney Failure Risk Equation, 4-variable, non-North American calibration (JAMA 2016;315:164-174, doi:10.1001/jama.2015.18202)";
+    WINTERS_1967 = "Albert, Dell, Winters. Winters' formula (Ann Intern Med 1967;66:312-322, doi:10.7326/0003-4819-66-2-312)";
+    VAZQUEZ_2010 = "Vazquez et al. Accuracy of bedside physical examination in distinguishing categories of shock: a pilot study (J Hosp Med 2010;5:471-474, doi:10.1002/jhm.695)";
+    BERLIN_2012 = "ARDS Definition Task Force. Berlin Definition (JAMA 2012;307:2526-2533, doi:10.1001/jama.2012.5669)";
+    WHO_BMI_2000 = "WHO. Obesity: preventing and managing the global epidemic (WHO Technical Report Series 894, 2000)";
+  }
+});
+
+// src/commands/shock.ts
+var shock_exports = {};
+__export(shock_exports, {
+  run: () => run9
+});
+var USAGE9, FLAGS, run9;
+var init_shock2 = __esm({
+  "src/commands/shock.ts"() {
+    "use strict";
+    init_shock();
+    init_sources();
+    init_cli();
+    USAGE9 = `Usage: medprotocol shock [options]
+
+Shock category from the bedside examination (skin temperature by JVP). A bedside heuristic from a
+pilot study, right in 76% of its own patients: not a diagnosis.
+
+Options:
+  --sbp <number>         Systolic blood pressure in mmHg (required)
+  --minutes <number>     How long the hypotension has lasted, in minutes
+  --skin <finding>       ${SHOCK_FINDINGS.skin.join(" | ")}
+  --jvp <finding>        ${SHOCK_FINDINGS.jvp.join(" | ")}
+  --jvp-cm <number>      Measured JVP in cmH2O; only read when --jvp is not given
+  --cap-refill <finding> ${SHOCK_FINDINGS.capillaryRefill.join(" | ")}
+  --pulse <finding>      ${SHOCK_FINDINGS.pulseVolume.join(" | ")}
+  --lungs <finding>      ${SHOCK_FINDINGS.lungExam.join(" | ")}
+  --json                 Output as JSON
+  --help                 Show this help
+
+A finding left out is not_assessed. Capillary refill, pulse and lungs never change the category;
+they are reported as supporting it or pointing elsewhere.
+
+Examples:
+  medprotocol shock --sbp 82 --minutes 45 --skin cool --jvp elevated
+  medprotocol shock --sbp 78 --minutes 60 --skin warm --jvp-cm 5 --cap-refill brisk`;
+    FLAGS = { skin: "skin", jvp: "jvp", "cap-refill": "capillaryRefill", pulse: "pulseVolume", lungs: "lungExam" };
+    run9 = (argv) => {
+      const values = parseFlags(argv, {
+        sbp: { type: "string" },
+        minutes: { type: "string" },
+        skin: { type: "string" },
+        jvp: { type: "string" },
+        "jvp-cm": { type: "string" },
+        "cap-refill": { type: "string" },
+        pulse: { type: "string" },
+        lungs: { type: "string" }
+      }, USAGE9);
+      if (!values) return;
+      if (!requireFlags(values, ["sbp"], USAGE9)) return;
+      for (const [flag, name] of Object.entries(FLAGS)) {
+        const allowed = SHOCK_FINDINGS[name];
+        const value = values[flag];
+        if (value !== void 0 && !allowed.includes(value)) return fail(`--${flag} must be one of: ${allowed.join(", ")}`);
+      }
+      const finding = (flag) => values[flag];
+      const result = classifyShock({
+        systolic: values.sbp,
+        durationMinutes: values.minutes,
+        skin: finding("skin"),
+        jvp: finding("jvp"),
+        jvpCmH2O: values["jvp-cm"],
+        capillaryRefill: finding("cap-refill"),
+        pulseVolume: finding("pulse"),
+        lungExam: finding("lungs")
+      });
+      if (!result) return fail("Could not classify \u2014 check input values (systolic > 0, minutes and JVP not negative)");
+      const data = {
+        ...result,
+        label: SHOCK_LABELS[result.category],
+        reasonText: result.reason ? SHOCK_REASONS[result.reason] : null,
+        source: VAZQUEZ_2010
+      };
+      printTable(data, values.json, "Shock Category (bedside examination)", [
+        ["Category", data.label],
+        ...data.reasonText ? [["Why", data.reasonText]] : [],
+        ["JVP used", result.jvp],
+        ["Supporting findings", result.supporting.join(", ") || "none"],
+        ["Findings pointing elsewhere", result.discordant.join(", ") || "none"],
+        ["Source", VAZQUEZ_2010]
+      ]);
+    };
+  }
+});
+
 // ../../plugin/lib/ckd.ts
 var calculateEGFR, GFR_BANDS, classifyGFRCategory, getGFRCategoryLabel, ACR_BANDS, ACR_BANDS_MMOL, classifyAlbuminuriaCategory, acrInMgPerG, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getMonitoringFrequency, calculateKFRE, assessReferralNeed, checkRASiEligibility, ACR_TREATMENT_CUTS, checkSGLT2iEligibility, checkFinerenoneEligibility, classifyAnemia, assessIronStatus, checkESAEligibility, assessPhosphate, correctCalcium, assessPTH, assessVitaminD, getCKDMBDMonitoring, getCKDSeverity;
 var init_ckd = __esm({
@@ -2616,15 +2784,15 @@ var init_ckd = __esm({
 // src/commands/ckd.ts
 var ckd_exports = {};
 __export(ckd_exports, {
-  run: () => run9
+  run: () => run10
 });
-var USAGE9, failNotCalculated, badAcrUnit, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run9;
+var USAGE10, failNotCalculated, badAcrUnit, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run10;
 var init_ckd2 = __esm({
   "src/commands/ckd.ts"() {
     "use strict";
     init_ckd();
     init_cli();
-    USAGE9 = `Usage: medprotocol ckd <sub-command> [options]
+    USAGE10 = `Usage: medprotocol ckd <sub-command> [options]
 
 Sub-commands:
   egfr         Calculate eGFR (CKD-EPI 2021)
@@ -2696,9 +2864,9 @@ Examples:
         creatinine: { type: "string" },
         age: { type: "string" },
         sex: { type: "string" }
-      }, USAGE9);
+      }, USAGE10);
       if (!values) return;
-      if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE9)) return;
+      if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE10)) return;
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
       if (egfr === 0) return failNotCalculated();
       const gfrCategory = classifyGFRCategory(String(egfr));
@@ -2718,9 +2886,9 @@ Examples:
         sex: { type: "string" },
         acr: { type: "string" },
         "acr-unit": { type: "string", default: "mg/g" }
-      }, USAGE9);
+      }, USAGE10);
       if (!values) return;
-      if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE9)) return;
+      if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE10)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const acrUnit = values["acr-unit"];
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
@@ -2760,9 +2928,9 @@ Examples:
         egfr: { type: "string" },
         acr: { type: "string" },
         "acr-unit": { type: "string", default: "mg/g" }
-      }, USAGE9);
+      }, USAGE10);
       if (!values) return;
-      if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE9)) return;
+      if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE10)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const kfre = calculateKFRE(values.age, values.sex, values.egfr, String(acrInMgPerG(values.acr, values["acr-unit"])));
       const referral = assessReferralNeed(String(kfre.fiveYear));
@@ -2786,9 +2954,9 @@ Examples:
         "heart-failure": { type: "boolean", default: false },
         "on-rasi": { type: "boolean", default: false },
         "potassium-normal": { type: "boolean", default: false }
-      }, USAGE9);
+      }, USAGE10);
       if (!values) return;
-      if (!requireFlags(values, ["egfr", "acr"], USAGE9)) return;
+      if (!requireFlags(values, ["egfr", "acr"], USAGE10)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const acrUnit = values["acr-unit"];
       const gfrCategory = classifyGFRCategory(values.egfr);
@@ -2825,9 +2993,9 @@ Examples:
         sex: { type: "string" },
         ferritin: { type: "string" },
         tsat: { type: "string" }
-      }, USAGE9);
+      }, USAGE10);
       if (!values) return;
-      if (!requireFlags(values, ["hb", "sex"], USAGE9)) return;
+      if (!requireFlags(values, ["hb", "sex"], USAGE10)) return;
       const anemia = classifyAnemia(values.hb, values.sex);
       const iron = values.ferritin && values.tsat ? assessIronStatus(values.ferritin, values.tsat) : null;
       const esa = values.ferritin && values.tsat ? checkESAEligibility(values.hb, values.ferritin, values.tsat, values.sex) : null;
@@ -2854,9 +3022,9 @@ Examples:
         pth: { type: "string" },
         "vitamin-d": { type: "string" },
         "gfr-category": { type: "string" }
-      }, USAGE9);
+      }, USAGE10);
       if (!values) return;
-      if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE9);
+      if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE10);
       const gfrCat = values["gfr-category"];
       const phosphateResult = values.phosphate ? assessPhosphate(values.phosphate, gfrCat) : null;
       const correctedCa = values.calcium && values.albumin ? correctCalcium(values.calcium, values.albumin) : null;
@@ -2892,7 +3060,7 @@ Examples:
       rows.push(["Monitor Vit D", monitoring.vitaminD]);
       printTable(data, values.json, "CKD-MBD Assessment", rows);
     };
-    run9 = (argv) => runSubcommand(argv, USAGE9, {
+    run10 = (argv) => runSubcommand(argv, USAGE10, {
       egfr: runEGFR,
       stage: runStage,
       kfre: runKFRE,
@@ -3084,16 +3252,16 @@ var init_endocrine = __esm({
 // src/commands/diabetes.ts
 var diabetes_exports = {};
 __export(diabetes_exports, {
-  run: () => run10
+  run: () => run11
 });
-var USAGE10, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run10;
+var USAGE11, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run11;
 var init_diabetes = __esm({
   "src/commands/diabetes.ts"() {
     "use strict";
     init_diabetes_dx();
     init_endocrine();
     init_cli();
-    USAGE10 = `Usage: medprotocol diabetes <sub-command> [options]
+    USAGE11 = `Usage: medprotocol diabetes <sub-command> [options]
 
 Sub-commands:
   diagnose     Diabetes diagnosis classifier (ADA Table 2.1/2.2)
@@ -3165,7 +3333,7 @@ Examples:
         "2h-pg": { type: "string", default: "" },
         "random-pg": { type: "string", default: "" },
         symptoms: { type: "boolean", default: false }
-      }, USAGE10);
+      }, USAGE11);
       if (!values) return;
       const a1c = values.a1c;
       const fpg = values.fpg;
@@ -3173,7 +3341,7 @@ Examples:
       const randomPG = values["random-pg"];
       const hasSymptoms = values.symptoms;
       if (!a1c && !fpg && !twohPG && !randomPG) {
-        return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE10);
+        return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE11);
       }
       const diagnosis = getDiagnosis(a1c, fpg, twohPG, randomPG, hasSymptoms);
       const rows = [];
@@ -3213,9 +3381,9 @@ Examples:
         "2h-pg": { type: "string", default: "" },
         a1c: { type: "string", default: "" },
         symptoms: { type: "boolean", default: false }
-      }, USAGE10);
+      }, USAGE11);
       if (!values) return;
-      if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE10);
+      if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE11);
       const result = classifyT1DStage(
         values.autoantibodies,
         values.fpg,
@@ -3250,9 +3418,9 @@ Examples:
         "fhx-t2d": { type: "boolean", default: false },
         "dka-history": { type: "boolean", default: false },
         autoimmune: { type: "boolean", default: false }
-      }, USAGE10);
+      }, USAGE11);
       if (!values) return;
-      if (!requireFlags(values, ["age", "bmi"], USAGE10)) return;
+      if (!requireFlags(values, ["age", "bmi"], USAGE11)) return;
       const result = classifyT1vsT2(
         values.age,
         values.bmi,
@@ -3297,9 +3465,9 @@ Examples:
         "insulin-resistance": { type: "boolean", default: false },
         "prior-prediabetes": { type: "boolean", default: false },
         "prior-gdm": { type: "boolean", default: false }
-      }, USAGE10);
+      }, USAGE11);
       if (!values) return;
-      if (!requireFlags(values, ["age", "bmi"], USAGE10)) return;
+      if (!requireFlags(values, ["age", "bmi"], USAGE11)) return;
       const riskFactors = {
         firstDegreeRelative: values["first-degree"],
         highRiskEthnicity: values["high-risk-ethnicity"],
@@ -3349,7 +3517,7 @@ Examples:
         "1h": { type: "string" },
         "2h": { type: "string" },
         "3h": { type: "string", default: "0" }
-      }, USAGE10);
+      }, USAGE11);
       if (!values) return;
       const missing = [];
       if (!values.strategy) missing.push("--strategy");
@@ -3359,7 +3527,7 @@ Examples:
       if (values.strategy === "two-step" && !values["3h"]) {
         missing.push("--3h");
       }
-      if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE10);
+      if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE11);
       const strategy = values.strategy;
       const result = strategy === "one-step" ? classifyGDM_OneStep(values.fasting, values["1h"], values["2h"]) : classifyGDM_TwoStep(values.fasting, values["1h"], values["2h"], values["3h"]);
       const rows = [
@@ -3387,7 +3555,7 @@ Examples:
       };
       printTable(data, values.json, `GDM Screening \u2014 ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`, rows);
     };
-    run10 = (argv) => runSubcommand(argv, USAGE10, {
+    run11 = (argv) => runSubcommand(argv, USAGE11, {
       diagnose: runDiagnose,
       "t1d-stage": runT1DStage,
       "t1-vs-t2": runT1vsT2,
@@ -3417,10 +3585,11 @@ var init_claude_spawn = __esm({
 });
 
 // ../../plugin/lib/extraction.ts
-var FIELDS, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, prepared, checkItem, checkExtraction, noteSegments, SEX_WORDS, sexStated, toNumber, unitOk, toInputs, applyFindings;
+var FIELDS, EXAM_FINDINGS, readsOk, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, prepared, checkItem, checkExtraction, noteSegments, SEX_WORDS, sexStated, toNumber, unitOk, toInputs, toExam, applyFindings;
 var init_extraction = __esm({
   "../../plugin/lib/extraction.ts"() {
     "use strict";
+    init_shock();
     FIELDS = {
       sbp: { label: "Systolic blood pressure", units: ["mmHg"] },
       dbp: { label: "Diastolic blood pressure", units: ["mmHg"] },
@@ -3454,10 +3623,16 @@ var init_extraction = __esm({
       tc: { label: "Total cholesterol", units: ["mg/dL"] },
       hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
       "urine-output": { label: "Urine output", units: ["mL"] },
+      /** How long the blood pressure has been low. Hours are converted (units.ts). */
+      "hypotension-min": { label: "Hypotension duration", units: ["min", "minutes", "mins", "minutos", "h", "hr", "hrs", "hour", "hours", "horas"] },
+      /** A measured height only. A bare "cm" may be above the sternal angle, so it is not accepted. */
+      "jvp-cm": { label: "Jugular venous pressure", units: ["cmH2O", "cm H2O"] },
       age: { label: "Age", units: ["years", "year", "yr", "yrs", "y", "yo", "y/o", "a\xF1os"] },
       /** The one key whose value is a word: `female` or `male`, see `sexStated`. */
       sex: { label: "Sex", units: [] }
     };
+    EXAM_FINDINGS = SHOCK_FINDINGS;
+    readsOk = (exam, reads) => typeof exam === "string" && Object.hasOwn(EXAM_FINDINGS, exam) && reads !== "not_assessed" && EXAM_FINDINGS[exam].includes(reads);
     EPISODES = ["current", "history"];
     MAX_EDITS = 5;
     stripAccents = (s) => s.normalize("NFD").replace(new RegExp("\\p{Mn}", "gu"), "");
@@ -3643,6 +3818,17 @@ var init_extraction = __esm({
       }
       return out;
     };
+    toExam = (checked) => {
+      const out = {};
+      const seen = /* @__PURE__ */ new Set();
+      checked.forEach((c, index) => {
+        if (!c.exam || c.episode !== "current") return;
+        if (seen.has(c.exam)) delete out[c.exam];
+        else if (c.status === "quoted" && readsOk(c.exam, c.reads)) out[c.exam] = { reads: c.reads, index };
+        seen.add(c.exam);
+      });
+      return out;
+    };
     applyFindings = (firstPass, findings, rejected) => {
       const kept = [...firstPass];
       const added = [];
@@ -3692,7 +3878,8 @@ var init_units = __esm({
       hb: { digits: 1, from: { "g/l": 0.1 } },
       albumin: { digits: 1, from: { "g/l": 0.1 } },
       pao2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
-      pco2: { digits: 1, from: { kpa: MMHG_PER_KPA } }
+      pco2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
+      "hypotension-min": { digits: 0, from: { h: 60, hr: 60, hrs: 60, hour: 60, hours: 60, horas: 60 } }
     };
     toExpectedUnit = (key, input) => {
       if (key === "fio2" && !input.unit && input.value >= 0.21 && input.value <= 1) {
@@ -3703,22 +3890,6 @@ var init_units = __esm({
       if (!rule || !factor) return input;
       return { ...input, value: Number((input.value * factor).toFixed(rule.digits)), unit: FIELDS[key].units[0], from: `${input.value} ${input.unit}` };
     };
-  }
-});
-
-// ../../plugin/lib/sources.ts
-var KDIGO_2021_BP, KDIGO_2012_ANEMIA, KDIGO_2024_CKD, CKD_EPI_2021, KFRE_TANGRI, WINTERS_1967, BERLIN_2012, WHO_BMI_2000;
-var init_sources = __esm({
-  "../../plugin/lib/sources.ts"() {
-    "use strict";
-    KDIGO_2021_BP = "KDIGO 2021 Clinical Practice Guideline for Blood Pressure in CKD (Kidney Int 2021;99:S1-S87, doi:10.1016/j.kint.2020.11.003)";
-    KDIGO_2012_ANEMIA = "KDIGO 2012 Clinical Practice Guideline for Anemia in CKD (Kidney Int Suppl 2012;2:279)";
-    KDIGO_2024_CKD = "KDIGO 2024 Clinical Practice Guideline for CKD Evaluation and Management (Kidney Int 2024;105:S117-S314, doi:10.1016/j.kint.2023.10.018)";
-    CKD_EPI_2021 = "CKD-EPI 2021 Creatinine Equation (Inker et al. N Engl J Med 2021;385:1737-1749, doi:10.1056/NEJMoa2102953)";
-    KFRE_TANGRI = "Tangri et al. Kidney Failure Risk Equation, 4-variable, non-North American calibration (JAMA 2016;315:164-174, doi:10.1001/jama.2015.18202)";
-    WINTERS_1967 = "Albert, Dell, Winters. Winters' formula (Ann Intern Med 1967;66:312-322, doi:10.7326/0003-4819-66-2-312)";
-    BERLIN_2012 = "ARDS Definition Task Force. Berlin Definition (JAMA 2012;307:2526-2533, doi:10.1001/jama.2012.5669)";
-    WHO_BMI_2000 = "WHO. Obesity: preventing and managing the global epidemic (WHO Technical Report Series 894, 2000)";
   }
 });
 
@@ -3913,6 +4084,57 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
 .rule text{font:500 11px/1 var(--mono);fill:var(--ink-2)}
 .card .band{margin:2px 0 0;font-size:13px;font-weight:600;color:var(--calc)}
 .card .src{margin-top:14px;font-size:12px}
+.card .src+.src{margin-top:3px}
+/* a syndromic assessment is drawn as its rule: a table of the two findings it reads. The cell they land in is
+   marked like the band of a scale; a cell still possible with a finding missing takes the highlighter; the pair
+   the rule names nothing for is hatched. The other findings stand in the cell they point at, in amber when that
+   is not the cell marked. The state classes are not "on": pointing clears that one everywhere */
+.cards.wide{grid-template-columns:minmax(0,34rem)}
+.gt{flex-wrap:wrap;justify-content:space-between;gap:2px 14px}
+.pat{font:600 15px/1.6 var(--ui);color:var(--calc)}
+.pat.no,.card .says{color:var(--ink)}
+.gx{display:grid;grid-template-columns:minmax(5.2rem,.7fr) 1fr 1fr;margin-top:14px;border-top:1px solid var(--ink)}
+.gx>*{min-width:0;padding:8px 10px 9px;border-bottom:1px solid var(--line)}
+.gh{font:700 11.5px/1.25 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.gh.lit{color:var(--ink)}
+.gh q{display:block;margin-top:3px;font:italic 400 14px/1.3 var(--text);letter-spacing:0;text-transform:none}
+.gc{min-height:70px;border-left:1px solid var(--line);font:400 17px/1.2 var(--text);color:var(--ink-2)}
+.gc>span:first-child{display:flex;align-items:center;gap:6px}
+.gc.at{background:var(--calc-t);box-shadow:inset 0 -3px var(--calc);color:var(--ink)}
+.gc.at .m{background-image:linear-gradient(var(--calc),var(--calc))}
+.gc.open{background:var(--hl);color:var(--ink)}
+.gc.none{background-image:repeating-linear-gradient(135deg,transparent 0 6px,var(--line) 6px 7px);font-style:italic}
+.gc.none.at{background-color:var(--hl);box-shadow:inset 0 -3px var(--ink)}
+.tg{display:flex;gap:6px;margin-top:5px;font:400 12.5px/1.25 var(--ui);color:var(--ink-2)}
+.tg::before{content:"";flex:none;width:7px;height:7px;margin-top:4px;box-shadow:inset 0 0 0 1px currentColor}
+.gc.at .tg{color:var(--ink)}
+.led{display:grid;gap:5px;margin-top:12px}
+.ic{display:inline-flex;flex:none;width:16px;height:16px;color:var(--calc)}
+.ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.led .sl{align-items:center;gap:10px;font-size:13.5px}
+.led .sl .lv{max-width:none;text-align:left}
+.sl.gone,.sl.gone .lv,.sl.gone .ic{color:var(--ink-2)}
+.sl.gone .lv{font-style:italic}
+.sl.off .ic{color:var(--warn)}
+.cite{display:flex;gap:10px;margin-top:14px;font-size:12px;color:var(--ink-2)}
+.cite .ic{width:14px;height:14px;margin-top:1px;color:var(--ink-2)}
+.cite a{color:var(--ink);text-underline-offset:3px}
+.gtog{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:4px 0;font:700 12px/1 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--calc);cursor:pointer;transition:color .3s var(--ease)}
+.gtog:hover{color:var(--ink)}
+.gtog:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.gx[hidden]{display:none}
+.calc .box,.calc .empty{margin:12px 0 26px}
+/* the left column has two tabs: the extracted data, and what a bedside rule reads from it. They are set like the
+   bar's other controls, uppercase text, the current one on an ink rule; the heads of the data stack under them */
+.tabs{position:sticky;top:0;z-index:2;display:flex;gap:28px;height:40px;border-bottom:1px solid var(--line);background:var(--ground);box-shadow:-12px 0 var(--ground),12px 0 var(--ground)}
+.tabs button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:7px;height:100%;border-bottom:2px solid transparent;font:700 12.5px/1 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;transition:color .3s var(--ease)}
+.tabs button:hover,.tabs button[aria-selected="true"]{color:var(--ink)}
+.tabs button[aria-selected="true"]{border-bottom-color:var(--ink)}
+.tabs button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.tabs b{font:500 12px/1 var(--mono);letter-spacing:0}
+.rail:has(>.tabs)[data-tab="syn"]>:not(.tabs):not(.syn),.rail:has(>.tabs):not([data-tab="syn"])>.syn{display:none}
+.sl .lv{max-width:62%;text-align:right;color:var(--ink)}
+.tg.off,.sl.off,.sl.off .lv{color:var(--warn)}
 @media (prefers-reduced-motion:no-preference){
   /* the highlighter is drawn across each quote once, when the note first appears */
   .fresh mark{animation:stroke .9s var(--ease) .1s both}
@@ -3962,6 +4184,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   .rail{overflow:visible;padding:0 var(--gut) 22px;border-right:0}
   /* a stack would take too much of a small screen: each head gives way to the next */
   .rail h2{top:0}
+  .tabs{position:static}
   /* the note is pasted first; what happens next comes after it */
   .in .rail{order:1}
   .proof{padding:0 var(--gut) 22px}
@@ -4008,6 +4231,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       <textarea id="paste" required placeholder="A made-up or de-identified note. Nothing is sent until you press Extract."></textarea>
       <div class="send">
         <label class="agree"><input type="checkbox" id="agree" required><span>This note is sent to the AI model, which runs on external servers. I confirm it is made up or de-identified: no names, record numbers, addresses or dates.</span></label>
+        <label class="agree"><input type="checkbox" id="syn"><span>Run the syndromic evaluation automatically after the extraction. Left off, a button in the Syndromic evaluation tab runs it when you want it.</span></label>
         <p class="go"><button class="btn fill" id="go" type="submit" aria-describedby="why" disabled>Extract</button><span id="why"></span></p>
       </div>
     </section>
@@ -4152,8 +4376,9 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     if (!m || (e.type === "keydown" && e.key !== "Enter")) return;
     var n = +m.dataset.items.split(" ")[0], r = rows[n];
     pinned = n; clear();
-    // below the stacked heads
-    if (r.length) bring(r[r.length - 1], rail.querySelectorAll("h2").length * 40 + 8);
+    // the value's own row is in the data tab; below the tabs and the stacked heads
+    showTab("");
+    if (r.length) bring(r[r.length - 1], (rail.querySelectorAll("h2").length + 1) * 40 + 8);
   }
   note.addEventListener("click", toRow);
   note.addEventListener("keydown", toRow);
@@ -4168,6 +4393,8 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     if (it.lab === true && it.episode === "history") name.appendChild(el("small", "", "history"));
     // the note says the patient does not have it
     if (it.absent === true) name.appendChild(el("small", "", "absent"));
+    // an examination finding: what its words were read as, a judgement the check cannot confirm
+    if (it.reads) name.appendChild(el("small", "", "read as " + it.reads.replace(/_/g, " ")));
     // when it was taken: the one thing the check cannot verify, so it is always shown
     if (it.time) name.appendChild(el("small", "", it.time));
     if (k === "close" || k === "bad") name.appendChild(el("span", "why", k === "close" ? "close match" : it.status === "mismatched" ? "not stated" : "not found"));
@@ -4206,6 +4433,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     }
     var meta = [(it.lab === true ? "Labs · " : "") + (it.episode === "history" ? "History" : "Current illness")];
     if (it.absent === true) meta.push("Absent");
+    if (it.reads) meta.push("Read as " + it.reads.replace(/_/g, " "));
     if (it.time) meta.push(it.time);
     if (it.ambiguous) meta.push("Appears more than once: first occurrence marked");
     li.appendChild(el("p", "", meta.join(" · ")));
@@ -4246,11 +4474,89 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return d;
   }
 
+  // the icons of a syndromic assessment, one stroke on a 16 grid; a ledger line takes the one of its label
+  var ICON = {
+    "Pressure": '<path d="M2.5 11.5a5.5 5.5 0 0 1 11 0"/><path d="M8 11.5l2.6-3.2"/>',
+    "Agrees": '<path d="M3 8.5l3.2 3.2L13 4.5"/>',
+    "Points elsewhere": '<path d="M4 12l8-8M6.5 4H12v5.5"/>',
+    "Fits more than one": '<path d="M8 14V8.5M8 8.5L4 3.5M8 8.5l4-5"/>',
+    "Also found": '<path d="M8 3.5v9M3.5 8h9"/>',
+    "Not in the note": '<circle cx="8" cy="8" r="5" stroke-dasharray="2.2 2"/>',
+    grid: '<path d="M2.5 2.5h11v11h-11zM8 2.5v11M2.5 8h11"/>',
+    info: '<circle cx="8" cy="8" r="5.5"/><path d="M8 7.5V11M8 5h0"/>'
+  };
+  // motion on request only, through the page's one ease: run by a click, so a redraw or a tab switch never replays
+  // it. Reduced motion keeps the fade and drops the rise
+  function rise(e, delay) {
+    var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    e.animate(still ? { opacity: [0, 1] } : { opacity: [0, 1], transform: ["translateY(6px)", "none"] },
+      { duration: 300, delay: delay || 0, easing: "cubic-bezier(.16,1,.3,1)", fill: "backwards" });
+  }
+  function ic(name) {
+    var i = el("span", "ic"); i.setAttribute("aria-hidden", "true");
+    i.innerHTML = '<svg viewBox="0 0 16 16">' + (ICON[name] || "") + "</svg>";
+    return i;
+  }
+
+  // a syndromic assessment as its rule: why it declined, what else the note says, the table on request, then
+  // the caveat and the study. The ledger's labels are icons, kept for screen readers and as the tooltip
+  function grid(g, source) {
+    var f = document.createDocumentFragment(), t = el("div", "gx"), l = el("div", "led");
+    function hd(h) { var d = el("div", h.on ? "gh lit" : "gh", h.label); if (h.quote) d.appendChild(el("q", "", h.quote)); return d; }
+    if (g.why) f.appendChild(el("p", "says", g.why));
+    g.ledger.forEach(function (r) {
+      var p = el("p", r[2] ? "sl off" : r[0] === "Not in the note" ? "sl gone" : "sl");
+      p.title = r[0];
+      p.appendChild(ic(r[0])); p.appendChild(el("span", "sr", r[0] + ": ")); p.appendChild(el("span", "lv", r[1]));
+      l.appendChild(p);
+    });
+    f.appendChild(l);
+    // the table is the long form: shut until the doctor asks for it, and kept that way across notes
+    var tg = el("button", "gtog"), tl = el("span", "", gridOpen ? "Hide the grid" : "Show the full grid");
+    tg.appendChild(ic("grid")); tg.appendChild(tl);
+    tg.type = "button"; tg.setAttribute("aria-expanded", String(gridOpen)); t.hidden = !gridOpen;
+    tg.onclick = function () {
+      gridOpen = t.hidden; t.hidden = !gridOpen;
+      if (gridOpen) rise(t);
+      tl.textContent = gridOpen ? "Hide the grid" : "Show the full grid"; tg.setAttribute("aria-expanded", String(gridOpen));
+    };
+    f.appendChild(tg);
+    t.appendChild(el("div", "gh"));
+    g.cols.forEach(function (h) { t.appendChild(hd(h)); });
+    g.rows.forEach(function (h, r) {
+      t.appendChild(hd(h));
+      g.cells[r].forEach(function (c) {
+        var d = el("div", "gc" + (c.none ? " none" : "") + (c.state ? " " + c.state : "")), s = el("span");
+        if (c.state === "at" && !c.none) s.appendChild(mk(""));
+        s.appendChild(document.createTextNode(c.label)); d.appendChild(s);
+        c.tags.forEach(function (x) { d.appendChild(el("span", x.off ? "tg off" : "tg", x.text)); });
+        t.appendChild(d);
+      });
+    });
+    f.appendChild(t);
+    // the caveat, then the study by author, journal and year, linked by its doi; the full reference is its tooltip
+    var cv = el("p", "cite"), m = /^(.+?)\. .*\(([^;(]+?) (\d{4});.*doi:(\S+?)\)$/.exec(source);
+    cv.appendChild(ic("info"));
+    var ct = el("span", "", g.caveat + " ");
+    if (m) {
+      var a = el("a", "", m[1] + "., " + m[2] + " " + m[3]);
+      a.href = "https://doi.org/" + m[4]; a.target = "_blank"; a.rel = "noopener"; a.title = source;
+      ct.appendChild(a);
+    } else ct.appendChild(document.createTextNode(source));
+    cv.appendChild(ct); f.appendChild(cv);
+    return f;
+  }
+
+  // the doctor's choice to run the syndromic evaluation without being asked; off until they tick the box
+  var ran = null, gridOpen = false, tabNow = "", tabFor = null, showTab = function () {};
+  function auto() { try { return localStorage.getItem("syndromic") === "on"; } catch (e) { return false; } }
+
   // a calculator result: its rows, its source. Pointing at it lights the words its inputs came from
   function calc(c) {
-    var li = el("li", "card");
+    var li = el("li", "card"), h = el("h3", c.grid ? "gt" : "", c.title);
     li.tabIndex = 0;
-    li.appendChild(el("h3", "", c.title));
+    if (c.grid) h.appendChild(el("span", c.grid.named ? "pat" : "pat no", c.grid.result));
+    li.appendChild(h);
     c.rows.forEach(function (r) {
       var p = line(r[0], "res");
       p.appendChild(FIG.test(r[1]) ? el("span", "n", r[1]) : document.createTextNode(r[1]));
@@ -4258,7 +4564,8 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       li.appendChild(p);
     });
     c.scales.forEach(function (s) { li.appendChild(scale(s)); });
-    li.appendChild(el("p", "src", c.source));
+    if (c.grid) li.appendChild(grid(c.grid, c.source));
+    else li.appendChild(el("p", "src", c.source));
     function lit() { clear(); c.uses.forEach(function (n) { on(n); }); }
     li.addEventListener("mouseenter", lit);
     li.addEventListener("focusin", lit);
@@ -4271,9 +4578,11 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
 
   // numbers the heads of the rail for the stack; a click on one brings its section up under the stack
   function stack() {
+    // the tabs, when drawn, are the first stop
+    var t = rail.querySelector(".tabs") ? 1 : 0;
     rail.querySelectorAll("h2").forEach(function (h, i) {
-      h.style.setProperty("--i", i);
-      h.onclick = function () { bring(h.nextElementSibling, (i + 1) * 40); };
+      h.style.setProperty("--i", i + t);
+      h.onclick = function () { bring(h.nextElementSibling, (i + t + 1) * 40); };
     });
   }
 
@@ -4294,7 +4603,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     // copies the items as extracted; status and offsets are computed, never stored
     json = JSON.stringify(items.map(function (i) {
       var o = {};
-      ["field", "key", "value", "unit", "quote", "episode", "lab", "time", "absent"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
+      ["field", "key", "value", "unit", "quote", "episode", "lab", "time", "absent", "exam", "reads"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
       return o;
     }), null, 2);
 
@@ -4320,6 +4629,34 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     var f = el("li"); f.appendChild(mk("")); f.appendChild(el("b", "", found + "/" + items.length)); f.appendChild(el("span", "", "found word for word")); tally.appendChild(f);
 
     if (!items.length) { rail.appendChild(el("p", "empty", "Nothing was extracted from this note.")); return; }
+    // two tabs over the left column: the extracted data, and what a bedside rule reads from it.
+    // The tab open stays open through a redraw of the same note; the arrow keys move between them
+    var tabs = el("div", "tabs");
+    tabs.setAttribute("role", "tablist");
+    function tabBtn(txt, id, n) {
+      var b = el("button", "", txt);
+      b.type = "button"; b.setAttribute("role", "tab");
+      if (n != null) b.appendChild(el("b", "", String(n)));
+      b.onclick = function () { showTab(id); rail.scrollTop = 0; };
+      tabs.appendChild(b);
+      return b;
+    }
+    var tData = tabBtn("Extracted data", "", items.length), tSyn = tabBtn("Syndromic evaluation", "syn");
+    showTab = function (id) {
+      tabNow = id; rail.dataset.tab = id;
+      [tData, tSyn].forEach(function (b, i) {
+        var sel = (i === 1) === (id === "syn");
+        b.setAttribute("aria-selected", String(sel)); b.tabIndex = sel ? 0 : -1;
+      });
+    };
+    tabs.onkeydown = function (e) {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      showTab(tabNow === "syn" ? "" : "syn"); rail.scrollTop = 0;
+      (tabNow === "syn" ? tSyn : tData).focus();
+    };
+    if (tabFor !== data.name) { tabNow = ""; tabFor = data.name; }
+    showTab(tabNow);
+    rail.appendChild(tabs);
     // a section of the rail: its head, then its body
     function sec(title, n, body, lead, cls) {
       var s = el("section", cls); s.appendChild(head(title, n));
@@ -4343,11 +4680,41 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       if (ul.firstChild) sec(g[0], ul.children.length, ul);
     });
     // last, apart from what the note says: what the calculators make of it
-    if (data.calcs && data.calcs.length) {
+    var cs = (data.calcs || []).filter(function (c) { return !c.grid; }), as = (data.calcs || []).filter(function (c) { return !!c.grid; });
+    if (cs.length) {
       var cl = el("ol", "cards");
-      data.calcs.forEach(function (c) { cl.appendChild(calc(c)); });
-      sec("Calculated", data.calcs.length, cl, "Worked out from the values found word for word in the current illness. Not in the note. For learning and prototyping, never patient care.", "calc");
+      cs.forEach(function (c) { cl.appendChild(calc(c)); });
+      sec("Calculated", cs.length, cl, "Worked out from the values found word for word in the current illness. Not in the note. For learning and prototyping, never patient care.", "calc");
     }
+    // the other tab: what a bedside rule reads from the examination, drawn as the rule. It is never forced on the
+    // doctor: drawn at once only when they chose that (the box of the intake form, kept for next time), or already
+    // ran it for this note; otherwise a button runs it. The results come with the data either way, so the button
+    // asks nobody. The tab is its title, so the section has no head
+    var syn = el("section", "calc syn");
+    syn.appendChild(el("p", "lead", "A bedside rule read from the exam findings of the current illness. Not a diagnosis; for learning, never patient care."));
+    function assessed() {
+      var ol = el("ol", "cards wide");
+      as.forEach(function (c) { ol.appendChild(calc(c)); });
+      if (as.length) tSyn.appendChild(el("b", "", String(as.length)));
+      return as.length ? ol : el("p", "empty", "No bedside rule applies to the values found in this note.");
+    }
+    if (auto() || ran === data.name) syn.appendChild(assessed());
+    else {
+      var box = el("div", "box"), run = el("button", "btn", "Run syndromic evaluation");
+      run.type = "button";
+      // nothing is worked out while a correction waits for its answer
+      run.disabled = !!data.held;
+      box.appendChild(run);
+      if (data.held) box.appendChild(el("p", "empty", "Decide the corrections first."));
+      run.onclick = function () {
+        ran = data.name; var a = assessed(); box.replaceWith(a);
+        // the result first, then its lines one after another; "no rule applies" rises alone
+        var parts = [].slice.call(a.querySelectorAll("h3, .says, .led>p, .gtog, .gx:not([hidden]), .cite"));
+        (parts.length ? parts : [a]).forEach(function (e, i) { rise(e, i * 40); });
+      };
+      syn.appendChild(box);
+    }
+    rail.appendChild(syn);
     stack();
     // the legend: the counts by mark
     [["", "current illness, found word for word"], ["his", "history, found word for word"], ["close", "close match"], ["bad", "missing, or the quote doesn't state the value"]].forEach(function (g) {
@@ -4552,7 +4919,9 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       if (at >= 0) point(li, at);
     });
     sec.appendChild(ol);
-    rail.insertBefore(sec, rail.firstChild);
+    // under the tabs
+    var tb = rail.querySelector(".tabs");
+    rail.insertBefore(sec, tb ? tb.nextSibling : rail.firstChild);
     stack();
   }
 
@@ -4601,13 +4970,16 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   }
   paste.addEventListener("input", sync);
   agree.addEventListener("change", sync);
+  var syn = document.getElementById("syn");
+  syn.checked = auto();
+  syn.addEventListener("change", function () { try { localStorage.setItem("syndromic", syn.checked ? "on" : "off"); } catch (e) {} });
   intake.addEventListener("submit", function (e) {
     e.preventDefault();
     if (go.disabled) return;
     go.disabled = true; go.setAttribute("aria-busy", "true"); go.textContent = "Sending"; why.textContent = "";
     send(paste.value).then(function (r) {
       if (!r.id) { sync(); why.textContent = "The note could not be sent: " + r.error; return; }
-      conn.hidden = true; intake.reset(); sync();
+      conn.hidden = true; intake.reset(); syn.checked = auto(); sync();
       location.hash = r.id;
     }, function () { sync(); conn.hidden = false; });
   });
@@ -5342,9 +5714,9 @@ var init_overlay_client = __esm({
 var overlay_exports = {};
 __export(overlay_exports, {
   isLocalOrigin: () => isLocalOrigin,
-  run: () => run11
+  run: () => run12
 });
-var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE11, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run11;
+var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE12, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run12;
 var init_overlay = __esm({
   "src/commands/overlay.ts"() {
     "use strict";
@@ -5355,7 +5727,7 @@ var init_overlay = __esm({
     init_claude_spawn();
     init_cli();
     init_overlay_client();
-    USAGE11 = `Usage: medprotocol overlay [options]
+    USAGE12 = `Usage: medprotocol overlay [options]
 
 The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
@@ -5780,7 +6152,7 @@ Examples:
         }
       });
     };
-    run11 = (argv) => {
+    run12 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string" },
@@ -5793,7 +6165,7 @@ Examples:
         watch: { type: "boolean", default: false },
         clear: { type: "boolean", default: false },
         dir: { type: "string" }
-      }, USAGE11);
+      }, USAGE12);
       if (!values) return;
       const dir = (0, import_node_path.resolve)(values.dir ?? (0, import_node_path.join)(".medprotocol", "queue"));
       const json = values.json;
@@ -5864,11 +6236,11 @@ Waiting for the overlay to create it\u2026
 var extract_exports = {};
 __export(extract_exports, {
   calculations: () => calculations,
-  run: () => run12,
+  run: () => run13,
   serve: () => serve2,
   stateOf: () => stateOf
 });
-var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE12, saveNote, itemsError, scaleOf, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run12;
+var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE13, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run13;
 var init_extract = __esm({
   "src/commands/extract.ts"() {
     "use strict";
@@ -5884,13 +6256,14 @@ var init_extract = __esm({
     init_extraction();
     init_nephrology();
     init_pafi();
+    init_shock();
     init_units();
     init_sources();
     init_format();
     init_cli();
     init_extract_artifact();
     init_overlay();
-    USAGE12 = `Usage: medprotocol extract --note <file> --items <file> [options]
+    USAGE13 = `Usage: medprotocol extract --note <file> --items <file> [options]
        medprotocol extract --save <file>
        medprotocol extract --serve [--port <number>]
 
@@ -5903,9 +6276,10 @@ Options:
                     so the same note always lands in the same folder. A <file> directly in extractions/
                     is a staging copy and is deleted once saved.
   --note <file>     The clinical note (plain text)
-  --items <file>    JSON array of { field, value, unit?, quote, episode, key?, lab?, time?, absent? }
+  --items <file>    JSON array of { field, value, unit?, quote, episode, key?, lab?, time?, absent?, exam?, reads? }
                     episode: "current" (this illness) or "history" (before it)
                     absent: true when the note says the patient does not have it ("no fever")
+                    exam + reads: an examination finding and what its words are read as ("skin", "cool")
   --artifact <file> Also write a page showing the note beside the extraction (HTML)
   --serve           Start the local extraction page server. Takes no other option but --port.
   --port <number>   Port for --serve (default 7332)
@@ -5941,12 +6315,56 @@ Example:
       if (badKey) return `unknown key "${badKey.key}" \u2014 use one of: ${Object.keys(FIELDS).join(", ")}`;
       const badAbsent = items.find((i) => i.absent !== void 0 && (typeof i.absent !== "boolean" || i.absent && i.key !== void 0));
       if (badAbsent) return `"${badAbsent.field}": absent is true or false, and an absent finding takes no key`;
+      const badExam = items.find((i) => (i.exam !== void 0 || i.reads !== void 0) && !readsOk(i.exam, i.reads));
+      if (badExam) return `"${badExam.field}": exam and reads go together \u2014 ${Object.entries(EXAM_FINDINGS).map(([k, v]) => `${k}: ${v.filter((r) => r !== "not_assessed").join(" | ")}`).join("; ")}`;
       return null;
     };
     scaleOf = (label, value, unit, cuts, at, band, [lo, hi]) => {
       const v = Number(value);
       const pad = (hi - lo) * 0.08;
       return { label, value, ...unit ? { unit } : {}, min: v < lo ? v - pad : lo, max: v > hi ? v + pad : hi, cuts: [...cuts], at, band };
+    };
+    SECONDARY = { capillaryRefill: "capillary refill", pulseVolume: "pulse", lungExam: "lungs" };
+    shockGrid = (exam, shock, quotes, said) => {
+      const read = shock.reason !== "outside_studied_cohort";
+      const skin = read ? exam.skin : void 0;
+      const jvp = read && shock.jvp !== "not_assessed" ? shock.jvp : void 0;
+      const found = Object.keys(SECONDARY).filter((n) => said[n]);
+      const text = (n) => `${SECONDARY[n]}: ${said[n]}`;
+      const list = (names) => names.map(text).join("; ");
+      const points = (n) => SHOCK_SUGGESTS[`${n}:${exam[n]}`];
+      const inStudy = { systolic: String(SHOCK_LIMITS.systolicBelow - 1), durationMinutes: String(SHOCK_LIMITS.minutesAtLeast) };
+      const cells = ["warm", "cool"].map(
+        (s) => ["normal_or_low", "elevated"].map((j) => {
+          const category = classifyShock({ ...inStudy, skin: s, jvp: j }).category;
+          const named = category !== "indeterminate";
+          const state = skin === s && jvp === j ? "at" : skin === s && !jvp || jvp === j && !skin ? "open" : void 0;
+          return {
+            label: named ? category : "no category",
+            ...named ? {} : { none: true },
+            ...state ? { state } : {},
+            tags: read && named ? found.filter((n) => points(n) === category).map((n) => ({ text: text(n), ...shock.reason === null && category !== shock.category ? { off: true } : {} })) : []
+          };
+        })
+      );
+      const open = cells.flat().filter((c) => c.state === "open" && !c.none).map((c) => c.label);
+      const minutes = exam.durationMinutes;
+      const why = shock.reason === null ? void 0 : shock.reason === "outside_studied_cohort" ? `${minutes ? `Low for ${minutes} minutes.` : "The note does not say how long the pressure has been low."} The rule was studied only after ${SHOCK_LIMITS.minutesAtLeast} minutes below ${SHOCK_LIMITS.systolicBelow} mmHg.` : shock.reason === "discordant_primary_findings" ? "Warm skin with an elevated neck: the study gives this pair no category." : `No ${[!skin && "skin temperature", !jvp && "neck vein"].filter(Boolean).join(" or ")} finding was found in the note${open.length === 2 ? `, so the rule cannot choose between ${open.join(" and ")}` : ""}.`;
+      const ledger = [
+        ["Pressure", `${exam.systolic} mmHg, ${minutes ? `low for ${minutes} min` : "duration not stated"}`],
+        ...shock.reason === null ? [["Agrees", list(shock.supporting)], ["Points elsewhere", list(shock.discordant), true], ["Fits more than one", list(found.filter((n) => !points(n)))]] : [["Also found", list(found)]],
+        ["Not in the note", Object.keys(SECONDARY).filter((n) => !said[n]).map((n) => SECONDARY[n]).join(", ")]
+      ];
+      return {
+        result: SHOCK_LABELS[shock.category],
+        named: shock.reason === null,
+        ...why ? { why } : {},
+        cols: [{ label: "Neck normal or low", on: jvp === "normal_or_low", ...jvp === "normal_or_low" && quotes.jvp ? { quote: quotes.jvp } : {} }, { label: "Neck elevated", on: jvp === "elevated", ...jvp === "elevated" && quotes.jvp ? { quote: quotes.jvp } : {} }],
+        rows: [{ label: "Skin warm", on: skin === "warm", ...skin === "warm" && quotes.skin ? { quote: quotes.skin } : {} }, { label: "Skin cool", on: skin === "cool", ...skin === "cool" && quotes.skin ? { quote: quotes.skin } : {} }],
+        cells,
+        ledger: ledger.filter((r) => r[1]),
+        caveat: SHOCK_CAVEAT
+      };
     };
     calculations = (checked) => {
       const { inputs: asStated, sex } = toInputs(checked);
@@ -6027,6 +6445,17 @@ Example:
           out.push({ title: "Anemia in CKD", rows: [["Hemoglobin", str("hb"), inputs.hb.unit], ["Anemia", anemia.anemic ? `Yes, ${anemia.severity}` : "No"], ...converted("hb")], scales: [], uses: uses("hb", "sex"), source: KDIGO_2012_ANEMIA });
         }
       }
+      if (inputs.sbp && inputs.sbp.value < SHOCK_LIMITS.systolicBelow) {
+        const found = toExam(checked);
+        const exam = { systolic: str("sbp"), durationMinutes: str("hypotension-min"), jvpCmH2O: str("jvp-cm"), skin: found.skin?.reads, jvp: found.jvp?.reads, capillaryRefill: found.capillaryRefill?.reads, pulseVolume: found.pulseVolume?.reads, lungExam: found.lungExam?.reads };
+        const shock = classifyShock(exam);
+        if (shock) {
+          const of = (k) => found[k] ? checked[found[k].index] : void 0;
+          const said = { capillaryRefill: of("capillaryRefill")?.value, pulseVolume: of("pulseVolume")?.value, lungExam: of("lungExam")?.value };
+          const quotes = { skin: of("skin")?.quote, jvp: of("jvp")?.quote ?? inputs["jvp-cm"]?.quote };
+          out.push({ title: "Shock pattern", rows: [], scales: [], uses: [...uses("sbp", "hypotension-min", "jvp-cm"), ...Object.values(found).map((f) => f.index)], source: VAZQUEZ_2010, grid: shockGrid(exam, shock, quotes, said) });
+        }
+      }
       return out;
     };
     pageData = (name, note, items) => ({
@@ -6050,7 +6479,7 @@ Example:
       const undecided = findings.some((f) => (f.correction || f.index !== void 0) && !f.decision);
       const state = verify ? undecided ? "review" : "done" : !running ? "failed" : firstPass ? "verifying" : "extracting";
       const items = verify ? checkExtraction(note, readJson((0, import_node_path2.join)(dir, "corrected.json")) ?? []) : [];
-      return { id: (0, import_node_path2.basename)(dir), state, error: null, note, ...pageData((0, import_node_path2.basename)(dir), note, items), ...undecided ? { calcs: [] } : {}, findings };
+      return { id: (0, import_node_path2.basename)(dir), state, error: null, note, ...pageData((0, import_node_path2.basename)(dir), note, items), ...undecided ? { calcs: [], held: true } : {}, findings };
     };
     children = /* @__PURE__ */ new Set();
     TIMEOUT_MS = 5 * 6e4;
@@ -6258,7 +6687,7 @@ ${check}`));
       });
       return server;
     };
-    run12 = (argv) => {
+    run13 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string", default: "7332" },
@@ -6266,7 +6695,7 @@ ${check}`));
         note: { type: "string" },
         items: { type: "string" },
         artifact: { type: "string" }
-      }, USAGE12);
+      }, USAGE13);
       if (!values) return;
       if (values.serve) {
         const port = Number(values.port);
@@ -6290,7 +6719,7 @@ ${check}`));
         printResult({ dir, existed }, values.json, () => dir + (existed ? "  (already saved)" : ""));
         return;
       }
-      if (!values.note || !values.items) return fail("--note and --items are required", USAGE12);
+      if (!values.note || !values.items) return fail("--note and --items are required", USAGE13);
       let note;
       let items;
       try {
@@ -6317,7 +6746,7 @@ ${check}`));
         }
       }
       printResult(
-        { items: checked, counts, inputs, ...sex ? { sex } : {}, review },
+        { items: checked, counts, inputs, ...sex ? { sex } : {}, exam: toExam(checked), review },
         values.json,
         () => [
           formatHeader("Extraction vs note"),
@@ -6337,7 +6766,7 @@ var version = "1.5.1";
 
 // src/index.ts
 init_cli();
-var USAGE13 = `medprotocol \u2014 Medical calculations from the terminal
+var USAGE14 = `medprotocol \u2014 Medical calculations from the terminal
 
 Usage: medprotocol <command> [options]
 
@@ -6350,6 +6779,7 @@ Commands:
   dka              Assess DKA parameters and resolution
   cardiology       Cardiology risk scores (ASCVD, HEART, CHA\u2082DS\u2082-VASc)
   sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)
+  shock            Shock category from the bedside examination (skin temperature by JVP)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
@@ -6392,7 +6822,7 @@ if (command === "--version" || command === "-v") {
   process.exit(0);
 }
 if (!command || command === "--help" || command === "-h") {
-  process.stdout.write(USAGE13 + "\n");
+  process.stdout.write(USAGE14 + "\n");
   process.exit(0);
 }
 var commands = {
@@ -6404,6 +6834,7 @@ var commands = {
   dka: () => Promise.resolve().then(() => (init_dka2(), dka_exports)),
   cardiology: () => Promise.resolve().then(() => (init_cardiology2(), cardiology_exports)),
   sepsis: () => Promise.resolve().then(() => (init_sepsis2(), sepsis_exports)),
+  shock: () => Promise.resolve().then(() => (init_shock2(), shock_exports)),
   ckd: () => Promise.resolve().then(() => (init_ckd2(), ckd_exports)),
   diabetes: () => Promise.resolve().then(() => (init_diabetes(), diabetes_exports)),
   extract: () => Promise.resolve().then(() => (init_extract(), extract_exports)),

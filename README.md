@@ -143,7 +143,7 @@ Quick SOFA (qSOFA)
   GCS               13
 ```
 
-Commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `ckd`, `diabetes`, `extract`, `overlay`. Add `--json` to any command, `--help` for its options. `medprotocol extract --serve` starts the local extraction page (`--port <number>` to change the port).
+Commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `shock`, `ckd`, `diabetes`, `extract`, `overlay`. Add `--json` to any command, `--help` for its options. `medprotocol extract --serve` starts the local extraction page (`--port <number>` to change the port).
 
 ## Repository layout
 

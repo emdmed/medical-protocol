@@ -16,6 +16,7 @@ const FACTORS: Partial<Record<FieldKey, { digits: number; from: Record<string, n
   albumin: { digits: 1, from: { "g/l": 0.1 } },
   pao2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
   pco2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
+  "hypotension-min": { digits: 0, from: { h: 60, hr: 60, hrs: 60, hour: 60, hours: 60, horas: 60 } },
 };
 
 export interface ConvertedInput extends ExtractedInput {

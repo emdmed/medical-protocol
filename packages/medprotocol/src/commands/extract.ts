@@ -8,11 +8,12 @@ import { basename, dirname, extname, join, resolve } from "node:path";
 import { analyze, NORMAL_RANGES } from "../../../../plugin/lib/acid-base";
 import { BMI_BANDS, calculateBMI, getBMICategory } from "../../../../plugin/lib/bmi";
 import { ACR_BANDS, ACR_BANDS_MMOL, GFR_BANDS, acrInMgPerG, calculateEGFR, calculateKFRE, classifyAlbuminuriaCategory, classifyAnemia, classifyGFRCategory, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getGFRCategoryLabel, getMonitoringFrequency } from "../../../../plugin/lib/ckd";
-import { FIELDS, EPISODES, applyFindings, checkExtraction, checkItem, noteSegments, toInputs, type CheckedItem, type ExtractedItem, type FieldKey, type Finding } from "../../../../plugin/lib/extraction";
+import { FIELDS, EPISODES, applyFindings, checkExtraction, checkItem, noteSegments, EXAM_FINDINGS, readsOk, toExam, toInputs, type CheckedItem, type ExtractedItem, type FieldKey, type Finding } from "../../../../plugin/lib/extraction";
 import { classifyBPInCKD } from "../../../../plugin/lib/nephrology";
 import { PAFI_BANDS, calculatePaFi, getPaFiClassification } from "../../../../plugin/lib/pafi";
+import { SHOCK_CAVEAT, SHOCK_LABELS, SHOCK_LIMITS, SHOCK_SUGGESTS, classifyShock, type SecondaryFinding, type ShockAssessment, type ShockExam } from "../../../../plugin/lib/shock";
 import { toExpectedUnit, type ConvertedInput } from "../../../../plugin/lib/units";
-import { BERLIN_2012, CKD_EPI_2021, KDIGO_2012_ANEMIA, KDIGO_2021_BP, KDIGO_2024_CKD, KFRE_TANGRI, WHO_BMI_2000, WINTERS_1967 } from "../../../../plugin/lib/sources";
+import { BERLIN_2012, CKD_EPI_2021, KDIGO_2012_ANEMIA, KDIGO_2021_BP, KDIGO_2024_CKD, KFRE_TANGRI, VAZQUEZ_2010, WHO_BMI_2000, WINTERS_1967 } from "../../../../plugin/lib/sources";
 import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
 import { fail, parseFlags } from "../cli";
 import { EXTRACT_ARTIFACT_HTML } from "../extract-artifact";
@@ -31,9 +32,10 @@ Options:
                     so the same note always lands in the same folder. A <file> directly in extractions/
                     is a staging copy and is deleted once saved.
   --note <file>     The clinical note (plain text)
-  --items <file>    JSON array of { field, value, unit?, quote, episode, key?, lab?, time?, absent? }
+  --items <file>    JSON array of { field, value, unit?, quote, episode, key?, lab?, time?, absent?, exam?, reads? }
                     episode: "current" (this illness) or "history" (before it)
                     absent: true when the note says the patient does not have it ("no fever")
+                    exam + reads: an examination finding and what its words are read as ("skin", "cool")
   --artifact <file> Also write a page showing the note beside the extraction (HTML)
   --serve           Start the local extraction page server. Takes no other option but --port.
   --port <number>   Port for --serve (default 7332)
@@ -75,6 +77,8 @@ const itemsError = (items: unknown): string | null => {
   // a denied finding is not a reading: it can never feed a calculator
   const badAbsent = items.find((i) => i.absent !== undefined && (typeof i.absent !== "boolean" || (i.absent && i.key !== undefined)));
   if (badAbsent) return `"${badAbsent.field}": absent is true or false, and an absent finding takes no key`;
+  const badExam = items.find((i) => (i.exam !== undefined || i.reads !== undefined) && !readsOk(i.exam, i.reads));
+  if (badExam) return `"${badExam.field}": exam and reads go together — ${Object.entries(EXAM_FINDINGS).map(([k, v]) => `${k}: ${v.filter((r) => r !== "not_assessed").join(" | ")}`).join("; ")}`;
   return null;
 };
 
@@ -106,7 +110,83 @@ export interface Calculation {
   scales: Scale[];
   uses: number[];
   source: string;
+  /** A syndromic assessment: drawn as its rule, in a section of its own. */
+  grid?: Grid;
 }
+
+interface GridHead {
+  label: string;
+  /** The note has this finding. */
+  on: boolean;
+  quote?: string;
+}
+
+/** A two-finding rule as a table. Every word the page shows is here; the page holds none of its own. */
+export interface Grid {
+  result: string;
+  /** False when the rule declined; `why` then says where it stopped. */
+  named: boolean;
+  why?: string;
+  cols: GridHead[];
+  rows: GridHead[];
+  /** By row, then column. `at`: where the findings land. `open`: still possible with a finding missing. `none`: a pair the rule names nothing for. */
+  cells: { label: string; none?: boolean; state?: "at" | "open"; tags: { text: string; off?: boolean }[] }[][];
+  ledger: [label: string, value: string, off?: boolean][];
+  caveat: string;
+}
+
+const SECONDARY: Record<SecondaryFinding, string> = { capillaryRefill: "capillary refill", pulseVolume: "pulse", lungExam: "lungs" };
+
+/** The shock rule as a grid. `said`: the note's own words for each secondary finding; `quotes`: for the two the rule reads. */
+const shockGrid = (exam: ShockExam, shock: ShockAssessment, quotes: { skin?: string; jvp?: string }, said: Partial<Record<SecondaryFinding, string>>): Grid => {
+  // outside the studied patients nothing is read, so nothing is marked
+  const read = shock.reason !== "outside_studied_cohort";
+  const skin = read ? exam.skin : undefined;
+  const jvp = read && shock.jvp !== "not_assessed" ? shock.jvp : undefined;
+  const found = (Object.keys(SECONDARY) as SecondaryFinding[]).filter((n) => said[n]);
+  const text = (n: SecondaryFinding): string => `${SECONDARY[n]}: ${said[n]}`;
+  const list = (names: SecondaryFinding[]): string => names.map(text).join("; ");
+  const points = (n: SecondaryFinding) => SHOCK_SUGGESTS[`${n}:${exam[n]}`];
+  // each cell asks the rule itself, so the table cannot drift from it
+  const inStudy = { systolic: String(SHOCK_LIMITS.systolicBelow - 1), durationMinutes: String(SHOCK_LIMITS.minutesAtLeast) };
+  const cells = (["warm", "cool"] as const).map((s) =>
+    (["normal_or_low", "elevated"] as const).map((j): Grid["cells"][number][number] => {
+      const category = classifyShock({ ...inStudy, skin: s, jvp: j })!.category;
+      const named = category !== "indeterminate";
+      const state = skin === s && jvp === j ? "at" : (skin === s && !jvp) || (jvp === j && !skin) ? "open" : undefined;
+      return {
+        label: named ? category : "no category",
+        ...(named ? {} : { none: true }),
+        ...(state ? { state } : {}),
+        tags: read && named ? found.filter((n) => points(n) === category).map((n) => ({ text: text(n), ...(shock.reason === null && category !== shock.category ? { off: true } : {}) })) : [],
+      };
+    }),
+  );
+  const open = cells.flat().filter((c) => c.state === "open" && !c.none).map((c) => c.label);
+  const minutes = exam.durationMinutes;
+  const why =
+    shock.reason === null ? undefined
+    : shock.reason === "outside_studied_cohort" ? `${minutes ? `Low for ${minutes} minutes.` : "The note does not say how long the pressure has been low."} The rule was studied only after ${SHOCK_LIMITS.minutesAtLeast} minutes below ${SHOCK_LIMITS.systolicBelow} mmHg.`
+    : shock.reason === "discordant_primary_findings" ? "Warm skin with an elevated neck: the study gives this pair no category."
+    : `No ${[!skin && "skin temperature", !jvp && "neck vein"].filter(Boolean).join(" or ")} finding was found in the note${open.length === 2 ? `, so the rule cannot choose between ${open.join(" and ")}` : ""}.`;
+  const ledger: Grid["ledger"] = [
+    ["Pressure", `${exam.systolic} mmHg, ${minutes ? `low for ${minutes} min` : "duration not stated"}`],
+    ...(shock.reason === null
+      ? ([["Agrees", list(shock.supporting)], ["Points elsewhere", list(shock.discordant), true], ["Fits more than one", list(found.filter((n) => !points(n)))]] as Grid["ledger"])
+      : ([["Also found", list(found)]] as Grid["ledger"])),
+    ["Not in the note", (Object.keys(SECONDARY) as SecondaryFinding[]).filter((n) => !said[n]).map((n) => SECONDARY[n]).join(", ")],
+  ];
+  return {
+    result: SHOCK_LABELS[shock.category],
+    named: shock.reason === null,
+    ...(why ? { why } : {}),
+    cols: [{ label: "Neck normal or low", on: jvp === "normal_or_low", ...(jvp === "normal_or_low" && quotes.jvp ? { quote: quotes.jvp } : {}) }, { label: "Neck elevated", on: jvp === "elevated", ...(jvp === "elevated" && quotes.jvp ? { quote: quotes.jvp } : {}) }],
+    rows: [{ label: "Skin warm", on: skin === "warm", ...(skin === "warm" && quotes.skin ? { quote: quotes.skin } : {}) }, { label: "Skin cool", on: skin === "cool", ...(skin === "cool" && quotes.skin ? { quote: quotes.skin } : {}) }],
+    cells,
+    ledger: ledger.filter((r) => r[1]),
+    caveat: SHOCK_CAVEAT,
+  };
+};
 
 /**
  * The calculators an extraction can feed with nothing else typed in, run on `toInputs` only: numbers
@@ -215,6 +295,20 @@ export const calculations = (checked: CheckedItem[]): Calculation[] => {
       out.push({ title: "Anemia in CKD", rows: [["Hemoglobin", str("hb"), inputs.hb.unit], ["Anemia", anemia.anemic ? `Yes, ${anemia.severity}` : "No"], ...converted("hb")], scales: [], uses: uses("hb", "sex"), source: KDIGO_2012_ANEMIA });
     }
   }
+
+  // the shock rule was studied below 90 mmHg only: a higher pressure gets no card, not an "indeterminate" on every note
+  if (inputs.sbp && inputs.sbp.value < SHOCK_LIMITS.systolicBelow) {
+    const found = toExam(checked);
+    const exam: ShockExam = { systolic: str("sbp"), durationMinutes: str("hypotension-min"), jvpCmH2O: str("jvp-cm"), skin: found.skin?.reads, jvp: found.jvp?.reads, capillaryRefill: found.capillaryRefill?.reads, pulseVolume: found.pulseVolume?.reads, lungExam: found.lungExam?.reads };
+    const shock = classifyShock(exam);
+    if (shock) {
+      const of = (k: keyof typeof found) => (found[k] ? checked[found[k]!.index] : undefined);
+      const said = { capillaryRefill: of("capillaryRefill")?.value, pulseVolume: of("pulseVolume")?.value, lungExam: of("lungExam")?.value };
+      // the examiner's impression is the neck the rule used; a measured height only without one
+      const quotes = { skin: of("skin")?.quote, jvp: of("jvp")?.quote ?? inputs["jvp-cm"]?.quote };
+      out.push({ title: "Shock pattern", rows: [], scales: [], uses: [...uses("sbp", "hypotension-min", "jvp-cm"), ...Object.values(found).map((f) => f.index)], source: VAZQUEZ_2010, grid: shockGrid(exam, shock, quotes, said) });
+    }
+  }
   return out;
 };
 
@@ -248,7 +342,7 @@ export const stateOf = (dir: string, running: boolean) => {
   const state = verify ? (undecided ? "review" : "done") : !running ? "failed" : firstPass ? "verifying" : "extracting";
   const items = verify ? checkExtraction(note, readJson(join(dir, "corrected.json")) ?? []) : [];
   // nothing is calculated from a correction the doctor has not answered yet
-  return { id: basename(dir), state, error: null as string | null, note, ...pageData(basename(dir), note, items), ...(undecided ? { calcs: [] } : {}), findings };
+  return { id: basename(dir), state, error: null as string | null, note, ...pageData(basename(dir), note, items), ...(undecided ? { calcs: [], held: true } : {}), findings };
 };
 
 export type AskModel = (prompt: string) => Promise<string>;
@@ -557,7 +651,7 @@ export const run = (argv: string[]): void => {
     }
   }
 
-  printResult({ items: checked, counts, inputs, ...(sex ? { sex } : {}), review }, values.json, () =>
+  printResult({ items: checked, counts, inputs, ...(sex ? { sex } : {}), exam: toExam(checked), review }, values.json, () =>
     [
       formatHeader("Extraction vs note"),
       formatTable(checked.map((c) => [c.field, `${c.value}${c.unit ? ` ${c.unit}` : ""}  (${c.episode})  [${c.status}${c.distance ? `, ${c.distance} chars off` : ""}${c.ambiguous ? ", ambiguous" : ""}]  "${c.quote}"`])),

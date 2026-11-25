@@ -7,6 +7,8 @@
  * failed check into a passing one. Ported from medextract's `core/verify.ts`.
  */
 
+import { SHOCK_FINDINGS } from "./shock";
+
 /**
  * The keys later tools read, named after the medprotocol CLI flags. `units` are the spellings
  * accepted as stated in the note, the first being the one the tools expect. No conversion happens
@@ -46,12 +48,28 @@ export const FIELDS = {
   tc: { label: "Total cholesterol", units: ["mg/dL"] },
   hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
   "urine-output": { label: "Urine output", units: ["mL"] },
+  /** How long the blood pressure has been low. Hours are converted (units.ts). */
+  "hypotension-min": { label: "Hypotension duration", units: ["min", "minutes", "mins", "minutos", "h", "hr", "hrs", "hour", "hours", "horas"] },
+  /** A measured height only. A bare "cm" may be above the sternal angle, so it is not accepted. */
+  "jvp-cm": { label: "Jugular venous pressure", units: ["cmH2O", "cm H2O"] },
   age: { label: "Age", units: ["years", "year", "yr", "yrs", "y", "yo", "y/o", "años"] },
   /** The one key whose value is a word: `female` or `male`, see `sexStated`. */
   sex: { label: "Sex", units: [] },
 } as const satisfies Record<string, { label: string; units: readonly string[] }>;
 
 export type FieldKey = keyof typeof FIELDS;
+
+/**
+ * The examination findings a syndromic assessment reads, and what each may be read as. Nothing is
+ * decided here: the lists are the vocabulary of the rules (shock.ts). `not_assessed` is never
+ * extracted: a finding the note does not state gets no item.
+ */
+export const EXAM_FINDINGS = SHOCK_FINDINGS;
+export type ExamKey = keyof typeof EXAM_FINDINGS;
+
+/** `reads` is one of the things an `exam` finding may be read as. */
+export const readsOk = (exam: unknown, reads: unknown): boolean =>
+  typeof exam === "string" && Object.hasOwn(EXAM_FINDINGS, exam) && reads !== "not_assessed" && (EXAM_FINDINGS[exam as ExamKey] as readonly unknown[]).includes(reads);
 
 export const EPISODES = ["current", "history"] as const;
 export type Episode = (typeof EPISODES)[number];
@@ -71,6 +89,13 @@ export interface ExtractedItem {
   lab?: boolean;
   /** The note says the patient does not have this ("no fever", "denies chest pain"). Never set for a finding the note does not mention; takes no `key`. */
   absent?: boolean;
+  /**
+   * Set with `reads` on an examination finding a syndromic assessment takes (see `EXAM_FINDINGS`).
+   * `value` and `quote` stay the note's own words ("cold and mottled"); `reads` is the extractor's
+   * reading of them ("cool"), a judgement no check here can confirm. An `absent` finding may carry both.
+   */
+  exam?: ExamKey;
+  reads?: string;
   /** When the note says it was taken, as written ("08:00", "on admission"); needed to tell repeated readings apart. */
   time?: string;
   /** The value as the note states it, e.g. "120/80", "1.4", "500 mg BID". */
@@ -379,6 +404,25 @@ export const toInputs = (checked: CheckedItem[]): ExtractionInputs => {
     else out.inputs[key] = { value: value!, ...(item.unit ? { unit: item.unit } : {}), quote: item.quote, ...(item.time ? { time: item.time } : {}) };
   }
   return out;
+};
+
+export type ExamReadings = { [K in ExamKey]?: { reads: Exclude<(typeof EXAM_FINDINGS)[K][number], "not_assessed">; index: number } };
+
+/**
+ * The examination findings in the shape an assessment reads: one per `exam` key, only from a `quoted`
+ * current-illness item; `index` is its position in `checked`. A finding extracted more than once is
+ * left out whole, like a repeated number. What is left out is simply not assessed.
+ */
+export const toExam = (checked: CheckedItem[]): ExamReadings => {
+  const out: Partial<Record<ExamKey, { reads: string; index: number }>> = {};
+  const seen = new Set<ExamKey>();
+  checked.forEach((c, index) => {
+    if (!c.exam || c.episode !== "current") return;
+    if (seen.has(c.exam)) delete out[c.exam];
+    else if (c.status === "quoted" && readsOk(c.exam, c.reads)) out[c.exam] = { reads: c.reads!, index };
+    seen.add(c.exam);
+  });
+  return out as ExamReadings;
 };
 
 /** What the second pass says about the first: a wrong item (`index`), a missed one (no `index`), or a remark. */

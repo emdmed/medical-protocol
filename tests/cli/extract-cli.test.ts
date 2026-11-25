@@ -262,3 +262,64 @@ describe('calculations', () => {
     ]);
   });
 });
+
+describe('calculations: shock pattern', () => {
+  const note = 'BP 82/50 mmHg, hypotensive for 2 hours. Extremities cold and mottled. JVP 9 cmH2O. Crackles at both bases. Capillary refill 4 seconds.';
+  const cur = { episode: 'current' as const };
+  const items = [
+    { ...cur, field: 'Systolic', key: 'sbp' as const, value: '82', unit: 'mmHg', quote: 'BP 82/50 mmHg' },
+    { ...cur, field: 'Hypotension', key: 'hypotension-min' as const, value: '2', unit: 'hours', quote: 'hypotensive for 2 hours' },
+    { ...cur, field: 'Skin', value: 'cold and mottled', quote: 'Extremities cold and mottled', exam: 'skin' as const, reads: 'cool' },
+    { ...cur, field: 'JVP', key: 'jvp-cm' as const, value: '9', unit: 'cmH2O', quote: 'JVP 9 cmH2O' },
+    { ...cur, field: 'Lungs', value: 'Crackles at both bases', quote: 'Crackles at both bases', exam: 'lungExam' as const, reads: 'bilateral_crackles' },
+    { ...cur, field: 'Capillary refill', value: '4 seconds', quote: 'Capillary refill 4 seconds', exam: 'capillaryRefill' as const, reads: 'delayed' },
+  ];
+  const shock = (its: typeof items, text = note) => calculations(checkExtraction(text, its)).find((c) => c.title === 'Shock pattern');
+
+  it('draws the rule as a grid, marks the cell the findings land in, and points back at every item used', () => {
+    const card = shock(items)!;
+    expect(card.uses).toEqual([0, 1, 3, 2, 4, 5]);
+    const g = card.grid!;
+    expect(g).toMatchObject({ result: 'Cardiogenic pattern', named: true });
+    expect(g.why).toBeUndefined();
+    expect(g.cells.map((r) => r.map((c) => [c.label, c.state]))).toEqual([[['septic', undefined], ['no category', undefined]], [['hypovolemic', undefined], ['cardiogenic', 'at']]]);
+    expect(g.cells[1][1].tags).toEqual([{ text: 'lungs: Crackles at both bases' }]);
+    expect(g.cols[1]).toEqual({ label: 'Neck elevated', on: true, quote: 'JVP 9 cmH2O' });
+    expect(g.rows[1]).toEqual({ label: 'Skin cool', on: true, quote: 'Extremities cold and mottled' });
+    expect(g.ledger).toEqual([['Pressure', '82 mmHg, low for 120 min'], ['Agrees', 'lungs: Crackles at both bases'], ['Fits more than one', 'capillary refill: 4 seconds'], ['Not in the note', 'pulse']]);
+  });
+
+  it('shows a finding that points at another cell there, in amber', () => {
+    const g = shock(items.map((it, i) => (i === 3 ? { ...cur, field: 'Neck', value: 'JVP 9 cmH2O', quote: 'JVP 9 cmH2O', exam: 'jvp' as const, reads: 'normal_or_low' } : it)) as typeof items)!.grid!;
+    expect(g.result).toBe('Hypovolemic pattern');
+    expect(g.cells[1][1].tags).toEqual([{ text: 'lungs: Crackles at both bases', off: true }]);
+    expect(g.ledger).toContainEqual(['Points elsewhere', 'lungs: Crackles at both bases', true]);
+  });
+
+  it('says where it stopped when it declines, and leaves open what a missing finding leaves open', () => {
+    const noNeck = shock(items.filter((_, i) => i !== 3))!.grid!;
+    expect(noNeck).toMatchObject({ result: 'Indeterminate', named: false, why: 'No neck vein finding was found in the note, so the rule cannot choose between hypovolemic and cardiogenic.' });
+    expect(noNeck.cells[1].map((c) => c.state)).toEqual(['open', 'open']);
+    expect(noNeck.ledger).toContainEqual(['Also found', 'capillary refill: 4 seconds; lungs: Crackles at both bases']);
+
+    const noTime = shock(items.filter((_, i) => i !== 1))!.grid!;
+    expect(noTime.why).toBe('The note does not say how long the pressure has been low. The rule was studied only after 30 minutes below 90 mmHg.');
+    expect(noTime.cells.flat().every((c) => !c.state && !c.tags.length)).toBe(true);
+    expect([...noTime.rows, ...noTime.cols].every((h) => !h.on)).toBe(true);
+  });
+
+  it('gives no card at a systolic of 90 or more, or when the systolic is not verified', () => {
+    expect(shock(items.map((it, i) => (i === 0 ? { ...it, value: '90', quote: 'BP 90/50 mmHg' } : it)), note.replace('82/50', '90/50'))).toBeUndefined();
+    expect(shock(items.map((it, i) => (i === 0 ? { ...it, quote: 'BP 82/51 mmHg' } : it)))).toBeUndefined();
+  });
+
+  it('rejects an exam finding read as something off its list', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'mp-shock-'));
+    writeFileSync(join(dir, 'n.txt'), note);
+    writeFileSync(join(dir, 'i.json'), JSON.stringify([{ ...items[2], reads: 'cold' }]));
+    run(['--note', join(dir, 'n.txt'), '--items', join(dir, 'i.json')]);
+    expect(stderr).toContain('exam and reads go together');
+    expect(process.exitCode).toBe(1);
+  });
+});
+

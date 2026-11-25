@@ -12,7 +12,7 @@ It's designed for two consumers:
 
 Each command wraps pure calculation functions from `plugin/lib/` with argument parsing, validation, and formatted output.
 
-Current commands (12):
+Current commands (13):
 
 | Command | Sub-commands | Lib file | Description |
 |---------|-------------|----------|-------------|
@@ -24,6 +24,7 @@ Current commands (12):
 | `dka` | — | `plugin/lib/dka.ts` | DKA assessment |
 | `cardiology` | `ascvd`, `heart`, `chadsvasc` | `plugin/lib/cardiology.ts` | Cardiology risk scores |
 | `sepsis` | `sofa`, `qsofa`, `lactate` | `plugin/lib/sepsis.ts` | Sepsis assessment |
+| `shock` | — | `plugin/lib/shock.ts` | Shock category from the bedside examination |
 | `ckd` | `egfr`, `stage`, `kfre`, `treatment`, `anemia`, `mbd` | `plugin/lib/ckd.ts` | CKD evaluation |
 | `diabetes` | `diagnose`, `t1d-stage`, `t1-vs-t2`, `t2d-screen`, `gdm` | `plugin/lib/diabetes-dx.ts`, `plugin/lib/endocrine.ts` | Diabetes diagnosis and classification |
 | `extract` | — | `plugin/lib/extraction.ts` | Check extracted values against the note they came from |

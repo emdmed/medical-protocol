@@ -29,7 +29,7 @@ npx vitest run tests/vital-signs/     # Run a single test directory
 npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
 npm run version:bump 0.4.0            # Bump version everywhere + rebuild
 npm run build                         # Build CLI → plugin/scripts/medprotocol.cjs, sync reference docs into skills (commit both)
-node plugin/scripts/medprotocol.cjs <cmd> [opts]  # CLI calculators (abg, bmi, cardiology, ckd, diabetes, dka, extract, pafi, sepsis, vitals, water-balance, overlay)
+node plugin/scripts/medprotocol.cjs <cmd> [opts]  # CLI calculators (abg, bmi, cardiology, ckd, diabetes, dka, extract, pafi, sepsis, shock, vitals, water-balance, overlay)
 ```
 
 No linter. TypeScript strict mode (`tsconfig.json`).
@@ -37,20 +37,20 @@ No linter. TypeScript strict mode (`tsconfig.json`).
 ## Architecture
 
 ```
-public/medical-protocol/workflows/ # Shared workflows: initial-clarification, agent-qa, quality-checklist, patient-privacy, troubleshoot, cardiology, nephrology, sepsis
+public/medical-protocol/workflows/ # Shared workflows: initial-clarification, agent-qa, quality-checklist, patient-privacy, troubleshoot, cardiology, nephrology, sepsis, shock
 public/medical-protocol/context/   # Shared medical context (single source of truth)
 ├── building.md                    # How every screen is built: copy logic, set up UI SDK, generate
 ├── components.md                  # Tool registry and dependencies
 ├── classification.md              # Signal words → domain routing
 ├── cli.md                         # CLI calculator reference
 ├── composition.md                 # Screen wiring patterns, gotchas
-├── {module}.md                    # Per-module context + Screen spec: acid-base, bmi, cardiology, diabetes, extraction, nephrology, dka, pafi, sepsis, vital-signs, water-balance
+├── {module}.md                    # Per-module context + Screen spec: acid-base, bmi, cardiology, diabetes, extraction, nephrology, dka, pafi, sepsis, shock, vital-signs, water-balance
 plugin/                            # Claude plugin source
 ├── .claude-plugin/plugin.json     # Marketplace manifest
 ├── lib/                           # Shared calculation + validation logic (copied into doctor projects)
 │   ├── acid-base/                 # analyze.ts, interfaces.ts, index.ts
 │   ├── vital-signs-validations/   # validation files per vital sign, severity.ts, types.ts
-│   └── *.ts                       # bmi, cardiology, ckd, diabetes-dx, dka, endocrine, format, hepatology, nephrology, pafi, patient, sepsis, severity, sources, trace, units, water-balance
+│   └── *.ts                       # bmi, cardiology, ckd, diabetes-dx, dka, endocrine, format, hepatology, nephrology, pafi, patient, sepsis, severity, shock, sources, trace, units, water-balance
 ├── agents/                        # qa-runner (Haiku): browser QA report; extraction-verifier: re-checks a first-pass extraction
 ├── hooks/                         # privacy-guard, extraction-guard, note-consent, qa-reminder, track-workflow
 ├── scripts/medprotocol.cjs        # Built CLI (skills run it via node; nothing is published to npm)

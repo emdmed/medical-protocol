@@ -24,6 +24,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury |
 | **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking |
 | **sepsis** | sepsis, SOFA, qSOFA, septic shock, organ failure, lactate, vasopressors, hour-1 bundle, resuscitation |
+| **shock** | shock category, type of shock, undifferentiated shock, cardiogenic, hypovolemic, hypotension, cool or warm skin, JVP, jugular venous pressure, syndromic assessment |
 
 ## Endocrinology / Diabetes
 

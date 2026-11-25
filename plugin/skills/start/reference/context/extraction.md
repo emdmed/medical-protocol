@@ -28,7 +28,7 @@ Run these steps in this order, every time. Each note gets its own folder, `extra
 Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
 
 1. The doctor gives a note (pasted or a file). Treat it as patient data (`patient-privacy.md`). Make sure `extractions/` is in the project's `.gitignore` (add the line if missing). A pasted note → write it exactly as pasted to `extractions/pasted.md` first; a file → use it where it is. No cleanup, no reformatting. Don't read the doctor's file yourself: save it first, then read `<dir>/note.md`, the first time with `cat <dir>/note.md` in Bash (the `note-consent` hook asks the doctor there, and refuses Read and Grep until the doctor has said yes). Then run `medprotocol extract --save <that file> --json`: it hashes the note, copies its bytes to `<dir>/note.md`, deletes `extractions/pasted.md` (a staging copy) and prints `{ dir, existed }`. Only `--save` writes `note.md`; the `extraction-guard` hook blocks any Write/Edit to it. `existed: true` means this exact note was saved before: if `<dir>/extraction.json` is there too, tell the doctor it was already extracted and ask whether to reuse it (go on from step 3) — the first pass can't be redone. `<dir>/note.md`, not your memory of the note, is what every quote is checked against.
-2. Read `<dir>/note.md` and write one item per value the doctor asked for: `{ field, value, unit?, quote, episode, key?, lab?, time?, absent? }`. Save the JSON array to `<dir>/extraction.json`; that is the first pass.
+2. Read `<dir>/note.md` and write one item per value the doctor asked for: `{ field, value, unit?, quote, episode, key?, lab?, time?, absent?, exam?, reads? }`. Save the JSON array to `<dir>/extraction.json`; that is the first pass.
    - `quote` is copied **character for character** from the note (the loose pass is a safety net for slips, not permission to paraphrase) — no fixing typos, case, accents or abbreviations. Quote enough words to be unique in the note.
    - `value` is what the note states, not a conversion or a calculation. No derived values (MAP unless the note writes it, BMI, eGFR, totals). For a keyed item, one number only.
    - Age and sex of the patient: `key: "age"` with the number of years, and `key: "sex"` with `value` `"female"` or `"male"` (the one keyed value that is a word) and a `quote` holding the note's own word for it ("woman", "M", "varón"). Both are `"current"`. Never infer sex from a name, a pronoun or a diagnosis: no word for it in the note, no item.
@@ -42,6 +42,7 @@ Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
    - `time` as the note states it ("08:00", "on admission", "yesterday"). Several readings of one value → extract each with its `time`; do not choose one.
    - Readings from an earlier admission are extracted, tagged `"history"`.
    - `absent: true` when the note says in words that the patient does **not** have a symptom, a sign or a condition ("no fever", "denies chest pain", "sin edemas"). `field` names the finding; `value` and `quote` are the note's own words for it. No `key`, no `unit`, never a number: a normal measurement ("afebrile, 36.8 °C") is a reading, not an absent finding. Only what the note denies: a finding the note does not mention gets no item — "said to be absent" and "nobody looked" are different, and only the first is written down. `episode` as for any item ("no known allergies" is `"history"`).
+   - `exam` + `reads` on a physical examination finding a syndromic assessment takes (table below), always both. `value` and `quote` stay the note's own words ("cold and mottled"); `reads` is what you read them as, one of the listed words ("cool"). Read only what the words say: never from a diagnosis ("cardiogenic shock" is not a neck finding), a lab or imaging, and when the words fit no listed reading or you are unsure, leave `exam` and `reads` out. A denied finding takes them too: "no JVD" is `absent: true`, `exam: "jvp"`, `reads: "normal_or_low"`. A measured neck height is a number, not a reading: `key: "jvp-cm"`, no `exam`.
    - A family member's values or a target ("keep MAP > 65") are not about this patient's state — leave them out.
    - Not in the note → leave the item out. Never guess, never fill "normal".
 3. **Verify.** Start the `extraction-verifier` agent (Agent tool, `subagent_type: "medical-protocol:extraction-verifier"`, or `"extraction-verifier"` if that is the name your agent list shows) with a prompt naming the files and the tools, the full paths filled in: `Verify <dir>. Rules: <path to this extraction.md>. CLI: node <path to medprotocol.cjs>`. Always a fresh-context subagent: it sees only the two files, never this chat, so it can't repeat your mistakes. Never verify in this chat yourself; if the agent can't be started, tell the doctor verification didn't run and stop before step 4. Verification never edits the first pass. It writes `<dir>/verify.json` and `<dir>/corrected.json` (§ Verification).
@@ -53,7 +54,7 @@ Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
 The verifier re-reads `<dir>/note.md` on its own, then:
 
 1. Runs `medprotocol extract --note <dir>/note.md --items <dir>/extraction.json --json` on the first pass.
-2. Checks every item against the note and the rules in step 2: is each quote verbatim (`quoted`), is the value the one the quote states, is the unit as written, is the key right, is the episode right (unsure is `history`), is the time stated, is `absent` set on every finding the note denies and on nothing else. It also looks for values and denied findings the first pass missed, and items that should not be there (a target, a family member's value, an absent finding the note never mentions).
+2. Checks every item against the note and the rules in step 2: is each quote verbatim (`quoted`), is the value the one the quote states, is the unit as written, is the key right, is the episode right (unsure is `history`), is the time stated, is `absent` set on every finding the note denies and on nothing else, and does each `reads` say what the quoted words say (a finding read from a diagnosis or a test, or read further than its words go, loses `exam` and `reads`). It also looks for values and denied findings the first pass missed, and items that should not be there (a target, a family member's value, an absent finding the note never mentions).
 3. Writes `<dir>/verify.json`:
 
 ```json
@@ -98,10 +99,28 @@ Named after the calculator inputs (`cli.md`). The first unit is the one the calc
 | `egfr` | eGFR, only when the note states it | mL/min/1.73m², mL/min |
 | `acr` | Albumin-to-creatinine ratio | mg/g, mg/mmol |
 | `urine-output` | Urine output | mL |
+| `hypotension-min` | How long the blood pressure has been low | min, minutes, mins, minutos; h, hr, hrs, hour, hours, horas (converted) |
+| `jvp-cm` | Measured jugular venous pressure | cmH2O (a bare "cm" is held back: it may be above the sternal angle) |
 | `age` | Age in years (months or days are held back) | years, year, yr, yrs, y, yo, y/o, años |
 | `sex` | `female` or `male`, quoted with the note's word for it | none |
 
 The source of truth is `FIELDS` in `extraction.ts`.
+
+### Examination findings
+
+Findings in words, for the syndromic assessments (`shock.md`). Set `exam` and `reads` together; an item has either a `key` or an `exam`, never both.
+
+| `exam` | Finding | `reads` |
+|---|---|---|
+| `skin` | Skin temperature | `warm`, `cool` |
+| `jvp` | Neck veins, as the examiner judged them | `elevated`, `normal_or_low` |
+| `capillaryRefill` | Capillary refill | `brisk`, `delayed` |
+| `pulseVolume` | Pulse volume | `bounding`, `normal`, `thready` |
+| `lungExam` | Chest auscultation | `clear`, `bilateral_crackles`, `unilateral_crackles` |
+
+The source of truth is `EXAM_FINDINGS` in `extraction.ts`. There is no reading for "not assessed": a finding the note does not state gets no item.
+
+`reads` is a judgement. The check confirms the quote is in the note, not that "raised to the earlobe" means elevated. That is why the pages show the reading beside the note's words, and why the verifier re-reads each one.
 
 ### Handing on to another tool
 
@@ -113,7 +132,9 @@ The source of truth is `FIELDS` in `extraction.ts`.
 
 `history` items and `absent` items are in neither list. They stay in the checked items with their tag, so a later tool can read them on purpose (e.g. a baseline creatinine) with `checked.filter(c => c.episode === "history")`; they never count as a repeat of a current reading.
 
-Extraction stops here. Whatever reads `inputs` does the analysis; this module never does.
+`toExam(checked)` → `{ skin?, jvp?, capillaryRefill?, pulseVolume?, lungExam? }`, each `{ reads, index }` (`index`: the item's position in `checked`). Same bar as a number: `current`, `quoted`, and extracted once; anything else is left out, which an assessment takes as not assessed. `medprotocol extract --json` prints it as `exam`.
+
+Extraction stops here. Whatever reads `inputs` or the examination findings does the analysis; this module never does.
 
 ### Units
 
@@ -143,6 +164,7 @@ The two local pages (`--artifact` and `--serve`) are the one place that reads `i
 | Kidney failure risk at 2 and 5 years (KFRE, 4 variables) | a CKD stage above, `age`, `sex` | the GFR category is G1 or G2, or the ACR is 0. An ACR in mg/mmol is converted for the equation (× 8.84) and shown |
 | Anemia in CKD | `hb`, `sex`, and a CKD stage above | hemoglobin has no unit (g/dL, or g/L converted), or the stage is G1 or G2 with A1 |
 | Blood pressure against the CKD target | `sbp`, `dbp`, and a CKD stage above | the stage is G1 or G2 with A1 (not CKD by these two values alone) |
+| Shock pattern (`shock.md`), in the "Syndromic evaluation" tab | `sbp` below 90; `hypotension-min`; the `skin` and `jvp` findings, or `jvp-cm` without a `jvp` finding | the systolic is 90 or more: no card at all. With the systolic low and something else missing the card is shown as Indeterminate and says where the rule stopped (duration not stated or under 30 minutes, a finding not in the note, warm skin with an elevated neck) |
 | Acid-base disorder, compensation, anion gap | `ph`, `pco2`, `hco3`; `na`, `cl`, `albumin` when stated | — . Compensation is worked out as acute and says so |
 
 - A value held back in `review` feeds nothing: the result is simply absent.
@@ -150,6 +172,8 @@ The two local pages (`--artifact` and `--serve`) are the one place that reads `i
 - In the live page, nothing is calculated while a correction is still waiting for the doctor's answer.
 - Pointing at a result highlights the words its inputs came from.
 - Each value is drawn on a scale: the cut-offs, the band it falls in (marked and named in words), and for acid-base the normal range in a frame. The cut-offs are data from the lib (`PAFI_BANDS`, `BMI_BANDS`, `GFR_BANDS`, `ACR_BANDS`, `ACR_BANDS_MMOL`, `NORMAL_RANGES`); the page holds no clinical number of its own.
+- A syndromic assessment is never shown unasked. The live page's intake form has a box, off by default and remembered in the browser: "Run the syndromic evaluation automatically after the extraction". The values column has two tabs, "Extracted data" (the items, the corrections and § Calculated) and "Syndromic evaluation". With the box off (and always in a page written by `--artifact` on a browser that never ticked it), the second tab holds a "Run syndromic evaluation" button; pressing it draws the result for that note. The page always opens on the data tab. The result comes with the page's data either way: the button calls no model and no server. While a correction waits for the doctor's answer the button is disabled.
+- A syndromic assessment is drawn as its rule, not on a scale: a table of the two findings it reads, the cell they land in marked, each finding with the note's words. The other findings stand in the cell they point at, in amber when that is not the marked cell; they never change the result. The table and its words come with the data (`Grid` in the CLI), built by asking `classifyShock` for each cell.
 - The generated extraction screen (§ Screen spec) stays extraction only.
 
 ---
@@ -194,6 +218,7 @@ The two local pages (`--artifact` and `--serve`) are the one place that reads `i
 - `checkItem(note, item)` / `checkExtraction(note, items)` → `CheckedItem` = item + `status: "quoted" | "edited" | "approximate" | "reordered" | "mismatched" | "unverified" | "none"`, `start`/`end` (offsets of the span found in the NFC note, set whenever one was found), `match?: "exact" | "loose" | "words"`, `distance?` (loose and words only, characters off), `ambiguous?` (exact only).
 - `noteSegments(note, checked)` → `{ text, items: number[] }[]`; joined, the texts are the note (NFC). `items` are indices into `checked`, so overlapping quotes (systolic and diastolic from one "BP 120/80") share a run.
 - `toInputs(checked)` → `{ inputs, review }` (see § Handing on).
+- `toExam(checked)` → the examination findings by `exam` key (see § Handing on). `EXAM_FINDINGS` → the table above; `readsOk(exam, reads)` → both are listed.
 - `toExpectedUnit(key, input)` (`units.ts`) → the input converted for a calculator (see § Units).
 - `MAX_EDITS` → 5.
 - `EPISODES` → `["current", "history"]`.

@@ -16,6 +16,7 @@ Commands:
   dka              Assess DKA parameters and resolution
   cardiology       Cardiology risk scores (ASCVD, HEART, CHA₂DS₂-VASc)
   sepsis           Sepsis assessment (SOFA, qSOFA, lactate clearance)
+  shock            Shock category from the bedside examination (skin temperature by JVP)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
@@ -73,6 +74,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   dka: () => import("./commands/dka"),
   cardiology: () => import("./commands/cardiology"),
   sepsis: () => import("./commands/sepsis"),
+  shock: () => import("./commands/shock"),
   ckd: () => import("./commands/ckd"),
   diabetes: () => import("./commands/diabetes"),
   extract: () => import("./commands/extract"),

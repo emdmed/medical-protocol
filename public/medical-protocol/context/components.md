@@ -15,6 +15,7 @@
 | ckd | eGFR, KDIGO staging, KFRE risk prediction |
 | nephrology | CKD anemia, CKD-MBD, cardio-metabolic panels |
 | sepsis | SOFA, qSOFA, septic shock, hour-1 bundle |
+| shock | Shock category from the bedside examination (skin temperature by JVP) |
 | diabetes-dx | ADA diabetes diagnosis, T1D staging, T1 vs T2, T2D/GDM screening |
 | hepatology | MASLD/MASH screening: FIB-4, LSM/ELF, referral |
 | extraction | Values pulled from a clinical note, each quote checked and highlighted in the note (no analysis) |
@@ -49,6 +50,7 @@ Clinical logic lives in `lib/medprotocol/` in the doctor's project (copied from 
 | ckd | `ckd.ts` | `nephrology.md` |
 | nephrology | `nephrology.ts` (+ `ckd.ts`) | `nephrology.md` |
 | sepsis | `sepsis.ts` | `sepsis.md` |
+| shock | `shock.ts` | `shock.md` |
 | diabetes-dx | `diabetes-dx.ts`, `endocrine.ts` | `diabetes.md` |
 | hepatology | `hepatology.ts` | `hepatology.md` |
 | extraction | `extraction.ts` | `extraction.md` |
