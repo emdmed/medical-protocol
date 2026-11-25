@@ -251,3 +251,46 @@ export const getCHADSVAScSeverity = (score: number, isFemale: boolean): string =
   if (score === 1) return "moderate";
   return "high";
 };
+
+// ── Jugular venous pressure ─────────────────────────────
+
+/**
+ * Bedside jugular venous pressure: a measured height in, Normal or Elevated out.
+ *
+ * The line is McGee's (Evidence-Based Physical Diagnosis): the top of the venous column more than
+ * 3 cm above the sternal angle is elevated, and the sternal angle sits a conventional 5 cm above
+ * the right atrium, so the same line is more than 8 cmH2O referenced to the right atrium.
+ * Strictly above: 8 itself is Normal.
+ *
+ * Only a MEASURED height is classified. An examiner's word for the neck ("raised", "flat") is a
+ * judgement already made and is not an input here.
+ */
+export const JVP_LIMITS = {
+  /** Above this, in cmH2O referenced to the right atrium, the JVP is Elevated. */
+  elevatedAboveCmH2O: 8,
+  /** The conventional vertical distance from the right atrium to the sternal angle, in cm. */
+  sternalAngleToRightAtriumCm: 5,
+  /** The plausible range of a bedside height, cmH2O referenced to the right atrium. */
+  min: 0,
+  max: 40,
+} as const;
+
+export type JVPReference = "right-atrium" | "sternal-angle";
+
+/**
+ * The height in cmH2O referenced to the right atrium, or null when the input is not a number or
+ * falls outside the plausible range.
+ */
+export const calculateJVPcmH2O = (value: string, reference: JVPReference): number | null => {
+  if (value.trim() === "" || !Number.isFinite(Number(value))) return null;
+  const n = safeParseFloat(value);
+  const cmH2O = reference === "sternal-angle" ? n + JVP_LIMITS.sternalAngleToRightAtriumCm : n;
+  if (cmH2O < JVP_LIMITS.min || cmH2O > JVP_LIMITS.max) return null;
+  return Math.round(cmH2O * 10) / 10;
+};
+
+export const getJVPCategory = (cmH2O: number): "Normal" | "Elevated" =>
+  cmH2O > JVP_LIMITS.elevatedAboveCmH2O ? "Elevated" : "Normal";
+
+export const getJVPSeverity = (cmH2O: number): "normal" | "elevated" =>
+  cmH2O > JVP_LIMITS.elevatedAboveCmH2O ? "elevated" : "normal";

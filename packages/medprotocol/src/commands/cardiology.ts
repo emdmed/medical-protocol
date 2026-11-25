@@ -10,6 +10,10 @@ import {
   getCHADSVAScCategory,
   getCHADSVAScAction,
   getCHADSVAScSeverity,
+  calculateJVPcmH2O,
+  getJVPCategory,
+  getJVPSeverity,
+  JVP_LIMITS,
 } from "../../../../plugin/lib/cardiology";
 import type {
   ASCVDInputs,
@@ -24,6 +28,7 @@ Sub-commands:
   ascvd        10-year ASCVD risk (Pooled Cohort Equations 2013, superseded by PREVENT)
   heart        HEART Score for chest pain triage
   chadsvasc    CHA₂DS₂-VASc stroke risk in atrial fibrillation
+  jvp          Jugular venous pressure: a measured height, Normal or Elevated
 
 ASCVD options:
   --age <number>           Age 40-79 (required)
@@ -53,6 +58,10 @@ CHA₂DS₂-VASc options:
   --age65                  Age 65-74 (+1)
   --female                 Female sex (+1)
 
+JVP options (exactly one):
+  --cmh2o <number>          Height in cmH2O above the right atrium
+  --sternal-angle <number>  Height in cm above the sternal angle (+5 cm to the right atrium)
+
 Global options:
   --json                   Output as JSON
   --help                   Show this help
@@ -60,7 +69,8 @@ Global options:
 Examples:
   medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
   medprotocol cardiology heart --history 1 --ecg 0 --age 2 --risk-factors 1 --troponin 0
-  medprotocol cardiology chadsvasc --hypertension --age75 --diabetes`;
+  medprotocol cardiology chadsvasc --hypertension --age75 --diabetes
+  medprotocol cardiology jvp --cmh2o 9`;
 
 const runASCVD = (argv: string[]): void => {
   const values = parseFlags(argv, {
@@ -231,9 +241,46 @@ const runCHADSVASc = (argv: string[]): void => {
   ]);
 };
 
+const runJVP = (argv: string[]): void => {
+  const values = parseFlags(argv, {
+    cmh2o: { type: "string" },
+    "sternal-angle": { type: "string" },
+  }, USAGE);
+  if (!values) return;
+
+  if ((values.cmh2o === undefined) === (values["sternal-angle"] === undefined)) {
+    return fail("Give exactly one of --cmh2o or --sternal-angle", USAGE);
+  }
+
+  const reference = values.cmh2o !== undefined ? "right-atrium" : "sternal-angle";
+  const raw = (values.cmh2o ?? values["sternal-angle"])!;
+  const cmH2O = calculateJVPcmH2O(raw, reference);
+  if (cmH2O === null) {
+    return fail(`Could not classify JVP — expected a height giving ${JVP_LIMITS.min}-${JVP_LIMITS.max} cmH2O above the right atrium`);
+  }
+
+  const category = getJVPCategory(cmH2O);
+  const data = {
+    cmH2O,
+    reference,
+    input: parseFloat(raw),
+    category,
+    severity: getJVPSeverity(cmH2O),
+    elevatedAboveCmH2O: JVP_LIMITS.elevatedAboveCmH2O,
+  };
+
+  printTable(data, values.json, "Jugular Venous Pressure", [
+    ["JVP", `${cmH2O} cmH2O above the right atrium`],
+    ...(reference === "sternal-angle" ? [["Measured", `${raw} cm above the sternal angle`] as [string, string]] : []),
+    ["Category", category],
+    ["Elevated above", `${JVP_LIMITS.elevatedAboveCmH2O} cmH2O`],
+  ]);
+};
+
 export const run = (argv: string[]): void =>
   runSubcommand(argv, USAGE, {
     ascvd: runASCVD,
     heart: runHEART,
     chadsvasc: runCHADSVASc,
+    jvp: runJVP,
   });

@@ -12,7 +12,7 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 | `vitals` | Evaluates vital signs and flags abnormal values | `medprotocol vitals --bp 120/80 --hr 72 --temp 37.0` |
 | `pafi` | Calculates PaO2/FiO2 ratio and gives its Berlin oxygenation range | `medprotocol pafi --pao2 60 --fio2 40` |
 | `dka` | Evaluates DKA parameters: glucose reduction rate, resolution criteria | `medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl` |
-| `cardiology` | Cardiology risk scores (ASCVD, HEART, CHA2DS2-VASc) | `medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120` |
+| `cardiology` | Cardiology risk scores (ASCVD, HEART, CHA2DS2-VASc) and measured JVP (Normal/Elevated) | `medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120` |
 | `sepsis` | Sepsis assessment (SOFA-2, qSOFA, lactate clearance) | `medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13` |
 | `shock` | Shock category from the bedside examination (skin temperature by JVP); a heuristic, not a diagnosis | `medprotocol shock --sbp 82 --minutes 45 --skin cool --jvp elevated` |
 | `volume` | Volume overload from the bedside examination (congestion signs); exam only, not a diagnosis | `medprotocol volume --jvp elevated --crackles present` |

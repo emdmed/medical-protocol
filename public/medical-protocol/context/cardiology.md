@@ -59,6 +59,7 @@ Types in `cardiology-types.ts`: `ASCVDInputs`, `HEARTInputs` (each field `0 | 1 
 - **ASCVD:** `calculateASCVD(inputs: ASCVDInputs)` → `string | null` (% risk, 1 decimal; null outside age 40-79 or missing labs). `getASCVDCategory(risk)` → Low (<5) / Borderline (5–7.4) / Intermediate (7.5–19.9) / High (≥20) / Unknown. `getASCVDSeverity(risk)` → low / borderline / intermediate / high / default.
 - **HEART:** `calculateHEARTScore(inputs)` → 0-10. `getHEARTCategory(score)` → Low (0–3) / Moderate (4–6) / High (7–10). `getHEARTAction(score)` → HEART pathway text for the risk band. `getHEARTSeverity(score)` → low / moderate / high.
 - **CHA2DS2-VASc:** `calculateCHADSVASc(inputs)` → 0-9. `getCHADSVAScCategory(score, isFemale)` → Low / Low-Moderate / Moderate-High. `getCHADSVAScAction(score, isFemale)` → anticoagulation guideline criterion. `getCHADSVAScSeverity(score, isFemale)`.
+- **JVP:** `calculateJVPcmH2O(value, reference)` → cmH2O above the right atrium (`reference` is `"right-atrium"` or `"sternal-angle"`, which adds `JVP_LIMITS.sternalAngleToRightAtriumCm` = 5), 1 decimal; null for a non-number or outside 0-40. `getJVPCategory(cmH2O)` → Normal / Elevated. `getJVPSeverity(cmH2O)` → normal / elevated. Elevated is strictly above `JVP_LIMITS.elevatedAboveCmH2O` = 8.
 
 ASCVD numeric inputs are `string` (parsed via `safeParseFloat`). `race: "other"` uses white coefficients.
 
@@ -76,6 +77,8 @@ ASCVD numeric inputs are `string` (parsed via `safeParseFloat`). `race: "other"`
 - **ASCVD age range:** 40-79 only, returns `null` outside
 - **ASCVD model is superseded.** `calculateASCVD` is the 2013 Pooled Cohort Equations. The ACC estimator now defaults to PREVENT and marks the pooled cohort equations as no longer supported (2026 ACC/AHA dyslipidemia guideline). PREVENT is not in the lib; say so on the screen
 - **CHA2DS2-VASc sex:** female sex adds 1 point; thresholds are sex-specific (female score 1 = Low, male score 1 = Low-Moderate). Always pass `isFemale`
+- **JVP 8 cmH2O is Normal.** McGee's line (more than 3 cm above the sternal angle, i.e. more than 8 cmH2O to the right atrium) is strictly above. Only a measured height is classified; an examiner's "raised" or "flat" is not an input
+- **Two JVP lines on purpose.** Shock and volume bin JVP at 7 cmH2O (Vazquez 2010, `binJvp`); this sub-command uses McGee's 8. Don't merge them
 
 ---
 
@@ -85,10 +88,12 @@ ASCVD numeric inputs are `string` (parsed via `safeParseFloat`). `race: "other"`
 medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
 medprotocol cardiology heart --history 1 --ecg 1 --age 2 --risk 1 --troponin 0
 medprotocol cardiology chadsvasc --chf --htn --age75 --diabetes --stroke
+medprotocol cardiology jvp --cmh2o 9
+medprotocol cardiology jvp --sternal-angle 4   # 4 + 5 = 9 cmH2O
 ```
 
 ---
 
 ## Guideline Reference
 
-ACC/AHA 2013 Pooled Cohort (ASCVD; superseded by PREVENT in the 2026 ACC/AHA dyslipidemia guideline), Six et al. 2008 (HEART), Lip et al. 2010 / ESC 2020 (CHA2DS2-VASc). Citations with DOI: `sources.PCE_2013`, `HEART_2008`, `CHADSVASC_2010`.
+ACC/AHA 2013 Pooled Cohort (ASCVD; superseded by PREVENT in the 2026 ACC/AHA dyslipidemia guideline), Six et al. 2008 (HEART), Lip et al. 2010 / ESC 2020 (CHA2DS2-VASc), McGee, Evidence-Based Physical Diagnosis (JVP; a textbook, no DOI). Citations with DOI: `sources.PCE_2013`, `HEART_2008`, `CHADSVASC_2010`.

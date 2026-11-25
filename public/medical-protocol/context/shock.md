@@ -77,7 +77,7 @@ From a note: the **extraction** module hands on the systolic, the duration, a me
 
 - **Unknown duration declines.** No duration is `indeterminate`, not "assume sustained".
 - **Systolic 90 is outside.** The cohort is below 90.
-- **JVP 7 cmH2O is normal.** Elevated is strictly above 7.
+- **JVP 7 cmH2O is normal.** Elevated is strictly above 7 (Vazquez). This is deliberately a different line from `cardiology jvp`, which uses McGee's strictly above 8 cmH2O; don't merge them.
 - **Not assessed is not normal.** A finding nobody examined stays `not_assessed`.
 
 ---
