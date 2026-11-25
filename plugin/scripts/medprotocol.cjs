@@ -3381,6 +3381,535 @@ Examples:
   }
 });
 
+// ../../plugin/lib/extraction.ts
+var FIELDS, EXAM_FINDINGS, readsOk, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, prepared, checkItem, checkExtraction, noteSegments, SEX_WORDS, sexStated, toNumber, unitOk, toInputs, toExam, applyFindings;
+var init_extraction = __esm({
+  "../../plugin/lib/extraction.ts"() {
+    "use strict";
+    init_shock();
+    FIELDS = {
+      sbp: { label: "Systolic blood pressure", units: ["mmHg"] },
+      dbp: { label: "Diastolic blood pressure", units: ["mmHg"] },
+      map: { label: "Mean arterial pressure", units: ["mmHg"] },
+      hr: { label: "Heart rate", units: ["bpm", "/min", "lpm", "beats/min"] },
+      rr: { label: "Respiratory rate", units: ["breaths/min", "/min", "rpm", "resp/min"] },
+      temp: { label: "Temperature", units: ["\xB0C", "\xB0F", "\xBAC", "\xBAF"] },
+      spo2: { label: "SpO2", units: ["%"] },
+      fio2: { label: "FiO2", units: ["%"] },
+      gcs: { label: "Glasgow Coma Scale", units: ["/15"] },
+      weight: { label: "Weight", units: ["kg", "lb", "lbs"] },
+      height: { label: "Height", units: ["cm", "m", "in"] },
+      ph: { label: "pH", units: [] },
+      pco2: { label: "pCO2", units: ["mmHg", "kPa"] },
+      pao2: { label: "PaO2", units: ["mmHg", "kPa"] },
+      hco3: { label: "Bicarbonate", units: ["mEq/L", "mmol/L"] },
+      lactate: { label: "Lactate", units: ["mmol/L"] },
+      na: { label: "Sodium", units: ["mEq/L", "mmol/L"] },
+      potassium: { label: "Potassium", units: ["mmol/L", "mEq/L"] },
+      cl: { label: "Chloride", units: ["mEq/L", "mmol/L"] },
+      albumin: { label: "Albumin", units: ["g/dL", "g/L"] },
+      creatinine: { label: "Creatinine", units: ["mg/dL", "\xB5mol/L", "\u03BCmol/L", "umol/L"] },
+      glucose: { label: "Glucose", units: ["mg/dL", "mmol/L"] },
+      ketones: { label: "Ketones", units: ["mmol/L"] },
+      bilirubin: { label: "Bilirubin", units: ["mg/dL"] },
+      platelets: { label: "Platelets", units: ["\xD710\xB3/\xB5L", "x10^3/uL", "10^3/\xB5L", "/mm\xB3", "\xD710\u2079/L", "x10^9/L"] },
+      hb: { label: "Hemoglobin", units: ["g/dL", "g/L"] },
+      a1c: { label: "HbA1c", units: ["%"] },
+      egfr: { label: "eGFR", units: ["mL/min/1.73m\xB2", "mL/min/1.73m2", "mL/min"] },
+      acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g", "mg/mmol"] },
+      tc: { label: "Total cholesterol", units: ["mg/dL"] },
+      hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
+      "urine-output": { label: "Urine output", units: ["mL"] },
+      /** How long the blood pressure has been low. Hours are converted (units.ts). */
+      "hypotension-min": { label: "Hypotension duration", units: ["min", "minutes", "mins", "minutos", "h", "hr", "hrs", "hour", "hours", "horas"] },
+      /** A measured height only. A bare "cm" may be above the sternal angle, so it is not accepted. */
+      "jvp-cm": { label: "Jugular venous pressure", units: ["cmH2O", "cm H2O"] },
+      age: { label: "Age", units: ["years", "year", "yr", "yrs", "y", "yo", "y/o", "a\xF1os"] },
+      /** The one key whose value is a word: `female` or `male`, see `sexStated`. */
+      sex: { label: "Sex", units: [] }
+    };
+    EXAM_FINDINGS = SHOCK_FINDINGS;
+    readsOk = (exam, reads) => typeof exam === "string" && Object.hasOwn(EXAM_FINDINGS, exam) && reads !== "not_assessed" && EXAM_FINDINGS[exam].includes(reads);
+    EPISODES = ["current", "history"];
+    MAX_EDITS = 5;
+    stripAccents = (s) => s.normalize("NFD").replace(new RegExp("\\p{Mn}", "gu"), "");
+    collapse = (s) => s.replace(/\s+/g, " ").trim();
+    collapseWithMap = (note) => {
+      let text = "";
+      const map = [];
+      for (let i = 0; i < note.length; i++) {
+        if (/\s/.test(note[i])) {
+          if (text && !text.endsWith(" ")) {
+            text += " ";
+            map.push(i);
+          }
+        } else {
+          text += note[i];
+          map.push(i);
+        }
+      }
+      return { text, map };
+    };
+    numbersIn = (s) => [...s.matchAll(/\d+(?:[.,·]\d+)?/g)].map(([m]) => {
+      const [whole, frac] = m.split(/[.,·]/);
+      const decimal = Number(frac === void 0 ? whole : `${whole}.${frac}`);
+      return m.includes(",") && frac?.length === 3 ? [decimal, Number(whole + frac)] : [decimal];
+    });
+    same = (a, b) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+    valueInQuote = (value, quote) => {
+      const source = numbersIn(quote);
+      let at = 0;
+      for (const values of numbersIn(value)) {
+        const found = source.findIndex((readings, i) => i >= at && readings.some((r) => values.some((v) => same(r, v))));
+        if (found === -1) return false;
+        at = found + 1;
+      }
+      return true;
+    };
+    closestSpan = (text, quote) => {
+      const fold = (c) => stripAccents(c).toLowerCase();
+      const t = text.split("").map(fold);
+      const q = quote.split("").map(fold);
+      let prev = q.map((_, i) => i + 1);
+      prev.unshift(0);
+      let starts = prev.map(() => 0);
+      let best = { distance: prev[q.length], start: 0, end: 0 };
+      for (let j = 0; j < t.length; j++) {
+        const cur = [0];
+        const curStart = [j + 1];
+        for (let i = 1; i <= q.length; i++) {
+          const sub = prev[i - 1] + (q[i - 1] === t[j] ? 0 : 1);
+          const del = prev[i] + 1;
+          const ins = cur[i - 1] + 1;
+          const d = Math.min(sub, del, ins);
+          cur.push(d);
+          curStart.push(d === sub ? starts[i - 1] : d === del ? starts[i] : curStart[i - 1]);
+        }
+        if (cur[q.length] < best.distance) best = { distance: cur[q.length], start: curStart[q.length], end: j + 1 };
+        prev = cur;
+        starts = curStart;
+      }
+      return best;
+    };
+    editDistance = (a, b) => {
+      let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+      for (let i = 1; i <= a.length; i++) {
+        const cur = [i];
+        for (let j = 1; j <= b.length; j++) cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)));
+        prev = cur;
+      }
+      return prev[b.length];
+    };
+    wordsOf = (s) => [...s.matchAll(/[\p{L}\p{N}]+(?:[.,·/^][\p{L}\p{N}]+)*/gu)].map((m) => ({
+      w: stripAccents(m[0]).toLowerCase(),
+      start: m.index,
+      end: m.index + m[0].length
+    }));
+    reorderedSpan = (note, quote) => {
+      const qw = wordsOf(quote).map((x) => x.w);
+      const nw = wordsOf(note);
+      const cost = (a, b) => a === b ? 0 : /\d/.test(a) || /\d/.test(b) ? Infinity : editDistance(a, b);
+      let best = null;
+      for (let i = 0; i + qw.length <= nw.length; i++) {
+        const window = nw.slice(i, i + qw.length);
+        const pairs = qw.flatMap((a, x) => window.map((b, y) => ({ x, y, d: cost(a, b.w) }))).sort((p, r) => p.d - r.d);
+        const usedQ = /* @__PURE__ */ new Set();
+        const usedN = /* @__PURE__ */ new Set();
+        let distance = 0;
+        for (const p of pairs) {
+          if (usedQ.has(p.x) || usedN.has(p.y)) continue;
+          usedQ.add(p.x);
+          usedN.add(p.y);
+          distance += p.d;
+        }
+        if (distance < (best?.distance ?? Infinity)) best = { distance, start: window[0].start, end: window.at(-1).end };
+      }
+      return best;
+    };
+    checkItem = (note, item) => {
+      const q = collapse(item.quote.normalize("NFC"));
+      if (!q) return { ...item, status: "none" };
+      if (prepared?.note !== note) {
+        const nfc2 = note.normalize("NFC");
+        prepared = { note, nfc: nfc2, ...collapseWithMap(nfc2) };
+      }
+      const { nfc, text, map } = prepared;
+      const at = text.indexOf(q);
+      if (at < 0) {
+        const budget = Math.min(MAX_EDITS, Math.floor(q.length / 4));
+        const span = closestSpan(text, q);
+        if (span.end === 0 || span.distance > budget) {
+          const words = reorderedSpan(nfc, q);
+          if (!words || words.distance > budget) return { ...item, status: "unverified" };
+          return {
+            ...item,
+            status: valueInQuote(item.value, nfc.slice(words.start, words.end)) ? "reordered" : "mismatched",
+            start: words.start,
+            end: words.end,
+            match: "words",
+            distance: words.distance
+          };
+        }
+        const start = map[span.start];
+        const end = map[span.end - 1] + 1;
+        return {
+          ...item,
+          // The value is checked against the note's words, so an edit that changed a digit fails here.
+          status: !valueInQuote(item.value, nfc.slice(start, end)) ? "mismatched" : span.distance === 0 ? "edited" : "approximate",
+          start,
+          end,
+          match: "loose",
+          distance: span.distance
+        };
+      }
+      return {
+        ...item,
+        status: valueInQuote(item.value, q) ? "quoted" : "mismatched",
+        match: "exact",
+        start: map[at],
+        end: map[at + q.length - 1] + 1,
+        ...text.indexOf(q, at + 1) >= 0 ? { ambiguous: true } : {}
+      };
+    };
+    checkExtraction = (note, items) => items.map((item) => checkItem(note, item));
+    noteSegments = (note, checked) => {
+      const text = note.normalize("NFC");
+      const cuts = /* @__PURE__ */ new Set([0, text.length]);
+      for (const c of checked) if (c.start !== void 0) cuts.add(c.start).add(c.end);
+      const points = [...cuts].sort((a, b) => a - b);
+      const out = [];
+      for (let i = 0; i < points.length - 1; i++) {
+        const [s, e] = [points[i], points[i + 1]];
+        const items = checked.flatMap((c, n) => c.start !== void 0 && c.start <= s && c.end >= e ? [n] : []);
+        out.push({ text: text.slice(s, e), items });
+      }
+      return out;
+    };
+    SEX_WORDS = {
+      female: ["female", "woman", "f", "mujer", "femenino", "femenina"],
+      male: ["male", "man", "m", "hombre", "masculino", "varon"]
+    };
+    sexStated = (value, quote) => {
+      const words = stripAccents(quote).toLowerCase().split(/[^a-z]+/);
+      const has = (s) => SEX_WORDS[s].some((w) => words.includes(w));
+      return (value === "female" || value === "male") && has(value) && !has(value === "female" ? "male" : "female") ? value : null;
+    };
+    toNumber = (value) => {
+      const v = value.trim();
+      if (!/^-?\d+(?:[.,]\d+)?$/.test(v) || /,\d{3}$/.test(v)) return null;
+      return Number(v.replace(",", "."));
+    };
+    unitOk = (key, unit) => !unit || FIELDS[key].units.some((u) => u.toLowerCase() === unit.trim().toLowerCase());
+    toInputs = (checked) => {
+      const keyed = checked.filter((c) => c.key && c.episode !== "history");
+      const count = (k) => keyed.filter((c) => c.key === k && c.episode === "current").length;
+      const out = { inputs: {}, review: [] };
+      for (const item of keyed) {
+        const key = item.key;
+        const value = toNumber(item.value);
+        const sex = key === "sex" ? sexStated(item.value, item.quote) : null;
+        const reason = item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence" : item.status !== "quoted" ? "not-verified" : item.episode !== "current" ? "no-episode" : key === "sex" && !sex ? "not-stated" : key !== "sex" && (item.absent || value === null) ? "not-a-number" : !unitOk(key, item.unit) ? "unit" : count(key) > 1 ? "repeated" : null;
+        if (reason) out.review.push({ item, reason });
+        else if (sex) out.sex = sex;
+        else out.inputs[key] = { value, ...item.unit ? { unit: item.unit } : {}, quote: item.quote, ...item.time ? { time: item.time } : {} };
+      }
+      return out;
+    };
+    toExam = (checked) => {
+      const out = {};
+      const seen = /* @__PURE__ */ new Set();
+      checked.forEach((c, index) => {
+        if (!c.exam || c.episode !== "current") return;
+        if (seen.has(c.exam)) delete out[c.exam];
+        else if (c.status === "quoted" && readsOk(c.exam, c.reads)) out[c.exam] = { reads: c.reads, index };
+        seen.add(c.exam);
+      });
+      return out;
+    };
+    applyFindings = (firstPass, findings, rejected) => {
+      const kept = [...firstPass];
+      const added = [];
+      findings.forEach(({ index, correction }, n) => {
+        if (rejected.has(n)) return;
+        if (index === void 0) {
+          if (correction) added.push(correction);
+        } else if (Number.isInteger(index) && index >= 0 && index < firstPass.length) kept[index] = correction;
+      });
+      return [...kept.filter((item) => item !== null), ...added];
+    };
+  }
+});
+
+// ../../plugin/lib/units.ts
+var UMOL_PER_MGDL, MMHG_PER_KPA, FACTORS, toExpectedUnit;
+var init_units = __esm({
+  "../../plugin/lib/units.ts"() {
+    "use strict";
+    init_extraction();
+    UMOL_PER_MGDL = 88.4;
+    MMHG_PER_KPA = 7.50062;
+    FACTORS = {
+      creatinine: { digits: 2, from: { "\xB5mol/l": 1 / UMOL_PER_MGDL, "\u03BCmol/l": 1 / UMOL_PER_MGDL, "umol/l": 1 / UMOL_PER_MGDL } },
+      hb: { digits: 1, from: { "g/l": 0.1 } },
+      albumin: { digits: 1, from: { "g/l": 0.1 } },
+      pao2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
+      pco2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
+      "hypotension-min": { digits: 0, from: { h: 60, hr: 60, hrs: 60, hour: 60, hours: 60, horas: 60 } }
+    };
+    toExpectedUnit = (key, input) => {
+      if (key === "fio2" && !input.unit && input.value >= 0.21 && input.value <= 1) {
+        return { ...input, value: Number((input.value * 100).toFixed(1)), unit: "%", from: String(input.value) };
+      }
+      const rule = FACTORS[key];
+      const factor = input.unit && rule?.from[input.unit.trim().toLowerCase()];
+      if (!rule || !factor) return input;
+      return { ...input, value: Number((input.value * factor).toFixed(rule.digits)), unit: FIELDS[key].units[0], from: `${input.value} ${input.unit}` };
+    };
+  }
+});
+
+// ../../plugin/lib/respiratory-failure.ts
+var RESPIRATORY_FAILURE_LIMITS, ENUM_FIELDS, GAS_FIELDS, DISTRESS_SIGNS, NEXT3, unitOf, inMmHg, assessRespiratoryFailure, RF_FAILURE_LABELS, RF_FAILURE_REASONS, RF_LIMB_LABELS, RF_DISTRESS_LABELS, RF_SIGN_LABELS, RF_NEXT_LABELS, RF_CAVEAT;
+var init_respiratory_failure = __esm({
+  "../../plugin/lib/respiratory-failure.ts"() {
+    "use strict";
+    init_acid_base();
+    init_units();
+    init_blood_oxygen_validations();
+    init_safeParseFloat();
+    RESPIRATORY_FAILURE_LIMITS = {
+      /** A measured rate at or above this is distress: the rate BTS and CURB-65 treat as severe in an adult. */
+      distressRespiratoryRateAtLeast: 30,
+      /** An arterial PaO2 below this (8 kPa) is hypoxaemia: the conventional definition of hypoxaemic failure. */
+      arterialPo2BelowMmHg: 60,
+      /** An arterial PaCO2 above this (6 kPa), with the disorder below, is hypercapnia. */
+      arterialPco2AboveMmHg: 45,
+      /** `analyze`'s primary disorder that makes a gas hypercapnic; a compensated retainer is "Mixed Disorder", not acute failure. */
+      hypercapnicDisorder: "Respiratory Acidosis",
+      /** The SpO2 severity (vital-signs-validations) that is hypoxaemia: below 90%. "low" (90-94%) is not failure. */
+      saturationSeverity: "critical"
+    };
+    ENUM_FIELDS = {
+      oxygenSupport: ["room_air", "supplemental_oxygen", "non_invasive_ventilation", "invasive_ventilation"],
+      accessoryMuscles: ["present", "absent"],
+      speech: ["full_sentences", "limited"],
+      paradoxicalBreathing: ["present", "absent"],
+      cyanosis: ["present", "absent"],
+      bloodGas: ["arterial", "venous"],
+      gasUnit: ["kPa", "mmHg"]
+    };
+    GAS_FIELDS = ["ph", "po2", "pco2", "hco3"];
+    DISTRESS_SIGNS = ["respiratory_rate", "accessory_muscles", "speech", "paradoxical_breathing", "cyanosis"];
+    NEXT3 = ["oxygen_saturation", "oxygen_support", "room_air_saturation", "arterial_blood_gas", "respiratory_rate"];
+    unitOf = (stated, pco2) => stated ?? (pco2 === null ? null : pco2 <= 20 ? "kPa" : "mmHg");
+    inMmHg = (x, unit) => x === null || unit === null ? null : unit === "kPa" ? Math.round(x * MMHG_PER_KPA * 10) / 10 : x;
+    assessRespiratoryFailure = (input) => {
+      const L = RESPIRATORY_FAILURE_LIMITS;
+      const respiratoryRate = safeParseFloatOrNull(input.respiratoryRate);
+      const oxygenSaturation = safeParseFloatOrNull(input.oxygenSaturation);
+      const saturationGiven = !!input.oxygenSaturation?.trim();
+      const notCalculated = [];
+      let severity = null;
+      if (saturationGiven) {
+        const s = bloodOxygenValidations.spo2;
+        if (s.isValid(input.oxygenSaturation)) severity = s.getSeverity(input.oxygenSaturation);
+        else notCalculated.push(`saturation ${input.oxygenSaturation}%: ${s.getErrorMessage(input.oxygenSaturation)}`);
+      }
+      let arterialGas = null;
+      if (input.bloodGas === "arterial") {
+        const [ph, po22, pco2, hco3] = GAS_FIELDS.map((f) => safeParseFloatOrNull(input[f]));
+        const unit = unitOf(input.gasUnit, pco2);
+        const pco2MmHg = inMmHg(pco2, unit);
+        const abg = pco2MmHg === null ? null : analyze({
+          values: { pH: input.ph ?? "", pCO2: String(pco2MmHg), HCO3: input.hco3 ?? "", Na: "", Cl: "", Albumin: "" },
+          isChronic: false
+        });
+        arterialGas = { unit, ph, po2MmHg: inMmHg(po22, unit), pco2MmHg, hco3, disorder: abg?.disorder ?? null };
+      }
+      const po2 = arterialGas?.po2MmHg ?? null;
+      const hypoxaemia = severity === L.saturationSeverity || po2 !== null && po2 < L.arterialPo2BelowMmHg ? "present" : input.oxygenSupport === "room_air" && (severity !== null || po2 !== null) ? "absent" : "not_determined";
+      const hypercapnia = arterialGas?.disorder == null ? "not_determined" : arterialGas.disorder === L.hypercapnicDisorder && arterialGas.pco2MmHg > L.arterialPco2AboveMmHg ? "present" : "absent";
+      let failure;
+      let failureReason;
+      if (hypoxaemia === "present" || hypercapnia === "present") {
+        failure = "present";
+        failureReason = hypoxaemia === hypercapnia ? "hypoxaemia_and_hypercapnia" : hypoxaemia === "present" ? "hypoxaemia" : "hypercapnia";
+      } else if (hypoxaemia === "absent") {
+        failure = input.bloodGas === "venous" ? "indeterminate" : "absent";
+        failureReason = input.bloodGas === "venous" ? "venous_gas_only" : "adequate_on_room_air";
+      } else {
+        failure = "indeterminate";
+        failureReason = !saturationGiven && po2 === null ? "no_oxygenation_measure" : severity === null && po2 === null ? "saturation_not_calculated" : input.oxygenSupport === void 0 ? "oxygen_support_not_stated" : "adequate_on_support";
+      }
+      const met = {
+        respiratory_rate: respiratoryRate !== null && respiratoryRate >= L.distressRespiratoryRateAtLeast,
+        accessory_muscles: input.accessoryMuscles === "present",
+        speech: input.speech === "limited",
+        paradoxical_breathing: input.paradoxicalBreathing === "present",
+        cyanosis: input.cyanosis === "present"
+      };
+      const distressSigns = DISTRESS_SIGNS.filter((s) => met[s]);
+      const distress = distressSigns.length ? "present" : respiratoryRate !== null ? "absent" : "not_assessed";
+      const next = NEXT3.filter((n) => {
+        if (n === "oxygen_saturation") return !saturationGiven && po2 === null;
+        if (n === "oxygen_support") return failureReason === "oxygen_support_not_stated";
+        if (n === "room_air_saturation") return failureReason === "adequate_on_support" && input.oxygenSupport === "supplemental_oxygen";
+        if (n === "arterial_blood_gas") {
+          return hypercapnia === "not_determined" && (failure === "present" || distress === "present" || failureReason === "venous_gas_only");
+        }
+        return respiratoryRate === null && distress !== "present";
+      });
+      return {
+        failure,
+        failureReason,
+        hypoxaemia,
+        hypercapnia,
+        distress,
+        distressSigns,
+        next,
+        measured: { respiratoryRate, oxygenSaturation },
+        arterialGas,
+        notCalculated
+      };
+    };
+    RF_FAILURE_LABELS = {
+      present: "Respiratory failure",
+      absent: "No respiratory failure",
+      indeterminate: "Failure indeterminate"
+    };
+    RF_FAILURE_REASONS = {
+      hypoxaemia: "Hypoxaemia: SpO2 below 90% or PaO2 below 60 mmHg (8 kPa)",
+      hypercapnia: "Hypercapnia: an arterial respiratory acidosis with PaCO2 above 45 mmHg (6 kPa)",
+      hypoxaemia_and_hypercapnia: "Hypoxaemia and hypercapnia",
+      adequate_on_room_air: "Oxygenation adequate on room air",
+      venous_gas_only: "Oxygenation adequate on room air, but only a venous gas: CO2 is not answered",
+      adequate_on_support: "Oxygenation adequate on oxygen or ventilation: that is what the support achieves",
+      oxygen_support_not_stated: "Oxygenation adequate, but nothing says what the patient was breathing",
+      saturation_not_calculated: "The saturation could not be used",
+      no_oxygenation_measure: "No saturation and no arterial PaO2"
+    };
+    RF_LIMB_LABELS = {
+      present: "Present",
+      absent: "Absent",
+      not_determined: "Not determined"
+    };
+    RF_DISTRESS_LABELS = {
+      present: "Respiratory distress",
+      absent: "No respiratory distress",
+      not_assessed: "Distress not assessed"
+    };
+    RF_SIGN_LABELS = {
+      respiratory_rate: "Respiratory rate 30/min or more",
+      accessory_muscles: "Accessory muscle use",
+      speech: "Speech limited",
+      paradoxical_breathing: "Paradoxical breathing",
+      cyanosis: "Cyanosis"
+    };
+    RF_NEXT_LABELS = {
+      oxygen_saturation: "Measure oxygen saturation",
+      oxygen_support: "State what the patient was breathing (room air, oxygen or ventilation)",
+      room_air_saturation: "A saturation on room air, if safe to take",
+      arterial_blood_gas: "Arterial blood gas",
+      respiratory_rate: "Count the respiratory rate"
+    };
+    RF_CAVEAT = "Two bounded reads kept apart: failure is gas exchange, distress is work of breathing. Not a diagnosis and not a treatment: a normal number on oxygen is what the support achieves.";
+  }
+});
+
+// src/commands/respiratory-failure.ts
+var respiratory_failure_exports = {};
+__export(respiratory_failure_exports, {
+  run: () => run14
+});
+var ENUM_FLAGS, pad2, enumLines, USAGE14, run14;
+var init_respiratory_failure2 = __esm({
+  "src/commands/respiratory-failure.ts"() {
+    "use strict";
+    init_respiratory_failure();
+    init_cli();
+    ENUM_FLAGS = {
+      "oxygen-support": "oxygenSupport",
+      "accessory-muscles": "accessoryMuscles",
+      speech: "speech",
+      "paradoxical-breathing": "paradoxicalBreathing",
+      cyanosis: "cyanosis",
+      "blood-gas": "bloodGas",
+      "gas-unit": "gasUnit"
+    };
+    pad2 = (s) => `  ${s.padEnd(30)}`;
+    enumLines = Object.entries(ENUM_FLAGS).map(([f, k]) => `${pad2(`--${f} <v>`)}${ENUM_FIELDS[k].join(" | ")}`).join("\n");
+    USAGE14 = `Usage: medprotocol respiratory-failure [options]
+
+Respiratory failure (gas exchange) and respiratory distress (work of breathing), two verdicts kept
+apart. Not a diagnosis, never a treatment.
+
+Findings (a finding left out was not stated):
+${enumLines}
+
+Measured:
+${pad2("--rr <n>")}Respiratory rate, breaths/min (distress at 30 or more)
+${pad2("--spo2 <%>")}Oxygen saturation, on whatever --oxygen-support says
+${pad2("--ph <n>")}Blood gas pH (needs --blood-gas)
+${pad2("--po2 <n>")}Blood gas pO2, in --gas-unit
+${pad2("--pco2 <n>")}Blood gas pCO2, in --gas-unit (unit inferred from it when left out)
+${pad2("--hco3 <n>")}Blood gas HCO3, mmol/L
+
+  --json                        Output as JSON
+  --help                        Show this help
+
+Examples:
+  medprotocol respiratory-failure --oxygen-support room_air --spo2 86 --rr 34 --accessory-muscles present
+  medprotocol respiratory-failure --blood-gas arterial --gas-unit kPa --ph 7.28 --po2 7.5 --pco2 8.1 --hco3 28`;
+    run14 = (argv) => {
+      const options = {};
+      for (const f of [...Object.keys(ENUM_FLAGS), ...GAS_FIELDS, "rr", "spo2"]) options[f] = { type: "string" };
+      const values = parseFlags(argv, options, USAGE14);
+      if (!values) return;
+      for (const [flag, key] of Object.entries(ENUM_FLAGS)) {
+        const value = values[flag];
+        const allowed = ENUM_FIELDS[key];
+        if (value !== void 0 && !allowed.includes(value)) return fail(`--${flag} must be one of: ${allowed.join(", ")}`);
+      }
+      for (const f of [...GAS_FIELDS, "rr"]) {
+        const value = values[f];
+        if (value !== void 0 && !Number.isFinite(Number(value))) return fail(`--${f} must be a number`);
+      }
+      if (GAS_FIELDS.some((f) => values[f] !== void 0) && !values["blood-gas"]) {
+        return fail("--ph, --po2, --pco2 and --hco3 need --blood-gas arterial or venous");
+      }
+      const input = {
+        ...Object.fromEntries(Object.entries(ENUM_FLAGS).map(([f, k]) => [k, values[f]])),
+        ...Object.fromEntries(GAS_FIELDS.map((f) => [f, values[f]])),
+        respiratoryRate: values.rr,
+        oxygenSaturation: values.spo2
+      };
+      const result = assessRespiratoryFailure(input);
+      const data = {
+        ...result,
+        failureLabel: RF_FAILURE_LABELS[result.failure],
+        failureReasonText: RF_FAILURE_REASONS[result.failureReason],
+        distressLabel: RF_DISTRESS_LABELS[result.distress],
+        distressSignsText: result.distressSigns.map((s) => RF_SIGN_LABELS[s]),
+        nextText: result.next.map((n) => RF_NEXT_LABELS[n]),
+        caveat: RF_CAVEAT
+      };
+      const g = result.arterialGas;
+      printTable(data, Boolean(values.json), "Respiratory Failure and Distress", [
+        ["Failure", data.failureLabel],
+        ["Why", data.failureReasonText],
+        ["Hypoxaemia", RF_LIMB_LABELS[result.hypoxaemia]],
+        ["Hypercapnia", RF_LIMB_LABELS[result.hypercapnia]],
+        ...g ? [["Arterial gas", `PaO2 ${g.po2MmHg ?? "?"} mmHg, PaCO2 ${g.pco2MmHg ?? "?"} mmHg${g.disorder ? `, ${g.disorder}` : ""}`]] : [],
+        ["Distress", data.distressLabel],
+        ...data.distressSignsText.length ? [["Distress signs", data.distressSignsText.join(", ")]] : [],
+        ...result.notCalculated.length ? [["Not calculated", result.notCalculated.join("; ")]] : [],
+        ...data.nextText.length ? [["Next", data.nextText.join("; ")]] : [],
+        ["Note", RF_CAVEAT]
+      ]);
+    };
+  }
+});
+
 // ../../plugin/lib/ckd.ts
 var calculateEGFR, GFR_BANDS, classifyGFRCategory, getGFRCategoryLabel, ACR_BANDS, ACR_BANDS_MMOL, classifyAlbuminuriaCategory, acrInMgPerG, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getMonitoringFrequency, calculateKFRE, assessReferralNeed, checkRASiEligibility, ACR_TREATMENT_CUTS, checkSGLT2iEligibility, checkFinerenoneEligibility, classifyAnemia, assessIronStatus, checkESAEligibility, assessPhosphate, correctCalcium, assessPTH, assessVitaminD, getCKDMBDMonitoring, getCKDSeverity;
 var init_ckd = __esm({
@@ -3651,15 +4180,15 @@ var init_ckd = __esm({
 // src/commands/ckd.ts
 var ckd_exports = {};
 __export(ckd_exports, {
-  run: () => run14
+  run: () => run15
 });
-var USAGE14, failNotCalculated, badAcrUnit, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run14;
+var USAGE15, failNotCalculated, badAcrUnit, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run15;
 var init_ckd2 = __esm({
   "src/commands/ckd.ts"() {
     "use strict";
     init_ckd();
     init_cli();
-    USAGE14 = `Usage: medprotocol ckd <sub-command> [options]
+    USAGE15 = `Usage: medprotocol ckd <sub-command> [options]
 
 Sub-commands:
   egfr         Calculate eGFR (CKD-EPI 2021)
@@ -3731,9 +4260,9 @@ Examples:
         creatinine: { type: "string" },
         age: { type: "string" },
         sex: { type: "string" }
-      }, USAGE14);
+      }, USAGE15);
       if (!values) return;
-      if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE14)) return;
+      if (!requireFlags(values, ["creatinine", "age", "sex"], USAGE15)) return;
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
       if (egfr === 0) return failNotCalculated();
       const gfrCategory = classifyGFRCategory(String(egfr));
@@ -3753,9 +4282,9 @@ Examples:
         sex: { type: "string" },
         acr: { type: "string" },
         "acr-unit": { type: "string", default: "mg/g" }
-      }, USAGE14);
+      }, USAGE15);
       if (!values) return;
-      if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE14)) return;
+      if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE15)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const acrUnit = values["acr-unit"];
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
@@ -3795,9 +4324,9 @@ Examples:
         egfr: { type: "string" },
         acr: { type: "string" },
         "acr-unit": { type: "string", default: "mg/g" }
-      }, USAGE14);
+      }, USAGE15);
       if (!values) return;
-      if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE14)) return;
+      if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE15)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const kfre = calculateKFRE(values.age, values.sex, values.egfr, String(acrInMgPerG(values.acr, values["acr-unit"])));
       const referral = assessReferralNeed(String(kfre.fiveYear));
@@ -3821,9 +4350,9 @@ Examples:
         "heart-failure": { type: "boolean", default: false },
         "on-rasi": { type: "boolean", default: false },
         "potassium-normal": { type: "boolean", default: false }
-      }, USAGE14);
+      }, USAGE15);
       if (!values) return;
-      if (!requireFlags(values, ["egfr", "acr"], USAGE14)) return;
+      if (!requireFlags(values, ["egfr", "acr"], USAGE15)) return;
       if (badAcrUnit(values["acr-unit"])) return;
       const acrUnit = values["acr-unit"];
       const gfrCategory = classifyGFRCategory(values.egfr);
@@ -3860,9 +4389,9 @@ Examples:
         sex: { type: "string" },
         ferritin: { type: "string" },
         tsat: { type: "string" }
-      }, USAGE14);
+      }, USAGE15);
       if (!values) return;
-      if (!requireFlags(values, ["hb", "sex"], USAGE14)) return;
+      if (!requireFlags(values, ["hb", "sex"], USAGE15)) return;
       const anemia = classifyAnemia(values.hb, values.sex);
       const iron = values.ferritin && values.tsat ? assessIronStatus(values.ferritin, values.tsat) : null;
       const esa = values.ferritin && values.tsat ? checkESAEligibility(values.hb, values.ferritin, values.tsat, values.sex) : null;
@@ -3889,9 +4418,9 @@ Examples:
         pth: { type: "string" },
         "vitamin-d": { type: "string" },
         "gfr-category": { type: "string" }
-      }, USAGE14);
+      }, USAGE15);
       if (!values) return;
-      if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE14);
+      if (!values["gfr-category"]) return fail("Missing required flag: --gfr-category", USAGE15);
       const gfrCat = values["gfr-category"];
       const phosphateResult = values.phosphate ? assessPhosphate(values.phosphate, gfrCat) : null;
       const correctedCa = values.calcium && values.albumin ? correctCalcium(values.calcium, values.albumin) : null;
@@ -3927,7 +4456,7 @@ Examples:
       rows.push(["Monitor Vit D", monitoring.vitaminD]);
       printTable(data, values.json, "CKD-MBD Assessment", rows);
     };
-    run14 = (argv) => runSubcommand(argv, USAGE14, {
+    run15 = (argv) => runSubcommand(argv, USAGE15, {
       egfr: runEGFR,
       stage: runStage,
       kfre: runKFRE,
@@ -4119,16 +4648,16 @@ var init_endocrine = __esm({
 // src/commands/diabetes.ts
 var diabetes_exports = {};
 __export(diabetes_exports, {
-  run: () => run15
+  run: () => run16
 });
-var USAGE15, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run15;
+var USAGE16, runDiagnose, runT1DStage, runT1vsT2, runT2DScreen, runGDM, run16;
 var init_diabetes = __esm({
   "src/commands/diabetes.ts"() {
     "use strict";
     init_diabetes_dx();
     init_endocrine();
     init_cli();
-    USAGE15 = `Usage: medprotocol diabetes <sub-command> [options]
+    USAGE16 = `Usage: medprotocol diabetes <sub-command> [options]
 
 Sub-commands:
   diagnose     Diabetes diagnosis classifier (ADA Table 2.1/2.2)
@@ -4200,7 +4729,7 @@ Examples:
         "2h-pg": { type: "string", default: "" },
         "random-pg": { type: "string", default: "" },
         symptoms: { type: "boolean", default: false }
-      }, USAGE15);
+      }, USAGE16);
       if (!values) return;
       const a1c = values.a1c;
       const fpg = values.fpg;
@@ -4208,7 +4737,7 @@ Examples:
       const randomPG = values["random-pg"];
       const hasSymptoms = values.symptoms;
       if (!a1c && !fpg && !twohPG && !randomPG) {
-        return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE15);
+        return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE16);
       }
       const diagnosis = getDiagnosis(a1c, fpg, twohPG, randomPG, hasSymptoms);
       const rows = [];
@@ -4248,9 +4777,9 @@ Examples:
         "2h-pg": { type: "string", default: "" },
         a1c: { type: "string", default: "" },
         symptoms: { type: "boolean", default: false }
-      }, USAGE15);
+      }, USAGE16);
       if (!values) return;
-      if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE15);
+      if (!values.autoantibodies) return fail("--autoantibodies is required", USAGE16);
       const result = classifyT1DStage(
         values.autoantibodies,
         values.fpg,
@@ -4285,9 +4814,9 @@ Examples:
         "fhx-t2d": { type: "boolean", default: false },
         "dka-history": { type: "boolean", default: false },
         autoimmune: { type: "boolean", default: false }
-      }, USAGE15);
+      }, USAGE16);
       if (!values) return;
-      if (!requireFlags(values, ["age", "bmi"], USAGE15)) return;
+      if (!requireFlags(values, ["age", "bmi"], USAGE16)) return;
       const result = classifyT1vsT2(
         values.age,
         values.bmi,
@@ -4332,9 +4861,9 @@ Examples:
         "insulin-resistance": { type: "boolean", default: false },
         "prior-prediabetes": { type: "boolean", default: false },
         "prior-gdm": { type: "boolean", default: false }
-      }, USAGE15);
+      }, USAGE16);
       if (!values) return;
-      if (!requireFlags(values, ["age", "bmi"], USAGE15)) return;
+      if (!requireFlags(values, ["age", "bmi"], USAGE16)) return;
       const riskFactors = {
         firstDegreeRelative: values["first-degree"],
         highRiskEthnicity: values["high-risk-ethnicity"],
@@ -4384,7 +4913,7 @@ Examples:
         "1h": { type: "string" },
         "2h": { type: "string" },
         "3h": { type: "string", default: "0" }
-      }, USAGE15);
+      }, USAGE16);
       if (!values) return;
       const missing = [];
       if (!values.strategy) missing.push("--strategy");
@@ -4394,7 +4923,7 @@ Examples:
       if (values.strategy === "two-step" && !values["3h"]) {
         missing.push("--3h");
       }
-      if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE15);
+      if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE16);
       const strategy = values.strategy;
       const result = strategy === "one-step" ? classifyGDM_OneStep(values.fasting, values["1h"], values["2h"]) : classifyGDM_TwoStep(values.fasting, values["1h"], values["2h"], values["3h"]);
       const rows = [
@@ -4422,7 +4951,7 @@ Examples:
       };
       printTable(data, values.json, `GDM Screening \u2014 ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`, rows);
     };
-    run15 = (argv) => runSubcommand(argv, USAGE15, {
+    run16 = (argv) => runSubcommand(argv, USAGE16, {
       diagnose: runDiagnose,
       "t1d-stage": runT1DStage,
       "t1-vs-t2": runT1vsT2,
@@ -4451,265 +4980,6 @@ var init_claude_spawn = __esm({
   }
 });
 
-// ../../plugin/lib/extraction.ts
-var FIELDS, EXAM_FINDINGS, readsOk, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, prepared, checkItem, checkExtraction, noteSegments, SEX_WORDS, sexStated, toNumber, unitOk, toInputs, toExam, applyFindings;
-var init_extraction = __esm({
-  "../../plugin/lib/extraction.ts"() {
-    "use strict";
-    init_shock();
-    FIELDS = {
-      sbp: { label: "Systolic blood pressure", units: ["mmHg"] },
-      dbp: { label: "Diastolic blood pressure", units: ["mmHg"] },
-      map: { label: "Mean arterial pressure", units: ["mmHg"] },
-      hr: { label: "Heart rate", units: ["bpm", "/min", "lpm", "beats/min"] },
-      rr: { label: "Respiratory rate", units: ["breaths/min", "/min", "rpm", "resp/min"] },
-      temp: { label: "Temperature", units: ["\xB0C", "\xB0F", "\xBAC", "\xBAF"] },
-      spo2: { label: "SpO2", units: ["%"] },
-      fio2: { label: "FiO2", units: ["%"] },
-      gcs: { label: "Glasgow Coma Scale", units: ["/15"] },
-      weight: { label: "Weight", units: ["kg", "lb", "lbs"] },
-      height: { label: "Height", units: ["cm", "m", "in"] },
-      ph: { label: "pH", units: [] },
-      pco2: { label: "pCO2", units: ["mmHg", "kPa"] },
-      pao2: { label: "PaO2", units: ["mmHg", "kPa"] },
-      hco3: { label: "Bicarbonate", units: ["mEq/L", "mmol/L"] },
-      lactate: { label: "Lactate", units: ["mmol/L"] },
-      na: { label: "Sodium", units: ["mEq/L", "mmol/L"] },
-      potassium: { label: "Potassium", units: ["mmol/L", "mEq/L"] },
-      cl: { label: "Chloride", units: ["mEq/L", "mmol/L"] },
-      albumin: { label: "Albumin", units: ["g/dL", "g/L"] },
-      creatinine: { label: "Creatinine", units: ["mg/dL", "\xB5mol/L", "\u03BCmol/L", "umol/L"] },
-      glucose: { label: "Glucose", units: ["mg/dL", "mmol/L"] },
-      ketones: { label: "Ketones", units: ["mmol/L"] },
-      bilirubin: { label: "Bilirubin", units: ["mg/dL"] },
-      platelets: { label: "Platelets", units: ["\xD710\xB3/\xB5L", "x10^3/uL", "10^3/\xB5L", "/mm\xB3", "\xD710\u2079/L", "x10^9/L"] },
-      hb: { label: "Hemoglobin", units: ["g/dL", "g/L"] },
-      a1c: { label: "HbA1c", units: ["%"] },
-      egfr: { label: "eGFR", units: ["mL/min/1.73m\xB2", "mL/min/1.73m2", "mL/min"] },
-      acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g", "mg/mmol"] },
-      tc: { label: "Total cholesterol", units: ["mg/dL"] },
-      hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
-      "urine-output": { label: "Urine output", units: ["mL"] },
-      /** How long the blood pressure has been low. Hours are converted (units.ts). */
-      "hypotension-min": { label: "Hypotension duration", units: ["min", "minutes", "mins", "minutos", "h", "hr", "hrs", "hour", "hours", "horas"] },
-      /** A measured height only. A bare "cm" may be above the sternal angle, so it is not accepted. */
-      "jvp-cm": { label: "Jugular venous pressure", units: ["cmH2O", "cm H2O"] },
-      age: { label: "Age", units: ["years", "year", "yr", "yrs", "y", "yo", "y/o", "a\xF1os"] },
-      /** The one key whose value is a word: `female` or `male`, see `sexStated`. */
-      sex: { label: "Sex", units: [] }
-    };
-    EXAM_FINDINGS = SHOCK_FINDINGS;
-    readsOk = (exam, reads) => typeof exam === "string" && Object.hasOwn(EXAM_FINDINGS, exam) && reads !== "not_assessed" && EXAM_FINDINGS[exam].includes(reads);
-    EPISODES = ["current", "history"];
-    MAX_EDITS = 5;
-    stripAccents = (s) => s.normalize("NFD").replace(new RegExp("\\p{Mn}", "gu"), "");
-    collapse = (s) => s.replace(/\s+/g, " ").trim();
-    collapseWithMap = (note) => {
-      let text = "";
-      const map = [];
-      for (let i = 0; i < note.length; i++) {
-        if (/\s/.test(note[i])) {
-          if (text && !text.endsWith(" ")) {
-            text += " ";
-            map.push(i);
-          }
-        } else {
-          text += note[i];
-          map.push(i);
-        }
-      }
-      return { text, map };
-    };
-    numbersIn = (s) => [...s.matchAll(/\d+(?:[.,·]\d+)?/g)].map(([m]) => {
-      const [whole, frac] = m.split(/[.,·]/);
-      const decimal = Number(frac === void 0 ? whole : `${whole}.${frac}`);
-      return m.includes(",") && frac?.length === 3 ? [decimal, Number(whole + frac)] : [decimal];
-    });
-    same = (a, b) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
-    valueInQuote = (value, quote) => {
-      const source = numbersIn(quote);
-      let at = 0;
-      for (const values of numbersIn(value)) {
-        const found = source.findIndex((readings, i) => i >= at && readings.some((r) => values.some((v) => same(r, v))));
-        if (found === -1) return false;
-        at = found + 1;
-      }
-      return true;
-    };
-    closestSpan = (text, quote) => {
-      const fold = (c) => stripAccents(c).toLowerCase();
-      const t = text.split("").map(fold);
-      const q = quote.split("").map(fold);
-      let prev = q.map((_, i) => i + 1);
-      prev.unshift(0);
-      let starts = prev.map(() => 0);
-      let best = { distance: prev[q.length], start: 0, end: 0 };
-      for (let j = 0; j < t.length; j++) {
-        const cur = [0];
-        const curStart = [j + 1];
-        for (let i = 1; i <= q.length; i++) {
-          const sub = prev[i - 1] + (q[i - 1] === t[j] ? 0 : 1);
-          const del = prev[i] + 1;
-          const ins = cur[i - 1] + 1;
-          const d = Math.min(sub, del, ins);
-          cur.push(d);
-          curStart.push(d === sub ? starts[i - 1] : d === del ? starts[i] : curStart[i - 1]);
-        }
-        if (cur[q.length] < best.distance) best = { distance: cur[q.length], start: curStart[q.length], end: j + 1 };
-        prev = cur;
-        starts = curStart;
-      }
-      return best;
-    };
-    editDistance = (a, b) => {
-      let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
-      for (let i = 1; i <= a.length; i++) {
-        const cur = [i];
-        for (let j = 1; j <= b.length; j++) cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)));
-        prev = cur;
-      }
-      return prev[b.length];
-    };
-    wordsOf = (s) => [...s.matchAll(/[\p{L}\p{N}]+(?:[.,·/^][\p{L}\p{N}]+)*/gu)].map((m) => ({
-      w: stripAccents(m[0]).toLowerCase(),
-      start: m.index,
-      end: m.index + m[0].length
-    }));
-    reorderedSpan = (note, quote) => {
-      const qw = wordsOf(quote).map((x) => x.w);
-      const nw = wordsOf(note);
-      const cost = (a, b) => a === b ? 0 : /\d/.test(a) || /\d/.test(b) ? Infinity : editDistance(a, b);
-      let best = null;
-      for (let i = 0; i + qw.length <= nw.length; i++) {
-        const window = nw.slice(i, i + qw.length);
-        const pairs = qw.flatMap((a, x) => window.map((b, y) => ({ x, y, d: cost(a, b.w) }))).sort((p, r) => p.d - r.d);
-        const usedQ = /* @__PURE__ */ new Set();
-        const usedN = /* @__PURE__ */ new Set();
-        let distance = 0;
-        for (const p of pairs) {
-          if (usedQ.has(p.x) || usedN.has(p.y)) continue;
-          usedQ.add(p.x);
-          usedN.add(p.y);
-          distance += p.d;
-        }
-        if (distance < (best?.distance ?? Infinity)) best = { distance, start: window[0].start, end: window.at(-1).end };
-      }
-      return best;
-    };
-    checkItem = (note, item) => {
-      const q = collapse(item.quote.normalize("NFC"));
-      if (!q) return { ...item, status: "none" };
-      if (prepared?.note !== note) {
-        const nfc2 = note.normalize("NFC");
-        prepared = { note, nfc: nfc2, ...collapseWithMap(nfc2) };
-      }
-      const { nfc, text, map } = prepared;
-      const at = text.indexOf(q);
-      if (at < 0) {
-        const budget = Math.min(MAX_EDITS, Math.floor(q.length / 4));
-        const span = closestSpan(text, q);
-        if (span.end === 0 || span.distance > budget) {
-          const words = reorderedSpan(nfc, q);
-          if (!words || words.distance > budget) return { ...item, status: "unverified" };
-          return {
-            ...item,
-            status: valueInQuote(item.value, nfc.slice(words.start, words.end)) ? "reordered" : "mismatched",
-            start: words.start,
-            end: words.end,
-            match: "words",
-            distance: words.distance
-          };
-        }
-        const start = map[span.start];
-        const end = map[span.end - 1] + 1;
-        return {
-          ...item,
-          // The value is checked against the note's words, so an edit that changed a digit fails here.
-          status: !valueInQuote(item.value, nfc.slice(start, end)) ? "mismatched" : span.distance === 0 ? "edited" : "approximate",
-          start,
-          end,
-          match: "loose",
-          distance: span.distance
-        };
-      }
-      return {
-        ...item,
-        status: valueInQuote(item.value, q) ? "quoted" : "mismatched",
-        match: "exact",
-        start: map[at],
-        end: map[at + q.length - 1] + 1,
-        ...text.indexOf(q, at + 1) >= 0 ? { ambiguous: true } : {}
-      };
-    };
-    checkExtraction = (note, items) => items.map((item) => checkItem(note, item));
-    noteSegments = (note, checked) => {
-      const text = note.normalize("NFC");
-      const cuts = /* @__PURE__ */ new Set([0, text.length]);
-      for (const c of checked) if (c.start !== void 0) cuts.add(c.start).add(c.end);
-      const points = [...cuts].sort((a, b) => a - b);
-      const out = [];
-      for (let i = 0; i < points.length - 1; i++) {
-        const [s, e] = [points[i], points[i + 1]];
-        const items = checked.flatMap((c, n) => c.start !== void 0 && c.start <= s && c.end >= e ? [n] : []);
-        out.push({ text: text.slice(s, e), items });
-      }
-      return out;
-    };
-    SEX_WORDS = {
-      female: ["female", "woman", "f", "mujer", "femenino", "femenina"],
-      male: ["male", "man", "m", "hombre", "masculino", "varon"]
-    };
-    sexStated = (value, quote) => {
-      const words = stripAccents(quote).toLowerCase().split(/[^a-z]+/);
-      const has = (s) => SEX_WORDS[s].some((w) => words.includes(w));
-      return (value === "female" || value === "male") && has(value) && !has(value === "female" ? "male" : "female") ? value : null;
-    };
-    toNumber = (value) => {
-      const v = value.trim();
-      if (!/^-?\d+(?:[.,]\d+)?$/.test(v) || /,\d{3}$/.test(v)) return null;
-      return Number(v.replace(",", "."));
-    };
-    unitOk = (key, unit) => !unit || FIELDS[key].units.some((u) => u.toLowerCase() === unit.trim().toLowerCase());
-    toInputs = (checked) => {
-      const keyed = checked.filter((c) => c.key && c.episode !== "history");
-      const count = (k) => keyed.filter((c) => c.key === k && c.episode === "current").length;
-      const out = { inputs: {}, review: [] };
-      for (const item of keyed) {
-        const key = item.key;
-        const value = toNumber(item.value);
-        const sex = key === "sex" ? sexStated(item.value, item.quote) : null;
-        const reason = item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence" : item.status !== "quoted" ? "not-verified" : item.episode !== "current" ? "no-episode" : key === "sex" && !sex ? "not-stated" : key !== "sex" && (item.absent || value === null) ? "not-a-number" : !unitOk(key, item.unit) ? "unit" : count(key) > 1 ? "repeated" : null;
-        if (reason) out.review.push({ item, reason });
-        else if (sex) out.sex = sex;
-        else out.inputs[key] = { value, ...item.unit ? { unit: item.unit } : {}, quote: item.quote, ...item.time ? { time: item.time } : {} };
-      }
-      return out;
-    };
-    toExam = (checked) => {
-      const out = {};
-      const seen = /* @__PURE__ */ new Set();
-      checked.forEach((c, index) => {
-        if (!c.exam || c.episode !== "current") return;
-        if (seen.has(c.exam)) delete out[c.exam];
-        else if (c.status === "quoted" && readsOk(c.exam, c.reads)) out[c.exam] = { reads: c.reads, index };
-        seen.add(c.exam);
-      });
-      return out;
-    };
-    applyFindings = (firstPass, findings, rejected) => {
-      const kept = [...firstPass];
-      const added = [];
-      findings.forEach(({ index, correction }, n) => {
-        if (rejected.has(n)) return;
-        if (index === void 0) {
-          if (correction) added.push(correction);
-        } else if (Number.isInteger(index) && index >= 0 && index < firstPass.length) kept[index] = correction;
-      });
-      return [...kept.filter((item) => item !== null), ...added];
-    };
-  }
-});
-
 // ../../plugin/lib/nephrology.ts
 function classifyBPInCKD(sbp, dbp) {
   const s = sf(sbp);
@@ -4728,34 +4998,6 @@ var init_nephrology = __esm({
     sf = (v) => {
       const n = parseFloat(v);
       return isNaN(n) ? 0 : n;
-    };
-  }
-});
-
-// ../../plugin/lib/units.ts
-var UMOL_PER_MGDL, MMHG_PER_KPA, FACTORS, toExpectedUnit;
-var init_units = __esm({
-  "../../plugin/lib/units.ts"() {
-    "use strict";
-    init_extraction();
-    UMOL_PER_MGDL = 88.4;
-    MMHG_PER_KPA = 7.50062;
-    FACTORS = {
-      creatinine: { digits: 2, from: { "\xB5mol/l": 1 / UMOL_PER_MGDL, "\u03BCmol/l": 1 / UMOL_PER_MGDL, "umol/l": 1 / UMOL_PER_MGDL } },
-      hb: { digits: 1, from: { "g/l": 0.1 } },
-      albumin: { digits: 1, from: { "g/l": 0.1 } },
-      pao2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
-      pco2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
-      "hypotension-min": { digits: 0, from: { h: 60, hr: 60, hrs: 60, hour: 60, hours: 60, horas: 60 } }
-    };
-    toExpectedUnit = (key, input) => {
-      if (key === "fio2" && !input.unit && input.value >= 0.21 && input.value <= 1) {
-        return { ...input, value: Number((input.value * 100).toFixed(1)), unit: "%", from: String(input.value) };
-      }
-      const rule = FACTORS[key];
-      const factor = input.unit && rule?.from[input.unit.trim().toLowerCase()];
-      if (!rule || !factor) return input;
-      return { ...input, value: Number((input.value * factor).toFixed(rule.digits)), unit: FIELDS[key].units[0], from: `${input.value} ${input.unit}` };
     };
   }
 });
@@ -6581,9 +6823,9 @@ var init_overlay_client = __esm({
 var overlay_exports = {};
 __export(overlay_exports, {
   isLocalOrigin: () => isLocalOrigin,
-  run: () => run16
+  run: () => run17
 });
-var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE16, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run16;
+var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE17, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run17;
 var init_overlay = __esm({
   "src/commands/overlay.ts"() {
     "use strict";
@@ -6594,7 +6836,7 @@ var init_overlay = __esm({
     init_claude_spawn();
     init_cli();
     init_overlay_client();
-    USAGE16 = `Usage: medprotocol overlay [options]
+    USAGE17 = `Usage: medprotocol overlay [options]
 
 The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
@@ -7019,7 +7261,7 @@ Examples:
         }
       });
     };
-    run16 = (argv) => {
+    run17 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string" },
@@ -7032,7 +7274,7 @@ Examples:
         watch: { type: "boolean", default: false },
         clear: { type: "boolean", default: false },
         dir: { type: "string" }
-      }, USAGE16);
+      }, USAGE17);
       if (!values) return;
       const dir = (0, import_node_path.resolve)(values.dir ?? (0, import_node_path.join)(".medprotocol", "queue"));
       const json = values.json;
@@ -7103,11 +7345,11 @@ Waiting for the overlay to create it\u2026
 var extract_exports = {};
 __export(extract_exports, {
   calculations: () => calculations,
-  run: () => run17,
+  run: () => run18,
   serve: () => serve2,
   stateOf: () => stateOf
 });
-var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE17, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run17;
+var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE18, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run18;
 var init_extract = __esm({
   "src/commands/extract.ts"() {
     "use strict";
@@ -7130,7 +7372,7 @@ var init_extract = __esm({
     init_cli();
     init_extract_artifact();
     init_overlay();
-    USAGE17 = `Usage: medprotocol extract --note <file> --items <file> [options]
+    USAGE18 = `Usage: medprotocol extract --note <file> --items <file> [options]
        medprotocol extract --save <file>
        medprotocol extract --serve [--port <number>]
 
@@ -7188,8 +7430,8 @@ Example:
     };
     scaleOf = (label, value, unit, cuts, at, band, [lo, hi]) => {
       const v = Number(value);
-      const pad2 = (hi - lo) * 0.08;
-      return { label, value, ...unit ? { unit } : {}, min: v < lo ? v - pad2 : lo, max: v > hi ? v + pad2 : hi, cuts: [...cuts], at, band };
+      const pad3 = (hi - lo) * 0.08;
+      return { label, value, ...unit ? { unit } : {}, min: v < lo ? v - pad3 : lo, max: v > hi ? v + pad3 : hi, cuts: [...cuts], at, band };
     };
     SECONDARY = { capillaryRefill: "capillary refill", pulseVolume: "pulse", lungExam: "lungs" };
     shockGrid = (exam, shock, quotes, said) => {
@@ -7554,7 +7796,7 @@ ${check}`));
       });
       return server;
     };
-    run17 = (argv) => {
+    run18 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string", default: "7332" },
@@ -7562,7 +7804,7 @@ ${check}`));
         note: { type: "string" },
         items: { type: "string" },
         artifact: { type: "string" }
-      }, USAGE17);
+      }, USAGE18);
       if (!values) return;
       if (values.serve) {
         const port = Number(values.port);
@@ -7586,7 +7828,7 @@ ${check}`));
         printResult({ dir, existed }, values.json, () => dir + (existed ? "  (already saved)" : ""));
         return;
       }
-      if (!values.note || !values.items) return fail("--note and --items are required", USAGE17);
+      if (!values.note || !values.items) return fail("--note and --items are required", USAGE18);
       let note;
       let items;
       try {
@@ -7633,7 +7875,7 @@ var version = "1.5.1";
 
 // src/index.ts
 init_cli();
-var USAGE18 = `medprotocol \u2014 Medical calculations from the terminal
+var USAGE19 = `medprotocol \u2014 Medical calculations from the terminal
 
 Usage: medprotocol <command> [options]
 
@@ -7651,6 +7893,7 @@ Commands:
   heart-failure    Heart failure from the bedside examination (left or right congestion)
   chest            Chest examination syndromes, per side (consolidation, effusion, collapse, pneumothorax)
   pulmonary        Focal pulmonary syndrome from history, chest signs and imaging (pneumonia evidence level)
+  respiratory-failure  Respiratory failure and distress, two verdicts (gas exchange, work of breathing)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
@@ -7693,7 +7936,7 @@ if (command === "--version" || command === "-v") {
   process.exit(0);
 }
 if (!command || command === "--help" || command === "-h") {
-  process.stdout.write(USAGE18 + "\n");
+  process.stdout.write(USAGE19 + "\n");
   process.exit(0);
 }
 var commands = {
@@ -7710,6 +7953,7 @@ var commands = {
   "heart-failure": () => Promise.resolve().then(() => (init_heart_failure2(), heart_failure_exports)),
   chest: () => Promise.resolve().then(() => (init_chest(), chest_exports)),
   pulmonary: () => Promise.resolve().then(() => (init_pulmonary(), pulmonary_exports)),
+  "respiratory-failure": () => Promise.resolve().then(() => (init_respiratory_failure2(), respiratory_failure_exports)),
   ckd: () => Promise.resolve().then(() => (init_ckd2(), ckd_exports)),
   diabetes: () => Promise.resolve().then(() => (init_diabetes(), diabetes_exports)),
   extract: () => Promise.resolve().then(() => (init_extract(), extract_exports)),

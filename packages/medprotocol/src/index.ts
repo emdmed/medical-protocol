@@ -21,6 +21,7 @@ Commands:
   heart-failure    Heart failure from the bedside examination (left or right congestion)
   chest            Chest examination syndromes, per side (consolidation, effusion, collapse, pneumothorax)
   pulmonary        Focal pulmonary syndrome from history, chest signs and imaging (pneumonia evidence level)
+  respiratory-failure  Respiratory failure and distress, two verdicts (gas exchange, work of breathing)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
@@ -83,6 +84,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   "heart-failure": () => import("./commands/heart-failure"),
   chest: () => import("./commands/chest"),
   pulmonary: () => import("./commands/pulmonary"),
+  "respiratory-failure": () => import("./commands/respiratory-failure"),
   ckd: () => import("./commands/ckd"),
   diabetes: () => import("./commands/diabetes"),
   extract: () => import("./commands/extract"),

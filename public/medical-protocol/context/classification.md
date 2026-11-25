@@ -29,6 +29,7 @@ When the doctor describes what they need, classify into one of these domains bas
 | **heart-failure** | heart failure, left-sided, right-sided, biventricular, right heart failure, congestive heart failure, CHF, RV infarct, parasternal heave, loud P2, tricuspid regurgitation, Kussmaul, pulsatile liver, ascites, breathlessness, dyspnoea, orthopnoea |
 | **chest-exam** | chest examination, chest exam, respiratory examination, percussion, dullness, stony dull, hyperresonant, breath sounds, bronchial breathing, vocal resonance, tracheal deviation, consolidation, pleural effusion, atelectasis, collapse, pneumothorax, wheeze, semiology |
 | **focal-pulmonary** | pneumonia, community-acquired pneumonia, CAP, chest infection, lower respiratory tract infection, LRTI, focal chest signs, cough with fever, purulent sputum, pleuritic pain, chest X-ray consolidation, lobar, focal pulmonary syndrome |
+| **respiratory-failure** | respiratory failure, type 1 respiratory failure, type 2 respiratory failure, hypoxaemia, hypoxemia, hypercapnia, CO2 retention, respiratory distress, work of breathing, tachypnoea, accessory muscles, can't complete sentences, paradoxical breathing, cyanosis, desaturation |
 
 ## Endocrinology / Diabetes
 

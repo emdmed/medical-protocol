@@ -219,3 +219,52 @@ export const assessRespiratoryFailure = (input: RespiratoryFailureInput): Respir
     notCalculated,
   };
 };
+
+export const RF_FAILURE_LABELS: Record<FailureVerdict, string> = {
+  present: "Respiratory failure",
+  absent: "No respiratory failure",
+  indeterminate: "Failure indeterminate",
+};
+
+export const RF_FAILURE_REASONS: Record<FailureReason, string> = {
+  hypoxaemia: "Hypoxaemia: SpO2 below 90% or PaO2 below 60 mmHg (8 kPa)",
+  hypercapnia: "Hypercapnia: an arterial respiratory acidosis with PaCO2 above 45 mmHg (6 kPa)",
+  hypoxaemia_and_hypercapnia: "Hypoxaemia and hypercapnia",
+  adequate_on_room_air: "Oxygenation adequate on room air",
+  venous_gas_only: "Oxygenation adequate on room air, but only a venous gas: CO2 is not answered",
+  adequate_on_support: "Oxygenation adequate on oxygen or ventilation: that is what the support achieves",
+  oxygen_support_not_stated: "Oxygenation adequate, but nothing says what the patient was breathing",
+  saturation_not_calculated: "The saturation could not be used",
+  no_oxygenation_measure: "No saturation and no arterial PaO2",
+};
+
+export const RF_LIMB_LABELS: Record<Limb, string> = {
+  present: "Present",
+  absent: "Absent",
+  not_determined: "Not determined",
+};
+
+export const RF_DISTRESS_LABELS: Record<DistressVerdict, string> = {
+  present: "Respiratory distress",
+  absent: "No respiratory distress",
+  not_assessed: "Distress not assessed",
+};
+
+export const RF_SIGN_LABELS: Record<DistressSign, string> = {
+  respiratory_rate: "Respiratory rate 30/min or more",
+  accessory_muscles: "Accessory muscle use",
+  speech: "Speech limited",
+  paradoxical_breathing: "Paradoxical breathing",
+  cyanosis: "Cyanosis",
+};
+
+export const RF_NEXT_LABELS: Record<Next, string> = {
+  oxygen_saturation: "Measure oxygen saturation",
+  oxygen_support: "State what the patient was breathing (room air, oxygen or ventilation)",
+  room_air_saturation: "A saturation on room air, if safe to take",
+  arterial_blood_gas: "Arterial blood gas",
+  respiratory_rate: "Count the respiratory rate",
+};
+
+/** Say this wherever the result is shown. */
+export const RF_CAVEAT = "Two bounded reads kept apart: failure is gas exchange, distress is work of breathing. Not a diagnosis and not a treatment: a normal number on oxygen is what the support achieves.";

@@ -20,6 +20,7 @@
 | heart-failure | Heart failure from the bedside examination (left or right congestion; not ventricular function) |
 | chest-exam | Chest examination syndromes, one side at a time (consolidation, effusion, atelectasis, pneumothorax; no imaging) |
 | focal-pulmonary | Focal pulmonary syndrome from history, chest signs and imaging (pneumonia evidence level, differential; no treatment) |
+| respiratory-failure | Respiratory failure (gas exchange) and distress (work of breathing), two separate verdicts; no treatment |
 | diabetes-dx | ADA diabetes diagnosis, T1D staging, T1 vs T2, T2D/GDM screening |
 | hepatology | MASLD/MASH screening: FIB-4, LSM/ELF, referral |
 | extraction | Values pulled from a clinical note, each quote checked and highlighted in the note (no analysis) |
@@ -59,6 +60,7 @@ Clinical logic lives in `lib/medprotocol/` in the doctor's project (copied from 
 | heart-failure | `heart-failure.ts` + `cardiology.ts`, `cardiology-types.ts`, `shock.ts`, `volume.ts` | `heart-failure.md` |
 | chest-exam | `chest-exam.ts` | `chest-exam.md` |
 | focal-pulmonary | `focal-pulmonary.ts` + `chest-exam.ts` | `focal-pulmonary.md` |
+| respiratory-failure | `respiratory-failure.ts` + `acid-base/`, `units.ts`, `vital-signs-validations/` | `respiratory-failure.md` |
 | diabetes-dx | `diabetes-dx.ts`, `endocrine.ts` | `diabetes.md` |
 | hepatology | `hepatology.ts` | `hepatology.md` |
 | extraction | `extraction.ts` | `extraction.md` |
@@ -76,6 +78,7 @@ Tools that share data. Wire them with props (see `composition.md`) instead of as
 - **dka** uses **acid-base**: it calls `analyze()` on each reading. Both modules are always copied together.
 - **volume** imports `binJvp` from **shock**: copy `shock.ts` with `volume.ts`.
 - **heart-failure** imports the JVP from **cardiology** and types from **shock** and **volume**: copy `cardiology.ts`, `cardiology-types.ts`, `shock.ts` and `volume.ts` with it.
+- **respiratory-failure** calls **acid-base**'s `analyze()` on an arterial gas and **vital-signs**' SpO2 validation: copy `acid-base/`, `units.ts` and `vital-signs-validations/` with it.
 - **sepsis** uses **vital-signs** (RR, SBP, FiO2 → qSOFA / respiration SOFA) and **water-balance** (urine output, fluid status).
 - **nephrology** is a companion to **ckd**. Wire `sex` from CKD to Anemia, `gfrCategory` (latest CKD reading) to PhosphoCalcic and CardioMetabolic, plus `age`, `hasDiabetes`, `hasPriorCVD`, `hasKidneyTransplant` to CardioMetabolic.
 - **diabetes-dx** uses `diabetes-dx.ts` for the diagnosis screen and `endocrine.ts` for the sub-screens (T1D staging, T1 vs T2, T2D screening, GDM screening). The tool name is `diabetes-dx`, not `diabetes`.
