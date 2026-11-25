@@ -67,6 +67,14 @@ describe('medprotocol extract', () => {
     expect(stderr).toContain('needs episode "current" or "history"');
   });
 
+  it('rejects an absent finding with a key', () => {
+    const bad = join(dir, 'absentkey.json');
+    writeFileSync(bad, JSON.stringify([{ episode: 'current', field: 'HR', key: 'hr', value: '88', quote: 'HR 88 bpm', absent: true }]));
+    run(['--note', notePath, '--items', bad]);
+    expect(process.exitCode).toBe(1);
+    expect(stderr).toContain('an absent finding takes no key');
+  });
+
   it('rejects items that are not the expected shape', () => {
     const bad = join(dir, 'bad.json');
     writeFileSync(bad, JSON.stringify([{ episode: 'current', field: 'HR', value: 88 }]));
@@ -224,5 +232,33 @@ describe('calculations', () => {
     expect(calcs[3].rows[1]).toEqual(['Anemia', 'Yes, mild']);
     // a sex the quote does not state feeds nothing
     expect(calculations(checkExtraction(note, items.map((it, i) => (i === 1 ? { ...it, value: 'male' } : it))))).toEqual([]);
+  });
+
+  it('stages an ACR in mg/mmol in its own unit and converts it only for KFRE', () => {
+    const calcs = calculations(checkExtraction('67-year-old woman. eGFR 30 mL/min/1.73m², ACR 3 mg/mmol.', [
+      cur('Age', 'age', '67', '67-year-old'),
+      cur('Sex', 'sex', 'female', '67-year-old woman'),
+      cur('eGFR', 'egfr', '30', 'eGFR 30', 'mL/min/1.73m²'),
+      cur('ACR', 'acr', '3', 'ACR 3 mg/mmol', 'mg/mmol'),
+    ]));
+    expect(calcs[0]).toMatchObject({ title: 'CKD staging', scales: [{}, { value: '3', unit: 'mg/mmol', cuts: [3, 30], at: 1 }] });
+    expect(calcs[0].rows[0]).toEqual(['Stage', 'G3b A2']);
+    expect(calcs[1].rows[2]).toEqual(['ACR, converted', '26.5', 'mg/g (note: 3 mg/mmol)']);
+  });
+
+  it('converts a value in another unit first, and shows what the note states', () => {
+    const note = '67-year-old woman. Creatinine 159 µmol/L. PaO2 8 kPa on FiO2 0.4.';
+    const calcs = calculations(checkExtraction(note, [
+      cur('Age', 'age', '67', '67-year-old'),
+      cur('Sex', 'sex', 'female', '67-year-old woman'),
+      cur('Creatinine', 'creatinine', '159', 'Creatinine 159 µmol/L', 'µmol/L'),
+      cur('PaO2', 'pao2', '8', 'PaO2 8 kPa', 'kPa'),
+      cur('FiO2', 'fio2', '0.4', 'FiO2 0.4'),
+    ]));
+    expect(calcs).toMatchObject([
+      { title: 'PaO2/FiO2', rows: [['PaO2, converted', '60', 'mmHg (note: 8 kPa)'], ['FiO2, converted', '40', '% (note: 0.4)']], scales: [{ value: '150' }] },
+      // 159 / 88.4 = 1.80 mg/dL: the same eGFR as the note in mg/dL above
+      { title: 'eGFR from creatinine', rows: [['Creatinine, converted', '1.8', 'mg/dL (note: 159 µmol/L)']], scales: [{ value: '30' }] },
+    ]);
   });
 });

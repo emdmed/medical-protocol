@@ -51,8 +51,8 @@ These are **separate** screens. Do NOT add anemia or MBD panels into the CKD scr
 - `calculateKFRE(age, sex, egfr, acr)` — 4-variable kidney failure risk
 - `assessReferralNeed(kfre5yr)` — referral recommendation
 - `checkRASiEligibility(gfrCategory, albCategory, hasDiabetes)` — ACEi/ARB criteria
-- `checkSGLT2iEligibility(egfr, acr, hasHeartFailure)` — SGLT2i criteria
-- `checkFinerenoneEligibility(egfr, acr, hasDiabetes, onMaxRASi, potassiumNormal)` — MRA criteria
+- `checkSGLT2iEligibility(egfr, acr, hasHeartFailure, acrUnit?)` — SGLT2i criteria
+- `checkFinerenoneEligibility(egfr, acr, hasDiabetes, onMaxRASi, potassiumNormal, acrUnit?)` — MRA criteria
 - `calculateEGFRSlope(readings)` — progression rate (mL/min/1.73m²/year)
 - `isRapidDecline(slope)` — true if ≥5 mL/min/year loss
 - `hasSignificantEGFRChange(previous, current)` — true if >20% drop

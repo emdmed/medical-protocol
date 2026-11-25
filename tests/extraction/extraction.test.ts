@@ -100,7 +100,7 @@ describe('toInputs', () => {
     const { inputs, review } = run([
       { episode: 'current', field: 'HR', key: 'hr', value: '98', quote: 'HR 88 bpm' },
       { episode: 'current', field: 'BP', key: 'sbp', value: '120/80', quote: 'BP 120/80' },
-      { episode: 'current', field: 'Creatinine', key: 'creatinine', value: '1.4', unit: 'µmol/L', quote: 'Creatinine 1.4 mg/dL' },
+      { episode: 'current', field: 'Creatinine', key: 'creatinine', value: '1.4', unit: 'g/L', quote: 'Creatinine 1.4 mg/dL' },
       { episode: 'current', field: 'K', key: 'potassium', value: '4.1', quote: 'K 4.1' },
     ]);
     expect(inputs).toEqual({});
@@ -143,6 +143,15 @@ describe('toInputs', () => {
     ]));
     expect(inputs.creatinine!.value).toBe(1.4);
     expect(review).toEqual([]);
+  });
+
+  it('never hands on an absent finding, even with a key', () => {
+    const { inputs, review } = toInputs(checkExtraction('No fever, temp 38 °C', [
+      { episode: 'current', field: 'Fever', key: 'temp', value: '38', unit: '°C', quote: 'temp 38 °C', absent: true },
+      { episode: 'current', field: 'Fever', value: 'No fever', quote: 'No fever', absent: true },
+    ]));
+    expect(inputs).toEqual({});
+    expect(review.map((r) => r.reason)).toEqual(['not-a-number']);
   });
 
   it('sends an untagged item to review instead of inputs', () => {

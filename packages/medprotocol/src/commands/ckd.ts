@@ -1,6 +1,8 @@
 import {
+  type ACRUnit,
   calculateEGFR,
   classifyGFRCategory,
+  acrInMgPerG,
   classifyAlbuminuriaCategory,
   getGFRCategoryLabel,
   getAlbuminuriaCategoryLabel,
@@ -39,17 +41,20 @@ eGFR options:
   --sex <male|female>      Sex (required)
 
 Stage options (eGFR options plus):
-  --acr <number>           Urine albumin-to-creatinine ratio mg/g (required)
+  --acr <number>           Urine albumin-to-creatinine ratio (required)
+  --acr-unit <mg/g|mg/mmol>  Unit of --acr (default mg/g). mg/mmol is read against KDIGO's cut-offs for that unit
 
 KFRE options:
   --age <number>           Age in years (required)
   --sex <male|female>      Sex (required)
   --egfr <number>          eGFR mL/min/1.73m² (required)
-  --acr <number>           ACR mg/g (required)
+  --acr <number>           ACR (required)
+  --acr-unit <mg/g|mg/mmol>  Unit of --acr (default mg/g)
 
 Treatment options:
   --egfr <number>          eGFR mL/min/1.73m² (required)
-  --acr <number>           ACR mg/g (required)
+  --acr <number>           ACR (required)
+  --acr-unit <mg/g|mg/mmol>  Unit of --acr (default mg/g)
   --diabetes               Has diabetes
   --heart-failure          Has heart failure
   --on-rasi                On maximum tolerated RASi
@@ -78,11 +83,19 @@ Examples:
   medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 45
   medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300
   medprotocol ckd treatment --egfr 35 --acr 300 --diabetes
+  medprotocol ckd treatment --egfr 35 --acr 30 --acr-unit mg/mmol --diabetes
   medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
   medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4`;
 
 // calculateEGFR returns 0 when it cannot calculate; staging that 0 would report G5.
 const failNotCalculated = (): void => fail("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0");
+
+// an unknown unit is refused, never read as mg/g
+const badAcrUnit = (unit: string): boolean => {
+  if (unit === "mg/g" || unit === "mg/mmol") return false;
+  fail(`--acr-unit must be mg/g or mg/mmol, got "${unit}"`);
+  return true;
+};
 
 const runEGFR = (argv: string[]): void => {
   const values = parseFlags(argv, {
@@ -115,16 +128,19 @@ const runStage = (argv: string[]): void => {
     age: { type: "string" },
     sex: { type: "string" },
     acr: { type: "string" },
+    "acr-unit": { type: "string", default: "mg/g" },
   }, USAGE);
   if (!values) return;
 
   if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE)) return;
+  if (badAcrUnit(values["acr-unit"]!)) return;
+  const acrUnit = values["acr-unit"] as ACRUnit;
 
   const egfr = calculateEGFR(values.creatinine!, values.age!, values.sex!);
   if (egfr === 0) return failNotCalculated();
   const gfrCategory = classifyGFRCategory(String(egfr));
   const gfrLabel = getGFRCategoryLabel(gfrCategory);
-  const albCategory = classifyAlbuminuriaCategory(values.acr!);
+  const albCategory = classifyAlbuminuriaCategory(values.acr!, acrUnit);
   const albLabel = getAlbuminuriaCategoryLabel(albCategory);
   const riskLevel = getCKDRiskLevel(gfrCategory, albCategory);
   const monitoring = getMonitoringFrequency(gfrCategory, albCategory);
@@ -139,7 +155,7 @@ const runStage = (argv: string[]): void => {
   printTable(data, values.json, "CKD CGA Staging (KDIGO)", [
     ["eGFR", `${egfr} mL/min/1.73m²`],
     ["GFR Category", `${gfrCategory} — ${gfrLabel}`],
-    ["ACR", `${values.acr} mg/g`],
+    ["ACR", `${values.acr} ${acrUnit}`],
     ["Albuminuria", `${albCategory} — ${albLabel}`],
     ["Risk Level", riskLevel],
     ["Monitoring", `${monitoring}×/year`],
@@ -153,12 +169,15 @@ const runKFRE = (argv: string[]): void => {
     sex: { type: "string" },
     egfr: { type: "string" },
     acr: { type: "string" },
+    "acr-unit": { type: "string", default: "mg/g" },
   }, USAGE);
   if (!values) return;
 
   if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE)) return;
 
-  const kfre = calculateKFRE(values.age!, values.sex!, values.egfr!, values.acr!);
+  if (badAcrUnit(values["acr-unit"]!)) return;
+  // the equation takes mg/g
+  const kfre = calculateKFRE(values.age!, values.sex!, values.egfr!, String(acrInMgPerG(values.acr!, values["acr-unit"] as ACRUnit)));
   const referral = assessReferralNeed(String(kfre.fiveYear));
 
   const data = {
@@ -178,6 +197,7 @@ const runTreatment = (argv: string[]): void => {
   const values = parseFlags(argv, {
     egfr: { type: "string" },
     acr: { type: "string" },
+    "acr-unit": { type: "string", default: "mg/g" },
     diabetes: { type: "boolean", default: false },
     "heart-failure": { type: "boolean", default: false },
     "on-rasi": { type: "boolean", default: false },
@@ -187,14 +207,17 @@ const runTreatment = (argv: string[]): void => {
 
   if (!requireFlags(values, ["egfr", "acr"], USAGE)) return;
 
+  if (badAcrUnit(values["acr-unit"]!)) return;
+  const acrUnit = values["acr-unit"] as ACRUnit;
+
   const gfrCategory = classifyGFRCategory(values.egfr!);
-  const albCategory = classifyAlbuminuriaCategory(values.acr!);
+  const albCategory = classifyAlbuminuriaCategory(values.acr!, acrUnit);
 
   const rasi = checkRASiEligibility(gfrCategory, albCategory, values.diabetes!);
-  const sglt2i = checkSGLT2iEligibility(values.egfr!, values.acr!, values["heart-failure"]!);
+  const sglt2i = checkSGLT2iEligibility(values.egfr!, values.acr!, values["heart-failure"]!, acrUnit);
   const finerenone = checkFinerenoneEligibility(
     values.egfr!, values.acr!, values.diabetes!,
-    values["on-rasi"]!, values["potassium-normal"]!,
+    values["on-rasi"]!, values["potassium-normal"]!, acrUnit,
   );
 
   const data = {

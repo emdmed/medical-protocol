@@ -10,7 +10,8 @@
 /**
  * The keys later tools read, named after the medprotocol CLI flags. `units` are the spellings
  * accepted as stated in the note, the first being the one the tools expect. No conversion happens
- * here: a value in another unit is sent to review, not converted.
+ * here: a value in a unit not listed is sent to review; a listed one is handed on as stated, and
+ * `toExpectedUnit` (units.ts) converts it for a calculator.
  */
 export const FIELDS = {
   sbp: { label: "Systolic blood pressure", units: ["mmHg"] },
@@ -25,23 +26,23 @@ export const FIELDS = {
   weight: { label: "Weight", units: ["kg", "lb", "lbs"] },
   height: { label: "Height", units: ["cm", "m", "in"] },
   ph: { label: "pH", units: [] },
-  pco2: { label: "pCO2", units: ["mmHg"] },
-  pao2: { label: "PaO2", units: ["mmHg"] },
+  pco2: { label: "pCO2", units: ["mmHg", "kPa"] },
+  pao2: { label: "PaO2", units: ["mmHg", "kPa"] },
   hco3: { label: "Bicarbonate", units: ["mEq/L", "mmol/L"] },
   lactate: { label: "Lactate", units: ["mmol/L"] },
   na: { label: "Sodium", units: ["mEq/L", "mmol/L"] },
   potassium: { label: "Potassium", units: ["mmol/L", "mEq/L"] },
   cl: { label: "Chloride", units: ["mEq/L", "mmol/L"] },
-  albumin: { label: "Albumin", units: ["g/dL"] },
-  creatinine: { label: "Creatinine", units: ["mg/dL"] },
+  albumin: { label: "Albumin", units: ["g/dL", "g/L"] },
+  creatinine: { label: "Creatinine", units: ["mg/dL", "µmol/L", "μmol/L", "umol/L"] },
   glucose: { label: "Glucose", units: ["mg/dL", "mmol/L"] },
   ketones: { label: "Ketones", units: ["mmol/L"] },
   bilirubin: { label: "Bilirubin", units: ["mg/dL"] },
   platelets: { label: "Platelets", units: ["×10³/µL", "x10^3/uL", "10^3/µL", "/mm³", "×10⁹/L", "x10^9/L"] },
-  hb: { label: "Hemoglobin", units: ["g/dL"] },
+  hb: { label: "Hemoglobin", units: ["g/dL", "g/L"] },
   a1c: { label: "HbA1c", units: ["%"] },
   egfr: { label: "eGFR", units: ["mL/min/1.73m²", "mL/min/1.73m2", "mL/min"] },
-  acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g"] },
+  acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g", "mg/mmol"] },
   tc: { label: "Total cholesterol", units: ["mg/dL"] },
   hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
   "urine-output": { label: "Urine output", units: ["mL"] },
@@ -68,6 +69,8 @@ export interface ExtractedItem {
   episode: Episode;
   /** A laboratory result (blood, urine, gases, cultures). Only for display: the page lists these apart. */
   lab?: boolean;
+  /** The note says the patient does not have this ("no fever", "denies chest pain"). Never set for a finding the note does not mention; takes no `key`. */
+  absent?: boolean;
   /** When the note says it was taken, as written ("08:00", "on admission"); needed to tell repeated readings apart. */
   time?: string;
   /** The value as the note states it, e.g. "120/80", "1.4", "500 mg BID". */
@@ -367,7 +370,7 @@ export const toInputs = (checked: CheckedItem[]): ExtractionInputs => {
       : item.status !== "quoted" ? "not-verified"
       : item.episode !== "current" ? "no-episode"
       : key === "sex" && !sex ? "not-stated"
-      : key !== "sex" && value === null ? "not-a-number"
+      : key !== "sex" && (item.absent || value === null) ? "not-a-number"
       : !unitOk(key, item.unit) ? "unit"
       : count(key) > 1 ? "repeated"
       : null;

@@ -449,6 +449,8 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     // the notes on a value stand with its field, so the figures stay in line
     // the labs are one group: say which ones are from before this illness
     if (it.lab === true && it.episode === "history") name.appendChild(el("small", "", "history"));
+    // the note says the patient does not have it
+    if (it.absent === true) name.appendChild(el("small", "", "absent"));
     // when it was taken: the one thing the check cannot verify, so it is always shown
     if (it.time) name.appendChild(el("small", "", it.time));
     if (k === "close" || k === "bad") name.appendChild(el("span", "why", k === "close" ? "close match" : it.status === "mismatched" ? "not stated" : "not found"));
@@ -486,6 +488,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       var s = line("Note says"); s.appendChild(document.createTextNode(text.slice(it.start, it.end))); li.appendChild(s);
     }
     var meta = [(it.lab === true ? "Labs · " : "") + (it.episode === "history" ? "History" : "Current illness")];
+    if (it.absent === true) meta.push("Absent");
     if (it.time) meta.push(it.time);
     if (it.ambiguous) meta.push("Appears more than once: first occurrence marked");
     li.appendChild(el("p", "", meta.join(" · ")));
@@ -574,7 +577,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     // copies the items as extracted; status and offsets are computed, never stored
     json = JSON.stringify(items.map(function (i) {
       var o = {};
-      ["field", "key", "value", "unit", "quote", "episode", "lab", "time"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
+      ["field", "key", "value", "unit", "quote", "episode", "lab", "time", "absent"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
       return o;
     }), null, 2);
 
@@ -759,7 +762,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   function says(label, it, old) {
     var p = line(label);
     if (!it) return p;
-    p.appendChild(document.createTextNode(it.field + " "));
+    p.appendChild(document.createTextNode(it.field + (it.absent === true ? " (absent) " : " ")));
     p.appendChild(el("span", old ? "n x" : "n", it.value));
     p.appendChild(document.createTextNode((it.unit ? " " + it.unit : "") + " "));
     if (it.quote) p.appendChild(el("q", "", it.quote));

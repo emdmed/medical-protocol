@@ -78,9 +78,9 @@ All three share one layout: latest-reading value grid (value + unit + lib severi
 
 All inputs `string` (parsed via `safeParseFloat`) unless noted.
 
-- Staging: `calculateEGFR(creatinine, age, sex)` → `number`; `classifyGFRCategory(egfr)` → G1–G5; `getGFRCategoryLabel(category)`; `classifyAlbuminuriaCategory(acr)` → A1–A3; `getAlbuminuriaCategoryLabel(category)`; `getCKDRiskLevel(gfrCategory, albCategory)` → green / yellow / orange / red / deep-red; `getMonitoringFrequency(gfrCategory, albCategory)` → times/year; `getCKDSeverity(gfrCategory)` → normal / warning / critical; `GFR_BANDS` → `{ cuts: [15, 30, 45, 60, 90], labels }` and `ACR_BANDS` → `{ cuts: [30, 300], labels }`, the cut-offs and category names the two classifiers read; use them to draw a scale
+- Staging: `calculateEGFR(creatinine, age, sex)` → `number`; `classifyGFRCategory(egfr)` → G1–G5; `getGFRCategoryLabel(category)`; `classifyAlbuminuriaCategory(acr, unit = "mg/g")` → A1–A3 (`"mg/mmol"` uses KDIGO's cut-offs for that unit, 3 and 30); `acrInMgPerG(acr, unit)` → mg/g for KFRE, never for staging; `getAlbuminuriaCategoryLabel(category)`; `getCKDRiskLevel(gfrCategory, albCategory)` → green / yellow / orange / red / deep-red; `getMonitoringFrequency(gfrCategory, albCategory)` → times/year; `getCKDSeverity(gfrCategory)` → normal / warning / critical; `GFR_BANDS` → `{ cuts: [15, 30, 45, 60, 90], labels }` and `ACR_BANDS` → `{ cuts: [30, 300], labels }` (mg/g; `ACR_BANDS_MMOL` → `[3, 30]`), the cut-offs and category names the two classifiers read; use them to draw a scale
 - KFRE: `calculateKFRE(age, sex, egfr, acr)` → `{ twoYear, fiveYear }` (%); `assessReferralNeed(kfre5yr)` → none / nephrology / multidisciplinary / krt-planning; `getReferralLabel(referral)`
-- Treatment: `checkRASiEligibility(gfrCategory, albCategory, hasDiabetes)`, `checkSGLT2iEligibility(egfr, acr, hasHeartFailure)`, `checkFinerenoneEligibility(egfr, acr, hasDiabetes, onMaxRASi, potassiumNormal)` — each → `{ eligible, grade }`
+- Treatment: `checkRASiEligibility(gfrCategory, albCategory, hasDiabetes)`, `checkSGLT2iEligibility(egfr, acr, hasHeartFailure, acrUnit = "mg/g")`, `checkFinerenoneEligibility(egfr, acr, hasDiabetes, onMaxRASi, potassiumNormal, acrUnit = "mg/g")` — each → `{ eligible, grade }`; with `"mg/mmol"` the ACR is read against KDIGO's cut-offs for that unit (3 and 20 instead of 30 and 200)
 - Progression: `calculateEGFRSlope(readings: string)` — **JSON string** of `[{ egfr, date }]`, → `number | null`; `isRapidDecline(slope: string)` — ≤ −5/yr; `hasSignificantEGFRChange(previous, current)` — >20% drop; `hasACRDoubling(previous, current)`
 - Anemia / MBD (CLI-oriented, also usable): `classifyAnemia(hb, sex)`, `assessIronStatus(ferritin, tsat)`, `checkESAEligibility(hb, ferritin, tsat, sex)`, `assessPhosphate(phosphate, gfrCategory)`, `correctCalcium(calcium, albumin)`, `assessPTH(pth, gfrCategory)`, `assessVitaminD(vitaminD)`, `getCKDMBDMonitoring(gfrCategory)`
 
@@ -130,6 +130,7 @@ Non-HDL: `classifyNonHDL(calculateNonHDL(tc, hdl) ?? 0)`. Do not subtract in the
 medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male
 medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 45
 medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300
+medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 4.5 --acr-unit mg/mmol   # stage, kfre and treatment take --acr-unit (default mg/g)
 medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
 medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4
 ```

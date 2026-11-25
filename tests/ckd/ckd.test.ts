@@ -194,6 +194,14 @@ describe('classifyGFRCategory', () => {
 // ─── classifyAlbuminuriaCategory ────────────────────────────────────
 
 describe('classifyAlbuminuriaCategory', () => {
+  it('stages mg/mmol against its own cut-offs', () => {
+    expect(classifyAlbuminuriaCategory('2.9', 'mg/mmol')).toBe('A1');
+    // 26.5 mg/g by conversion, which would be A1
+    expect(classifyAlbuminuriaCategory('3', 'mg/mmol')).toBe('A2');
+    expect(classifyAlbuminuriaCategory('29.9', 'mg/mmol')).toBe('A2');
+    expect(classifyAlbuminuriaCategory('30', 'mg/mmol')).toBe('A3');
+  });
+
   it('returns A1 for ACR < 30', () => {
     expect(classifyAlbuminuriaCategory('0')).toBe('A1');
     expect(classifyAlbuminuriaCategory('10')).toBe('A1');
@@ -405,6 +413,14 @@ describe('checkRASiEligibility', () => {
 // ─── checkSGLT2iEligibility ─────────────────────────────────────────
 
 describe('checkSGLT2iEligibility', () => {
+  it('reads an ACR in mg/mmol against 20 and 3', () => {
+    expect(checkSGLT2iEligibility('35', '20', false, 'mg/mmol')).toEqual({ eligible: true, grade: '1A' });
+    expect(checkSGLT2iEligibility('35', '3', false, 'mg/mmol')).toEqual({ eligible: true, grade: '2B' });
+    expect(checkSGLT2iEligibility('35', '2.9', false, 'mg/mmol')).toEqual({ eligible: false, grade: '' });
+    expect(checkFinerenoneEligibility('35', '3', true, true, true, 'mg/mmol').eligible).toBe(true);
+    expect(checkFinerenoneEligibility('35', '2.9', true, true, true, 'mg/mmol').eligible).toBe(false);
+  });
+
   it('returns eligible 1A for eGFR ≥20 + ACR ≥200', () => {
     expect(checkSGLT2iEligibility('35', '250', false)).toEqual({ eligible: true, grade: '1A' });
   });

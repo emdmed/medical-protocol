@@ -2347,7 +2347,7 @@ Examples:
 });
 
 // ../../plugin/lib/ckd.ts
-var calculateEGFR, GFR_BANDS, classifyGFRCategory, getGFRCategoryLabel, ACR_BANDS, classifyAlbuminuriaCategory, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getMonitoringFrequency, calculateKFRE, assessReferralNeed, checkRASiEligibility, checkSGLT2iEligibility, checkFinerenoneEligibility, classifyAnemia, assessIronStatus, checkESAEligibility, assessPhosphate, correctCalcium, assessPTH, assessVitaminD, getCKDMBDMonitoring, getCKDSeverity;
+var calculateEGFR, GFR_BANDS, classifyGFRCategory, getGFRCategoryLabel, ACR_BANDS, ACR_BANDS_MMOL, classifyAlbuminuriaCategory, acrInMgPerG, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getMonitoringFrequency, calculateKFRE, assessReferralNeed, checkRASiEligibility, ACR_TREATMENT_CUTS, checkSGLT2iEligibility, checkFinerenoneEligibility, classifyAnemia, assessIronStatus, checkESAEligibility, assessPhosphate, correctCalcium, assessPTH, assessVitaminD, getCKDMBDMonitoring, getCKDSeverity;
 var init_ckd = __esm({
   "../../plugin/lib/ckd.ts"() {
     "use strict";
@@ -2390,10 +2390,16 @@ var init_ckd = __esm({
       cuts: [30, 300],
       labels: ["A1", "A2", "A3"]
     };
-    classifyAlbuminuriaCategory = (acr) => {
-      const val = safeParseFloat(acr);
-      return ACR_BANDS.labels[ACR_BANDS.cuts.filter((cut) => val >= cut).length];
+    ACR_BANDS_MMOL = {
+      cuts: [3, 30],
+      labels: ACR_BANDS.labels
     };
+    classifyAlbuminuriaCategory = (acr, unit = "mg/g") => {
+      const val = safeParseFloat(acr);
+      const bands = unit === "mg/mmol" ? ACR_BANDS_MMOL : ACR_BANDS;
+      return bands.labels[bands.cuts.filter((cut) => val >= cut).length];
+    };
+    acrInMgPerG = (acr, unit) => unit === "mg/mmol" ? Number((safeParseFloat(acr) * 8.84).toFixed(1)) : safeParseFloat(acr);
     getAlbuminuriaCategoryLabel = (category) => {
       const labels = {
         A1: "Normal to mildly increased",
@@ -2457,21 +2463,26 @@ var init_ckd = __esm({
       }
       return { eligible: false, grade: "" };
     };
-    checkSGLT2iEligibility = (egfr, acr, hasHeartFailure) => {
+    ACR_TREATMENT_CUTS = {
+      "mg/g": { a2: ACR_BANDS.cuts[0], sglt2i: 200 },
+      "mg/mmol": { a2: ACR_BANDS_MMOL.cuts[0], sglt2i: 20 }
+    };
+    checkSGLT2iEligibility = (egfr, acr, hasHeartFailure, acrUnit = "mg/g") => {
       const egfrVal = safeParseFloat(egfr);
       const acrVal = safeParseFloat(acr);
+      const cuts = ACR_TREATMENT_CUTS[acrUnit];
       if (egfrVal < 20) return { eligible: false, grade: "" };
-      if (acrVal >= 200) return { eligible: true, grade: "1A" };
+      if (acrVal >= cuts.sglt2i) return { eligible: true, grade: "1A" };
       if (hasHeartFailure) return { eligible: true, grade: "1A" };
-      if (acrVal >= 30) return { eligible: true, grade: "2B" };
+      if (acrVal >= cuts.a2) return { eligible: true, grade: "2B" };
       return { eligible: false, grade: "" };
     };
-    checkFinerenoneEligibility = (egfr, acr, hasDiabetes, onMaxRASi, potassiumNormal) => {
+    checkFinerenoneEligibility = (egfr, acr, hasDiabetes, onMaxRASi, potassiumNormal, acrUnit = "mg/g") => {
       const egfrVal = safeParseFloat(egfr);
       const acrVal = safeParseFloat(acr);
       if (!hasDiabetes) return { eligible: false, grade: "" };
       if (egfrVal < 25) return { eligible: false, grade: "" };
-      if (acrVal < 30) return { eligible: false, grade: "" };
+      if (acrVal < ACR_TREATMENT_CUTS[acrUnit].a2) return { eligible: false, grade: "" };
       if (!onMaxRASi) return { eligible: false, grade: "" };
       if (!potassiumNormal) return { eligible: false, grade: "" };
       return { eligible: true, grade: "1A" };
@@ -2607,7 +2618,7 @@ var ckd_exports = {};
 __export(ckd_exports, {
   run: () => run9
 });
-var USAGE9, failNotCalculated, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run9;
+var USAGE9, failNotCalculated, badAcrUnit, runEGFR, runStage, runKFRE, runTreatment, runAnemia, runMBD, run9;
 var init_ckd2 = __esm({
   "src/commands/ckd.ts"() {
     "use strict";
@@ -2629,17 +2640,20 @@ eGFR options:
   --sex <male|female>      Sex (required)
 
 Stage options (eGFR options plus):
-  --acr <number>           Urine albumin-to-creatinine ratio mg/g (required)
+  --acr <number>           Urine albumin-to-creatinine ratio (required)
+  --acr-unit <mg/g|mg/mmol>  Unit of --acr (default mg/g). mg/mmol is read against KDIGO's cut-offs for that unit
 
 KFRE options:
   --age <number>           Age in years (required)
   --sex <male|female>      Sex (required)
   --egfr <number>          eGFR mL/min/1.73m\xB2 (required)
-  --acr <number>           ACR mg/g (required)
+  --acr <number>           ACR (required)
+  --acr-unit <mg/g|mg/mmol>  Unit of --acr (default mg/g)
 
 Treatment options:
   --egfr <number>          eGFR mL/min/1.73m\xB2 (required)
-  --acr <number>           ACR mg/g (required)
+  --acr <number>           ACR (required)
+  --acr-unit <mg/g|mg/mmol>  Unit of --acr (default mg/g)
   --diabetes               Has diabetes
   --heart-failure          Has heart failure
   --on-rasi                On maximum tolerated RASi
@@ -2668,9 +2682,15 @@ Examples:
   medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 45
   medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300
   medprotocol ckd treatment --egfr 35 --acr 300 --diabetes
+  medprotocol ckd treatment --egfr 35 --acr 30 --acr-unit mg/mmol --diabetes
   medprotocol ckd anemia --hb 9.5 --sex male --ferritin 80 --tsat 15
   medprotocol ckd mbd --phosphate 5.2 --calcium 8.5 --albumin 3.2 --pth 250 --vitamin-d 18 --gfr-category G4`;
     failNotCalculated = () => fail("eGFR not calculated: CKD-EPI 2021 needs age 18 or older and creatinine above 0");
+    badAcrUnit = (unit) => {
+      if (unit === "mg/g" || unit === "mg/mmol") return false;
+      fail(`--acr-unit must be mg/g or mg/mmol, got "${unit}"`);
+      return true;
+    };
     runEGFR = (argv) => {
       const values = parseFlags(argv, {
         creatinine: { type: "string" },
@@ -2696,15 +2716,18 @@ Examples:
         creatinine: { type: "string" },
         age: { type: "string" },
         sex: { type: "string" },
-        acr: { type: "string" }
+        acr: { type: "string" },
+        "acr-unit": { type: "string", default: "mg/g" }
       }, USAGE9);
       if (!values) return;
       if (!requireFlags(values, ["creatinine", "age", "sex", "acr"], USAGE9)) return;
+      if (badAcrUnit(values["acr-unit"])) return;
+      const acrUnit = values["acr-unit"];
       const egfr = calculateEGFR(values.creatinine, values.age, values.sex);
       if (egfr === 0) return failNotCalculated();
       const gfrCategory = classifyGFRCategory(String(egfr));
       const gfrLabel = getGFRCategoryLabel(gfrCategory);
-      const albCategory = classifyAlbuminuriaCategory(values.acr);
+      const albCategory = classifyAlbuminuriaCategory(values.acr, acrUnit);
       const albLabel = getAlbuminuriaCategoryLabel(albCategory);
       const riskLevel = getCKDRiskLevel(gfrCategory, albCategory);
       const monitoring = getMonitoringFrequency(gfrCategory, albCategory);
@@ -2723,7 +2746,7 @@ Examples:
       printTable(data, values.json, "CKD CGA Staging (KDIGO)", [
         ["eGFR", `${egfr} mL/min/1.73m\xB2`],
         ["GFR Category", `${gfrCategory} \u2014 ${gfrLabel}`],
-        ["ACR", `${values.acr} mg/g`],
+        ["ACR", `${values.acr} ${acrUnit}`],
         ["Albuminuria", `${albCategory} \u2014 ${albLabel}`],
         ["Risk Level", riskLevel],
         ["Monitoring", `${monitoring}\xD7/year`],
@@ -2735,11 +2758,13 @@ Examples:
         age: { type: "string" },
         sex: { type: "string" },
         egfr: { type: "string" },
-        acr: { type: "string" }
+        acr: { type: "string" },
+        "acr-unit": { type: "string", default: "mg/g" }
       }, USAGE9);
       if (!values) return;
       if (!requireFlags(values, ["age", "sex", "egfr", "acr"], USAGE9)) return;
-      const kfre = calculateKFRE(values.age, values.sex, values.egfr, values.acr);
+      if (badAcrUnit(values["acr-unit"])) return;
+      const kfre = calculateKFRE(values.age, values.sex, values.egfr, String(acrInMgPerG(values.acr, values["acr-unit"])));
       const referral = assessReferralNeed(String(kfre.fiveYear));
       const data = {
         twoYearRisk: kfre.twoYear,
@@ -2756,6 +2781,7 @@ Examples:
       const values = parseFlags(argv, {
         egfr: { type: "string" },
         acr: { type: "string" },
+        "acr-unit": { type: "string", default: "mg/g" },
         diabetes: { type: "boolean", default: false },
         "heart-failure": { type: "boolean", default: false },
         "on-rasi": { type: "boolean", default: false },
@@ -2763,16 +2789,19 @@ Examples:
       }, USAGE9);
       if (!values) return;
       if (!requireFlags(values, ["egfr", "acr"], USAGE9)) return;
+      if (badAcrUnit(values["acr-unit"])) return;
+      const acrUnit = values["acr-unit"];
       const gfrCategory = classifyGFRCategory(values.egfr);
-      const albCategory = classifyAlbuminuriaCategory(values.acr);
+      const albCategory = classifyAlbuminuriaCategory(values.acr, acrUnit);
       const rasi = checkRASiEligibility(gfrCategory, albCategory, values.diabetes);
-      const sglt2i = checkSGLT2iEligibility(values.egfr, values.acr, values["heart-failure"]);
+      const sglt2i = checkSGLT2iEligibility(values.egfr, values.acr, values["heart-failure"], acrUnit);
       const finerenone = checkFinerenoneEligibility(
         values.egfr,
         values.acr,
         values.diabetes,
         values["on-rasi"],
-        values["potassium-normal"]
+        values["potassium-normal"],
+        acrUnit
       );
       const data = {
         gfrCategory,
@@ -3405,23 +3434,23 @@ var init_extraction = __esm({
       weight: { label: "Weight", units: ["kg", "lb", "lbs"] },
       height: { label: "Height", units: ["cm", "m", "in"] },
       ph: { label: "pH", units: [] },
-      pco2: { label: "pCO2", units: ["mmHg"] },
-      pao2: { label: "PaO2", units: ["mmHg"] },
+      pco2: { label: "pCO2", units: ["mmHg", "kPa"] },
+      pao2: { label: "PaO2", units: ["mmHg", "kPa"] },
       hco3: { label: "Bicarbonate", units: ["mEq/L", "mmol/L"] },
       lactate: { label: "Lactate", units: ["mmol/L"] },
       na: { label: "Sodium", units: ["mEq/L", "mmol/L"] },
       potassium: { label: "Potassium", units: ["mmol/L", "mEq/L"] },
       cl: { label: "Chloride", units: ["mEq/L", "mmol/L"] },
-      albumin: { label: "Albumin", units: ["g/dL"] },
-      creatinine: { label: "Creatinine", units: ["mg/dL"] },
+      albumin: { label: "Albumin", units: ["g/dL", "g/L"] },
+      creatinine: { label: "Creatinine", units: ["mg/dL", "\xB5mol/L", "\u03BCmol/L", "umol/L"] },
       glucose: { label: "Glucose", units: ["mg/dL", "mmol/L"] },
       ketones: { label: "Ketones", units: ["mmol/L"] },
       bilirubin: { label: "Bilirubin", units: ["mg/dL"] },
       platelets: { label: "Platelets", units: ["\xD710\xB3/\xB5L", "x10^3/uL", "10^3/\xB5L", "/mm\xB3", "\xD710\u2079/L", "x10^9/L"] },
-      hb: { label: "Hemoglobin", units: ["g/dL"] },
+      hb: { label: "Hemoglobin", units: ["g/dL", "g/L"] },
       a1c: { label: "HbA1c", units: ["%"] },
       egfr: { label: "eGFR", units: ["mL/min/1.73m\xB2", "mL/min/1.73m2", "mL/min"] },
-      acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g"] },
+      acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g", "mg/mmol"] },
       tc: { label: "Total cholesterol", units: ["mg/dL"] },
       hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
       "urine-output": { label: "Urine output", units: ["mL"] },
@@ -3607,7 +3636,7 @@ var init_extraction = __esm({
         const key = item.key;
         const value = toNumber(item.value);
         const sex = key === "sex" ? sexStated(item.value, item.quote) : null;
-        const reason = item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence" : item.status !== "quoted" ? "not-verified" : item.episode !== "current" ? "no-episode" : key === "sex" && !sex ? "not-stated" : key !== "sex" && value === null ? "not-a-number" : !unitOk(key, item.unit) ? "unit" : count(key) > 1 ? "repeated" : null;
+        const reason = item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence" : item.status !== "quoted" ? "not-verified" : item.episode !== "current" ? "no-episode" : key === "sex" && !sex ? "not-stated" : key !== "sex" && (item.absent || value === null) ? "not-a-number" : !unitOk(key, item.unit) ? "unit" : count(key) > 1 ? "repeated" : null;
         if (reason) out.review.push({ item, reason });
         else if (sex) out.sex = sex;
         else out.inputs[key] = { value, ...item.unit ? { unit: item.unit } : {}, quote: item.quote, ...item.time ? { time: item.time } : {} };
@@ -3646,6 +3675,33 @@ var init_nephrology = __esm({
     sf = (v) => {
       const n = parseFloat(v);
       return isNaN(n) ? 0 : n;
+    };
+  }
+});
+
+// ../../plugin/lib/units.ts
+var UMOL_PER_MGDL, MMHG_PER_KPA, FACTORS, toExpectedUnit;
+var init_units = __esm({
+  "../../plugin/lib/units.ts"() {
+    "use strict";
+    init_extraction();
+    UMOL_PER_MGDL = 88.4;
+    MMHG_PER_KPA = 7.50062;
+    FACTORS = {
+      creatinine: { digits: 2, from: { "\xB5mol/l": 1 / UMOL_PER_MGDL, "\u03BCmol/l": 1 / UMOL_PER_MGDL, "umol/l": 1 / UMOL_PER_MGDL } },
+      hb: { digits: 1, from: { "g/l": 0.1 } },
+      albumin: { digits: 1, from: { "g/l": 0.1 } },
+      pao2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
+      pco2: { digits: 1, from: { kpa: MMHG_PER_KPA } }
+    };
+    toExpectedUnit = (key, input) => {
+      if (key === "fio2" && !input.unit && input.value >= 0.21 && input.value <= 1) {
+        return { ...input, value: Number((input.value * 100).toFixed(1)), unit: "%", from: String(input.value) };
+      }
+      const rule = FACTORS[key];
+      const factor = input.unit && rule?.from[input.unit.trim().toLowerCase()];
+      if (!rule || !factor) return input;
+      return { ...input, value: Number((input.value * factor).toFixed(rule.digits)), unit: FIELDS[key].units[0], from: `${input.value} ${input.unit}` };
     };
   }
 });
@@ -4110,6 +4166,8 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     // the notes on a value stand with its field, so the figures stay in line
     // the labs are one group: say which ones are from before this illness
     if (it.lab === true && it.episode === "history") name.appendChild(el("small", "", "history"));
+    // the note says the patient does not have it
+    if (it.absent === true) name.appendChild(el("small", "", "absent"));
     // when it was taken: the one thing the check cannot verify, so it is always shown
     if (it.time) name.appendChild(el("small", "", it.time));
     if (k === "close" || k === "bad") name.appendChild(el("span", "why", k === "close" ? "close match" : it.status === "mismatched" ? "not stated" : "not found"));
@@ -4147,6 +4205,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       var s = line("Note says"); s.appendChild(document.createTextNode(text.slice(it.start, it.end))); li.appendChild(s);
     }
     var meta = [(it.lab === true ? "Labs · " : "") + (it.episode === "history" ? "History" : "Current illness")];
+    if (it.absent === true) meta.push("Absent");
     if (it.time) meta.push(it.time);
     if (it.ambiguous) meta.push("Appears more than once: first occurrence marked");
     li.appendChild(el("p", "", meta.join(" · ")));
@@ -4235,7 +4294,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     // copies the items as extracted; status and offsets are computed, never stored
     json = JSON.stringify(items.map(function (i) {
       var o = {};
-      ["field", "key", "value", "unit", "quote", "episode", "lab", "time"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
+      ["field", "key", "value", "unit", "quote", "episode", "lab", "time", "absent"].forEach(function (k) { if (i[k] != null) o[k] = i[k]; });
       return o;
     }), null, 2);
 
@@ -4420,7 +4479,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   function says(label, it, old) {
     var p = line(label);
     if (!it) return p;
-    p.appendChild(document.createTextNode(it.field + " "));
+    p.appendChild(document.createTextNode(it.field + (it.absent === true ? " (absent) " : " ")));
     p.appendChild(el("span", old ? "n x" : "n", it.value));
     p.appendChild(document.createTextNode((it.unit ? " " + it.unit : "") + " "));
     if (it.quote) p.appendChild(el("q", "", it.quote));
@@ -5825,6 +5884,7 @@ var init_extract = __esm({
     init_extraction();
     init_nephrology();
     init_pafi();
+    init_units();
     init_sources();
     init_format();
     init_cli();
@@ -5843,8 +5903,9 @@ Options:
                     so the same note always lands in the same folder. A <file> directly in extractions/
                     is a staging copy and is deleted once saved.
   --note <file>     The clinical note (plain text)
-  --items <file>    JSON array of { field, value, unit?, quote, episode, key?, time? }
+  --items <file>    JSON array of { field, value, unit?, quote, episode, key?, lab?, time?, absent? }
                     episode: "current" (this illness) or "history" (before it)
+                    absent: true when the note says the patient does not have it ("no fever")
   --artifact <file> Also write a page showing the note beside the extraction (HTML)
   --serve           Start the local extraction page server. Takes no other option but --port.
   --port <number>   Port for --serve (default 7332)
@@ -5878,6 +5939,8 @@ Example:
       if (badEpisode) return `"${badEpisode.field}" needs episode "current" or "history"`;
       const badKey = items.find((i) => i.key !== void 0 && !Object.hasOwn(FIELDS, i.key));
       if (badKey) return `unknown key "${badKey.key}" \u2014 use one of: ${Object.keys(FIELDS).join(", ")}`;
+      const badAbsent = items.find((i) => i.absent !== void 0 && (typeof i.absent !== "boolean" || i.absent && i.key !== void 0));
+      if (badAbsent) return `"${badAbsent.field}": absent is true or false, and an absent finding takes no key`;
       return null;
     };
     scaleOf = (label, value, unit, cuts, at, band, [lo, hi]) => {
@@ -5886,7 +5949,9 @@ Example:
       return { label, value, ...unit ? { unit } : {}, min: v < lo ? v - pad : lo, max: v > hi ? v + pad : hi, cuts: [...cuts], at, band };
     };
     calculations = (checked) => {
-      const { inputs, sex } = toInputs(checked);
+      const { inputs: asStated, sex } = toInputs(checked);
+      const inputs = Object.fromEntries(Object.entries(asStated).map(([k, v]) => [k, toExpectedUnit(k, v)]));
+      const converted = (...keys) => keys.flatMap((k) => inputs[k]?.from ? [[`${FIELDS[k].label}, converted`, String(inputs[k].value), `${inputs[k].unit} (note: ${inputs[k].from})`]] : []);
       const str = (k) => inputs[k] ? String(inputs[k].value) : "";
       const unit = (k) => inputs[k]?.unit?.trim().toLowerCase();
       const uses = (...keys) => keys.filter((k) => k === "sex" ? sex : inputs[k]).map((k) => checked.findIndex((c) => c.key === k && c.episode === "current"));
@@ -5902,7 +5967,7 @@ Example:
       const pafi = inputs.pao2 && inputs.fio2 ? calculatePaFi(str("pao2"), str("fio2")) : null;
       if (pafi) {
         const range = getPaFiClassification(pafi);
-        out.push({ title: "PaO2/FiO2", rows: [], scales: [scaleOf("Ratio", pafi, "mmHg", PAFI_BANDS.cuts, PAFI_BANDS.labels.indexOf(range), range, [0, 500])], uses: uses("pao2", "fio2"), source: BERLIN_2012 });
+        out.push({ title: "PaO2/FiO2", rows: converted("pao2", "fio2"), scales: [scaleOf("Ratio", pafi, "mmHg", PAFI_BANDS.cuts, PAFI_BANDS.labels.indexOf(range), range, [0, 500])], uses: uses("pao2", "fio2"), source: BERLIN_2012 });
       }
       const abg = inputs.ph && inputs.pco2 && inputs.hco3 ? analyze({ values: { pH: str("ph"), pCO2: str("pco2"), HCO3: str("hco3"), Na: str("na"), Cl: str("cl"), Albumin: str("albumin") }, isChronic: false }) : null;
       if (abg) {
@@ -5916,7 +5981,8 @@ Example:
             ["Disorder", abg.disorder],
             // the note does not say acute or chronic; same default as `medprotocol abg`
             ["Compensation", `${abg.compensation} (taken as acute)`],
-            ...abg.anionGap !== null ? [["Anion gap", abg.anionGap, `mEq/L, ${abg.agStatus}`]] : []
+            ...abg.anionGap !== null ? [["Anion gap", abg.anionGap, `mEq/L, ${abg.agStatus}`]] : [],
+            ...converted("pco2", "albumin")
           ],
           scales: [against("pH", "ph", NORMAL_RANGES.pH, [7.1, 7.7]), against("pCO2", "pco2", NORMAL_RANGES.pCO2, [20, 60]), against("Bicarbonate", "hco3", NORMAL_RANGES.HCO3, [10, 40])],
           uses: uses("ph", "pco2", "hco3", "na", "cl", "albumin"),
@@ -5928,12 +5994,14 @@ Example:
         return scaleOf(label, value, u, GFR_BANDS.cuts, GFR_BANDS.labels.indexOf(g), `${g}: ${getGFRCategoryLabel(g)}`, [0, 120]);
       };
       const made = inputs.creatinine && inputs.age && sex && unit("creatinine") === "mg/dl" ? calculateEGFR(str("creatinine"), str("age"), sex) : 0;
-      if (made) out.push({ title: "eGFR from creatinine", rows: [], scales: [gfrScale("eGFR", String(made), "mL/min/1.73m\xB2")], uses: uses("creatinine", "age", "sex"), source: CKD_EPI_2021 });
+      if (made) out.push({ title: "eGFR from creatinine", rows: converted("creatinine"), scales: [gfrScale("eGFR", String(made), "mL/min/1.73m\xB2")], uses: uses("creatinine", "age", "sex"), source: CKD_EPI_2021 });
       const stated = !!inputs.egfr && !!unit("egfr")?.includes("1.73");
       const egfr = stated ? str("egfr") : made ? String(made) : "";
-      if (egfr && inputs.acr && unit("acr") === "mg/g") {
+      const acrUnit = unit("acr");
+      if (egfr && inputs.acr && (acrUnit === "mg/g" || acrUnit === "mg/mmol")) {
+        const mmol = acrUnit === "mg/mmol";
         const g = classifyGFRCategory(egfr);
-        const a = classifyAlbuminuriaCategory(str("acr"));
+        const a = classifyAlbuminuriaCategory(str("acr"), acrUnit);
         const risk = getCKDRiskLevel(g, a);
         const from = stated ? uses("egfr", "acr") : uses("creatinine", "age", "sex", "acr");
         out.push({
@@ -5941,21 +6009,22 @@ Example:
           rows: [["Stage", `${g} ${a}`], ["Risk level", risk], ["Monitoring", String(getMonitoringFrequency(g, a)), "times a year"]],
           scales: [
             stated ? gfrScale("eGFR", egfr, inputs.egfr.unit) : gfrScale("eGFR, calculated", egfr, "mL/min/1.73m\xB2"),
-            scaleOf("ACR", str("acr"), inputs.acr.unit, ACR_BANDS.cuts, ACR_BANDS.labels.indexOf(a), `${a}: ${getAlbuminuriaCategoryLabel(a)}`, [0, 500])
+            scaleOf("ACR", str("acr"), inputs.acr.unit, (mmol ? ACR_BANDS_MMOL : ACR_BANDS).cuts, ACR_BANDS.labels.indexOf(a), `${a}: ${getAlbuminuriaCategoryLabel(a)}`, mmol ? [0, 50] : [0, 500])
           ],
           uses: from,
           source: KDIGO_2024_CKD
         });
         if (sex && inputs.age && g !== "G1" && g !== "G2" && inputs.acr.value > 0) {
-          const kfre = calculateKFRE(str("age"), sex, egfr, str("acr"));
-          out.push({ title: "Kidney failure risk (KFRE)", rows: [["In 2 years", String(kfre.twoYear), "%"], ["In 5 years", String(kfre.fiveYear), "%"]], scales: [], uses: [.../* @__PURE__ */ new Set([...from, ...uses("age", "sex")])], source: KFRE_TANGRI });
+          const perG = String(acrInMgPerG(str("acr"), acrUnit));
+          const kfre = calculateKFRE(str("age"), sex, egfr, perG);
+          out.push({ title: "Kidney failure risk (KFRE)", rows: [["In 2 years", String(kfre.twoYear), "%"], ["In 5 years", String(kfre.fiveYear), "%"], ...mmol ? [["ACR, converted", perG, `mg/g (note: ${str("acr")} ${inputs.acr.unit})`]] : []], scales: [], uses: [.../* @__PURE__ */ new Set([...from, ...uses("age", "sex")])], source: KFRE_TANGRI });
         }
         if (risk !== "green" && inputs.sbp && inputs.dbp) {
           out.push({ title: "Blood pressure in CKD", rows: [["Reading", `${str("sbp")}/${str("dbp")}`, "mmHg"], ["Against target", classifyBPInCKD(str("sbp"), str("dbp")).label]], scales: [], uses: uses("sbp", "dbp"), source: KDIGO_2021_BP });
         }
         if (risk !== "green" && inputs.hb && sex && unit("hb") === "g/dl") {
           const anemia = classifyAnemia(str("hb"), sex);
-          out.push({ title: "Anemia in CKD", rows: [["Hemoglobin", str("hb"), inputs.hb.unit], ["Anemia", anemia.anemic ? `Yes, ${anemia.severity}` : "No"]], scales: [], uses: uses("hb", "sex"), source: KDIGO_2012_ANEMIA });
+          out.push({ title: "Anemia in CKD", rows: [["Hemoglobin", str("hb"), inputs.hb.unit], ["Anemia", anemia.anemic ? `Yes, ${anemia.severity}` : "No"], ...converted("hb")], scales: [], uses: uses("hb", "sex"), source: KDIGO_2012_ANEMIA });
         }
       }
       return out;

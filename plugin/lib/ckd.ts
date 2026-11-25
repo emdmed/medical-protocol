@@ -78,15 +78,32 @@ export const ACR_BANDS = {
   labels: ["A1", "A2", "A3"],
 } as const;
 
+export type ACRUnit = "mg/g" | "mg/mmol";
+
+/** The same categories for an ACR in mg/mmol. KDIGO states these cut-offs itself; they are not 30 and 300 mg/g converted (that would be 3.4 and 34). */
+export const ACR_BANDS_MMOL = {
+  cuts: [3, 30],
+  labels: ACR_BANDS.labels,
+} as const;
+
 /**
- * Classify ACR (mg/g) into KDIGO albuminuria categories A1–A3.
+ * Classify ACR into KDIGO albuminuria categories A1–A3, against the cut-offs of its own unit.
  */
 export const classifyAlbuminuriaCategory = (
   acr: string,
+  unit: ACRUnit = "mg/g",
 ): string => {
   const val = safeParseFloat(acr);
-  return ACR_BANDS.labels[ACR_BANDS.cuts.filter((cut) => val >= cut).length];
+  const bands = unit === "mg/mmol" ? ACR_BANDS_MMOL : ACR_BANDS;
+  return bands.labels[bands.cuts.filter((cut) => val >= cut).length];
 };
+
+/**
+ * ACR in mg/g, 1 decimal: 1 mg/mmol = 8.84 mg/g (creatinine, 113.12 g/mol). For equations that take
+ * mg/g (KFRE). Never for staging: classify an ACR in mg/mmol in its own unit.
+ */
+export const acrInMgPerG = (acr: string, unit: ACRUnit): number =>
+  unit === "mg/mmol" ? Number((safeParseFloat(acr) * 8.84).toFixed(1)) : safeParseFloat(acr);
 
 /**
  * Albuminuria category label descriptions.
@@ -229,25 +246,33 @@ export const checkRASiEligibility = (
   return { eligible: false, grade: "" };
 };
 
+/** The ACR cut-offs the treatment criteria read, as KDIGO states them in each unit: A2 from 30 mg/g (3 mg/mmol), SGLT2i grade 1A from 200 mg/g (20 mg/mmol). */
+const ACR_TREATMENT_CUTS = {
+  "mg/g": { a2: ACR_BANDS.cuts[0], sglt2i: 200 },
+  "mg/mmol": { a2: ACR_BANDS_MMOL.cuts[0], sglt2i: 20 },
+} as const;
+
 /**
- * SGLT2i eligibility: eGFR ≥20 + (ACR ≥200 or heart failure).
+ * SGLT2i eligibility: eGFR ≥20 + (ACR ≥200 mg/g or heart failure).
  */
 export const checkSGLT2iEligibility = (
   egfr: string,
   acr: string,
   hasHeartFailure: boolean,
+  acrUnit: ACRUnit = "mg/g",
 ): { eligible: boolean; grade: string } => {
   const egfrVal = safeParseFloat(egfr);
   const acrVal = safeParseFloat(acr);
+  const cuts = ACR_TREATMENT_CUTS[acrUnit];
   if (egfrVal < 20) return { eligible: false, grade: "" };
-  if (acrVal >= 200) return { eligible: true, grade: "1A" };
+  if (acrVal >= cuts.sglt2i) return { eligible: true, grade: "1A" };
   if (hasHeartFailure) return { eligible: true, grade: "1A" };
-  if (acrVal >= 30) return { eligible: true, grade: "2B" };
+  if (acrVal >= cuts.a2) return { eligible: true, grade: "2B" };
   return { eligible: false, grade: "" };
 };
 
 /**
- * Finerenone (MRA) eligibility: diabetic CKD + eGFR ≥25 + ACR ≥30 + on max RASi + normal K+.
+ * Finerenone (MRA) eligibility: diabetic CKD + eGFR ≥25 + ACR ≥30 mg/g + on max RASi + normal K+.
  */
 export const checkFinerenoneEligibility = (
   egfr: string,
@@ -255,12 +280,13 @@ export const checkFinerenoneEligibility = (
   hasDiabetes: boolean,
   onMaxRASi: boolean,
   potassiumNormal: boolean,
+  acrUnit: ACRUnit = "mg/g",
 ): { eligible: boolean; grade: string } => {
   const egfrVal = safeParseFloat(egfr);
   const acrVal = safeParseFloat(acr);
   if (!hasDiabetes) return { eligible: false, grade: "" };
   if (egfrVal < 25) return { eligible: false, grade: "" };
-  if (acrVal < 30) return { eligible: false, grade: "" };
+  if (acrVal < ACR_TREATMENT_CUTS[acrUnit].a2) return { eligible: false, grade: "" };
   if (!onMaxRASi) return { eligible: false, grade: "" };
   if (!potassiumNormal) return { eligible: false, grade: "" };
   return { eligible: true, grade: "1A" };

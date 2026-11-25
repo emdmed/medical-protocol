@@ -144,6 +144,21 @@ describe('medprotocol ckd kfre', () => {
 // ── Treatment ──────────────────────────────────────────
 
 describe('medprotocol ckd treatment', () => {
+  it('reads --acr in mg/mmol against its own cut-offs, and refuses an unknown unit', () => {
+    // 20 mg/mmol is A2 and SGLT2i grade 1A; read as 20 mg/g it would be A1
+    run(['treatment', '--egfr', '35', '--acr', '20', '--acr-unit', 'mg/mmol', '--json']);
+    expect(JSON.parse(stdout)).toMatchObject({ albCategory: 'A2', sglt2i: { eligible: true, grade: '1A' } });
+    stdout = '';
+    run(['kfre', '--age', '65', '--sex', 'female', '--egfr', '35', '--acr', '300', '--json']);
+    const perG = stdout;
+    stdout = '';
+    run(['kfre', '--age', '65', '--sex', 'female', '--egfr', '35', '--acr', '33.94', '--acr-unit', 'mg/mmol', '--json']);
+    expect(stdout).toBe(perG);
+    run(['treatment', '--egfr', '35', '--acr', '20', '--acr-unit', 'mg/dL']);
+    expect(process.exitCode).toBe(1);
+    expect(stderr).toContain('--acr-unit must be mg/g or mg/mmol');
+  });
+
   it('shows treatment eligibility for valid inputs', () => {
     run(['treatment', '--egfr', '35', '--acr', '300', '--diabetes']);
     expect(stdout).toContain('Guideline Criteria');

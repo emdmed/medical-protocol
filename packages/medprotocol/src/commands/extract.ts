@@ -7,10 +7,11 @@ import type { AddressInfo } from "node:net";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { analyze, NORMAL_RANGES } from "../../../../plugin/lib/acid-base";
 import { BMI_BANDS, calculateBMI, getBMICategory } from "../../../../plugin/lib/bmi";
-import { ACR_BANDS, GFR_BANDS, calculateEGFR, calculateKFRE, classifyAlbuminuriaCategory, classifyAnemia, classifyGFRCategory, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getGFRCategoryLabel, getMonitoringFrequency } from "../../../../plugin/lib/ckd";
+import { ACR_BANDS, ACR_BANDS_MMOL, GFR_BANDS, acrInMgPerG, calculateEGFR, calculateKFRE, classifyAlbuminuriaCategory, classifyAnemia, classifyGFRCategory, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getGFRCategoryLabel, getMonitoringFrequency } from "../../../../plugin/lib/ckd";
 import { FIELDS, EPISODES, applyFindings, checkExtraction, checkItem, noteSegments, toInputs, type CheckedItem, type ExtractedItem, type FieldKey, type Finding } from "../../../../plugin/lib/extraction";
 import { classifyBPInCKD } from "../../../../plugin/lib/nephrology";
 import { PAFI_BANDS, calculatePaFi, getPaFiClassification } from "../../../../plugin/lib/pafi";
+import { toExpectedUnit, type ConvertedInput } from "../../../../plugin/lib/units";
 import { BERLIN_2012, CKD_EPI_2021, KDIGO_2012_ANEMIA, KDIGO_2021_BP, KDIGO_2024_CKD, KFRE_TANGRI, WHO_BMI_2000, WINTERS_1967 } from "../../../../plugin/lib/sources";
 import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
 import { fail, parseFlags } from "../cli";
@@ -30,8 +31,9 @@ Options:
                     so the same note always lands in the same folder. A <file> directly in extractions/
                     is a staging copy and is deleted once saved.
   --note <file>     The clinical note (plain text)
-  --items <file>    JSON array of { field, value, unit?, quote, episode, key?, time? }
+  --items <file>    JSON array of { field, value, unit?, quote, episode, key?, lab?, time?, absent? }
                     episode: "current" (this illness) or "history" (before it)
+                    absent: true when the note says the patient does not have it ("no fever")
   --artifact <file> Also write a page showing the note beside the extraction (HTML)
   --serve           Start the local extraction page server. Takes no other option but --port.
   --port <number>   Port for --serve (default 7332)
@@ -70,6 +72,9 @@ const itemsError = (items: unknown): string | null => {
   if (badEpisode) return `"${badEpisode.field}" needs episode "current" or "history"`;
   const badKey = items.find((i) => i.key !== undefined && !Object.hasOwn(FIELDS, i.key));
   if (badKey) return `unknown key "${badKey.key}" — use one of: ${Object.keys(FIELDS).join(", ")}`;
+  // a denied finding is not a reading: it can never feed a calculator
+  const badAbsent = items.find((i) => i.absent !== undefined && (typeof i.absent !== "boolean" || (i.absent && i.key !== undefined)));
+  if (badAbsent) return `"${badAbsent.field}": absent is true or false, and an absent finding takes no key`;
   return null;
 };
 
@@ -109,7 +114,12 @@ export interface Calculation {
  * result, never a guess. Every number and category comes from plugin/lib.
  */
 export const calculations = (checked: CheckedItem[]): Calculation[] => {
-  const { inputs, sex } = toInputs(checked);
+  const { inputs: asStated, sex } = toInputs(checked);
+  // each input in the unit its calculator takes; `from` is set on the ones converted
+  const inputs = Object.fromEntries(Object.entries(asStated).map(([k, v]) => [k, toExpectedUnit(k as FieldKey, v)])) as Partial<Record<FieldKey, ConvertedInput>>;
+  // a converted input is shown beside what the note states
+  const converted = (...keys: FieldKey[]): Calculation["rows"] =>
+    keys.flatMap((k) => (inputs[k]?.from ? [[`${FIELDS[k].label}, converted`, String(inputs[k]!.value), `${inputs[k]!.unit} (note: ${inputs[k]!.from})`] as [string, string, string]] : []));
   const str = (k: FieldKey): string => (inputs[k] ? String(inputs[k]!.value) : "");
   const unit = (k: FieldKey): string | undefined => inputs[k]?.unit?.trim().toLowerCase();
   // a key in `inputs` was extracted once in the current illness
@@ -126,11 +136,11 @@ export const calculations = (checked: CheckedItem[]): Calculation[] => {
     if (bmi) out.push({ title: "Body mass index", rows: [], scales: [scaleOf("BMI", bmi, "kg/m²", BMI_BANDS.cuts, (BMI_BANDS.labels as readonly string[]).indexOf(category), category, [15, 45])], uses: uses("weight", "height"), source: WHO_BMI_2000 });
   }
 
-  // an FiO2 written as a fraction (0.4) is refused by the lib, not converted
+  // an FiO2 outside 21 to 100 is refused by the lib
   const pafi = inputs.pao2 && inputs.fio2 ? calculatePaFi(str("pao2"), str("fio2")) : null;
   if (pafi) {
     const range = getPaFiClassification(pafi);
-    out.push({ title: "PaO2/FiO2", rows: [], scales: [scaleOf("Ratio", pafi, "mmHg", PAFI_BANDS.cuts, (PAFI_BANDS.labels as readonly string[]).indexOf(range), range, [0, 500])], uses: uses("pao2", "fio2"), source: BERLIN_2012 });
+    out.push({ title: "PaO2/FiO2", rows: converted("pao2", "fio2"), scales: [scaleOf("Ratio", pafi, "mmHg", PAFI_BANDS.cuts, (PAFI_BANDS.labels as readonly string[]).indexOf(range), range, [0, 500])], uses: uses("pao2", "fio2"), source: BERLIN_2012 });
   }
 
   const abg =
@@ -150,6 +160,7 @@ export const calculations = (checked: CheckedItem[]): Calculation[] => {
         // the note does not say acute or chronic; same default as `medprotocol abg`
         ["Compensation", `${abg.compensation} (taken as acute)`],
         ...(abg.anionGap !== null ? [["Anion gap", abg.anionGap, `mEq/L, ${abg.agStatus}`] as [string, string, string]] : []),
+        ...converted("pco2", "albumin"),
       ],
       scales: [against("pH", "ph", NORMAL_RANGES.pH, [7.1, 7.7]), against("pCO2", "pco2", NORMAL_RANGES.pCO2, [20, 60]), against("Bicarbonate", "hco3", NORMAL_RANGES.HCO3, [10, 40])],
       uses: uses("ph", "pco2", "hco3", "na", "cl", "albumin"),
@@ -161,17 +172,20 @@ export const calculations = (checked: CheckedItem[]): Calculation[] => {
     const g = classifyGFRCategory(value);
     return scaleOf(label, value, u, GFR_BANDS.cuts, (GFR_BANDS.labels as readonly string[]).indexOf(g), `${g}: ${getGFRCategoryLabel(g)}`, [0, 120]);
   };
-  // a creatinine with no unit may be in µmol/L: not guessed. The lib gives 0 when it cannot calculate (under 18)
+  // a creatinine with no unit may be in µmol/L: not guessed; one stated in µmol/L was converted above. The lib gives 0 when it cannot calculate (under 18)
   const made = inputs.creatinine && inputs.age && sex && unit("creatinine") === "mg/dl" ? calculateEGFR(str("creatinine"), str("age"), sex) : 0;
-  if (made) out.push({ title: "eGFR from creatinine", rows: [], scales: [gfrScale("eGFR", String(made), "mL/min/1.73m²")], uses: uses("creatinine", "age", "sex"), source: CKD_EPI_2021 });
+  if (made) out.push({ title: "eGFR from creatinine", rows: converted("creatinine"), scales: [gfrScale("eGFR", String(made), "mL/min/1.73m²")], uses: uses("creatinine", "age", "sex"), source: CKD_EPI_2021 });
 
   // the categories are per 1.73 m²: an eGFR with no unit or in plain mL/min (it may be a clearance) is not staged.
   // The eGFR the note states comes first; without one, the one worked out above
   const stated = !!inputs.egfr && !!unit("egfr")?.includes("1.73");
   const egfr = stated ? str("egfr") : made ? String(made) : "";
-  if (egfr && inputs.acr && unit("acr") === "mg/g") {
+  // an ACR in mg/mmol is staged against KDIGO's cut-offs for that unit, not converted: 3 mg/mmol is A2, 26.5 mg/g is not
+  const acrUnit = unit("acr");
+  if (egfr && inputs.acr && (acrUnit === "mg/g" || acrUnit === "mg/mmol")) {
+    const mmol = acrUnit === "mg/mmol";
     const g = classifyGFRCategory(egfr);
-    const a = classifyAlbuminuriaCategory(str("acr"));
+    const a = classifyAlbuminuriaCategory(str("acr"), acrUnit);
     const risk = getCKDRiskLevel(g, a);
     const from = stated ? uses("egfr", "acr") : uses("creatinine", "age", "sex", "acr");
     out.push({
@@ -179,15 +193,17 @@ export const calculations = (checked: CheckedItem[]): Calculation[] => {
       rows: [["Stage", `${g} ${a}`], ["Risk level", risk], ["Monitoring", String(getMonitoringFrequency(g, a)), "times a year"]],
       scales: [
         stated ? gfrScale("eGFR", egfr, inputs.egfr!.unit!) : gfrScale("eGFR, calculated", egfr, "mL/min/1.73m²"),
-        scaleOf("ACR", str("acr"), inputs.acr.unit, ACR_BANDS.cuts, (ACR_BANDS.labels as readonly string[]).indexOf(a), `${a}: ${getAlbuminuriaCategoryLabel(a)}`, [0, 500]),
+        scaleOf("ACR", str("acr"), inputs.acr.unit, (mmol ? ACR_BANDS_MMOL : ACR_BANDS).cuts, (ACR_BANDS.labels as readonly string[]).indexOf(a), `${a}: ${getAlbuminuriaCategoryLabel(a)}`, mmol ? [0, 50] : [0, 500]),
       ],
       uses: from,
       source: KDIGO_2024_CKD,
     });
     // the equation was built in CKD G3 to G5; an ACR of 0 has no logarithm
     if (sex && inputs.age && g !== "G1" && g !== "G2" && inputs.acr.value > 0) {
-      const kfre = calculateKFRE(str("age"), sex, egfr, str("acr"));
-      out.push({ title: "Kidney failure risk (KFRE)", rows: [["In 2 years", String(kfre.twoYear), "%"], ["In 5 years", String(kfre.fiveYear), "%"]], scales: [], uses: [...new Set([...from, ...uses("age", "sex")])], source: KFRE_TANGRI });
+      // the equation takes mg/g
+      const perG = String(acrInMgPerG(str("acr"), acrUnit));
+      const kfre = calculateKFRE(str("age"), sex, egfr, perG);
+      out.push({ title: "Kidney failure risk (KFRE)", rows: [["In 2 years", String(kfre.twoYear), "%"], ["In 5 years", String(kfre.fiveYear), "%"], ...(mmol ? [["ACR, converted", perG, `mg/g (note: ${str("acr")} ${inputs.acr.unit})`] as [string, string, string]] : [])], scales: [], uses: [...new Set([...from, ...uses("age", "sex")])], source: KFRE_TANGRI });
     }
     // the CKD target is for CKD: G1 or G2 with A1 (green) is not CKD by these two values alone
     if (risk !== "green" && inputs.sbp && inputs.dbp) {
@@ -196,7 +212,7 @@ export const calculations = (checked: CheckedItem[]): Calculation[] => {
     // a hemoglobin with no unit may be in g/L: not guessed
     if (risk !== "green" && inputs.hb && sex && unit("hb") === "g/dl") {
       const anemia = classifyAnemia(str("hb"), sex);
-      out.push({ title: "Anemia in CKD", rows: [["Hemoglobin", str("hb"), inputs.hb.unit], ["Anemia", anemia.anemic ? `Yes, ${anemia.severity}` : "No"]], scales: [], uses: uses("hb", "sex"), source: KDIGO_2012_ANEMIA });
+      out.push({ title: "Anemia in CKD", rows: [["Hemoglobin", str("hb"), inputs.hb.unit], ["Anemia", anemia.anemic ? `Yes, ${anemia.severity}` : "No"], ...converted("hb")], scales: [], uses: uses("hb", "sex"), source: KDIGO_2012_ANEMIA });
     }
   }
   return out;
