@@ -39,7 +39,7 @@ Do NOT ask about thresholds, which findings count, or technical preferences.
 
 ### From a clinical note
 
-1. Run the extract skill on the note (`../extract/SKILL.md`), with its privacy steps. Its `exam` output (`extraction.md` § Examination findings) covers shock's five findings; every other finding comes from the note's own words, quoted, with the doctor confirming it.
+1. Run the extract skill on the note (`../extract/SKILL.md`), with its privacy steps. Its `exam` output (`extraction.md` § Examination findings) carries the findings every rule reads, and the extraction page's "Syndromic evaluation" tab draws one card per rule the note gives a finding for. Imaging and symptom duration are not extracted: add them by hand for focal pulmonary.
 2. Run each assessment from the table whose findings the note states, with `--json`. A finding the note does not state is left out, which the rule reads as not assessed. Never infer a finding from a diagnosis, a lab or imaging, and never carry one rule's verdict into another's input.
 3. Tell the doctor, per assessment: the verdict, each finding with the words it came from, the findings not in the note, anything listed under `notCalculated`, and the rule's caveat line.
 

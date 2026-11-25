@@ -330,6 +330,8 @@ describe('toExam', () => {
 
   it('readsOk takes only a listed reading of a listed finding', () => {
     expect(readsOk('lungExam', 'bilateral_crackles')).toBe(true);
+    expect(readsOk('rightPercussion', 'stony_dull')).toBe(true);
+    expect(readsOk('oxygenSupport', 'not_assessed')).toBe(false);
     expect(readsOk('lungs', 'clear')).toBe(false);
     expect(readsOk('toString', 'clear')).toBe(false);
     expect(readsOk(undefined, 'cool')).toBe(false);

@@ -7,6 +7,10 @@
  * failed check into a passing one. Ported from medextract's `core/verify.ts`.
  */
 
+import { SIDE_FINDINGS, TRACHEA } from "./chest-exam";
+import { HISTORY_FINDINGS } from "./focal-pulmonary";
+import { HEART_FAILURE_FINDINGS } from "./heart-failure";
+import { ENUM_FIELDS } from "./respiratory-failure";
 import { SHOCK_FINDINGS } from "./shock";
 
 /**
@@ -61,10 +65,38 @@ export type FieldKey = keyof typeof FIELDS;
 
 /**
  * The examination findings a syndromic assessment reads, and what each may be read as. Nothing is
- * decided here: the lists are the vocabulary of the rules (shock.ts). `not_assessed` is never
- * extracted: a finding the note does not state gets no item.
+ * decided here: the lists are the vocabulary of the rules (shock.ts, heart-failure.ts, chest-exam.ts,
+ * focal-pulmonary.ts, respiratory-failure.ts). `not_assessed` is never extracted: a finding the note
+ * does not state gets no item. `jvp` and `lungExam` are read by more than one rule.
  */
-export const EXAM_FINDINGS = SHOCK_FINDINGS;
+export const EXAM_FINDINGS = {
+  ...SHOCK_FINDINGS,
+  thirdHeartSound: HEART_FAILURE_FINDINGS.thirdHeartSound,
+  hepatojugularReflux: ["present", "absent"],
+  hepatomegaly: HEART_FAILURE_FINDINGS.hepatomegaly,
+  peripheralOedema: HEART_FAILURE_FINDINGS.peripheralOedema,
+  breathlessness: HISTORY_FINDINGS.breathlessness,
+  cough: HISTORY_FINDINGS.cough,
+  sputum: HISTORY_FINDINGS.sputum,
+  fever: HISTORY_FINDINGS.reportedFever,
+  pleuriticPain: HISTORY_FINDINGS.pleuriticPain,
+  trachea: TRACHEA,
+  rightExpansion: SIDE_FINDINGS.expansion,
+  rightPercussion: SIDE_FINDINGS.percussion,
+  rightBreathSounds: SIDE_FINDINGS.breathSounds,
+  rightAddedSounds: SIDE_FINDINGS.addedSounds,
+  rightVocalResonance: SIDE_FINDINGS.vocalResonance,
+  leftExpansion: SIDE_FINDINGS.expansion,
+  leftPercussion: SIDE_FINDINGS.percussion,
+  leftBreathSounds: SIDE_FINDINGS.breathSounds,
+  leftAddedSounds: SIDE_FINDINGS.addedSounds,
+  leftVocalResonance: SIDE_FINDINGS.vocalResonance,
+  oxygenSupport: ENUM_FIELDS.oxygenSupport,
+  accessoryMuscles: ENUM_FIELDS.accessoryMuscles,
+  speech: ENUM_FIELDS.speech,
+  paradoxicalBreathing: ENUM_FIELDS.paradoxicalBreathing,
+  cyanosis: ENUM_FIELDS.cyanosis,
+} as const;
 export type ExamKey = keyof typeof EXAM_FINDINGS;
 
 /** `reads` is one of the things an `exam` finding may be read as. */

@@ -4,19 +4,20 @@
  * listed here is left as stated.
  */
 
-import { FIELDS, type ExtractedInput, type FieldKey } from "./extraction";
+// type-only: extraction.ts reads the rules' vocabularies, and respiratory-failure.ts imports this file
+import type { ExtractedInput, FieldKey } from "./extraction";
 
 const UMOL_PER_MGDL = 88.4; // creatinine, 113.12 g/mol
 export const MMHG_PER_KPA = 7.50062;
 
-/** Per key: the note's unit (lower case) → what to multiply by, and the decimals kept. The target is the key's first unit in `FIELDS`. */
-const FACTORS: Partial<Record<FieldKey, { digits: number; from: Record<string, number> }>> = {
-  creatinine: { digits: 2, from: { "µmol/l": 1 / UMOL_PER_MGDL, "μmol/l": 1 / UMOL_PER_MGDL, "umol/l": 1 / UMOL_PER_MGDL } },
-  hb: { digits: 1, from: { "g/l": 0.1 } },
-  albumin: { digits: 1, from: { "g/l": 0.1 } },
-  pao2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
-  pco2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
-  "hypotension-min": { digits: 0, from: { h: 60, hr: 60, hrs: 60, hour: 60, hours: 60, horas: 60 } },
+/** Per key: the note's unit (lower case) → what to multiply by, the decimals kept, and the target: the key's first unit in `FIELDS`. */
+const FACTORS: Partial<Record<FieldKey, { digits: number; to: string; from: Record<string, number> }>> = {
+  creatinine: { digits: 2, to: "mg/dL", from: { "µmol/l": 1 / UMOL_PER_MGDL, "μmol/l": 1 / UMOL_PER_MGDL, "umol/l": 1 / UMOL_PER_MGDL } },
+  hb: { digits: 1, to: "g/dL", from: { "g/l": 0.1 } },
+  albumin: { digits: 1, to: "g/dL", from: { "g/l": 0.1 } },
+  pao2: { digits: 1, to: "mmHg", from: { kpa: MMHG_PER_KPA } },
+  pco2: { digits: 1, to: "mmHg", from: { kpa: MMHG_PER_KPA } },
+  "hypotension-min": { digits: 0, to: "min", from: { h: 60, hr: 60, hrs: 60, hour: 60, hours: 60, horas: 60 } },
 };
 
 export interface ConvertedInput extends ExtractedInput {
@@ -33,5 +34,5 @@ export const toExpectedUnit = (key: FieldKey, input: ExtractedInput): ConvertedI
   const rule = FACTORS[key];
   const factor = input.unit && rule?.from[input.unit.trim().toLowerCase()];
   if (!rule || !factor) return input;
-  return { ...input, value: Number((input.value * factor).toFixed(rule.digits)), unit: (FIELDS[key].units as readonly string[])[0], from: `${input.value} ${input.unit}` };
+  return { ...input, value: Number((input.value * factor).toFixed(rule.digits)), unit: rule.to, from: `${input.value} ${input.unit}` };
 };

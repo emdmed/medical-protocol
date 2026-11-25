@@ -8,12 +8,17 @@ import { basename, dirname, extname, join, resolve } from "node:path";
 import { analyze, NORMAL_RANGES } from "../../../../plugin/lib/acid-base";
 import { BMI_BANDS, calculateBMI, getBMICategory } from "../../../../plugin/lib/bmi";
 import { ACR_BANDS, ACR_BANDS_MMOL, GFR_BANDS, acrInMgPerG, calculateEGFR, calculateKFRE, classifyAlbuminuriaCategory, classifyAnemia, classifyGFRCategory, getAlbuminuriaCategoryLabel, getCKDRiskLevel, getGFRCategoryLabel, getMonitoringFrequency } from "../../../../plugin/lib/ckd";
-import { FIELDS, EPISODES, applyFindings, checkExtraction, checkItem, noteSegments, EXAM_FINDINGS, readsOk, toExam, toInputs, type CheckedItem, type ExtractedItem, type FieldKey, type Finding } from "../../../../plugin/lib/extraction";
+import { CHEST_CAVEAT, CHEST_LABELS, FOCAL_SYNDROMES, CHEST_PATTERN_LABELS, CHEST_REASONS, CHEST_SIGN_LABELS, SIDE_FIELDS, assessChestExam, type ChestSide } from "../../../../plugin/lib/chest-exam";
+import { FIELDS, EPISODES, applyFindings, checkExtraction, checkItem, noteSegments, EXAM_FINDINGS, readsOk, toExam, toInputs, type CheckedItem, type ExamKey, type ExtractedItem, type FieldKey, type Finding } from "../../../../plugin/lib/extraction";
+import { FOCAL_CAVEAT, FOCAL_DIFFERENTIAL_LABELS, FOCAL_EVIDENCE_LABELS, FOCAL_LABELS, FOCAL_NEXT_LABELS, FOCAL_REASONS, assessFocalPulmonary } from "../../../../plugin/lib/focal-pulmonary";
+import { HF_CAVEAT, HF_LABELS, HF_NEXT_LABELS, HF_REASONS, HF_SYNDROME_LABELS, assessHeartFailure } from "../../../../plugin/lib/heart-failure";
+import { RF_CAVEAT, RF_DISTRESS_LABELS, RF_FAILURE_LABELS, RF_FAILURE_REASONS, RF_NEXT_LABELS, RF_SIGN_LABELS, assessRespiratoryFailure } from "../../../../plugin/lib/respiratory-failure";
+import { VOLUME_CAVEAT, VOLUME_LABELS, VOLUME_REASONS, assessVolume } from "../../../../plugin/lib/volume";
 import { classifyBPInCKD } from "../../../../plugin/lib/nephrology";
 import { PAFI_BANDS, calculatePaFi, getPaFiClassification } from "../../../../plugin/lib/pafi";
 import { SHOCK_CAVEAT, SHOCK_LABELS, SHOCK_LIMITS, SHOCK_SUGGESTS, classifyShock, type SecondaryFinding, type ShockAssessment, type ShockExam } from "../../../../plugin/lib/shock";
 import { toExpectedUnit, type ConvertedInput } from "../../../../plugin/lib/units";
-import { BERLIN_2012, CKD_EPI_2021, KDIGO_2012_ANEMIA, KDIGO_2021_BP, KDIGO_2024_CKD, KFRE_TANGRI, VAZQUEZ_2010, WHO_BMI_2000, WINTERS_1967 } from "../../../../plugin/lib/sources";
+import { BERLIN_2012, CKD_EPI_2021, ESC_HF_2021, KDIGO_2012_ANEMIA, KDIGO_2021_BP, KDIGO_2024_CKD, KFRE_TANGRI, MCKEE_1971, VAZQUEZ_2010, WHO_BMI_2000, WINTERS_1967 } from "../../../../plugin/lib/sources";
 import { formatHeader, formatTable, printResult } from "../../../../plugin/lib/format";
 import { fail, parseFlags } from "../cli";
 import { EXTRACT_ARTIFACT_HTML } from "../extract-artifact";
@@ -126,6 +131,8 @@ export interface Grid {
   result: string;
   /** False when the rule declined; `why` then says where it stopped. */
   named: boolean;
+  /** For the glance: the rule found its syndrome, found none, or could not decide. */
+  tone: "found" | "clear" | "open";
   why?: string;
   cols: GridHead[];
   rows: GridHead[];
@@ -174,11 +181,11 @@ const shockGrid = (exam: ShockExam, shock: ShockAssessment, quotes: { skin?: str
     ...(shock.reason === null
       ? ([["Agrees", list(shock.supporting)], ["Points elsewhere", list(shock.discordant), true], ["Fits more than one", list(found.filter((n) => !points(n)))]] as Grid["ledger"])
       : ([["Also found", list(found)]] as Grid["ledger"])),
-    ["Not in the note", (Object.keys(SECONDARY) as SecondaryFinding[]).filter((n) => !said[n]).map((n) => SECONDARY[n]).join(", ")],
   ];
   return {
     result: SHOCK_LABELS[shock.category],
     named: shock.reason === null,
+    tone: shock.reason === null ? "found" : "open",
     ...(why ? { why } : {}),
     cols: [{ label: "Neck normal or low", on: jvp === "normal_or_low", ...(jvp === "normal_or_low" && quotes.jvp ? { quote: quotes.jvp } : {}) }, { label: "Neck elevated", on: jvp === "elevated", ...(jvp === "elevated" && quotes.jvp ? { quote: quotes.jvp } : {}) }],
     rows: [{ label: "Skin warm", on: skin === "warm", ...(skin === "warm" && quotes.skin ? { quote: quotes.skin } : {}) }, { label: "Skin cool", on: skin === "cool", ...(skin === "cool" && quotes.skin ? { quote: quotes.skin } : {}) }],
@@ -186,6 +193,108 @@ const shockGrid = (exam: ShockExam, shock: ShockAssessment, quotes: { skin?: str
     ledger: ledger.filter((r) => r[1]),
     caveat: SHOCK_CAVEAT,
   };
+};
+
+const sideKeys = (side: "right" | "left") => SIDE_FIELDS.map((f) => `${side}${f[0].toUpperCase()}${f.slice(1)}` as ExamKey);
+// a sign name from the lib, in words: "bilateral_crackles" → "bilateral crackles"
+const spoken = (names: readonly string[]): string => names.map((n) => n.replace(/_/g, " ")).join(", ");
+
+/**
+ * The bedside rules past shock, in the syndromic workflow's order. A rule gets a card only when the note gives
+ * one of the findings it reads; every verdict and label is the rule's own. The page draws them like the shock
+ * card, without its table: the other rules are not a two-finding grid.
+ */
+const bedsideRules = (checked: CheckedItem[], inputs: Partial<Record<FieldKey, ConvertedInput>>, uses: (...keys: FieldKey[]) => number[]): Calculation[] => {
+  const found = toExam(checked);
+  const r = <K extends ExamKey>(k: K) => found[k]?.reads;
+  const str = (k: FieldKey): string => (inputs[k] ? String(inputs[k]!.value) : "");
+  const out: Calculation[] = [];
+  const card = (title: string, reads: readonly ExamKey[], numbers: FieldKey[], source: string, v: { result: string; named: boolean; tone: Grid["tone"]; why?: string; agrees?: string; next?: string[]; caveat: string }) => {
+    const got = reads.filter((k) => found[k]);
+    if (!got.length) return;
+    const nums = numbers.filter((k) => inputs[k]);
+    // what the note denies ("no S3") apart from what it finds; what it never mentions is not shown
+    const said = (absent: boolean) => got.map((k) => checked[found[k]!.index]).filter((c) => !!c.absent === absent).map((c) => `${c.field}: ${c.value}`);
+    const ledger: Grid["ledger"] = [
+      ["Agrees", v.agrees ?? ""],
+      ["Found", [...said(false), ...nums.map((k) => `${FIELDS[k].label}: ${inputs[k]!.value}${inputs[k]!.unit ? ` ${inputs[k]!.unit}` : ""}`)].join("; ")],
+      ["Absent", said(true).join("; ")],
+      ["Next", (v.next ?? []).join("; ")],
+    ];
+    out.push({ title, rows: [], scales: [], uses: [...uses(...nums), ...got.map((k) => found[k]!.index)], source, grid: { result: v.result, named: v.named, tone: v.tone, ...(v.why ? { why: v.why } : {}), cols: [], rows: [], cells: [], ledger: ledger.filter((l) => l[1]), caveat: v.caveat } });
+  };
+  // one finding in the note's words feeds several rules, each in its own vocabulary
+  const lung = r("lungExam"), s3 = r("thirdHeartSound"), oedema = r("peripheralOedema"), liver = r("hepatomegaly");
+  const presence = (x: string | undefined, yes: boolean) => (x ? (yes ? "present" : "absent") : undefined);
+
+  const volume = assessVolume({
+    jvp: r("jvp"), jvpCmH2O: str("jvp-cm"), hepatojugularReflux: r("hepatojugularReflux"),
+    rales: presence(lung, lung === "bilateral_crackles"), s3Gallop: presence(s3, s3 !== "absent"),
+    bilateralAnkleEdema: presence(oedema, oedema === "dependent"), hepatomegaly: presence(liver, liver !== "absent"),
+  });
+  if (volume) card("Volume overload", ["jvp", "lungExam", "thirdHeartSound", "hepatojugularReflux", "peripheralOedema", "hepatomegaly"], ["jvp-cm"], MCKEE_1971, {
+    result: VOLUME_LABELS[volume.status], named: volume.status !== "indeterminate",
+    tone: ({ overload: "found", no_overload: "clear", indeterminate: "open" } as const)[volume.status],
+    ...(volume.reason ? { why: VOLUME_REASONS[volume.reason] } : {}),
+    next: volume.pivotal.length ? [`Would settle it: ${volume.pivotal.map((p) => p.replace(/[A-Z]/g, (c) => ` ${c.toLowerCase()}`)).join(", ")}`] : [],
+    caveat: VOLUME_CAVEAT,
+  });
+
+  const hf = assessHeartFailure({
+    breathlessness: r("breathlessness"), thirdHeartSound: s3, jvp: r("jvp"), hepatojugularReflux: r("hepatojugularReflux"), hepatomegaly: liver, peripheralOedema: oedema,
+    crackles: lung && ({ clear: "none", bilateral_crackles: "bilateral", unilateral_crackles: "unilateral" } as const)[lung],
+    // a jvp-cm is cmH2O above the right atrium (FIELDS)
+    ...(str("jvp-cm") ? { jvpHeightCm: str("jvp-cm"), jvpReference: "right-atrium" as const } : {}),
+  });
+  card("Heart failure", ["breathlessness", "lungExam", "thirdHeartSound", "jvp", "hepatojugularReflux", "hepatomegaly", "peripheralOedema"], ["jvp-cm"], ESC_HF_2021, {
+    result: HF_LABELS[hf.verdict], named: hf.verdict !== "indeterminate",
+    tone: hf.verdict === "indeterminate" ? "open" : hf.verdict === "no_congestion" ? "clear" : "found",
+    why: [hf.reason ? HF_REASONS[hf.reason] : HF_SYNDROME_LABELS[hf.syndrome], ...hf.notCalculated].join(". ") + ".",
+    agrees: [hf.leftSigns.length && `left: ${spoken(hf.leftSigns)}`, hf.rightSigns.length && `right: ${spoken(hf.rightSigns)}`].filter(Boolean).join("; "),
+    next: hf.next.map((n) => HF_NEXT_LABELS[n]), caveat: HF_CAVEAT,
+  });
+
+  const side = (s: "right" | "left"): ChestSide => Object.fromEntries(SIDE_FIELDS.map((f, i) => [f, r(sideKeys(s)[i])]));
+  const chestKeys: ExamKey[] = ["trachea", ...sideKeys("right"), ...sideKeys("left")];
+  const chest = assessChestExam({ trachea: r("trachea"), right: side("right"), left: side("left") });
+  const sides = (["right", "left"] as const).map((s) => [s, chest[s]] as const);
+  card("Chest examination", chestKeys, [], "The classic bedside semiology table (medextract's respiratory syndrome rule); no study measured it", {
+    result: sides.map(([s, a]) => `${s === "right" ? "Right" : "Left"}: ${CHEST_LABELS[a.verdict]}`).join(" · "),
+    named: sides.every(([, a]) => a.verdict !== "indeterminate"),
+    tone: sides.some(([, a]) => (FOCAL_SYNDROMES as readonly string[]).includes(a.verdict)) || chest.patterns.length ? "found" : sides.some(([, a]) => a.verdict === "indeterminate") ? "open" : "clear",
+    why: sides.filter(([, a]) => a.reason).map(([s, a]) => `${s === "right" ? "Right" : "Left"}: ${CHEST_REASONS[a.reason!]}${a.unexplained.length ? ` (${a.unexplained.map((u) => `${CHEST_SIGN_LABELS[u.sign].toLowerCase()} ${u.value.replace(/_/g, " ")}`).join(", ")})` : ""}.`).join(" ") || undefined,
+    agrees: chest.patterns.map((p) => CHEST_PATTERN_LABELS[p]).join("; "),
+    caveat: CHEST_CAVEAT,
+  });
+
+  // the lib reads a measured temperature in °C only
+  const celsius = /^[°º]c$/i.test(inputs.temp?.unit?.trim() ?? "");
+  const focal = assessFocalPulmonary({
+    cough: r("cough"), sputum: r("sputum"), reportedFever: r("fever"), pleuriticPain: r("pleuriticPain"), breathlessness: r("breathlessness"),
+    trachea: r("trachea"), right: side("right"), left: side("left"), temperatureC: celsius ? str("temp") : "", oxygenSaturation: str("spo2"),
+  });
+  card("Focal pulmonary syndrome", ["cough", "sputum", "fever", "pleuriticPain", "breathlessness", ...chestKeys], [...(celsius ? (["temp"] as const) : []), "spo2"], "NICE NG250 for the 38 °C fever line (medextract's respiratory syndrome rule); no study measured it", {
+    result: FOCAL_LABELS[focal.verdict], named: focal.verdict !== "indeterminate",
+    tone: ({ supported: "found", unsupported: "clear", indeterminate: "open" } as const)[focal.verdict], why: FOCAL_REASONS[focal.reason] + ".",
+    agrees: [`pneumonia evidence: ${FOCAL_EVIDENCE_LABELS[focal.pneumoniaEvidence]}`, focal.differential.length && `differential: ${focal.differential.map((d) => FOCAL_DIFFERENTIAL_LABELS[d]).join(", ")}`].filter(Boolean).join("; "),
+    next: focal.next.map((n) => FOCAL_NEXT_LABELS[n]), caveat: FOCAL_CAVEAT,
+  });
+
+  // only a PaO2 makes the gas arterial; the numbers are in mmHg once converted, else as stated
+  const gasUnit = ({ mmhg: "mmHg", kpa: "kPa" } as const)[inputs.pco2?.unit?.trim().toLowerCase() as "mmhg" | "kpa"];
+  const rf = assessRespiratoryFailure({
+    oxygenSupport: r("oxygenSupport"), accessoryMuscles: r("accessoryMuscles"), speech: r("speech"), paradoxicalBreathing: r("paradoxicalBreathing"), cyanosis: r("cyanosis"),
+    respiratoryRate: str("rr"), oxygenSaturation: str("spo2"),
+    ...(inputs.pao2 ? { bloodGas: "arterial" as const, ...(gasUnit ? { gasUnit } : {}), ph: str("ph"), po2: str("pao2"), pco2: str("pco2"), hco3: str("hco3") } : {}),
+  });
+  card("Respiratory failure and distress", ["oxygenSupport", "accessoryMuscles", "speech", "paradoxicalBreathing", "cyanosis"], ["rr", "spo2", "pao2", "pco2", "ph", "hco3"], "Conventional definitions: PaO2 below 8 kPa, PaCO2 above 6 kPa with acidaemia; a rate of 30/min as BTS and CURB-65 (medextract's respiratory-failure rule)", {
+    result: `${RF_FAILURE_LABELS[rf.failure]} · ${RF_DISTRESS_LABELS[rf.distress]}`, named: rf.failure !== "indeterminate",
+    tone: rf.failure === "present" || rf.distress === "present" ? "found" : rf.failure === "absent" && rf.distress === "absent" ? "clear" : "open",
+    why: [RF_FAILURE_REASONS[rf.failureReason], ...rf.notCalculated].join(". ") + ".",
+    agrees: [rf.distressSigns.map((d) => RF_SIGN_LABELS[d]).join(", "), rf.arterialGas?.disorder && `gas: ${rf.arterialGas.disorder}`].filter(Boolean).join("; "),
+    next: rf.next.map((n) => RF_NEXT_LABELS[n]), caveat: RF_CAVEAT,
+  });
+  return out;
 };
 
 /**
@@ -306,9 +415,10 @@ export const calculations = (checked: CheckedItem[]): Calculation[] => {
       const said = { capillaryRefill: of("capillaryRefill")?.value, pulseVolume: of("pulseVolume")?.value, lungExam: of("lungExam")?.value };
       // the examiner's impression is the neck the rule used; a measured height only without one
       const quotes = { skin: of("skin")?.quote, jvp: of("jvp")?.quote ?? inputs["jvp-cm"]?.quote };
-      out.push({ title: "Shock pattern", rows: [], scales: [], uses: [...uses("sbp", "hypotension-min", "jvp-cm"), ...Object.values(found).map((f) => f.index)], source: VAZQUEZ_2010, grid: shockGrid(exam, shock, quotes, said) });
+      out.push({ title: "Shock pattern", rows: [], scales: [], uses: [...uses("sbp", "hypotension-min", "jvp-cm"), ...Object.entries(found).filter(([k]) => k in exam).map(([, f]) => f.index)], source: VAZQUEZ_2010, grid: shockGrid(exam, shock, quotes, said) });
     }
   }
+  out.push(...bedsideRules(checked, inputs, uses));
   return out;
 };
 
@@ -342,7 +452,9 @@ export const stateOf = (dir: string, running: boolean) => {
   const state = verify ? (undecided ? "review" : "done") : !running ? "failed" : firstPass ? "verifying" : "extracting";
   const items = verify ? checkExtraction(note, readJson(join(dir, "corrected.json")) ?? []) : [];
   // nothing is calculated from a correction the doctor has not answered yet
-  return { id: basename(dir), state, error: null as string | null, note, ...pageData(basename(dir), note, items), ...(undecided ? { calcs: [], held: true } : {}), findings };
+  // the doctor's answer on each syndromic rule, by its title
+  const reviews: Record<string, "confirmed" | "discarded"> = readJson(join(dir, "reviews.json")) ?? {};
+  return { id: basename(dir), state, error: null as string | null, note, ...pageData(basename(dir), note, items), ...(undecided ? { calcs: [], held: true } : {}), findings, reviews };
 };
 
 export type AskModel = (prompt: string) => Promise<string>;
@@ -525,9 +637,9 @@ export const serve = (port: number, askModel: AskModel = askClaude): Server => {
         return send(200, list);
       }
 
-      const [, hash, decisions] = /^\/api\/extractions\/([0-9a-f]{12})(\/decisions)?$/.exec(path) ?? [];
+      const [, hash, decisions, reviews] = /^\/api\/extractions\/([0-9a-f]{12})(?:(\/decisions)|(\/reviews))?$/.exec(path) ?? [];
       const dir = hash && join("extractions", hash);
-      if (req.method === "GET" && !decisions && dir && existsSync(join(dir, "note.md"))) {
+      if (req.method === "GET" && !decisions && !reviews && dir && existsSync(join(dir, "note.md"))) {
         return send(200, { ...stateOf(dir, running.has(dir)), error: errors.get(dir) ?? null });
       }
 
@@ -551,6 +663,21 @@ export const serve = (port: number, askModel: AskModel = askClaude): Server => {
         // a finding nobody decided on yet stays applied
         const rejected = new Set(Object.keys(decided).filter((n) => decided[n] === "rejected").map(Number));
         writeFileSync(join(dir, "corrected.json"), JSON.stringify(applyFindings(readJson(join(dir, "extraction.json")) ?? [], verify.findings, rejected), null, 2));
+        return send(200, { ...stateOf(dir, running.has(dir)), error: errors.get(dir) ?? null });
+      }
+
+      // the doctor confirms or discards a syndromic rule's result; it changes nothing else
+      if (req.method === "POST" && reviews && dir && existsSync(join(dir, "note.md"))) {
+        let body: any;
+        try {
+          body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        } catch {
+          return send(400, { error: "the body must be JSON" });
+        }
+        const rules = stateOf(dir, running.has(dir)).calcs.filter((c) => c.grid).map((c) => c.title);
+        if (typeof body?.rule !== "string" || !rules.includes(body.rule)) return send(400, { error: "rule must be the title of a syndromic rule on this page" });
+        if (body.decision !== "confirmed" && body.decision !== "discarded") return send(400, { error: 'decision must be "confirmed" or "discarded"' });
+        writeFileSync(join(dir, "reviews.json"), JSON.stringify({ ...readJson(join(dir, "reviews.json")), [body.rule]: body.decision }, null, 2));
         return send(200, { ...stateOf(dir, running.has(dir)), error: errors.get(dir) ?? null });
       }
       send(404, { error: "not found" });

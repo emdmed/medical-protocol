@@ -286,7 +286,7 @@ describe('calculations: shock pattern', () => {
     expect(g.cells[1][1].tags).toEqual([{ text: 'lungs: Crackles at both bases' }]);
     expect(g.cols[1]).toEqual({ label: 'Neck elevated', on: true, quote: 'JVP 9 cmH2O' });
     expect(g.rows[1]).toEqual({ label: 'Skin cool', on: true, quote: 'Extremities cold and mottled' });
-    expect(g.ledger).toEqual([['Pressure', '82 mmHg, low for 120 min'], ['Agrees', 'lungs: Crackles at both bases'], ['Fits more than one', 'capillary refill: 4 seconds'], ['Not in the note', 'pulse']]);
+    expect(g.ledger).toEqual([['Pressure', '82 mmHg, low for 120 min'], ['Agrees', 'lungs: Crackles at both bases'], ['Fits more than one', 'capillary refill: 4 seconds']]);
   });
 
   it('shows a finding that points at another cell there, in amber', () => {
@@ -323,3 +323,36 @@ describe('calculations: shock pattern', () => {
   });
 });
 
+describe('calculations: the other bedside rules', () => {
+  const note = 'Cough with purulent sputum. RR 32 /min. SpO2 88 % on room air. Right base dull, bronchial breathing. Left resonant, vesicular. Using accessory muscles.';
+  const cur = { episode: 'current' as const };
+  const items = [
+    { ...cur, field: 'Cough', value: 'Cough', quote: 'Cough with purulent sputum', exam: 'cough' as const, reads: 'present' },
+    { ...cur, field: 'RR', key: 'rr' as const, value: '32', unit: '/min', quote: 'RR 32 /min' },
+    { ...cur, field: 'SpO2', key: 'spo2' as const, value: '88', unit: '%', quote: 'SpO2 88 %' },
+    { ...cur, field: 'Oxygen', value: 'room air', quote: 'on room air', exam: 'oxygenSupport' as const, reads: 'room_air' },
+    { ...cur, field: 'Right percussion', value: 'dull', quote: 'Right base dull', exam: 'rightPercussion' as const, reads: 'dull' },
+    { ...cur, field: 'Right breath sounds', value: 'bronchial breathing', quote: 'bronchial breathing', exam: 'rightBreathSounds' as const, reads: 'bronchial' },
+    { ...cur, field: 'Left percussion', value: 'resonant', quote: 'Left resonant', exam: 'leftPercussion' as const, reads: 'resonant' },
+    { ...cur, field: 'Left breath sounds', value: 'vesicular', quote: 'vesicular', exam: 'leftBreathSounds' as const, reads: 'vesicular' },
+    { ...cur, field: 'Accessory muscles', value: 'Using accessory muscles', quote: 'Using accessory muscles', exam: 'accessoryMuscles' as const, reads: 'present' },
+  ];
+  const calcs = () => calculations(checkExtraction(note, items));
+
+  it('draws a card only for a rule the note gives a finding for, in the workflow order, without a table', () => {
+    const cards = calcs().filter((c) => c.grid);
+    expect(cards.map((c) => c.title)).toEqual(['Chest examination', 'Focal pulmonary syndrome', 'Respiratory failure and distress']);
+    expect(cards.every((c) => c.grid!.cells.length === 0)).toBe(true);
+  });
+
+  it('shows the rule\'s own verdict and the findings it used, and leaves out what the note does not mention', () => {
+    const [chest, focal, rf] = calcs().filter((c) => c.grid);
+    expect(chest.grid).toMatchObject({ result: 'Right: Consolidation · Left: No focal syndrome', named: true });
+    expect(focal.grid!.result).toBe('Focal pulmonary syndrome supported');
+    expect(rf.grid).toMatchObject({ result: 'Respiratory failure · Respiratory distress', named: true });
+    expect(rf.grid!.ledger).toContainEqual(['Agrees', 'Respiratory rate 30/min or more, Accessory muscle use']);
+    expect(rf.grid!.ledger).toContainEqual(['Found', 'Oxygen: room air; Accessory muscles: Using accessory muscles; Respiratory rate: 32 /min; SpO2: 88 %']);
+    expect(rf.grid!.ledger.map((l) => l[0])).not.toContain('Absent');
+    expect(rf.uses).toEqual([1, 2, 3, 8]);
+  });
+});

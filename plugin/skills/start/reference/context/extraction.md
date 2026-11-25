@@ -108,7 +108,7 @@ The source of truth is `FIELDS` in `extraction.ts`.
 
 ### Examination findings
 
-Findings in words, for the syndromic assessments (`shock.md`). Set `exam` and `reads` together; an item has either a `key` or an `exam`, never both.
+Findings in words, for the syndromic assessments (`workflows/syndromic.md`: shock, volume, heart failure, chest examination, focal pulmonary, respiratory failure). One finding can feed several rules: `jvp` and `lungExam` are read by shock, volume and heart failure. Set `exam` and `reads` together; an item has either a `key` or an `exam`, never both.
 
 | `exam` | Finding | `reads` |
 |---|---|---|
@@ -117,6 +117,26 @@ Findings in words, for the syndromic assessments (`shock.md`). Set `exam` and `r
 | `capillaryRefill` | Capillary refill | `brisk`, `delayed` |
 | `pulseVolume` | Pulse volume | `bounding`, `normal`, `thready` |
 | `lungExam` | Chest auscultation | `clear`, `bilateral_crackles`, `unilateral_crackles` |
+| `thirdHeartSound` | Third heart sound | `left_or_unsided`, `right_ventricular` (left sternal edge, louder on inspiration), `absent` |
+| `hepatojugularReflux` | Hepatojugular reflux | `present`, `absent` |
+| `hepatomegaly` | Liver | `present`, `pulsatile`, `absent` |
+| `peripheralOedema` | Leg oedema | `dependent` (both legs, sacrum), `unilateral`, `absent` |
+| `breathlessness` | Breathlessness (symptom) | `present`, `absent` |
+| `cough` | Cough | `present`, `absent` |
+| `sputum` | Sputum | `purulent`, `mucoid`, `blood_stained`, `none` |
+| `fever` | Fever as reported, not measured (a measured one is `temp`) | `present`, `absent` |
+| `pleuriticPain` | Pleuritic chest pain | `present`, `absent` |
+| `trachea` | Trachea | `central`, `deviated_left`, `deviated_right` |
+| `rightExpansion`, `leftExpansion` | Chest expansion, per side | `normal`, `reduced` |
+| `rightPercussion`, `leftPercussion` | Percussion note, per side | `resonant`, `dull`, `stony_dull`, `hyperresonant` |
+| `rightBreathSounds`, `leftBreathSounds` | Breath sounds, per side | `vesicular`, `bronchial`, `reduced`, `absent` |
+| `rightAddedSounds`, `leftAddedSounds` | Added sounds, per side | `none`, `crackles`, `crackles_clearing_on_cough`, `wheeze`, `crackles_and_wheeze` |
+| `rightVocalResonance`, `leftVocalResonance` | Vocal resonance, per side | `normal`, `increased`, `reduced` |
+| `oxygenSupport` | What the patient was breathing | `room_air`, `supplemental_oxygen`, `non_invasive_ventilation`, `invasive_ventilation` |
+| `accessoryMuscles` | Accessory muscle use | `present`, `absent` |
+| `speech` | Speech | `full_sentences`, `limited` |
+| `paradoxicalBreathing` | Paradoxical breathing | `present`, `absent` |
+| `cyanosis` | Cyanosis | `present`, `absent` |
 
 The source of truth is `EXAM_FINDINGS` in `extraction.ts`. There is no reading for "not assessed": a finding the note does not state gets no item.
 
@@ -132,7 +152,7 @@ The source of truth is `EXAM_FINDINGS` in `extraction.ts`. There is no reading f
 
 `history` items and `absent` items are in neither list. They stay in the checked items with their tag, so a later tool can read them on purpose (e.g. a baseline creatinine) with `checked.filter(c => c.episode === "history")`; they never count as a repeat of a current reading.
 
-`toExam(checked)` → `{ skin?, jvp?, capillaryRefill?, pulseVolume?, lungExam? }`, each `{ reads, index }` (`index`: the item's position in `checked`). Same bar as a number: `current`, `quoted`, and extracted once; anything else is left out, which an assessment takes as not assessed. `medprotocol extract --json` prints it as `exam`.
+`toExam(checked)` → one entry per `exam` key found (`{ skin?, jvp?, … }`), each `{ reads, index }` (`index`: the item's position in `checked`). Same bar as a number: `current`, `quoted`, and extracted once; anything else is left out, which an assessment takes as not assessed. `medprotocol extract --json` prints it as `exam`.
 
 Extraction stops here. Whatever reads `inputs` or the examination findings does the analysis; this module never does.
 
@@ -165,6 +185,7 @@ The two local pages (`--artifact` and `--serve`) are the one place that reads `i
 | Anemia in CKD | `hb`, `sex`, and a CKD stage above | hemoglobin has no unit (g/dL, or g/L converted), or the stage is G1 or G2 with A1 |
 | Blood pressure against the CKD target | `sbp`, `dbp`, and a CKD stage above | the stage is G1 or G2 with A1 (not CKD by these two values alone) |
 | Shock pattern (`shock.md`), in the "Syndromic evaluation" tab | `sbp` below 90; `hypotension-min`; the `skin` and `jvp` findings, or `jvp-cm` without a `jvp` finding | the systolic is 90 or more: no card at all. With the systolic low and something else missing the card is shown as Indeterminate and says where the rule stopped (duration not stated or under 30 minutes, a finding not in the note, warm skin with an elevated neck) |
+| Volume, heart failure, chest examination, focal pulmonary, respiratory failure (their `context/{module}.md`), in the same tab, in that order | at least one `exam` finding the rule reads (§ Examination findings); `jvp-cm`, `temp` in °C, `spo2`, `rr` and the gas fill in. A gas counts as arterial only with a `pao2` | none of the rule's findings is in the note: no card. Otherwise the card is drawn as the rule's verdict and reason, the findings it used with the note's words (present and absent apart), and what to check next, without a table; a finding the note never mentions is not shown. The tab groups the rules as syndrome found, undecided and not present |
 | Acid-base disorder, compensation, anion gap | `ph`, `pco2`, `hco3`; `na`, `cl`, `albumin` when stated | — . Compensation is worked out as acute and says so |
 
 - A value held back in `review` feeds nothing: the result is simply absent.
@@ -173,6 +194,7 @@ The two local pages (`--artifact` and `--serve`) are the one place that reads `i
 - Pointing at a result highlights the words its inputs came from.
 - Each value is drawn on a scale: the cut-offs, the band it falls in (marked and named in words), and for acid-base the normal range in a frame. The cut-offs are data from the lib (`PAFI_BANDS`, `BMI_BANDS`, `GFR_BANDS`, `ACR_BANDS`, `ACR_BANDS_MMOL`, `NORMAL_RANGES`); the page holds no clinical number of its own.
 - A syndromic assessment is never shown unasked. The live page's intake form has a box, off by default and remembered in the browser: "Run the syndromic evaluation automatically after the extraction". The values column has two tabs, "Extracted data" (the items, the corrections and § Calculated) and "Syndromic evaluation". With the box off (and always in a page written by `--artifact` on a browser that never ticked it), the second tab holds a "Run syndromic evaluation" button; pressing it draws the result for that note. The page always opens on the data tab. The result comes with the page's data either way: the button calls no model and no server. While a correction waits for the doctor's answer the button is disabled.
+- Each syndromic rule has Confirm and Discard buttons. The answer is the doctor's review of the rule's result and changes nothing else: a discarded rule is struck through in its group, a confirmed one says so on its row. `--serve` keeps the answers beside the note in `extractions/<hash>/reviews.json` (`POST /api/extractions/<hash>/reviews` with `{ rule: <card title>, decision: "confirmed" | "discarded" }`); a page written by `--artifact` keeps them in that browser only.
 - A syndromic assessment is drawn as its rule, not on a scale: a table of the two findings it reads, the cell they land in marked, each finding with the note's words. The other findings stand in the cell they point at, in amber when that is not the marked cell; they never change the result. The table and its words come with the data (`Grid` in the CLI), built by asking `classifyShock` for each cell.
 - The generated extraction screen (§ Screen spec) stays extraction only.
 

@@ -339,3 +339,33 @@ describe('POST /api/extractions/<hash>/decisions', () => {
     expect((await get(`/api/extractions/${HASH}/decisions`)).status).toBe(404);
   });
 });
+
+describe('POST /api/extractions/<hash>/reviews', () => {
+  const cough = { field: 'Cough', value: 'cough', quote: 'Cough for 3 days', episode: 'current', exam: 'cough', reads: 'present' };
+  const review = async (body: unknown) => {
+    const res = await get(`/api/extractions/${HASH}/reviews`, {}, JSON.stringify(body));
+    return { status: res.status, body: JSON.parse(res.text) };
+  };
+  const withRule = () => {
+    writeFileSync(join(DIR, 'note.md'), 'Cough for 3 days.');
+    put('extraction.json', [cough]);
+    put('verify.json', { findings: [] });
+    put('corrected.json', [cough]);
+  };
+
+  it('keeps the answer on a rule and hands it back with the state', async () => {
+    withRule();
+    expect(await review({ rule: 'Focal pulmonary syndrome', decision: 'confirmed' })).toMatchObject({ status: 200, body: { reviews: { 'Focal pulmonary syndrome': 'confirmed' } } });
+    await review({ rule: 'Focal pulmonary syndrome', decision: 'discarded' });
+    expect(JSON.parse(readFileSync(join(DIR, 'reviews.json'), 'utf8'))).toEqual({ 'Focal pulmonary syndrome': 'discarded' });
+    expect(stateOf(DIR, false).reviews).toEqual({ 'Focal pulmonary syndrome': 'discarded' });
+  });
+
+  it('a rule not on the page, a bad decision or body → 400, nothing written', async () => {
+    withRule();
+    for (const body of [{ rule: 'Shock pattern', decision: 'confirmed' }, { rule: 'Focal pulmonary syndrome', decision: 'maybe' }, null]) {
+      expect((await review(body)).status).toBe(400);
+    }
+    expect(existsSync(join(DIR, 'reviews.json'))).toBe(false);
+  });
+});

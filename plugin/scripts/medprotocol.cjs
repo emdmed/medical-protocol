@@ -3381,280 +3381,20 @@ Examples:
   }
 });
 
-// ../../plugin/lib/extraction.ts
-var FIELDS, EXAM_FINDINGS, readsOk, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, prepared, checkItem, checkExtraction, noteSegments, SEX_WORDS, sexStated, toNumber, unitOk, toInputs, toExam, applyFindings;
-var init_extraction = __esm({
-  "../../plugin/lib/extraction.ts"() {
-    "use strict";
-    init_shock();
-    FIELDS = {
-      sbp: { label: "Systolic blood pressure", units: ["mmHg"] },
-      dbp: { label: "Diastolic blood pressure", units: ["mmHg"] },
-      map: { label: "Mean arterial pressure", units: ["mmHg"] },
-      hr: { label: "Heart rate", units: ["bpm", "/min", "lpm", "beats/min"] },
-      rr: { label: "Respiratory rate", units: ["breaths/min", "/min", "rpm", "resp/min"] },
-      temp: { label: "Temperature", units: ["\xB0C", "\xB0F", "\xBAC", "\xBAF"] },
-      spo2: { label: "SpO2", units: ["%"] },
-      fio2: { label: "FiO2", units: ["%"] },
-      gcs: { label: "Glasgow Coma Scale", units: ["/15"] },
-      weight: { label: "Weight", units: ["kg", "lb", "lbs"] },
-      height: { label: "Height", units: ["cm", "m", "in"] },
-      ph: { label: "pH", units: [] },
-      pco2: { label: "pCO2", units: ["mmHg", "kPa"] },
-      pao2: { label: "PaO2", units: ["mmHg", "kPa"] },
-      hco3: { label: "Bicarbonate", units: ["mEq/L", "mmol/L"] },
-      lactate: { label: "Lactate", units: ["mmol/L"] },
-      na: { label: "Sodium", units: ["mEq/L", "mmol/L"] },
-      potassium: { label: "Potassium", units: ["mmol/L", "mEq/L"] },
-      cl: { label: "Chloride", units: ["mEq/L", "mmol/L"] },
-      albumin: { label: "Albumin", units: ["g/dL", "g/L"] },
-      creatinine: { label: "Creatinine", units: ["mg/dL", "\xB5mol/L", "\u03BCmol/L", "umol/L"] },
-      glucose: { label: "Glucose", units: ["mg/dL", "mmol/L"] },
-      ketones: { label: "Ketones", units: ["mmol/L"] },
-      bilirubin: { label: "Bilirubin", units: ["mg/dL"] },
-      platelets: { label: "Platelets", units: ["\xD710\xB3/\xB5L", "x10^3/uL", "10^3/\xB5L", "/mm\xB3", "\xD710\u2079/L", "x10^9/L"] },
-      hb: { label: "Hemoglobin", units: ["g/dL", "g/L"] },
-      a1c: { label: "HbA1c", units: ["%"] },
-      egfr: { label: "eGFR", units: ["mL/min/1.73m\xB2", "mL/min/1.73m2", "mL/min"] },
-      acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g", "mg/mmol"] },
-      tc: { label: "Total cholesterol", units: ["mg/dL"] },
-      hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
-      "urine-output": { label: "Urine output", units: ["mL"] },
-      /** How long the blood pressure has been low. Hours are converted (units.ts). */
-      "hypotension-min": { label: "Hypotension duration", units: ["min", "minutes", "mins", "minutos", "h", "hr", "hrs", "hour", "hours", "horas"] },
-      /** A measured height only. A bare "cm" may be above the sternal angle, so it is not accepted. */
-      "jvp-cm": { label: "Jugular venous pressure", units: ["cmH2O", "cm H2O"] },
-      age: { label: "Age", units: ["years", "year", "yr", "yrs", "y", "yo", "y/o", "a\xF1os"] },
-      /** The one key whose value is a word: `female` or `male`, see `sexStated`. */
-      sex: { label: "Sex", units: [] }
-    };
-    EXAM_FINDINGS = SHOCK_FINDINGS;
-    readsOk = (exam, reads) => typeof exam === "string" && Object.hasOwn(EXAM_FINDINGS, exam) && reads !== "not_assessed" && EXAM_FINDINGS[exam].includes(reads);
-    EPISODES = ["current", "history"];
-    MAX_EDITS = 5;
-    stripAccents = (s) => s.normalize("NFD").replace(new RegExp("\\p{Mn}", "gu"), "");
-    collapse = (s) => s.replace(/\s+/g, " ").trim();
-    collapseWithMap = (note) => {
-      let text = "";
-      const map = [];
-      for (let i = 0; i < note.length; i++) {
-        if (/\s/.test(note[i])) {
-          if (text && !text.endsWith(" ")) {
-            text += " ";
-            map.push(i);
-          }
-        } else {
-          text += note[i];
-          map.push(i);
-        }
-      }
-      return { text, map };
-    };
-    numbersIn = (s) => [...s.matchAll(/\d+(?:[.,·]\d+)?/g)].map(([m]) => {
-      const [whole, frac] = m.split(/[.,·]/);
-      const decimal = Number(frac === void 0 ? whole : `${whole}.${frac}`);
-      return m.includes(",") && frac?.length === 3 ? [decimal, Number(whole + frac)] : [decimal];
-    });
-    same = (a, b) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
-    valueInQuote = (value, quote) => {
-      const source = numbersIn(quote);
-      let at = 0;
-      for (const values of numbersIn(value)) {
-        const found = source.findIndex((readings, i) => i >= at && readings.some((r) => values.some((v) => same(r, v))));
-        if (found === -1) return false;
-        at = found + 1;
-      }
-      return true;
-    };
-    closestSpan = (text, quote) => {
-      const fold = (c) => stripAccents(c).toLowerCase();
-      const t = text.split("").map(fold);
-      const q = quote.split("").map(fold);
-      let prev = q.map((_, i) => i + 1);
-      prev.unshift(0);
-      let starts = prev.map(() => 0);
-      let best = { distance: prev[q.length], start: 0, end: 0 };
-      for (let j = 0; j < t.length; j++) {
-        const cur = [0];
-        const curStart = [j + 1];
-        for (let i = 1; i <= q.length; i++) {
-          const sub = prev[i - 1] + (q[i - 1] === t[j] ? 0 : 1);
-          const del = prev[i] + 1;
-          const ins = cur[i - 1] + 1;
-          const d = Math.min(sub, del, ins);
-          cur.push(d);
-          curStart.push(d === sub ? starts[i - 1] : d === del ? starts[i] : curStart[i - 1]);
-        }
-        if (cur[q.length] < best.distance) best = { distance: cur[q.length], start: curStart[q.length], end: j + 1 };
-        prev = cur;
-        starts = curStart;
-      }
-      return best;
-    };
-    editDistance = (a, b) => {
-      let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
-      for (let i = 1; i <= a.length; i++) {
-        const cur = [i];
-        for (let j = 1; j <= b.length; j++) cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)));
-        prev = cur;
-      }
-      return prev[b.length];
-    };
-    wordsOf = (s) => [...s.matchAll(/[\p{L}\p{N}]+(?:[.,·/^][\p{L}\p{N}]+)*/gu)].map((m) => ({
-      w: stripAccents(m[0]).toLowerCase(),
-      start: m.index,
-      end: m.index + m[0].length
-    }));
-    reorderedSpan = (note, quote) => {
-      const qw = wordsOf(quote).map((x) => x.w);
-      const nw = wordsOf(note);
-      const cost = (a, b) => a === b ? 0 : /\d/.test(a) || /\d/.test(b) ? Infinity : editDistance(a, b);
-      let best = null;
-      for (let i = 0; i + qw.length <= nw.length; i++) {
-        const window = nw.slice(i, i + qw.length);
-        const pairs = qw.flatMap((a, x) => window.map((b, y) => ({ x, y, d: cost(a, b.w) }))).sort((p, r) => p.d - r.d);
-        const usedQ = /* @__PURE__ */ new Set();
-        const usedN = /* @__PURE__ */ new Set();
-        let distance = 0;
-        for (const p of pairs) {
-          if (usedQ.has(p.x) || usedN.has(p.y)) continue;
-          usedQ.add(p.x);
-          usedN.add(p.y);
-          distance += p.d;
-        }
-        if (distance < (best?.distance ?? Infinity)) best = { distance, start: window[0].start, end: window.at(-1).end };
-      }
-      return best;
-    };
-    checkItem = (note, item) => {
-      const q = collapse(item.quote.normalize("NFC"));
-      if (!q) return { ...item, status: "none" };
-      if (prepared?.note !== note) {
-        const nfc2 = note.normalize("NFC");
-        prepared = { note, nfc: nfc2, ...collapseWithMap(nfc2) };
-      }
-      const { nfc, text, map } = prepared;
-      const at = text.indexOf(q);
-      if (at < 0) {
-        const budget = Math.min(MAX_EDITS, Math.floor(q.length / 4));
-        const span = closestSpan(text, q);
-        if (span.end === 0 || span.distance > budget) {
-          const words = reorderedSpan(nfc, q);
-          if (!words || words.distance > budget) return { ...item, status: "unverified" };
-          return {
-            ...item,
-            status: valueInQuote(item.value, nfc.slice(words.start, words.end)) ? "reordered" : "mismatched",
-            start: words.start,
-            end: words.end,
-            match: "words",
-            distance: words.distance
-          };
-        }
-        const start = map[span.start];
-        const end = map[span.end - 1] + 1;
-        return {
-          ...item,
-          // The value is checked against the note's words, so an edit that changed a digit fails here.
-          status: !valueInQuote(item.value, nfc.slice(start, end)) ? "mismatched" : span.distance === 0 ? "edited" : "approximate",
-          start,
-          end,
-          match: "loose",
-          distance: span.distance
-        };
-      }
-      return {
-        ...item,
-        status: valueInQuote(item.value, q) ? "quoted" : "mismatched",
-        match: "exact",
-        start: map[at],
-        end: map[at + q.length - 1] + 1,
-        ...text.indexOf(q, at + 1) >= 0 ? { ambiguous: true } : {}
-      };
-    };
-    checkExtraction = (note, items) => items.map((item) => checkItem(note, item));
-    noteSegments = (note, checked) => {
-      const text = note.normalize("NFC");
-      const cuts = /* @__PURE__ */ new Set([0, text.length]);
-      for (const c of checked) if (c.start !== void 0) cuts.add(c.start).add(c.end);
-      const points = [...cuts].sort((a, b) => a - b);
-      const out = [];
-      for (let i = 0; i < points.length - 1; i++) {
-        const [s, e] = [points[i], points[i + 1]];
-        const items = checked.flatMap((c, n) => c.start !== void 0 && c.start <= s && c.end >= e ? [n] : []);
-        out.push({ text: text.slice(s, e), items });
-      }
-      return out;
-    };
-    SEX_WORDS = {
-      female: ["female", "woman", "f", "mujer", "femenino", "femenina"],
-      male: ["male", "man", "m", "hombre", "masculino", "varon"]
-    };
-    sexStated = (value, quote) => {
-      const words = stripAccents(quote).toLowerCase().split(/[^a-z]+/);
-      const has = (s) => SEX_WORDS[s].some((w) => words.includes(w));
-      return (value === "female" || value === "male") && has(value) && !has(value === "female" ? "male" : "female") ? value : null;
-    };
-    toNumber = (value) => {
-      const v = value.trim();
-      if (!/^-?\d+(?:[.,]\d+)?$/.test(v) || /,\d{3}$/.test(v)) return null;
-      return Number(v.replace(",", "."));
-    };
-    unitOk = (key, unit) => !unit || FIELDS[key].units.some((u) => u.toLowerCase() === unit.trim().toLowerCase());
-    toInputs = (checked) => {
-      const keyed = checked.filter((c) => c.key && c.episode !== "history");
-      const count = (k) => keyed.filter((c) => c.key === k && c.episode === "current").length;
-      const out = { inputs: {}, review: [] };
-      for (const item of keyed) {
-        const key = item.key;
-        const value = toNumber(item.value);
-        const sex = key === "sex" ? sexStated(item.value, item.quote) : null;
-        const reason = item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence" : item.status !== "quoted" ? "not-verified" : item.episode !== "current" ? "no-episode" : key === "sex" && !sex ? "not-stated" : key !== "sex" && (item.absent || value === null) ? "not-a-number" : !unitOk(key, item.unit) ? "unit" : count(key) > 1 ? "repeated" : null;
-        if (reason) out.review.push({ item, reason });
-        else if (sex) out.sex = sex;
-        else out.inputs[key] = { value, ...item.unit ? { unit: item.unit } : {}, quote: item.quote, ...item.time ? { time: item.time } : {} };
-      }
-      return out;
-    };
-    toExam = (checked) => {
-      const out = {};
-      const seen = /* @__PURE__ */ new Set();
-      checked.forEach((c, index) => {
-        if (!c.exam || c.episode !== "current") return;
-        if (seen.has(c.exam)) delete out[c.exam];
-        else if (c.status === "quoted" && readsOk(c.exam, c.reads)) out[c.exam] = { reads: c.reads, index };
-        seen.add(c.exam);
-      });
-      return out;
-    };
-    applyFindings = (firstPass, findings, rejected) => {
-      const kept = [...firstPass];
-      const added = [];
-      findings.forEach(({ index, correction }, n) => {
-        if (rejected.has(n)) return;
-        if (index === void 0) {
-          if (correction) added.push(correction);
-        } else if (Number.isInteger(index) && index >= 0 && index < firstPass.length) kept[index] = correction;
-      });
-      return [...kept.filter((item) => item !== null), ...added];
-    };
-  }
-});
-
 // ../../plugin/lib/units.ts
 var UMOL_PER_MGDL, MMHG_PER_KPA, FACTORS, toExpectedUnit;
 var init_units = __esm({
   "../../plugin/lib/units.ts"() {
     "use strict";
-    init_extraction();
     UMOL_PER_MGDL = 88.4;
     MMHG_PER_KPA = 7.50062;
     FACTORS = {
-      creatinine: { digits: 2, from: { "\xB5mol/l": 1 / UMOL_PER_MGDL, "\u03BCmol/l": 1 / UMOL_PER_MGDL, "umol/l": 1 / UMOL_PER_MGDL } },
-      hb: { digits: 1, from: { "g/l": 0.1 } },
-      albumin: { digits: 1, from: { "g/l": 0.1 } },
-      pao2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
-      pco2: { digits: 1, from: { kpa: MMHG_PER_KPA } },
-      "hypotension-min": { digits: 0, from: { h: 60, hr: 60, hrs: 60, hour: 60, hours: 60, horas: 60 } }
+      creatinine: { digits: 2, to: "mg/dL", from: { "\xB5mol/l": 1 / UMOL_PER_MGDL, "\u03BCmol/l": 1 / UMOL_PER_MGDL, "umol/l": 1 / UMOL_PER_MGDL } },
+      hb: { digits: 1, to: "g/dL", from: { "g/l": 0.1 } },
+      albumin: { digits: 1, to: "g/dL", from: { "g/l": 0.1 } },
+      pao2: { digits: 1, to: "mmHg", from: { kpa: MMHG_PER_KPA } },
+      pco2: { digits: 1, to: "mmHg", from: { kpa: MMHG_PER_KPA } },
+      "hypotension-min": { digits: 0, to: "min", from: { h: 60, hr: 60, hrs: 60, hour: 60, hours: 60, horas: 60 } }
     };
     toExpectedUnit = (key, input) => {
       if (key === "fio2" && !input.unit && input.value >= 0.21 && input.value <= 1) {
@@ -3663,7 +3403,7 @@ var init_units = __esm({
       const rule = FACTORS[key];
       const factor = input.unit && rule?.from[input.unit.trim().toLowerCase()];
       if (!rule || !factor) return input;
-      return { ...input, value: Number((input.value * factor).toFixed(rule.digits)), unit: FIELDS[key].units[0], from: `${input.value} ${input.unit}` };
+      return { ...input, value: Number((input.value * factor).toFixed(rule.digits)), unit: rule.to, from: `${input.value} ${input.unit}` };
     };
   }
 });
@@ -4980,6 +4720,296 @@ var init_claude_spawn = __esm({
   }
 });
 
+// ../../plugin/lib/extraction.ts
+var FIELDS, EXAM_FINDINGS, readsOk, EPISODES, MAX_EDITS, stripAccents, collapse, collapseWithMap, numbersIn, same, valueInQuote, closestSpan, editDistance, wordsOf, reorderedSpan, prepared, checkItem, checkExtraction, noteSegments, SEX_WORDS, sexStated, toNumber, unitOk, toInputs, toExam, applyFindings;
+var init_extraction = __esm({
+  "../../plugin/lib/extraction.ts"() {
+    "use strict";
+    init_chest_exam();
+    init_focal_pulmonary();
+    init_heart_failure();
+    init_respiratory_failure();
+    init_shock();
+    FIELDS = {
+      sbp: { label: "Systolic blood pressure", units: ["mmHg"] },
+      dbp: { label: "Diastolic blood pressure", units: ["mmHg"] },
+      map: { label: "Mean arterial pressure", units: ["mmHg"] },
+      hr: { label: "Heart rate", units: ["bpm", "/min", "lpm", "beats/min"] },
+      rr: { label: "Respiratory rate", units: ["breaths/min", "/min", "rpm", "resp/min"] },
+      temp: { label: "Temperature", units: ["\xB0C", "\xB0F", "\xBAC", "\xBAF"] },
+      spo2: { label: "SpO2", units: ["%"] },
+      fio2: { label: "FiO2", units: ["%"] },
+      gcs: { label: "Glasgow Coma Scale", units: ["/15"] },
+      weight: { label: "Weight", units: ["kg", "lb", "lbs"] },
+      height: { label: "Height", units: ["cm", "m", "in"] },
+      ph: { label: "pH", units: [] },
+      pco2: { label: "pCO2", units: ["mmHg", "kPa"] },
+      pao2: { label: "PaO2", units: ["mmHg", "kPa"] },
+      hco3: { label: "Bicarbonate", units: ["mEq/L", "mmol/L"] },
+      lactate: { label: "Lactate", units: ["mmol/L"] },
+      na: { label: "Sodium", units: ["mEq/L", "mmol/L"] },
+      potassium: { label: "Potassium", units: ["mmol/L", "mEq/L"] },
+      cl: { label: "Chloride", units: ["mEq/L", "mmol/L"] },
+      albumin: { label: "Albumin", units: ["g/dL", "g/L"] },
+      creatinine: { label: "Creatinine", units: ["mg/dL", "\xB5mol/L", "\u03BCmol/L", "umol/L"] },
+      glucose: { label: "Glucose", units: ["mg/dL", "mmol/L"] },
+      ketones: { label: "Ketones", units: ["mmol/L"] },
+      bilirubin: { label: "Bilirubin", units: ["mg/dL"] },
+      platelets: { label: "Platelets", units: ["\xD710\xB3/\xB5L", "x10^3/uL", "10^3/\xB5L", "/mm\xB3", "\xD710\u2079/L", "x10^9/L"] },
+      hb: { label: "Hemoglobin", units: ["g/dL", "g/L"] },
+      a1c: { label: "HbA1c", units: ["%"] },
+      egfr: { label: "eGFR", units: ["mL/min/1.73m\xB2", "mL/min/1.73m2", "mL/min"] },
+      acr: { label: "Albumin-to-creatinine ratio", units: ["mg/g", "mg/mmol"] },
+      tc: { label: "Total cholesterol", units: ["mg/dL"] },
+      hdl: { label: "HDL cholesterol", units: ["mg/dL"] },
+      "urine-output": { label: "Urine output", units: ["mL"] },
+      /** How long the blood pressure has been low. Hours are converted (units.ts). */
+      "hypotension-min": { label: "Hypotension duration", units: ["min", "minutes", "mins", "minutos", "h", "hr", "hrs", "hour", "hours", "horas"] },
+      /** A measured height only. A bare "cm" may be above the sternal angle, so it is not accepted. */
+      "jvp-cm": { label: "Jugular venous pressure", units: ["cmH2O", "cm H2O"] },
+      age: { label: "Age", units: ["years", "year", "yr", "yrs", "y", "yo", "y/o", "a\xF1os"] },
+      /** The one key whose value is a word: `female` or `male`, see `sexStated`. */
+      sex: { label: "Sex", units: [] }
+    };
+    EXAM_FINDINGS = {
+      ...SHOCK_FINDINGS,
+      thirdHeartSound: HEART_FAILURE_FINDINGS.thirdHeartSound,
+      hepatojugularReflux: ["present", "absent"],
+      hepatomegaly: HEART_FAILURE_FINDINGS.hepatomegaly,
+      peripheralOedema: HEART_FAILURE_FINDINGS.peripheralOedema,
+      breathlessness: HISTORY_FINDINGS.breathlessness,
+      cough: HISTORY_FINDINGS.cough,
+      sputum: HISTORY_FINDINGS.sputum,
+      fever: HISTORY_FINDINGS.reportedFever,
+      pleuriticPain: HISTORY_FINDINGS.pleuriticPain,
+      trachea: TRACHEA,
+      rightExpansion: SIDE_FINDINGS.expansion,
+      rightPercussion: SIDE_FINDINGS.percussion,
+      rightBreathSounds: SIDE_FINDINGS.breathSounds,
+      rightAddedSounds: SIDE_FINDINGS.addedSounds,
+      rightVocalResonance: SIDE_FINDINGS.vocalResonance,
+      leftExpansion: SIDE_FINDINGS.expansion,
+      leftPercussion: SIDE_FINDINGS.percussion,
+      leftBreathSounds: SIDE_FINDINGS.breathSounds,
+      leftAddedSounds: SIDE_FINDINGS.addedSounds,
+      leftVocalResonance: SIDE_FINDINGS.vocalResonance,
+      oxygenSupport: ENUM_FIELDS.oxygenSupport,
+      accessoryMuscles: ENUM_FIELDS.accessoryMuscles,
+      speech: ENUM_FIELDS.speech,
+      paradoxicalBreathing: ENUM_FIELDS.paradoxicalBreathing,
+      cyanosis: ENUM_FIELDS.cyanosis
+    };
+    readsOk = (exam, reads) => typeof exam === "string" && Object.hasOwn(EXAM_FINDINGS, exam) && reads !== "not_assessed" && EXAM_FINDINGS[exam].includes(reads);
+    EPISODES = ["current", "history"];
+    MAX_EDITS = 5;
+    stripAccents = (s) => s.normalize("NFD").replace(new RegExp("\\p{Mn}", "gu"), "");
+    collapse = (s) => s.replace(/\s+/g, " ").trim();
+    collapseWithMap = (note) => {
+      let text = "";
+      const map = [];
+      for (let i = 0; i < note.length; i++) {
+        if (/\s/.test(note[i])) {
+          if (text && !text.endsWith(" ")) {
+            text += " ";
+            map.push(i);
+          }
+        } else {
+          text += note[i];
+          map.push(i);
+        }
+      }
+      return { text, map };
+    };
+    numbersIn = (s) => [...s.matchAll(/\d+(?:[.,·]\d+)?/g)].map(([m]) => {
+      const [whole, frac] = m.split(/[.,·]/);
+      const decimal = Number(frac === void 0 ? whole : `${whole}.${frac}`);
+      return m.includes(",") && frac?.length === 3 ? [decimal, Number(whole + frac)] : [decimal];
+    });
+    same = (a, b) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+    valueInQuote = (value, quote) => {
+      const source = numbersIn(quote);
+      let at = 0;
+      for (const values of numbersIn(value)) {
+        const found = source.findIndex((readings, i) => i >= at && readings.some((r) => values.some((v) => same(r, v))));
+        if (found === -1) return false;
+        at = found + 1;
+      }
+      return true;
+    };
+    closestSpan = (text, quote) => {
+      const fold = (c) => stripAccents(c).toLowerCase();
+      const t = text.split("").map(fold);
+      const q = quote.split("").map(fold);
+      let prev = q.map((_, i) => i + 1);
+      prev.unshift(0);
+      let starts = prev.map(() => 0);
+      let best = { distance: prev[q.length], start: 0, end: 0 };
+      for (let j = 0; j < t.length; j++) {
+        const cur = [0];
+        const curStart = [j + 1];
+        for (let i = 1; i <= q.length; i++) {
+          const sub = prev[i - 1] + (q[i - 1] === t[j] ? 0 : 1);
+          const del = prev[i] + 1;
+          const ins = cur[i - 1] + 1;
+          const d = Math.min(sub, del, ins);
+          cur.push(d);
+          curStart.push(d === sub ? starts[i - 1] : d === del ? starts[i] : curStart[i - 1]);
+        }
+        if (cur[q.length] < best.distance) best = { distance: cur[q.length], start: curStart[q.length], end: j + 1 };
+        prev = cur;
+        starts = curStart;
+      }
+      return best;
+    };
+    editDistance = (a, b) => {
+      let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+      for (let i = 1; i <= a.length; i++) {
+        const cur = [i];
+        for (let j = 1; j <= b.length; j++) cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)));
+        prev = cur;
+      }
+      return prev[b.length];
+    };
+    wordsOf = (s) => [...s.matchAll(/[\p{L}\p{N}]+(?:[.,·/^][\p{L}\p{N}]+)*/gu)].map((m) => ({
+      w: stripAccents(m[0]).toLowerCase(),
+      start: m.index,
+      end: m.index + m[0].length
+    }));
+    reorderedSpan = (note, quote) => {
+      const qw = wordsOf(quote).map((x) => x.w);
+      const nw = wordsOf(note);
+      const cost = (a, b) => a === b ? 0 : /\d/.test(a) || /\d/.test(b) ? Infinity : editDistance(a, b);
+      let best = null;
+      for (let i = 0; i + qw.length <= nw.length; i++) {
+        const window = nw.slice(i, i + qw.length);
+        const pairs = qw.flatMap((a, x) => window.map((b, y) => ({ x, y, d: cost(a, b.w) }))).sort((p, r) => p.d - r.d);
+        const usedQ = /* @__PURE__ */ new Set();
+        const usedN = /* @__PURE__ */ new Set();
+        let distance = 0;
+        for (const p of pairs) {
+          if (usedQ.has(p.x) || usedN.has(p.y)) continue;
+          usedQ.add(p.x);
+          usedN.add(p.y);
+          distance += p.d;
+        }
+        if (distance < (best?.distance ?? Infinity)) best = { distance, start: window[0].start, end: window.at(-1).end };
+      }
+      return best;
+    };
+    checkItem = (note, item) => {
+      const q = collapse(item.quote.normalize("NFC"));
+      if (!q) return { ...item, status: "none" };
+      if (prepared?.note !== note) {
+        const nfc2 = note.normalize("NFC");
+        prepared = { note, nfc: nfc2, ...collapseWithMap(nfc2) };
+      }
+      const { nfc, text, map } = prepared;
+      const at = text.indexOf(q);
+      if (at < 0) {
+        const budget = Math.min(MAX_EDITS, Math.floor(q.length / 4));
+        const span = closestSpan(text, q);
+        if (span.end === 0 || span.distance > budget) {
+          const words = reorderedSpan(nfc, q);
+          if (!words || words.distance > budget) return { ...item, status: "unverified" };
+          return {
+            ...item,
+            status: valueInQuote(item.value, nfc.slice(words.start, words.end)) ? "reordered" : "mismatched",
+            start: words.start,
+            end: words.end,
+            match: "words",
+            distance: words.distance
+          };
+        }
+        const start = map[span.start];
+        const end = map[span.end - 1] + 1;
+        return {
+          ...item,
+          // The value is checked against the note's words, so an edit that changed a digit fails here.
+          status: !valueInQuote(item.value, nfc.slice(start, end)) ? "mismatched" : span.distance === 0 ? "edited" : "approximate",
+          start,
+          end,
+          match: "loose",
+          distance: span.distance
+        };
+      }
+      return {
+        ...item,
+        status: valueInQuote(item.value, q) ? "quoted" : "mismatched",
+        match: "exact",
+        start: map[at],
+        end: map[at + q.length - 1] + 1,
+        ...text.indexOf(q, at + 1) >= 0 ? { ambiguous: true } : {}
+      };
+    };
+    checkExtraction = (note, items) => items.map((item) => checkItem(note, item));
+    noteSegments = (note, checked) => {
+      const text = note.normalize("NFC");
+      const cuts = /* @__PURE__ */ new Set([0, text.length]);
+      for (const c of checked) if (c.start !== void 0) cuts.add(c.start).add(c.end);
+      const points = [...cuts].sort((a, b) => a - b);
+      const out = [];
+      for (let i = 0; i < points.length - 1; i++) {
+        const [s, e] = [points[i], points[i + 1]];
+        const items = checked.flatMap((c, n) => c.start !== void 0 && c.start <= s && c.end >= e ? [n] : []);
+        out.push({ text: text.slice(s, e), items });
+      }
+      return out;
+    };
+    SEX_WORDS = {
+      female: ["female", "woman", "f", "mujer", "femenino", "femenina"],
+      male: ["male", "man", "m", "hombre", "masculino", "varon"]
+    };
+    sexStated = (value, quote) => {
+      const words = stripAccents(quote).toLowerCase().split(/[^a-z]+/);
+      const has = (s) => SEX_WORDS[s].some((w) => words.includes(w));
+      return (value === "female" || value === "male") && has(value) && !has(value === "female" ? "male" : "female") ? value : null;
+    };
+    toNumber = (value) => {
+      const v = value.trim();
+      if (!/^-?\d+(?:[.,]\d+)?$/.test(v) || /,\d{3}$/.test(v)) return null;
+      return Number(v.replace(",", "."));
+    };
+    unitOk = (key, unit) => !unit || FIELDS[key].units.some((u) => u.toLowerCase() === unit.trim().toLowerCase());
+    toInputs = (checked) => {
+      const keyed = checked.filter((c) => c.key && c.episode !== "history");
+      const count = (k) => keyed.filter((c) => c.key === k && c.episode === "current").length;
+      const out = { inputs: {}, review: [] };
+      for (const item of keyed) {
+        const key = item.key;
+        const value = toNumber(item.value);
+        const sex = key === "sex" ? sexStated(item.value, item.quote) : null;
+        const reason = item.status === "edited" || item.status === "approximate" || item.status === "reordered" ? "low-confidence" : item.status !== "quoted" ? "not-verified" : item.episode !== "current" ? "no-episode" : key === "sex" && !sex ? "not-stated" : key !== "sex" && (item.absent || value === null) ? "not-a-number" : !unitOk(key, item.unit) ? "unit" : count(key) > 1 ? "repeated" : null;
+        if (reason) out.review.push({ item, reason });
+        else if (sex) out.sex = sex;
+        else out.inputs[key] = { value, ...item.unit ? { unit: item.unit } : {}, quote: item.quote, ...item.time ? { time: item.time } : {} };
+      }
+      return out;
+    };
+    toExam = (checked) => {
+      const out = {};
+      const seen = /* @__PURE__ */ new Set();
+      checked.forEach((c, index) => {
+        if (!c.exam || c.episode !== "current") return;
+        if (seen.has(c.exam)) delete out[c.exam];
+        else if (c.status === "quoted" && readsOk(c.exam, c.reads)) out[c.exam] = { reads: c.reads, index };
+        seen.add(c.exam);
+      });
+      return out;
+    };
+    applyFindings = (firstPass, findings, rejected) => {
+      const kept = [...firstPass];
+      const added = [];
+      findings.forEach(({ index, correction }, n) => {
+        if (rejected.has(n)) return;
+        if (index === void 0) {
+          if (correction) added.push(correction);
+        } else if (Number.isInteger(index) && index >= 0 && index < firstPass.length) kept[index] = correction;
+      });
+      return [...kept.filter((item) => item !== null), ...added];
+    };
+  }
+});
+
 // ../../plugin/lib/nephrology.ts
 function classifyBPInCKD(sbp, dbp) {
   const s = sf(sbp);
@@ -5148,6 +5178,13 @@ mark.close{--hl:transparent;--hl-line:var(--bad);text-decoration-style:dashed}
 mark.bad{--hl:var(--bad-t);--hl-line:var(--bad);text-decoration-thickness:1.5px}
 /* the quote pointed at is filled with its own ink, the text in paper */
 mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent}
+/* pointing lights fast and lets go slower: the light comes with the pointer, the fade-out keeps the eye on where
+   it was. Colours only, so nothing moves and reduced motion keeps it. --hl is registered so the marker colour,
+   painted as a gradient, can fade */
+@property --hl{syntax:"<color>";inherits:true;initial-value:transparent}
+mark{transition:--hl .24s var(--ease),color .24s var(--ease),text-decoration-color .24s var(--ease)}
+.card,.e{transition-duration:.24s}
+mark.on,.card:hover,.card.on,.e:hover,.e.on{transition-duration:.12s}
 /* a group of values reads like a lab sheet, across then down, in as many columns as fit:
    field at left, the figure and its unit in fixed places at right, so figures line up */
 .vals{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr));gap:0 36px;margin-bottom:26px}
@@ -5159,13 +5196,18 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
 .e:not(.t)::after{content:"";grid-area:1/3;border-bottom:1px dotted;opacity:.45;transform:translateY(-3px)}
 /* a value in words is read, not compared: under its field, at text weight */
 /* the field is read in ink; its notes and the unit step back */
-.e:not(.bad)>.m+span{color:var(--ink)}
+.e:not(.bad)>.m+span{color:var(--ink);font-weight:600}
 .e small{color:var(--ink-2)}
 .e.t>span{grid-column:2/-1}
+.e.t>span:first-of-type{grid-area:1/2/2/4}
+.e .rd{grid-area:1/4;font:600 12.5px/1.3 var(--ui);color:var(--calc);text-align:right;white-space:nowrap}
+.e.t .val{margin-top:2px}
+/* a group's two kinds of value, named in the bar's uppercase so they sort the grid without competing with its heads */
+.sub{margin:16px 0 2px;font:700 11.5px/1 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
 .e.t .val{text-align:left;white-space:normal}
 /* the figure is the largest thing in an entry */
 .v{font:600 15px/1.3 var(--mono);color:var(--ink)}
-.v.txt{font:400 14.5px/1.35 var(--ui)}
+.v.txt{font:400 16px/1.35 var(--text)}
 .e small,.e .why{margin-left:5px;font-size:12px}
 .e .u{display:inline-block;min-width:5ch;text-align:left}
 .e.bad,.e.bad .v{color:var(--bad)}
@@ -5198,10 +5240,7 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
    marked like the band of a scale; a cell still possible with a finding missing takes the highlighter; the pair
    the rule names nothing for is hatched. The other findings stand in the cell they point at, in amber when that
    is not the cell marked. The state classes are not "on": pointing clears that one everywhere */
-.cards.wide{grid-template-columns:minmax(0,34rem)}
-.gt{flex-wrap:wrap;justify-content:space-between;gap:2px 14px}
-.pat{font:600 15px/1.6 var(--ui);color:var(--calc)}
-.pat.no,.card .says{color:var(--ink)}
+.card .says{color:var(--ink)}
 .gx{display:grid;grid-template-columns:minmax(5.2rem,.7fr) 1fr 1fr;margin-top:14px;border-top:1px solid var(--ink)}
 .gx>*{min-width:0;padding:8px 10px 9px;border-bottom:1px solid var(--line)}
 .gh{font:700 11.5px/1.25 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
@@ -5217,14 +5256,63 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
 .tg{display:flex;gap:6px;margin-top:5px;font:400 12.5px/1.25 var(--ui);color:var(--ink-2)}
 .tg::before{content:"";flex:none;width:7px;height:7px;margin-top:4px;box-shadow:inset 0 0 0 1px currentColor}
 .gc.at .tg{color:var(--ink)}
-.led{display:grid;gap:5px;margin-top:12px}
+/* the syndromic tab is read at a glance: the rules in three groups (found, undecided, not present), each rule one
+   shut row with its name and its result, opened on its detail. A group head is a section head of the page (the
+   serif italic over an ink rule) with its mark; the rows sit indented under its words. The mark says the group in
+   shape, not only colour: filled = the rule found its syndrome, open square = found none, hatched = could not
+   decide (the hatch of the grid's "no category") */
+.syn-top{display:flex;justify-content:flex-end;margin-top:10px}
+.syn-top .gtog{margin-top:0}
+.syn-g{display:flex;align-items:center;gap:9px;margin:30px 0 0;padding-bottom:7px;border-bottom:1px solid var(--ink);font:italic 400 21px/24px var(--text)}
+.syn-top+.syn-g{margin-top:6px}
+.syn-g .tn{width:11px;height:11px;transform:none}
+.syn-g b{margin-left:auto;font:500 12px/1 var(--mono);color:var(--ink-2)}
+.syn-l{margin-bottom:8px}
+.syn-r.card{position:relative;margin-inline:0;padding:0}
+/* one column, so the answers line up down the list; the result reads on from the name */
+.syn-r summary{display:grid;grid-template-columns:minmax(7rem,16rem) minmax(0,1fr) 12px;align-items:baseline;gap:2px 14px;padding:11px 82px 10px 20px;cursor:pointer;list-style:none}
+.syn-r summary::-webkit-details-marker{display:none}
+.syn-r summary:focus-visible{outline-offset:-2px}
+.syn-r h4{margin:0;font:400 17px/1.3 var(--text)}
+.syn-r .v{font:600 13.5px/1.35 var(--ui);color:var(--ink-2);text-wrap:balance}
+.syn-r.found .v{color:var(--calc)}
+.syn-r.open .v{color:var(--ink)}
+.syn-r .ch{align-self:center;width:12px;height:12px;color:var(--ink-2);transition:transform .3s var(--ease)}
+.syn-r details[open] .ch{transform:rotate(90deg)}
+.tn{flex:none;display:inline-block}
+.tn.found{background:var(--calc)}
+.tn.clear{box-shadow:inset 0 0 0 1.5px var(--ink-2)}
+.tn.open{box-shadow:inset 0 0 0 1.5px var(--ink);background:repeating-linear-gradient(135deg,transparent 0 2px,var(--ink) 2px 3px)}
+.syn-b{padding:0 4px 16px 20px}
+.syn-b .says{margin-top:0;font-size:14px}
+/* the doctor's answer on a rule: given, it is a word on the row (confirmed in ink, discarded struck through in
+   its group) and the detail offers only the other answer, to change it */
+/* the two answers on the shut row too, beside its summary (a button cannot sit inside the one that opens it);
+   the one given stays filled */
+/* shut, the row is only its summary: the answers stand in its middle, one line or two; open, they stay by its first line */
+.qa{position:absolute;top:0;bottom:0;right:4px;display:flex;align-items:center;gap:6px}
+.syn-r:has(>details[open])>.qa{bottom:auto;top:7px}
+.qb{all:unset;box-sizing:border-box;display:inline-grid;place-items:center;width:30px;height:30px;border:1px solid var(--line);color:var(--ink-2);cursor:pointer;transition:border-color .3s var(--ease),color .3s var(--ease),background-color .3s var(--ease)}
+.qb:hover{border-color:var(--ink);color:var(--ink)}
+.qb[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--sheet)}
+.qb:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.qb .ic{width:14px;height:14px;color:inherit}
+.syn-r.no h4,.syn-r.no .v{color:var(--ink-2);text-decoration:line-through;text-decoration-thickness:1px}
+.syn-b .acts{justify-content:flex-start;margin-top:16px}
+.syn-b .acts .btn:first-child:not(:only-child){background:var(--ink);color:var(--sheet)}
+.syn-b .acts .btn:first-child:not(:only-child):hover{background:var(--ink-2)}
+.syn-top{justify-content:space-between;align-items:center;gap:8px 16px;font-size:13px;color:var(--ink-2)}
+.syn-top b{font:500 13px/1 var(--mono);color:var(--ink)}
+.ldg{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:7px 14px;margin:12px 0 0;font-size:13.5px}
+.ldg dt{padding-top:2px;font:700 11px/1.4 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.ldg dd{margin:0;color:var(--ink)}
+.ldg dd li+li{margin-top:2px}
+.ldg .f{color:var(--ink-2)}
+.ldg .gone,.ldg .gone .f{color:var(--ink-2)}
+.ldg .off{color:var(--warn)}
+@media (max-width:520px){.ldg{grid-template-columns:minmax(0,1fr);gap:2px}.ldg dd+dt{margin-top:8px}.syn-r summary{grid-template-columns:minmax(0,1fr) 12px}.syn-r .v{grid-row:2}}
 .ic{display:inline-flex;flex:none;width:16px;height:16px;color:var(--calc)}
 .ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.led .sl{align-items:center;gap:10px;font-size:13.5px}
-.led .sl .lv{max-width:none;text-align:left}
-.sl.gone,.sl.gone .lv,.sl.gone .ic{color:var(--ink-2)}
-.sl.gone .lv{font-style:italic}
-.sl.off .ic{color:var(--warn)}
 .cite{display:flex;gap:10px;margin-top:14px;font-size:12px;color:var(--ink-2)}
 .cite .ic{width:14px;height:14px;margin-top:1px;color:var(--ink-2)}
 .cite a{color:var(--ink);text-underline-offset:3px}
@@ -5502,13 +5590,17 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     if (it.lab === true && it.episode === "history") name.appendChild(el("small", "", "history"));
     // the note says the patient does not have it
     if (it.absent === true) name.appendChild(el("small", "", "absent"));
-    // an examination finding: what its words were read as, a judgement the check cannot confirm
-    if (it.reads) name.appendChild(el("small", "", "read as " + it.reads.replace(/_/g, " ")));
     // when it was taken: the one thing the check cannot verify, so it is always shown
     if (it.time) name.appendChild(el("small", "", it.time));
     if (k === "close" || k === "bad") name.appendChild(el("span", "why", k === "close" ? "close match" : it.status === "mismatched" ? "not stated" : "not found"));
     if (it.ambiguous) name.appendChild(el("small", "", "first of several"));
     li.appendChild(name);
+    // an examination finding: what its words were read as, a judgement the check cannot confirm. It stands where a
+    // figure would, in the calculators' blue: the value a rule takes, worked out from the note's words under it
+    if (it.reads) {
+      var rd = el("span", "rd"); rd.appendChild(el("span", "sr", "read as ")); rd.appendChild(document.createTextNode(it.reads.replace(/_/g, " ")));
+      li.appendChild(rd);
+    }
     val.appendChild(el("b", fig ? "v" : "v txt", it.value));
     // a figure keeps the place of its unit even without one
     if (fig || it.unit) val.appendChild(el("small", "u", it.unit || ""));
@@ -5583,16 +5675,13 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return d;
   }
 
-  // the icons of a syndromic assessment, one stroke on a 16 grid; a ledger line takes the one of its label
+  // the icons of a syndromic assessment, one stroke on a 16 grid
   var ICON = {
-    "Pressure": '<path d="M2.5 11.5a5.5 5.5 0 0 1 11 0"/><path d="M8 11.5l2.6-3.2"/>',
-    "Agrees": '<path d="M3 8.5l3.2 3.2L13 4.5"/>',
-    "Points elsewhere": '<path d="M4 12l8-8M6.5 4H12v5.5"/>',
-    "Fits more than one": '<path d="M8 14V8.5M8 8.5L4 3.5M8 8.5l4-5"/>',
-    "Also found": '<path d="M8 3.5v9M3.5 8h9"/>',
-    "Not in the note": '<circle cx="8" cy="8" r="5" stroke-dasharray="2.2 2"/>',
     grid: '<path d="M2.5 2.5h11v11h-11zM8 2.5v11M2.5 8h11"/>',
-    info: '<circle cx="8" cy="8" r="5.5"/><path d="M8 7.5V11M8 5h0"/>'
+    info: '<circle cx="8" cy="8" r="5.5"/><path d="M8 7.5V11M8 5h0"/>',
+    open: '<path d="M6 3.5L10.5 8 6 12.5"/>',
+    yes: '<path d="M3 8.5l3.2 3.2L13 4.5"/>',
+    no: '<path d="M4 4l8 8M12 4l-8 8"/>'
   };
   // motion on request only, through the page's one ease: run by a click, so a redraw or a tab switch never replays
   // it. Reduced motion keeps the fade and drops the rise
@@ -5607,42 +5696,57 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return i;
   }
 
+  // the ledger's labels as the doctor reads them; the data keeps its own
+  var LEDGER = { Agrees: "Supports", Found: "Present", Absent: "Absent", Next: "Check next" };
   // a syndromic assessment as its rule: why it declined, what else the note says, the table on request, then
-  // the caveat and the study. The ledger's labels are icons, kept for screen readers and as the tooltip
+  // the caveat and the study. A ledger value is a list joined by "; ", each "finding: the note's words"
   function grid(g, source) {
-    var f = document.createDocumentFragment(), t = el("div", "gx"), l = el("div", "led");
+    var f = document.createDocumentFragment(), t = el("div", "gx"), l = el("dl", "ldg");
     function hd(h) { var d = el("div", h.on ? "gh lit" : "gh", h.label); if (h.quote) d.appendChild(el("q", "", h.quote)); return d; }
     if (g.why) f.appendChild(el("p", "says", g.why));
     g.ledger.forEach(function (r) {
-      var p = el("p", r[2] ? "sl off" : r[0] === "Not in the note" ? "sl gone" : "sl");
-      p.title = r[0];
-      p.appendChild(ic(r[0])); p.appendChild(el("span", "sr", r[0] + ": ")); p.appendChild(el("span", "lv", r[1]));
-      l.appendChild(p);
+      var dd = el("dd", r[2] ? "off" : r[0] === "Absent" ? "gone" : "");
+      l.appendChild(el("dt", "", LEDGER[r[0]] || r[0]));
+      if (r[0] === "Pressure") dd.textContent = r[1];
+      else {
+        var ul = el("ul");
+        r[1].split("; ").forEach(function (x) {
+          var li = el("li"), at = x.indexOf(": ");
+          if (at > 0) { li.appendChild(el("span", "f", x.slice(0, at) + ": ")); li.appendChild(document.createTextNode(x.slice(at + 2))); }
+          else li.textContent = x;
+          ul.appendChild(li);
+        });
+        dd.appendChild(ul);
+      }
+      l.appendChild(dd);
     });
     f.appendChild(l);
-    // the table is the long form: shut until the doctor asks for it, and kept that way across notes
-    var tg = el("button", "gtog"), tl = el("span", "", gridOpen ? "Hide the grid" : "Show the full grid");
-    tg.appendChild(ic("grid")); tg.appendChild(tl);
-    tg.type = "button"; tg.setAttribute("aria-expanded", String(gridOpen)); t.hidden = !gridOpen;
-    tg.onclick = function () {
-      gridOpen = t.hidden; t.hidden = !gridOpen;
-      if (gridOpen) rise(t);
-      tl.textContent = gridOpen ? "Hide the grid" : "Show the full grid"; tg.setAttribute("aria-expanded", String(gridOpen));
-    };
-    f.appendChild(tg);
-    t.appendChild(el("div", "gh"));
-    g.cols.forEach(function (h) { t.appendChild(hd(h)); });
-    g.rows.forEach(function (h, r) {
-      t.appendChild(hd(h));
-      g.cells[r].forEach(function (c) {
-        var d = el("div", "gc" + (c.none ? " none" : "") + (c.state ? " " + c.state : "")), s = el("span");
-        if (c.state === "at" && !c.none) s.appendChild(mk(""));
-        s.appendChild(document.createTextNode(c.label)); d.appendChild(s);
-        c.tags.forEach(function (x) { d.appendChild(el("span", x.off ? "tg off" : "tg", x.text)); });
-        t.appendChild(d);
+    // a rule that is not a two-finding table has no grid to show
+    if (g.cells.length) {
+      // the table is the long form: shut until the doctor asks for it, and kept that way across notes
+      var tg = el("button", "gtog"), tl = el("span", "", gridOpen ? "Hide the grid" : "Show the full grid");
+      tg.appendChild(ic("grid")); tg.appendChild(tl);
+      tg.type = "button"; tg.setAttribute("aria-expanded", String(gridOpen)); t.hidden = !gridOpen;
+      tg.onclick = function () {
+        gridOpen = t.hidden; t.hidden = !gridOpen;
+        if (gridOpen) rise(t);
+        tl.textContent = gridOpen ? "Hide the grid" : "Show the full grid"; tg.setAttribute("aria-expanded", String(gridOpen));
+      };
+      f.appendChild(tg);
+      t.appendChild(el("div", "gh"));
+      g.cols.forEach(function (h) { t.appendChild(hd(h)); });
+      g.rows.forEach(function (h, r) {
+        t.appendChild(hd(h));
+        g.cells[r].forEach(function (c) {
+          var d = el("div", "gc" + (c.none ? " none" : "") + (c.state ? " " + c.state : "")), s = el("span");
+          if (c.state === "at" && !c.none) s.appendChild(mk(""));
+          s.appendChild(document.createTextNode(c.label)); d.appendChild(s);
+          c.tags.forEach(function (x) { d.appendChild(el("span", x.off ? "tg off" : "tg", x.text)); });
+          t.appendChild(d);
+        });
       });
-    });
-    f.appendChild(t);
+      f.appendChild(t);
+    }
     // the caveat, then the study by author, journal and year, linked by its doi; the full reference is its tooltip
     var cv = el("p", "cite"), m = /^(.+?)\. .*\(([^;(]+?) (\d{4});.*doi:(\S+?)\)$/.exec(source);
     cv.appendChild(ic("info"));
@@ -5660,12 +5764,46 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   var ran = null, gridOpen = false, tabNow = "", tabFor = null, showTab = function () {};
   function auto() { try { return localStorage.getItem("syndromic") === "on"; } catch (e) { return false; } }
 
+  // the doctor's answers on the rules of the note drawn, by title, and how one is given (set by render)
+  var opened = {}, reviews = {}, answer = function () {};
+  // a syndromic rule as one row: shut, it is the glance (its name, its result, the doctor's answer; its group says
+  // the rest); open, its detail and the two answers. Which rows are open is kept across a redraw
+  function rule(c) {
+    var g = c.grid, said = reviews[c.title], li = el("li", "card syn-r " + g.tone + (said === "discarded" ? " no" : "")), d = el("details"), sm = el("summary");
+    sm.appendChild(el("h4", "", c.title));
+    sm.appendChild(el("span", "v", g.result));
+    if (said) sm.appendChild(el("span", "sr", said === "confirmed" ? ", confirmed" : ", discarded"));
+    var ch = ic("open"); ch.classList.add("ch"); sm.appendChild(ch);
+    d.appendChild(sm);
+    var b = el("div", "syn-b"), go = el("div", "acts");
+    b.appendChild(grid(g, c.source));
+    go.setAttribute("role", "group"); go.setAttribute("aria-label", "Your answer on " + c.title);
+    // neither answer is given yet: both, Confirm first; once one is, only the other
+    [["confirmed", said ? "Confirm instead" : "Confirm"], ["discarded", said ? "Discard instead" : "Discard"]].forEach(function (a) {
+      if (said === a[0]) return;
+      var btn = el("button", "btn", a[1]); btn.type = "button"; btn.dataset.r = c.title + "|" + a[0];
+      btn.onclick = function () { answer(c.title, a[0], btn); };
+      go.appendChild(btn);
+    });
+    b.appendChild(go); d.appendChild(b);
+    var qa = el("div", "qa"); qa.setAttribute("role", "group"); qa.setAttribute("aria-label", "Your answer on " + c.title);
+    [["confirmed", "yes", "Confirm"], ["discarded", "no", "Discard"]].forEach(function (a) {
+      var q = el("button", "qb"); q.type = "button"; q.dataset.q = c.title + "|" + a[0];
+      q.title = a[2]; q.setAttribute("aria-label", a[2] + " " + c.title); q.setAttribute("aria-pressed", String(said === a[0]));
+      q.appendChild(ic(a[1]));
+      q.onclick = function () { if (said !== a[0]) answer(c.title, a[0], q); };
+      qa.appendChild(q);
+    });
+    d.open = !!opened[c.title];
+    d.addEventListener("toggle", function () { opened[c.title] = d.open; if (d.open) rise(b); });
+    li.appendChild(d); li.appendChild(qa);
+    return li;
+  }
+
   // a calculator result: its rows, its source. Pointing at it lights the words its inputs came from
   function calc(c) {
-    var li = el("li", "card"), h = el("h3", c.grid ? "gt" : "", c.title);
-    li.tabIndex = 0;
-    if (c.grid) h.appendChild(el("span", c.grid.named ? "pat" : "pat no", c.grid.result));
-    li.appendChild(h);
+    var li = c.grid ? rule(c) : el("li", "card"), h = el("h3", "", c.title);
+    if (!c.grid) { li.tabIndex = 0; li.appendChild(h); }
     c.rows.forEach(function (r) {
       var p = line(r[0], "res");
       p.appendChild(FIG.test(r[1]) ? el("span", "n", r[1]) : document.createTextNode(r[1]));
@@ -5673,9 +5811,12 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       li.appendChild(p);
     });
     c.scales.forEach(function (s) { li.appendChild(scale(s)); });
-    if (c.grid) li.appendChild(grid(c.grid, c.source));
-    else li.appendChild(el("p", "src", c.source));
-    function lit() { clear(); c.uses.forEach(function (n) { on(n); }); }
+    if (!c.grid) li.appendChild(el("p", "src", c.source));
+    // its words and their values light, not the other cards that share an input: those light from the note's words
+    function lit() {
+      clear(); c.uses.forEach(function (n) { on(n); });
+      rail.querySelectorAll(".card.on").forEach(function (o) { if (o !== li && !o.contains(li)) o.classList.remove("on"); });
+    }
     li.addEventListener("mouseenter", lit);
     li.addEventListener("focusin", lit);
     li.addEventListener("mouseleave", clear);
@@ -5784,9 +5925,20 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       ["History", function (i) { return i.lab !== true && i.episode === "history"; }],
       ["Labs", function (i) { return i.lab === true && i.episode !== "history"; }, function (i) { return i.lab === true && i.episode === "history"; }]
     ].forEach(function (g) {
-      var ul = el("ul", "vals");
-      g.slice(1).forEach(function (is) { items.forEach(function (it, n) { if (is(it)) ul.appendChild(entry(it, n)); }); });
-      if (ul.firstChild) sec(g[0], ul.children.length, ul);
+      var of = [];
+      g.slice(1).forEach(function (is) { items.forEach(function (it, n) { if (is(it)) of.push([it, n]); }); });
+      if (!of.length) return;
+      // the figures first, then the findings in words, each in its own grid so neither breaks the other's rhythm;
+      // a group of one kind needs no sub-heads
+      var body = document.createDocumentFragment(), figs = of.filter(function (p) { return FIG.test(p[0].value); });
+      [["Measurements", figs], ["Findings", of.filter(function (p) { return !FIG.test(p[0].value); })]].forEach(function (k) {
+        if (!k[1].length) return;
+        if (k[1].length < of.length) body.appendChild(el("h3", "sub", k[0]));
+        var ul = el("ul", "vals");
+        k[1].forEach(function (p) { ul.appendChild(entry(p[0], p[1])); });
+        body.appendChild(ul);
+      });
+      sec(g[0], of.length, body);
     });
     // last, apart from what the note says: what the calculators make of it
     var cs = (data.calcs || []).filter(function (c) { return !c.grid; }), as = (data.calcs || []).filter(function (c) { return !!c.grid; });
@@ -5800,13 +5952,54 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     // ran it for this note; otherwise a button runs it. The results come with the data either way, so the button
     // asks nobody. The tab is its title, so the section has no head
     var syn = el("section", "calc syn");
-    syn.appendChild(el("p", "lead", "A bedside rule read from the exam findings of the current illness. Not a diagnosis; for learning, never patient care."));
+    syn.appendChild(el("p", "lead", "Bedside rules read from the exam findings of this illness. Open a rule for its findings. Not a diagnosis; for learning, never patient care."));
     function assessed() {
-      var ol = el("ol", "cards wide");
-      as.forEach(function (c) { ol.appendChild(calc(c)); });
-      if (as.length) tSyn.appendChild(el("b", "", String(as.length)));
-      return as.length ? ol : el("p", "empty", "No bedside rule applies to the values found in this note.");
+      if (!as.length) return el("p", "empty", "No bedside rule applies to the values found in this note.");
+      // drawn again on every answer: the tab keeps one count
+      if (!tSyn.querySelector("b")) tSyn.appendChild(el("b", "", String(as.length)));
+      var f = el("div", "syn-v"), top = el("div", "syn-top"), all = el("button", "gtog"), al = el("span"), done = el("p");
+      var answered = as.filter(function (c) { return reviews[c.title]; }).length;
+      done.appendChild(el("b", "", answered + "/" + as.length)); done.appendChild(document.createTextNode(" reviewed"));
+      all.type = "button";
+      function label() { al.textContent = f.querySelector("details:not([open])") ? "Open all" : "Close all"; }
+      all.appendChild(al);
+      all.onclick = function () {
+        var shut = !!f.querySelector("details:not([open])");
+        f.querySelectorAll("details").forEach(function (d) { d.open = shut; });
+        label();
+      };
+      top.appendChild(done); top.appendChild(all); f.appendChild(top);
+      // what a rule found first, then what it could not decide, then the syndromes ruled out, each in the workflow's
+      // order; a rule the doctor discarded stays in its group, struck through
+      [["found", "Syndrome found"], ["open", "Undecided"], ["clear", "Not present"]].forEach(function (t) {
+        var of = as.filter(function (c) { return c.grid.tone === t[0]; });
+        if (!of.length) return;
+        var h = el("h3", "syn-g"), m = el("i", "tn " + t[0]), ol = el("ol", "syn-l");
+        m.setAttribute("aria-hidden", "true");
+        h.appendChild(m); h.appendChild(document.createTextNode(t[1])); h.appendChild(el("b", "", String(of.length)));
+        of.forEach(function (c) { ol.appendChild(calc(c)); });
+        f.appendChild(h); f.appendChild(ol);
+      });
+      f.addEventListener("toggle", label, true);
+      label();
+      return f;
     }
+    reviews = reviewsOf(data);
+    // an answer redraws the tab in place: the rail keeps its scroll, the rule stays open, its other answer takes focus
+    answer = function (title, decision, btn) {
+      function show(next) {
+        reviews = next; data.reviews = next;
+        // answered from the detail it stays open; from the shut row it stays shut
+        if (btn.dataset.r) opened[title] = true;
+        var v = syn.querySelector(".syn-v"); if (v) v.replaceWith(assessed());
+        var b = syn.querySelector(btn.dataset.q ? '[data-q="' + btn.dataset.q.replace(/"/g, '\\"') + '"]' : '[data-r="' + title.replace(/"/g, '\\"') + "|" + (decision === "confirmed" ? "discarded" : "confirmed") + '"]');
+        if (b) b.focus();
+      }
+      var next = Object.assign({}, reviews); next[title] = decision;
+      if (!data.id) { try { localStorage.setItem("reviews:" + data.name, JSON.stringify(next)); } catch (e) {} show(next); return; }
+      btn.disabled = true; btn.setAttribute("aria-busy", "true");
+      postReview(data.id, title, decision, function (s) { if (s) show(s.reviews || next); else { btn.disabled = false; btn.removeAttribute("aria-busy"); } });
+    };
     if (auto() || ran === data.name) syn.appendChild(assessed());
     else {
       var box = el("div", "box"), run = el("button", "btn", "Run syndromic evaluation");
@@ -5816,10 +6009,10 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       box.appendChild(run);
       if (data.held) box.appendChild(el("p", "empty", "Decide the corrections first."));
       run.onclick = function () {
-        ran = data.name; var a = assessed(); box.replaceWith(a);
-        // the result first, then its lines one after another; "no rule applies" rises alone
-        var parts = [].slice.call(a.querySelectorAll("h3, .says, .led>p, .gtog, .gx:not([hidden]), .cite"));
-        (parts.length ? parts : [a]).forEach(function (e, i) { rise(e, i * 40); });
+        ran = data.name; var a = assessed(), parts = a.tagName === "DIV" ? [].slice.call(a.querySelectorAll(".syn-g, .syn-l>li")) : [a];
+        box.replaceWith(a);
+        // the key first, then the rules one after another; "no rule applies" rises alone
+        parts.forEach(function (e, i) { rise(e, i * 40); });
       };
       syn.appendChild(box);
     }
@@ -5831,6 +6024,14 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       var li = el("li"); li.appendChild(mk(g[0])); li.appendChild(el("b", "", String(count[g[0]]))); li.appendChild(el("span", "", g[1])); key.appendChild(li);
     });
   }
+
+  // the doctor's answers on the syndromic rules: live, the server keeps them beside the note (reviews.json); a page
+  // written by --artifact keeps them in this browser only
+  function reviewsOf(d) {
+    if (d.id) return d.reviews || {};
+    try { return JSON.parse(localStorage.getItem("reviews:" + d.name)) || {}; } catch (e) { return {}; }
+  }
+  var postReview = function () {};
 
   if (!data.live) { render(data); return; }
 
@@ -5846,6 +6047,17 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   var statusLine = el("p", "sr"); statusLine.setAttribute("role", "status");
   // last: the response text already drawn. seq: answers to an older request are dropped
   var id = null, last = null, timer = 0, seq = 0, tick = 0;
+  // an answer on a rule: the state the server sends back becomes the one drawn, so the next poll does not redraw it
+  postReview = function (hash, title, decision, done) {
+    fetch("/api/extractions/" + hash + "/reviews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rule: title, decision: decision }) })
+      .then(function (r) {
+        return r.text().then(function (body) {
+          conn.hidden = true;
+          if (!r.ok) { done(null); last = null; load(); return; }
+          last = body; done(JSON.parse(body));
+        });
+      }, function () { conn.hidden = false; done(null); });
+  };
 
   // the saved notes of this folder, newest first; asked for again each time the note on the page changes
   var pick = document.getElementById("pick"), dlg = document.getElementById("notes"), nlist = document.getElementById("nlist");
@@ -7349,7 +7561,7 @@ __export(extract_exports, {
   serve: () => serve2,
   stateOf: () => stateOf
 });
-var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE18, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run18;
+var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE18, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, sideKeys, spoken, bedsideRules, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run18;
 var init_extract = __esm({
   "src/commands/extract.ts"() {
     "use strict";
@@ -7362,7 +7574,12 @@ var init_extract = __esm({
     init_acid_base();
     init_bmi();
     init_ckd();
+    init_chest_exam();
     init_extraction();
+    init_focal_pulmonary();
+    init_heart_failure();
+    init_respiratory_failure();
+    init_volume();
     init_nephrology();
     init_pafi();
     init_shock();
@@ -7461,12 +7678,12 @@ Example:
       const why = shock.reason === null ? void 0 : shock.reason === "outside_studied_cohort" ? `${minutes ? `Low for ${minutes} minutes.` : "The note does not say how long the pressure has been low."} The rule was studied only after ${SHOCK_LIMITS.minutesAtLeast} minutes below ${SHOCK_LIMITS.systolicBelow} mmHg.` : shock.reason === "discordant_primary_findings" ? "Warm skin with an elevated neck: the study gives this pair no category." : `No ${[!skin && "skin temperature", !jvp && "neck vein"].filter(Boolean).join(" or ")} finding was found in the note${open.length === 2 ? `, so the rule cannot choose between ${open.join(" and ")}` : ""}.`;
       const ledger = [
         ["Pressure", `${exam.systolic} mmHg, ${minutes ? `low for ${minutes} min` : "duration not stated"}`],
-        ...shock.reason === null ? [["Agrees", list2(shock.supporting)], ["Points elsewhere", list2(shock.discordant), true], ["Fits more than one", list2(found.filter((n) => !points(n)))]] : [["Also found", list2(found)]],
-        ["Not in the note", Object.keys(SECONDARY).filter((n) => !said[n]).map((n) => SECONDARY[n]).join(", ")]
+        ...shock.reason === null ? [["Agrees", list2(shock.supporting)], ["Points elsewhere", list2(shock.discordant), true], ["Fits more than one", list2(found.filter((n) => !points(n)))]] : [["Also found", list2(found)]]
       ];
       return {
         result: SHOCK_LABELS[shock.category],
         named: shock.reason === null,
+        tone: shock.reason === null ? "found" : "open",
         ...why ? { why } : {},
         cols: [{ label: "Neck normal or low", on: jvp === "normal_or_low", ...jvp === "normal_or_low" && quotes.jvp ? { quote: quotes.jvp } : {} }, { label: "Neck elevated", on: jvp === "elevated", ...jvp === "elevated" && quotes.jvp ? { quote: quotes.jvp } : {} }],
         rows: [{ label: "Skin warm", on: skin === "warm", ...skin === "warm" && quotes.skin ? { quote: quotes.skin } : {} }, { label: "Skin cool", on: skin === "cool", ...skin === "cool" && quotes.skin ? { quote: quotes.skin } : {} }],
@@ -7474,6 +7691,121 @@ Example:
         ledger: ledger.filter((r) => r[1]),
         caveat: SHOCK_CAVEAT
       };
+    };
+    sideKeys = (side) => SIDE_FIELDS.map((f) => `${side}${f[0].toUpperCase()}${f.slice(1)}`);
+    spoken = (names) => names.map((n) => n.replace(/_/g, " ")).join(", ");
+    bedsideRules = (checked, inputs, uses) => {
+      const found = toExam(checked);
+      const r = (k) => found[k]?.reads;
+      const str = (k) => inputs[k] ? String(inputs[k].value) : "";
+      const out = [];
+      const card = (title, reads, numbers, source, v) => {
+        const got = reads.filter((k) => found[k]);
+        if (!got.length) return;
+        const nums = numbers.filter((k) => inputs[k]);
+        const said = (absent) => got.map((k) => checked[found[k].index]).filter((c) => !!c.absent === absent).map((c) => `${c.field}: ${c.value}`);
+        const ledger = [
+          ["Agrees", v.agrees ?? ""],
+          ["Found", [...said(false), ...nums.map((k) => `${FIELDS[k].label}: ${inputs[k].value}${inputs[k].unit ? ` ${inputs[k].unit}` : ""}`)].join("; ")],
+          ["Absent", said(true).join("; ")],
+          ["Next", (v.next ?? []).join("; ")]
+        ];
+        out.push({ title, rows: [], scales: [], uses: [...uses(...nums), ...got.map((k) => found[k].index)], source, grid: { result: v.result, named: v.named, tone: v.tone, ...v.why ? { why: v.why } : {}, cols: [], rows: [], cells: [], ledger: ledger.filter((l) => l[1]), caveat: v.caveat } });
+      };
+      const lung = r("lungExam"), s3 = r("thirdHeartSound"), oedema = r("peripheralOedema"), liver = r("hepatomegaly");
+      const presence = (x, yes) => x ? yes ? "present" : "absent" : void 0;
+      const volume = assessVolume({
+        jvp: r("jvp"),
+        jvpCmH2O: str("jvp-cm"),
+        hepatojugularReflux: r("hepatojugularReflux"),
+        rales: presence(lung, lung === "bilateral_crackles"),
+        s3Gallop: presence(s3, s3 !== "absent"),
+        bilateralAnkleEdema: presence(oedema, oedema === "dependent"),
+        hepatomegaly: presence(liver, liver !== "absent")
+      });
+      if (volume) card("Volume overload", ["jvp", "lungExam", "thirdHeartSound", "hepatojugularReflux", "peripheralOedema", "hepatomegaly"], ["jvp-cm"], MCKEE_1971, {
+        result: VOLUME_LABELS[volume.status],
+        named: volume.status !== "indeterminate",
+        tone: { overload: "found", no_overload: "clear", indeterminate: "open" }[volume.status],
+        ...volume.reason ? { why: VOLUME_REASONS[volume.reason] } : {},
+        next: volume.pivotal.length ? [`Would settle it: ${volume.pivotal.map((p) => p.replace(/[A-Z]/g, (c) => ` ${c.toLowerCase()}`)).join(", ")}`] : [],
+        caveat: VOLUME_CAVEAT
+      });
+      const hf = assessHeartFailure({
+        breathlessness: r("breathlessness"),
+        thirdHeartSound: s3,
+        jvp: r("jvp"),
+        hepatojugularReflux: r("hepatojugularReflux"),
+        hepatomegaly: liver,
+        peripheralOedema: oedema,
+        crackles: lung && { clear: "none", bilateral_crackles: "bilateral", unilateral_crackles: "unilateral" }[lung],
+        // a jvp-cm is cmH2O above the right atrium (FIELDS)
+        ...str("jvp-cm") ? { jvpHeightCm: str("jvp-cm"), jvpReference: "right-atrium" } : {}
+      });
+      card("Heart failure", ["breathlessness", "lungExam", "thirdHeartSound", "jvp", "hepatojugularReflux", "hepatomegaly", "peripheralOedema"], ["jvp-cm"], ESC_HF_2021, {
+        result: HF_LABELS[hf.verdict],
+        named: hf.verdict !== "indeterminate",
+        tone: hf.verdict === "indeterminate" ? "open" : hf.verdict === "no_congestion" ? "clear" : "found",
+        why: [hf.reason ? HF_REASONS[hf.reason] : HF_SYNDROME_LABELS[hf.syndrome], ...hf.notCalculated].join(". ") + ".",
+        agrees: [hf.leftSigns.length && `left: ${spoken(hf.leftSigns)}`, hf.rightSigns.length && `right: ${spoken(hf.rightSigns)}`].filter(Boolean).join("; "),
+        next: hf.next.map((n) => HF_NEXT_LABELS[n]),
+        caveat: HF_CAVEAT
+      });
+      const side = (s) => Object.fromEntries(SIDE_FIELDS.map((f, i) => [f, r(sideKeys(s)[i])]));
+      const chestKeys = ["trachea", ...sideKeys("right"), ...sideKeys("left")];
+      const chest = assessChestExam({ trachea: r("trachea"), right: side("right"), left: side("left") });
+      const sides = ["right", "left"].map((s) => [s, chest[s]]);
+      card("Chest examination", chestKeys, [], "The classic bedside semiology table (medextract's respiratory syndrome rule); no study measured it", {
+        result: sides.map(([s, a]) => `${s === "right" ? "Right" : "Left"}: ${CHEST_LABELS[a.verdict]}`).join(" \xB7 "),
+        named: sides.every(([, a]) => a.verdict !== "indeterminate"),
+        tone: sides.some(([, a]) => FOCAL_SYNDROMES.includes(a.verdict)) || chest.patterns.length ? "found" : sides.some(([, a]) => a.verdict === "indeterminate") ? "open" : "clear",
+        why: sides.filter(([, a]) => a.reason).map(([s, a]) => `${s === "right" ? "Right" : "Left"}: ${CHEST_REASONS[a.reason]}${a.unexplained.length ? ` (${a.unexplained.map((u) => `${CHEST_SIGN_LABELS[u.sign].toLowerCase()} ${u.value.replace(/_/g, " ")}`).join(", ")})` : ""}.`).join(" ") || void 0,
+        agrees: chest.patterns.map((p) => CHEST_PATTERN_LABELS[p]).join("; "),
+        caveat: CHEST_CAVEAT
+      });
+      const celsius = /^[°º]c$/i.test(inputs.temp?.unit?.trim() ?? "");
+      const focal = assessFocalPulmonary({
+        cough: r("cough"),
+        sputum: r("sputum"),
+        reportedFever: r("fever"),
+        pleuriticPain: r("pleuriticPain"),
+        breathlessness: r("breathlessness"),
+        trachea: r("trachea"),
+        right: side("right"),
+        left: side("left"),
+        temperatureC: celsius ? str("temp") : "",
+        oxygenSaturation: str("spo2")
+      });
+      card("Focal pulmonary syndrome", ["cough", "sputum", "fever", "pleuriticPain", "breathlessness", ...chestKeys], [...celsius ? ["temp"] : [], "spo2"], "NICE NG250 for the 38 \xB0C fever line (medextract's respiratory syndrome rule); no study measured it", {
+        result: FOCAL_LABELS[focal.verdict],
+        named: focal.verdict !== "indeterminate",
+        tone: { supported: "found", unsupported: "clear", indeterminate: "open" }[focal.verdict],
+        why: FOCAL_REASONS[focal.reason] + ".",
+        agrees: [`pneumonia evidence: ${FOCAL_EVIDENCE_LABELS[focal.pneumoniaEvidence]}`, focal.differential.length && `differential: ${focal.differential.map((d) => FOCAL_DIFFERENTIAL_LABELS[d]).join(", ")}`].filter(Boolean).join("; "),
+        next: focal.next.map((n) => FOCAL_NEXT_LABELS[n]),
+        caveat: FOCAL_CAVEAT
+      });
+      const gasUnit = { mmhg: "mmHg", kpa: "kPa" }[inputs.pco2?.unit?.trim().toLowerCase()];
+      const rf = assessRespiratoryFailure({
+        oxygenSupport: r("oxygenSupport"),
+        accessoryMuscles: r("accessoryMuscles"),
+        speech: r("speech"),
+        paradoxicalBreathing: r("paradoxicalBreathing"),
+        cyanosis: r("cyanosis"),
+        respiratoryRate: str("rr"),
+        oxygenSaturation: str("spo2"),
+        ...inputs.pao2 ? { bloodGas: "arterial", ...gasUnit ? { gasUnit } : {}, ph: str("ph"), po2: str("pao2"), pco2: str("pco2"), hco3: str("hco3") } : {}
+      });
+      card("Respiratory failure and distress", ["oxygenSupport", "accessoryMuscles", "speech", "paradoxicalBreathing", "cyanosis"], ["rr", "spo2", "pao2", "pco2", "ph", "hco3"], "Conventional definitions: PaO2 below 8 kPa, PaCO2 above 6 kPa with acidaemia; a rate of 30/min as BTS and CURB-65 (medextract's respiratory-failure rule)", {
+        result: `${RF_FAILURE_LABELS[rf.failure]} \xB7 ${RF_DISTRESS_LABELS[rf.distress]}`,
+        named: rf.failure !== "indeterminate",
+        tone: rf.failure === "present" || rf.distress === "present" ? "found" : rf.failure === "absent" && rf.distress === "absent" ? "clear" : "open",
+        why: [RF_FAILURE_REASONS[rf.failureReason], ...rf.notCalculated].join(". ") + ".",
+        agrees: [rf.distressSigns.map((d) => RF_SIGN_LABELS[d]).join(", "), rf.arterialGas?.disorder && `gas: ${rf.arterialGas.disorder}`].filter(Boolean).join("; "),
+        next: rf.next.map((n) => RF_NEXT_LABELS[n]),
+        caveat: RF_CAVEAT
+      });
+      return out;
     };
     calculations = (checked) => {
       const { inputs: asStated, sex } = toInputs(checked);
@@ -7562,9 +7894,10 @@ Example:
           const of = (k) => found[k] ? checked[found[k].index] : void 0;
           const said = { capillaryRefill: of("capillaryRefill")?.value, pulseVolume: of("pulseVolume")?.value, lungExam: of("lungExam")?.value };
           const quotes = { skin: of("skin")?.quote, jvp: of("jvp")?.quote ?? inputs["jvp-cm"]?.quote };
-          out.push({ title: "Shock pattern", rows: [], scales: [], uses: [...uses("sbp", "hypotension-min", "jvp-cm"), ...Object.values(found).map((f) => f.index)], source: VAZQUEZ_2010, grid: shockGrid(exam, shock, quotes, said) });
+          out.push({ title: "Shock pattern", rows: [], scales: [], uses: [...uses("sbp", "hypotension-min", "jvp-cm"), ...Object.entries(found).filter(([k]) => k in exam).map(([, f]) => f.index)], source: VAZQUEZ_2010, grid: shockGrid(exam, shock, quotes, said) });
         }
       }
+      out.push(...bedsideRules(checked, inputs, uses));
       return out;
     };
     pageData = (name, note, items) => ({
@@ -7588,7 +7921,8 @@ Example:
       const undecided = findings.some((f) => (f.correction || f.index !== void 0) && !f.decision);
       const state = verify ? undecided ? "review" : "done" : !running ? "failed" : firstPass ? "verifying" : "extracting";
       const items = verify ? checkExtraction(note, readJson((0, import_node_path2.join)(dir, "corrected.json")) ?? []) : [];
-      return { id: (0, import_node_path2.basename)(dir), state, error: null, note, ...pageData((0, import_node_path2.basename)(dir), note, items), ...undecided ? { calcs: [], held: true } : {}, findings };
+      const reviews = readJson((0, import_node_path2.join)(dir, "reviews.json")) ?? {};
+      return { id: (0, import_node_path2.basename)(dir), state, error: null, note, ...pageData((0, import_node_path2.basename)(dir), note, items), ...undecided ? { calcs: [], held: true } : {}, findings, reviews };
     };
     children = /* @__PURE__ */ new Set();
     TIMEOUT_MS = 5 * 6e4;
@@ -7743,9 +8077,9 @@ ${check}`));
             }).sort((a, b) => b.saved.localeCompare(a.saved));
             return send(200, list2);
           }
-          const [, hash, decisions] = /^\/api\/extractions\/([0-9a-f]{12})(\/decisions)?$/.exec(path) ?? [];
+          const [, hash, decisions, reviews] = /^\/api\/extractions\/([0-9a-f]{12})(?:(\/decisions)|(\/reviews))?$/.exec(path) ?? [];
           const dir = hash && (0, import_node_path2.join)("extractions", hash);
-          if (req.method === "GET" && !decisions && dir && (0, import_node_fs2.existsSync)((0, import_node_path2.join)(dir, "note.md"))) {
+          if (req.method === "GET" && !decisions && !reviews && dir && (0, import_node_fs2.existsSync)((0, import_node_path2.join)(dir, "note.md"))) {
             return send(200, { ...stateOf(dir, running.has(dir)), error: errors.get(dir) ?? null });
           }
           if (req.method === "POST" && decisions && dir && (0, import_node_fs2.existsSync)((0, import_node_path2.join)(dir, "note.md"))) {
@@ -7767,6 +8101,19 @@ ${check}`));
             (0, import_node_fs2.writeFileSync)((0, import_node_path2.join)(dir, "decisions.json"), JSON.stringify(decided, null, 2));
             const rejected = new Set(Object.keys(decided).filter((n) => decided[n] === "rejected").map(Number));
             (0, import_node_fs2.writeFileSync)((0, import_node_path2.join)(dir, "corrected.json"), JSON.stringify(applyFindings(readJson((0, import_node_path2.join)(dir, "extraction.json")) ?? [], verify.findings, rejected), null, 2));
+            return send(200, { ...stateOf(dir, running.has(dir)), error: errors.get(dir) ?? null });
+          }
+          if (req.method === "POST" && reviews && dir && (0, import_node_fs2.existsSync)((0, import_node_path2.join)(dir, "note.md"))) {
+            let body;
+            try {
+              body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+            } catch {
+              return send(400, { error: "the body must be JSON" });
+            }
+            const rules = stateOf(dir, running.has(dir)).calcs.filter((c) => c.grid).map((c) => c.title);
+            if (typeof body?.rule !== "string" || !rules.includes(body.rule)) return send(400, { error: "rule must be the title of a syndromic rule on this page" });
+            if (body.decision !== "confirmed" && body.decision !== "discarded") return send(400, { error: 'decision must be "confirmed" or "discarded"' });
+            (0, import_node_fs2.writeFileSync)((0, import_node_path2.join)(dir, "reviews.json"), JSON.stringify({ ...readJson((0, import_node_path2.join)(dir, "reviews.json")), [body.rule]: body.decision }, null, 2));
             return send(200, { ...stateOf(dir, running.has(dir)), error: errors.get(dir) ?? null });
           }
           send(404, { error: "not found" });

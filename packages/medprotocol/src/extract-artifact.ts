@@ -151,6 +151,13 @@ mark.close{--hl:transparent;--hl-line:var(--bad);text-decoration-style:dashed}
 mark.bad{--hl:var(--bad-t);--hl-line:var(--bad);text-decoration-thickness:1.5px}
 /* the quote pointed at is filled with its own ink, the text in paper */
 mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent}
+/* pointing lights fast and lets go slower: the light comes with the pointer, the fade-out keeps the eye on where
+   it was. Colours only, so nothing moves and reduced motion keeps it. --hl is registered so the marker colour,
+   painted as a gradient, can fade */
+@property --hl{syntax:"<color>";inherits:true;initial-value:transparent}
+mark{transition:--hl .24s var(--ease),color .24s var(--ease),text-decoration-color .24s var(--ease)}
+.card,.e{transition-duration:.24s}
+mark.on,.card:hover,.card.on,.e:hover,.e.on{transition-duration:.12s}
 /* a group of values reads like a lab sheet, across then down, in as many columns as fit:
    field at left, the figure and its unit in fixed places at right, so figures line up */
 .vals{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr));gap:0 36px;margin-bottom:26px}
@@ -162,13 +169,18 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
 .e:not(.t)::after{content:"";grid-area:1/3;border-bottom:1px dotted;opacity:.45;transform:translateY(-3px)}
 /* a value in words is read, not compared: under its field, at text weight */
 /* the field is read in ink; its notes and the unit step back */
-.e:not(.bad)>.m+span{color:var(--ink)}
+.e:not(.bad)>.m+span{color:var(--ink);font-weight:600}
 .e small{color:var(--ink-2)}
 .e.t>span{grid-column:2/-1}
+.e.t>span:first-of-type{grid-area:1/2/2/4}
+.e .rd{grid-area:1/4;font:600 12.5px/1.3 var(--ui);color:var(--calc);text-align:right;white-space:nowrap}
+.e.t .val{margin-top:2px}
+/* a group's two kinds of value, named in the bar's uppercase so they sort the grid without competing with its heads */
+.sub{margin:16px 0 2px;font:700 11.5px/1 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
 .e.t .val{text-align:left;white-space:normal}
 /* the figure is the largest thing in an entry */
 .v{font:600 15px/1.3 var(--mono);color:var(--ink)}
-.v.txt{font:400 14.5px/1.35 var(--ui)}
+.v.txt{font:400 16px/1.35 var(--text)}
 .e small,.e .why{margin-left:5px;font-size:12px}
 .e .u{display:inline-block;min-width:5ch;text-align:left}
 .e.bad,.e.bad .v{color:var(--bad)}
@@ -201,10 +213,7 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
    marked like the band of a scale; a cell still possible with a finding missing takes the highlighter; the pair
    the rule names nothing for is hatched. The other findings stand in the cell they point at, in amber when that
    is not the cell marked. The state classes are not "on": pointing clears that one everywhere */
-.cards.wide{grid-template-columns:minmax(0,34rem)}
-.gt{flex-wrap:wrap;justify-content:space-between;gap:2px 14px}
-.pat{font:600 15px/1.6 var(--ui);color:var(--calc)}
-.pat.no,.card .says{color:var(--ink)}
+.card .says{color:var(--ink)}
 .gx{display:grid;grid-template-columns:minmax(5.2rem,.7fr) 1fr 1fr;margin-top:14px;border-top:1px solid var(--ink)}
 .gx>*{min-width:0;padding:8px 10px 9px;border-bottom:1px solid var(--line)}
 .gh{font:700 11.5px/1.25 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
@@ -220,14 +229,63 @@ mark.on{--hl:var(--hl-line);color:var(--sheet);text-decoration-color:transparent
 .tg{display:flex;gap:6px;margin-top:5px;font:400 12.5px/1.25 var(--ui);color:var(--ink-2)}
 .tg::before{content:"";flex:none;width:7px;height:7px;margin-top:4px;box-shadow:inset 0 0 0 1px currentColor}
 .gc.at .tg{color:var(--ink)}
-.led{display:grid;gap:5px;margin-top:12px}
+/* the syndromic tab is read at a glance: the rules in three groups (found, undecided, not present), each rule one
+   shut row with its name and its result, opened on its detail. A group head is a section head of the page (the
+   serif italic over an ink rule) with its mark; the rows sit indented under its words. The mark says the group in
+   shape, not only colour: filled = the rule found its syndrome, open square = found none, hatched = could not
+   decide (the hatch of the grid's "no category") */
+.syn-top{display:flex;justify-content:flex-end;margin-top:10px}
+.syn-top .gtog{margin-top:0}
+.syn-g{display:flex;align-items:center;gap:9px;margin:30px 0 0;padding-bottom:7px;border-bottom:1px solid var(--ink);font:italic 400 21px/24px var(--text)}
+.syn-top+.syn-g{margin-top:6px}
+.syn-g .tn{width:11px;height:11px;transform:none}
+.syn-g b{margin-left:auto;font:500 12px/1 var(--mono);color:var(--ink-2)}
+.syn-l{margin-bottom:8px}
+.syn-r.card{position:relative;margin-inline:0;padding:0}
+/* one column, so the answers line up down the list; the result reads on from the name */
+.syn-r summary{display:grid;grid-template-columns:minmax(7rem,16rem) minmax(0,1fr) 12px;align-items:baseline;gap:2px 14px;padding:11px 82px 10px 20px;cursor:pointer;list-style:none}
+.syn-r summary::-webkit-details-marker{display:none}
+.syn-r summary:focus-visible{outline-offset:-2px}
+.syn-r h4{margin:0;font:400 17px/1.3 var(--text)}
+.syn-r .v{font:600 13.5px/1.35 var(--ui);color:var(--ink-2);text-wrap:balance}
+.syn-r.found .v{color:var(--calc)}
+.syn-r.open .v{color:var(--ink)}
+.syn-r .ch{align-self:center;width:12px;height:12px;color:var(--ink-2);transition:transform .3s var(--ease)}
+.syn-r details[open] .ch{transform:rotate(90deg)}
+.tn{flex:none;display:inline-block}
+.tn.found{background:var(--calc)}
+.tn.clear{box-shadow:inset 0 0 0 1.5px var(--ink-2)}
+.tn.open{box-shadow:inset 0 0 0 1.5px var(--ink);background:repeating-linear-gradient(135deg,transparent 0 2px,var(--ink) 2px 3px)}
+.syn-b{padding:0 4px 16px 20px}
+.syn-b .says{margin-top:0;font-size:14px}
+/* the doctor's answer on a rule: given, it is a word on the row (confirmed in ink, discarded struck through in
+   its group) and the detail offers only the other answer, to change it */
+/* the two answers on the shut row too, beside its summary (a button cannot sit inside the one that opens it);
+   the one given stays filled */
+/* shut, the row is only its summary: the answers stand in its middle, one line or two; open, they stay by its first line */
+.qa{position:absolute;top:0;bottom:0;right:4px;display:flex;align-items:center;gap:6px}
+.syn-r:has(>details[open])>.qa{bottom:auto;top:7px}
+.qb{all:unset;box-sizing:border-box;display:inline-grid;place-items:center;width:30px;height:30px;border:1px solid var(--line);color:var(--ink-2);cursor:pointer;transition:border-color .3s var(--ease),color .3s var(--ease),background-color .3s var(--ease)}
+.qb:hover{border-color:var(--ink);color:var(--ink)}
+.qb[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--sheet)}
+.qb:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.qb .ic{width:14px;height:14px;color:inherit}
+.syn-r.no h4,.syn-r.no .v{color:var(--ink-2);text-decoration:line-through;text-decoration-thickness:1px}
+.syn-b .acts{justify-content:flex-start;margin-top:16px}
+.syn-b .acts .btn:first-child:not(:only-child){background:var(--ink);color:var(--sheet)}
+.syn-b .acts .btn:first-child:not(:only-child):hover{background:var(--ink-2)}
+.syn-top{justify-content:space-between;align-items:center;gap:8px 16px;font-size:13px;color:var(--ink-2)}
+.syn-top b{font:500 13px/1 var(--mono);color:var(--ink)}
+.ldg{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:7px 14px;margin:12px 0 0;font-size:13.5px}
+.ldg dt{padding-top:2px;font:700 11px/1.4 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.ldg dd{margin:0;color:var(--ink)}
+.ldg dd li+li{margin-top:2px}
+.ldg .f{color:var(--ink-2)}
+.ldg .gone,.ldg .gone .f{color:var(--ink-2)}
+.ldg .off{color:var(--warn)}
+@media (max-width:520px){.ldg{grid-template-columns:minmax(0,1fr);gap:2px}.ldg dd+dt{margin-top:8px}.syn-r summary{grid-template-columns:minmax(0,1fr) 12px}.syn-r .v{grid-row:2}}
 .ic{display:inline-flex;flex:none;width:16px;height:16px;color:var(--calc)}
 .ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.led .sl{align-items:center;gap:10px;font-size:13.5px}
-.led .sl .lv{max-width:none;text-align:left}
-.sl.gone,.sl.gone .lv,.sl.gone .ic{color:var(--ink-2)}
-.sl.gone .lv{font-style:italic}
-.sl.off .ic{color:var(--warn)}
 .cite{display:flex;gap:10px;margin-top:14px;font-size:12px;color:var(--ink-2)}
 .cite .ic{width:14px;height:14px;margin-top:1px;color:var(--ink-2)}
 .cite a{color:var(--ink);text-underline-offset:3px}
@@ -505,13 +563,17 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     if (it.lab === true && it.episode === "history") name.appendChild(el("small", "", "history"));
     // the note says the patient does not have it
     if (it.absent === true) name.appendChild(el("small", "", "absent"));
-    // an examination finding: what its words were read as, a judgement the check cannot confirm
-    if (it.reads) name.appendChild(el("small", "", "read as " + it.reads.replace(/_/g, " ")));
     // when it was taken: the one thing the check cannot verify, so it is always shown
     if (it.time) name.appendChild(el("small", "", it.time));
     if (k === "close" || k === "bad") name.appendChild(el("span", "why", k === "close" ? "close match" : it.status === "mismatched" ? "not stated" : "not found"));
     if (it.ambiguous) name.appendChild(el("small", "", "first of several"));
     li.appendChild(name);
+    // an examination finding: what its words were read as, a judgement the check cannot confirm. It stands where a
+    // figure would, in the calculators' blue: the value a rule takes, worked out from the note's words under it
+    if (it.reads) {
+      var rd = el("span", "rd"); rd.appendChild(el("span", "sr", "read as ")); rd.appendChild(document.createTextNode(it.reads.replace(/_/g, " ")));
+      li.appendChild(rd);
+    }
     val.appendChild(el("b", fig ? "v" : "v txt", it.value));
     // a figure keeps the place of its unit even without one
     if (fig || it.unit) val.appendChild(el("small", "u", it.unit || ""));
@@ -586,16 +648,13 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return d;
   }
 
-  // the icons of a syndromic assessment, one stroke on a 16 grid; a ledger line takes the one of its label
+  // the icons of a syndromic assessment, one stroke on a 16 grid
   var ICON = {
-    "Pressure": '<path d="M2.5 11.5a5.5 5.5 0 0 1 11 0"/><path d="M8 11.5l2.6-3.2"/>',
-    "Agrees": '<path d="M3 8.5l3.2 3.2L13 4.5"/>',
-    "Points elsewhere": '<path d="M4 12l8-8M6.5 4H12v5.5"/>',
-    "Fits more than one": '<path d="M8 14V8.5M8 8.5L4 3.5M8 8.5l4-5"/>',
-    "Also found": '<path d="M8 3.5v9M3.5 8h9"/>',
-    "Not in the note": '<circle cx="8" cy="8" r="5" stroke-dasharray="2.2 2"/>',
     grid: '<path d="M2.5 2.5h11v11h-11zM8 2.5v11M2.5 8h11"/>',
-    info: '<circle cx="8" cy="8" r="5.5"/><path d="M8 7.5V11M8 5h0"/>'
+    info: '<circle cx="8" cy="8" r="5.5"/><path d="M8 7.5V11M8 5h0"/>',
+    open: '<path d="M6 3.5L10.5 8 6 12.5"/>',
+    yes: '<path d="M3 8.5l3.2 3.2L13 4.5"/>',
+    no: '<path d="M4 4l8 8M12 4l-8 8"/>'
   };
   // motion on request only, through the page's one ease: run by a click, so a redraw or a tab switch never replays
   // it. Reduced motion keeps the fade and drops the rise
@@ -610,42 +669,57 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return i;
   }
 
+  // the ledger's labels as the doctor reads them; the data keeps its own
+  var LEDGER = { Agrees: "Supports", Found: "Present", Absent: "Absent", Next: "Check next" };
   // a syndromic assessment as its rule: why it declined, what else the note says, the table on request, then
-  // the caveat and the study. The ledger's labels are icons, kept for screen readers and as the tooltip
+  // the caveat and the study. A ledger value is a list joined by "; ", each "finding: the note's words"
   function grid(g, source) {
-    var f = document.createDocumentFragment(), t = el("div", "gx"), l = el("div", "led");
+    var f = document.createDocumentFragment(), t = el("div", "gx"), l = el("dl", "ldg");
     function hd(h) { var d = el("div", h.on ? "gh lit" : "gh", h.label); if (h.quote) d.appendChild(el("q", "", h.quote)); return d; }
     if (g.why) f.appendChild(el("p", "says", g.why));
     g.ledger.forEach(function (r) {
-      var p = el("p", r[2] ? "sl off" : r[0] === "Not in the note" ? "sl gone" : "sl");
-      p.title = r[0];
-      p.appendChild(ic(r[0])); p.appendChild(el("span", "sr", r[0] + ": ")); p.appendChild(el("span", "lv", r[1]));
-      l.appendChild(p);
+      var dd = el("dd", r[2] ? "off" : r[0] === "Absent" ? "gone" : "");
+      l.appendChild(el("dt", "", LEDGER[r[0]] || r[0]));
+      if (r[0] === "Pressure") dd.textContent = r[1];
+      else {
+        var ul = el("ul");
+        r[1].split("; ").forEach(function (x) {
+          var li = el("li"), at = x.indexOf(": ");
+          if (at > 0) { li.appendChild(el("span", "f", x.slice(0, at) + ": ")); li.appendChild(document.createTextNode(x.slice(at + 2))); }
+          else li.textContent = x;
+          ul.appendChild(li);
+        });
+        dd.appendChild(ul);
+      }
+      l.appendChild(dd);
     });
     f.appendChild(l);
-    // the table is the long form: shut until the doctor asks for it, and kept that way across notes
-    var tg = el("button", "gtog"), tl = el("span", "", gridOpen ? "Hide the grid" : "Show the full grid");
-    tg.appendChild(ic("grid")); tg.appendChild(tl);
-    tg.type = "button"; tg.setAttribute("aria-expanded", String(gridOpen)); t.hidden = !gridOpen;
-    tg.onclick = function () {
-      gridOpen = t.hidden; t.hidden = !gridOpen;
-      if (gridOpen) rise(t);
-      tl.textContent = gridOpen ? "Hide the grid" : "Show the full grid"; tg.setAttribute("aria-expanded", String(gridOpen));
-    };
-    f.appendChild(tg);
-    t.appendChild(el("div", "gh"));
-    g.cols.forEach(function (h) { t.appendChild(hd(h)); });
-    g.rows.forEach(function (h, r) {
-      t.appendChild(hd(h));
-      g.cells[r].forEach(function (c) {
-        var d = el("div", "gc" + (c.none ? " none" : "") + (c.state ? " " + c.state : "")), s = el("span");
-        if (c.state === "at" && !c.none) s.appendChild(mk(""));
-        s.appendChild(document.createTextNode(c.label)); d.appendChild(s);
-        c.tags.forEach(function (x) { d.appendChild(el("span", x.off ? "tg off" : "tg", x.text)); });
-        t.appendChild(d);
+    // a rule that is not a two-finding table has no grid to show
+    if (g.cells.length) {
+      // the table is the long form: shut until the doctor asks for it, and kept that way across notes
+      var tg = el("button", "gtog"), tl = el("span", "", gridOpen ? "Hide the grid" : "Show the full grid");
+      tg.appendChild(ic("grid")); tg.appendChild(tl);
+      tg.type = "button"; tg.setAttribute("aria-expanded", String(gridOpen)); t.hidden = !gridOpen;
+      tg.onclick = function () {
+        gridOpen = t.hidden; t.hidden = !gridOpen;
+        if (gridOpen) rise(t);
+        tl.textContent = gridOpen ? "Hide the grid" : "Show the full grid"; tg.setAttribute("aria-expanded", String(gridOpen));
+      };
+      f.appendChild(tg);
+      t.appendChild(el("div", "gh"));
+      g.cols.forEach(function (h) { t.appendChild(hd(h)); });
+      g.rows.forEach(function (h, r) {
+        t.appendChild(hd(h));
+        g.cells[r].forEach(function (c) {
+          var d = el("div", "gc" + (c.none ? " none" : "") + (c.state ? " " + c.state : "")), s = el("span");
+          if (c.state === "at" && !c.none) s.appendChild(mk(""));
+          s.appendChild(document.createTextNode(c.label)); d.appendChild(s);
+          c.tags.forEach(function (x) { d.appendChild(el("span", x.off ? "tg off" : "tg", x.text)); });
+          t.appendChild(d);
+        });
       });
-    });
-    f.appendChild(t);
+      f.appendChild(t);
+    }
     // the caveat, then the study by author, journal and year, linked by its doi; the full reference is its tooltip
     var cv = el("p", "cite"), m = /^(.+?)\. .*\(([^;(]+?) (\d{4});.*doi:(\S+?)\)$/.exec(source);
     cv.appendChild(ic("info"));
@@ -663,12 +737,46 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   var ran = null, gridOpen = false, tabNow = "", tabFor = null, showTab = function () {};
   function auto() { try { return localStorage.getItem("syndromic") === "on"; } catch (e) { return false; } }
 
+  // the doctor's answers on the rules of the note drawn, by title, and how one is given (set by render)
+  var opened = {}, reviews = {}, answer = function () {};
+  // a syndromic rule as one row: shut, it is the glance (its name, its result, the doctor's answer; its group says
+  // the rest); open, its detail and the two answers. Which rows are open is kept across a redraw
+  function rule(c) {
+    var g = c.grid, said = reviews[c.title], li = el("li", "card syn-r " + g.tone + (said === "discarded" ? " no" : "")), d = el("details"), sm = el("summary");
+    sm.appendChild(el("h4", "", c.title));
+    sm.appendChild(el("span", "v", g.result));
+    if (said) sm.appendChild(el("span", "sr", said === "confirmed" ? ", confirmed" : ", discarded"));
+    var ch = ic("open"); ch.classList.add("ch"); sm.appendChild(ch);
+    d.appendChild(sm);
+    var b = el("div", "syn-b"), go = el("div", "acts");
+    b.appendChild(grid(g, c.source));
+    go.setAttribute("role", "group"); go.setAttribute("aria-label", "Your answer on " + c.title);
+    // neither answer is given yet: both, Confirm first; once one is, only the other
+    [["confirmed", said ? "Confirm instead" : "Confirm"], ["discarded", said ? "Discard instead" : "Discard"]].forEach(function (a) {
+      if (said === a[0]) return;
+      var btn = el("button", "btn", a[1]); btn.type = "button"; btn.dataset.r = c.title + "|" + a[0];
+      btn.onclick = function () { answer(c.title, a[0], btn); };
+      go.appendChild(btn);
+    });
+    b.appendChild(go); d.appendChild(b);
+    var qa = el("div", "qa"); qa.setAttribute("role", "group"); qa.setAttribute("aria-label", "Your answer on " + c.title);
+    [["confirmed", "yes", "Confirm"], ["discarded", "no", "Discard"]].forEach(function (a) {
+      var q = el("button", "qb"); q.type = "button"; q.dataset.q = c.title + "|" + a[0];
+      q.title = a[2]; q.setAttribute("aria-label", a[2] + " " + c.title); q.setAttribute("aria-pressed", String(said === a[0]));
+      q.appendChild(ic(a[1]));
+      q.onclick = function () { if (said !== a[0]) answer(c.title, a[0], q); };
+      qa.appendChild(q);
+    });
+    d.open = !!opened[c.title];
+    d.addEventListener("toggle", function () { opened[c.title] = d.open; if (d.open) rise(b); });
+    li.appendChild(d); li.appendChild(qa);
+    return li;
+  }
+
   // a calculator result: its rows, its source. Pointing at it lights the words its inputs came from
   function calc(c) {
-    var li = el("li", "card"), h = el("h3", c.grid ? "gt" : "", c.title);
-    li.tabIndex = 0;
-    if (c.grid) h.appendChild(el("span", c.grid.named ? "pat" : "pat no", c.grid.result));
-    li.appendChild(h);
+    var li = c.grid ? rule(c) : el("li", "card"), h = el("h3", "", c.title);
+    if (!c.grid) { li.tabIndex = 0; li.appendChild(h); }
     c.rows.forEach(function (r) {
       var p = line(r[0], "res");
       p.appendChild(FIG.test(r[1]) ? el("span", "n", r[1]) : document.createTextNode(r[1]));
@@ -676,9 +784,12 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       li.appendChild(p);
     });
     c.scales.forEach(function (s) { li.appendChild(scale(s)); });
-    if (c.grid) li.appendChild(grid(c.grid, c.source));
-    else li.appendChild(el("p", "src", c.source));
-    function lit() { clear(); c.uses.forEach(function (n) { on(n); }); }
+    if (!c.grid) li.appendChild(el("p", "src", c.source));
+    // its words and their values light, not the other cards that share an input: those light from the note's words
+    function lit() {
+      clear(); c.uses.forEach(function (n) { on(n); });
+      rail.querySelectorAll(".card.on").forEach(function (o) { if (o !== li && !o.contains(li)) o.classList.remove("on"); });
+    }
     li.addEventListener("mouseenter", lit);
     li.addEventListener("focusin", lit);
     li.addEventListener("mouseleave", clear);
@@ -787,9 +898,20 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       ["History", function (i) { return i.lab !== true && i.episode === "history"; }],
       ["Labs", function (i) { return i.lab === true && i.episode !== "history"; }, function (i) { return i.lab === true && i.episode === "history"; }]
     ].forEach(function (g) {
-      var ul = el("ul", "vals");
-      g.slice(1).forEach(function (is) { items.forEach(function (it, n) { if (is(it)) ul.appendChild(entry(it, n)); }); });
-      if (ul.firstChild) sec(g[0], ul.children.length, ul);
+      var of = [];
+      g.slice(1).forEach(function (is) { items.forEach(function (it, n) { if (is(it)) of.push([it, n]); }); });
+      if (!of.length) return;
+      // the figures first, then the findings in words, each in its own grid so neither breaks the other's rhythm;
+      // a group of one kind needs no sub-heads
+      var body = document.createDocumentFragment(), figs = of.filter(function (p) { return FIG.test(p[0].value); });
+      [["Measurements", figs], ["Findings", of.filter(function (p) { return !FIG.test(p[0].value); })]].forEach(function (k) {
+        if (!k[1].length) return;
+        if (k[1].length < of.length) body.appendChild(el("h3", "sub", k[0]));
+        var ul = el("ul", "vals");
+        k[1].forEach(function (p) { ul.appendChild(entry(p[0], p[1])); });
+        body.appendChild(ul);
+      });
+      sec(g[0], of.length, body);
     });
     // last, apart from what the note says: what the calculators make of it
     var cs = (data.calcs || []).filter(function (c) { return !c.grid; }), as = (data.calcs || []).filter(function (c) { return !!c.grid; });
@@ -803,13 +925,54 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     // ran it for this note; otherwise a button runs it. The results come with the data either way, so the button
     // asks nobody. The tab is its title, so the section has no head
     var syn = el("section", "calc syn");
-    syn.appendChild(el("p", "lead", "A bedside rule read from the exam findings of the current illness. Not a diagnosis; for learning, never patient care."));
+    syn.appendChild(el("p", "lead", "Bedside rules read from the exam findings of this illness. Open a rule for its findings. Not a diagnosis; for learning, never patient care."));
     function assessed() {
-      var ol = el("ol", "cards wide");
-      as.forEach(function (c) { ol.appendChild(calc(c)); });
-      if (as.length) tSyn.appendChild(el("b", "", String(as.length)));
-      return as.length ? ol : el("p", "empty", "No bedside rule applies to the values found in this note.");
+      if (!as.length) return el("p", "empty", "No bedside rule applies to the values found in this note.");
+      // drawn again on every answer: the tab keeps one count
+      if (!tSyn.querySelector("b")) tSyn.appendChild(el("b", "", String(as.length)));
+      var f = el("div", "syn-v"), top = el("div", "syn-top"), all = el("button", "gtog"), al = el("span"), done = el("p");
+      var answered = as.filter(function (c) { return reviews[c.title]; }).length;
+      done.appendChild(el("b", "", answered + "/" + as.length)); done.appendChild(document.createTextNode(" reviewed"));
+      all.type = "button";
+      function label() { al.textContent = f.querySelector("details:not([open])") ? "Open all" : "Close all"; }
+      all.appendChild(al);
+      all.onclick = function () {
+        var shut = !!f.querySelector("details:not([open])");
+        f.querySelectorAll("details").forEach(function (d) { d.open = shut; });
+        label();
+      };
+      top.appendChild(done); top.appendChild(all); f.appendChild(top);
+      // what a rule found first, then what it could not decide, then the syndromes ruled out, each in the workflow's
+      // order; a rule the doctor discarded stays in its group, struck through
+      [["found", "Syndrome found"], ["open", "Undecided"], ["clear", "Not present"]].forEach(function (t) {
+        var of = as.filter(function (c) { return c.grid.tone === t[0]; });
+        if (!of.length) return;
+        var h = el("h3", "syn-g"), m = el("i", "tn " + t[0]), ol = el("ol", "syn-l");
+        m.setAttribute("aria-hidden", "true");
+        h.appendChild(m); h.appendChild(document.createTextNode(t[1])); h.appendChild(el("b", "", String(of.length)));
+        of.forEach(function (c) { ol.appendChild(calc(c)); });
+        f.appendChild(h); f.appendChild(ol);
+      });
+      f.addEventListener("toggle", label, true);
+      label();
+      return f;
     }
+    reviews = reviewsOf(data);
+    // an answer redraws the tab in place: the rail keeps its scroll, the rule stays open, its other answer takes focus
+    answer = function (title, decision, btn) {
+      function show(next) {
+        reviews = next; data.reviews = next;
+        // answered from the detail it stays open; from the shut row it stays shut
+        if (btn.dataset.r) opened[title] = true;
+        var v = syn.querySelector(".syn-v"); if (v) v.replaceWith(assessed());
+        var b = syn.querySelector(btn.dataset.q ? '[data-q="' + btn.dataset.q.replace(/"/g, '\\"') + '"]' : '[data-r="' + title.replace(/"/g, '\\"') + "|" + (decision === "confirmed" ? "discarded" : "confirmed") + '"]');
+        if (b) b.focus();
+      }
+      var next = Object.assign({}, reviews); next[title] = decision;
+      if (!data.id) { try { localStorage.setItem("reviews:" + data.name, JSON.stringify(next)); } catch (e) {} show(next); return; }
+      btn.disabled = true; btn.setAttribute("aria-busy", "true");
+      postReview(data.id, title, decision, function (s) { if (s) show(s.reviews || next); else { btn.disabled = false; btn.removeAttribute("aria-busy"); } });
+    };
     if (auto() || ran === data.name) syn.appendChild(assessed());
     else {
       var box = el("div", "box"), run = el("button", "btn", "Run syndromic evaluation");
@@ -819,10 +982,10 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       box.appendChild(run);
       if (data.held) box.appendChild(el("p", "empty", "Decide the corrections first."));
       run.onclick = function () {
-        ran = data.name; var a = assessed(); box.replaceWith(a);
-        // the result first, then its lines one after another; "no rule applies" rises alone
-        var parts = [].slice.call(a.querySelectorAll("h3, .says, .led>p, .gtog, .gx:not([hidden]), .cite"));
-        (parts.length ? parts : [a]).forEach(function (e, i) { rise(e, i * 40); });
+        ran = data.name; var a = assessed(), parts = a.tagName === "DIV" ? [].slice.call(a.querySelectorAll(".syn-g, .syn-l>li")) : [a];
+        box.replaceWith(a);
+        // the key first, then the rules one after another; "no rule applies" rises alone
+        parts.forEach(function (e, i) { rise(e, i * 40); });
       };
       syn.appendChild(box);
     }
@@ -834,6 +997,14 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       var li = el("li"); li.appendChild(mk(g[0])); li.appendChild(el("b", "", String(count[g[0]]))); li.appendChild(el("span", "", g[1])); key.appendChild(li);
     });
   }
+
+  // the doctor's answers on the syndromic rules: live, the server keeps them beside the note (reviews.json); a page
+  // written by --artifact keeps them in this browser only
+  function reviewsOf(d) {
+    if (d.id) return d.reviews || {};
+    try { return JSON.parse(localStorage.getItem("reviews:" + d.name)) || {}; } catch (e) { return {}; }
+  }
+  var postReview = function () {};
 
   if (!data.live) { render(data); return; }
 
@@ -849,6 +1020,17 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
   var statusLine = el("p", "sr"); statusLine.setAttribute("role", "status");
   // last: the response text already drawn. seq: answers to an older request are dropped
   var id = null, last = null, timer = 0, seq = 0, tick = 0;
+  // an answer on a rule: the state the server sends back becomes the one drawn, so the next poll does not redraw it
+  postReview = function (hash, title, decision, done) {
+    fetch("/api/extractions/" + hash + "/reviews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rule: title, decision: decision }) })
+      .then(function (r) {
+        return r.text().then(function (body) {
+          conn.hidden = true;
+          if (!r.ok) { done(null); last = null; load(); return; }
+          last = body; done(JSON.parse(body));
+        });
+      }, function () { conn.hidden = false; done(null); });
+  };
 
   // the saved notes of this folder, newest first; asked for again each time the note on the page changes
   var pick = document.getElementById("pick"), dlg = document.getElementById("notes"), nlist = document.getElementById("nlist");
