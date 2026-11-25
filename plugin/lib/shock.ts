@@ -6,6 +6,7 @@
  * result is a bedside heuristic, not a diagnosis. Ported from medextract's `syndromes/shock/rule.ts`.
  */
 
+import { JVP_LIMITS } from "./cardiology";
 import { safeParseFloatOrNull } from "./utils/safeParseFloat";
 
 /** The study's cut-offs. Outside its cohort the rule declines to answer. */
@@ -14,8 +15,8 @@ export const SHOCK_LIMITS = {
   systolicBelow: 90,
   /** For at least this many minutes. */
   minutesAtLeast: 30,
-  /** A measured JVP above this, in cmH2O, is elevated. Strictly above. */
-  jvpElevatedAboveCmH2O: 7,
+  /** A measured JVP above this, in cmH2O, is elevated. Strictly above. The one JVP line, from cardiology. */
+  jvpElevatedAboveCmH2O: JVP_LIMITS.elevatedAboveCmH2O,
 } as const;
 
 /** Every finding can be `not_assessed`: a finding nobody examined is never guessed. */

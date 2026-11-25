@@ -1725,7 +1725,7 @@ var init_cardiology = __esm({
     };
     JVP_LIMITS = {
       /** Above this, in cmH2O referenced to the right atrium, the JVP is Elevated. */
-      elevatedAboveCmH2O: 8,
+      elevatedAboveCmH2O: 7,
       /** The conventional vertical distance from the right atrium to the sternal angle, in cm. */
       sternalAngleToRightAtriumCm: 5,
       /** The plausible range of a bedside height, cmH2O referenced to the right atrium. */
@@ -2407,14 +2407,15 @@ var SHOCK_LIMITS, SHOCK_FINDINGS, SHOCK_LABELS, SHOCK_REASONS, binJvp, SHOCK_CAV
 var init_shock = __esm({
   "../../plugin/lib/shock.ts"() {
     "use strict";
+    init_cardiology();
     init_safeParseFloat();
     SHOCK_LIMITS = {
       /** Systolic below this, in mmHg. */
       systolicBelow: 90,
       /** For at least this many minutes. */
       minutesAtLeast: 30,
-      /** A measured JVP above this, in cmH2O, is elevated. Strictly above. */
-      jvpElevatedAboveCmH2O: 7
+      /** A measured JVP above this, in cmH2O, is elevated. Strictly above. The one JVP line, from cardiology. */
+      jvpElevatedAboveCmH2O: JVP_LIMITS.elevatedAboveCmH2O
     };
     SHOCK_FINDINGS = {
       skin: ["warm", "cool", "not_assessed"],

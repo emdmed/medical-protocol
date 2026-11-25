@@ -257,17 +257,17 @@ export const getCHADSVAScSeverity = (score: number, isFemale: boolean): string =
 /**
  * Bedside jugular venous pressure: a measured height in, Normal or Elevated out.
  *
- * The line is McGee's (Evidence-Based Physical Diagnosis): the top of the venous column more than
- * 3 cm above the sternal angle is elevated, and the sternal angle sits a conventional 5 cm above
- * the right atrium, so the same line is more than 8 cmH2O referenced to the right atrium.
- * Strictly above: 8 itself is Normal.
+ * One line for every command: more than 7 cmH2O referenced to the right atrium is elevated, the cut
+ * Vazquez et al. used (J Hosp Med 2010;5:471-474) and the one shock and volume bin at. The sternal
+ * angle sits a conventional 5 cm above the right atrium, so that is more than 2 cm above the angle.
+ * McGee's textbook line (more than 8 cmH2O) is deliberately not used. Strictly above: 7 is Normal.
  *
  * Only a MEASURED height is classified. An examiner's word for the neck ("raised", "flat") is a
  * judgement already made and is not an input here.
  */
 export const JVP_LIMITS = {
   /** Above this, in cmH2O referenced to the right atrium, the JVP is Elevated. */
-  elevatedAboveCmH2O: 8,
+  elevatedAboveCmH2O: 7,
   /** The conventional vertical distance from the right atrium to the sternal angle, in cm. */
   sternalAngleToRightAtriumCm: 5,
   /** The plausible range of a bedside height, cmH2O referenced to the right atrium. */

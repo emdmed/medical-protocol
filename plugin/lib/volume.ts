@@ -6,7 +6,7 @@
  * examination can produce; the radiograph, symptom, catheter, vital-capacity, weight and heart-rate
  * items are dropped. The subset has never been validated, so no Framingham sensitivity or
  * specificity may be quoted for it. The JVP major is bedside inspection of the neck (a measured
- * height binned at 7 cmH2O), not Framingham's > 16 cmH2O catheter value. Ported from medextract's
+ * height binned at the shared 7 cmH2O line), not Framingham's > 16 cmH2O catheter value. Ported from medextract's
  * `syndromes/volume/rule.ts`.
  */
 

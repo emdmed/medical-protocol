@@ -2,15 +2,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { calculateJVPcmH2O, getJVPCategory, getJVPSeverity } from "../../plugin/lib/cardiology";
 import { run } from "../../packages/medprotocol/src/commands/cardiology";
 
-describe("JVP (McGee: Elevated strictly above 8 cmH2O to the right atrium)", () => {
-  it("8 cmH2O is Normal", () => {
-    expect(getJVPCategory(8)).toBe("Normal");
-    expect(getJVPSeverity(8)).toBe("normal");
+describe("JVP (Elevated strictly above 7 cmH2O to the right atrium)", () => {
+  it("7 cmH2O is Normal", () => {
+    expect(getJVPCategory(7)).toBe("Normal");
+    expect(getJVPSeverity(7)).toBe("normal");
   });
 
-  it("9 cmH2O is Elevated", () => {
-    expect(getJVPCategory(9)).toBe("Elevated");
-    expect(getJVPSeverity(9)).toBe("elevated");
+  it("8 cmH2O is Elevated", () => {
+    expect(getJVPCategory(8)).toBe("Elevated");
+    expect(getJVPSeverity(8)).toBe("elevated");
   });
 
   it("4 cm above the sternal angle is 9 cmH2O, Elevated", () => {
@@ -42,8 +42,8 @@ describe("medprotocol cardiology jvp", () => {
     process.exitCode = undefined;
   });
 
-  it("--cmh2o 8 is Normal", () => {
-    run(["jvp", "--cmh2o", "8", "--json"]);
+  it("--cmh2o 7 is Normal", () => {
+    run(["jvp", "--cmh2o", "7", "--json"]);
     expect(JSON.parse(stdout).category).toBe("Normal");
   });
 

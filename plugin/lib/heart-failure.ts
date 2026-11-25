@@ -11,7 +11,7 @@
  * - Left: crackles at both bases, or a third heart sound not attributed to the right ventricle.
  *   Crackles at one base are a local process (a pneumonia), so they are a chest examined and clear.
  * - Right: the neck decides alone, either way, and a raised JVP over a clear chest is enough (an RV
- *   infarct). A measured height is binned by `getJVPCategory` (> 8 cmH2O, McGee), never by the
+ *   infarct). A measured height is binned by `getJVPCategory` (> 7 cmH2O, the one JVP line), never by the
  *   impression beside it. Only when nobody assessed the neck do three routes make the limb present:
  *   a positive hepatojugular reflux, a pulsatile liver, or a loaded RV sign (heave, loud P2, RV
  *   gallop, TR murmur) paired with a venous congestion sign (liver, ascites, dependent oedema).

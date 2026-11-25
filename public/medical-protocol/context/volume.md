@@ -78,7 +78,7 @@ The JVP is the same finding **shock** reads; on a combined screen, ask for it on
 
 - **Not assessed is not absent.** A sign nobody examined stays `not_assessed`.
 - **`no_overload` is not euvolemia.** It means the count fell short, not that volume is normal.
-- **JVP 7 cmH2O is normal.** Elevated is strictly above 7 (shock's Vazquez line). This is deliberately a different line from `cardiology jvp`, which uses McGee's strictly above 8 cmH2O; don't merge them.
+- **JVP 7 cmH2O is normal.** Elevated is strictly above 7, the one JVP line shared with shock, heart failure and `cardiology jvp` (`JVP_LIMITS.elevatedAboveCmH2O`).
 
 ---
 
