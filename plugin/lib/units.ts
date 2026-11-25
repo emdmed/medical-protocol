@@ -7,7 +7,7 @@
 import { FIELDS, type ExtractedInput, type FieldKey } from "./extraction";
 
 const UMOL_PER_MGDL = 88.4; // creatinine, 113.12 g/mol
-const MMHG_PER_KPA = 7.50062;
+export const MMHG_PER_KPA = 7.50062;
 
 /** Per key: the note's unit (lower case) → what to multiply by, and the decimals kept. The target is the key's first unit in `FIELDS`. */
 const FACTORS: Partial<Record<FieldKey, { digits: number; from: Record<string, number> }>> = {
