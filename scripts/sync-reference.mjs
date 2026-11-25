@@ -37,7 +37,7 @@ for (const doc of readdirSync(join(PUBLIC, "context")).filter((f) => !SHARED_DOC
 
 // Workflow files → start (for domain routing)
 copyTo(join(PUBLIC, "workflows/initial-clarification.md"), ["start"]);
-for (const wf of ["nephrology", "cardiology", "sepsis", "shock"]) {
+for (const wf of ["nephrology", "cardiology", "sepsis", "shock", "syndromic"]) {
   copyTo(join(PUBLIC, `workflows/${wf}.md`), ["start"]);
 }
 copyTo(join(PUBLIC, "workflows/troubleshoot.md"), ["troubleshoot"]);

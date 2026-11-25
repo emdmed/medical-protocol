@@ -7914,9 +7914,16 @@ Examples:
   medprotocol cardiology ascvd --age 55 --sex male --tc 213 --hdl 50 --sbp 120
   medprotocol cardiology heart --history 1 --ecg 0 --age 2 --risk-factors 1 --troponin 0
   medprotocol cardiology chadsvasc --hypertension --age75 --diabetes
+  medprotocol cardiology jvp --cmh2o 9
   medprotocol sepsis sofa --pao2 80 --fio2 40 --platelets 90 --gcs 13
   medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13
   medprotocol sepsis lactate --initial 4.2 --repeat 2.1
+  medprotocol shock --sbp 82 --minutes 45 --skin cool --jvp elevated
+  medprotocol volume --jvp elevated --crackles present
+  medprotocol heart-failure --crackles bilateral --jvp-cm 4 --jvp-ref sternal-angle
+  medprotocol chest --right-percussion dull --right-breath-sounds bronchial
+  medprotocol pulmonary --cough present --temp 38.4 --right-percussion dull
+  medprotocol respiratory-failure --oxygen-support room_air --spo2 86 --rr 34
   medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male
   medprotocol ckd stage --creatinine 1.2 --age 55 --sex male --acr 45
   medprotocol ckd kfre --age 65 --sex female --egfr 35 --acr 300

@@ -21,7 +21,7 @@ When the doctor describes what they need, classify into one of these domains bas
 |---|---|
 | **acid-base** | pH, blood gas, ABG, arterial blood gas, acidosis, alkalosis, anion gap, bicarbonate, pCO2 |
 | **water-balance** | fluid balance, intake, output, I/O, diuresis, insensible loss, fluid management |
-| **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure, lung injury |
+| **pafi** | PaFi, PaO2/FiO2, ARDS, oxygenation index, lung injury |
 | **dka** | DKA, diabetic ketoacidosis, glucemia, ketones, insulin drip, glucose monitoring, ketone tracking |
 | **sepsis** | sepsis, SOFA, qSOFA, septic shock, organ failure, lactate, vasopressors, hour-1 bundle, resuscitation |
 | **shock** | shock category, type of shock, undifferentiated shock, cardiogenic, hypovolemic, hypotension, cool or warm skin, JVP, jugular venous pressure, syndromic assessment |
@@ -68,6 +68,8 @@ When the doctor describes what they need, classify into one of these domains bas
 ## Routing Rules
 
 **Cross-prompt:** When the doctor requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.
+
+**Syndromic assessments:** `shock`, `volume`, `heart-failure`, `chest-exam`, `focal-pulmonary` and `respiratory-failure` all route to the syndromic workflow. "Respiratory failure" with a PaO2/FiO2 ratio or ARDS is `pafi`; on its own, or with SpO2, work of breathing or a blood gas, it is `respiratory-failure`.
 
 **If the request matches multiple domains**, prefer `dashboard` as it combines components.
 
