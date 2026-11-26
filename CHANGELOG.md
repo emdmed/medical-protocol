@@ -2,6 +2,20 @@
 
 One entry per release, newest first, written for the doctors and developers who use the plugin. Releases before 1.5.0 are in the git tags.
 
+## 1.6.0 — 2026-11-26
+
+- **New bedside syndromic assessments**, each a quick-calculator command and a screen spec, routed by the new syndromic workflow. All are examination patterns, not diagnoses, and say "indeterminate" (with what would settle it) when signs are missing:
+  - `shock`: shock category from skin temperature and JVP.
+  - `volume`: volume overload from congestion signs (examination subset of Framingham).
+  - `heart-failure`: left- and right-sided congestion, and whether the heart failure syndrome is present (a cardinal symptom).
+  - `chest`: per-side chest examination syndromes (consolidation, pleural effusion, atelectasis, pneumothorax) and a whole-chest bronchial obstruction pattern.
+  - `pulmonary`: focal pulmonary syndrome from history, chest signs and imaging, with a pneumonia evidence level (physical sign only, clinically suspected, imaging-supported) and a conflict line when examination and film disagree.
+  - `respiratory-failure`: two separate reads, failure (gas exchange, SpO2 or arterial gas in mmHg or kPa) and distress (work of breathing).
+- **JVP:** new `cardiology jvp` converts a height above the sternal angle or right atrium to cmH2O. One cut-point for every command: elevated means above 7 cmH2O.
+- **Routing:** "respiratory failure" goes to `pafi` only with a PaO2/FiO2 ratio or ARDS; otherwise to `respiratory-failure`.
+- **Extraction:** accepts creatinine in µmol/L, hemoglobin and albumin in g/L, PaO2 and pCO2 in kPa, ACR in mg/mmol, and an FiO2 from 0.21 to 1 as a fraction. Values are passed on as the note states them and converted only for a calculator. Findings the note denies ("no fever") are marked `absent: true` and listed apart. Examination findings feed the syndromic rules, and the extraction page gains a syndromic evaluation tab.
+- **CKD:** an ACR in mg/mmol is staged against KDIGO's mg/mmol cut-offs (3 and 30); `ckd stage`, `kfre` and `treatment` take `--acr-unit`.
+
 ## 1.5.1 — 2026-11-24
 
 - **Diabetes, type 1 vs type 2:** `--on-insulin` is removed. It never changed the result. Passing it now gives a one-line error.
