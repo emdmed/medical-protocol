@@ -17,9 +17,9 @@ Say "Let me take a look." Run all checks, collect failures before fixing.
 | `project-scaffold` | `package.json` has `next` | No project |
 | `project-dependencies` | `node_modules` exists | Deps missing |
 | `project-config` | `.claude/CLAUDE.md` exists | Config missing |
-| `server-port` | Read the `npm run dev` output (it says port 3000 is in use and names the port it took) | Port occupied: use the port it names, and check that page is this project's |
-| `server-stopped` | `ps aux \| grep "next dev"` | Server down |
-| `server-crashed` | `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000` | Not responding |
+| `server-port` | Read the `Local:` line `npm run dev` printed (Next.js moves past 3000 when another app has it). Call this `<port>` | Port taken by another app: use the port it names, and check that page is this project's |
+| `server-stopped` | `pgrep -af "next dev"`, then `lsof -a -d cwd -p <pid>` shows each one's folder; this project's server is the one running in this folder | No dev server for this project |
+| `server-crashed` | `curl -s -o /dev/null -w "%{http_code}" http://localhost:<port>` | Not responding |
 | `component-missing` | `ls components/` | No components |
 | `component-typescript` | `npx tsc --noEmit` | TS errors |
 | `browser-no-page` | `ls app/page.tsx app/*/page.tsx` | No page file |
@@ -38,9 +38,9 @@ Fix automatically. Use clinical language if you need to explain anything.
 | `project-scaffold` | Run scaffold from main protocol |
 | `project-dependencies` | `npm install` |
 | `project-config` | Re-read protocol, restore config |
-| `server-port` | `npx --yes kill-port 3000` then `npm run dev` |
+| `server-port` | Never stop the other app. Use the port `npm run dev` printed; if none, start `npm run dev` and use the port it prints |
 | `server-stopped` | `npm run dev` |
-| `server-crashed` | `npx --yes kill-port 3000` then `npm run dev` |
+| `server-crashed` | Stop only the dev server started for this project (`kill <pid>` from `server-stopped`), then `npm run dev` and use the port it prints. Never stop a process from another folder |
 | `component-missing` | Rebuild the screen per building.md (re-copy `lib/medprotocol/`, regenerate) |
 | `component-typescript` | Read errors, fix (missing imports, missing UI SDK setup) |
 | `browser-no-page` | Create page importing the existing screens |
@@ -53,7 +53,7 @@ Fix automatically. Use clinical language if you need to explain anything.
 
 ## Phase 3: User Communication
 
-**If fixed:** "I found and fixed the issue. Everything should be working now at http://localhost:3000"
+**If fixed:** "I found and fixed the issue. Everything should be working now at http://localhost:<port>"
 
 **If not fixable**, explain in plain language:
 
