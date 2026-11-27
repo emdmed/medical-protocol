@@ -1,28 +1,18 @@
 ---
 name: calc
-description: "[Internal] Run quick clinical calculations from the terminal — BMI, blood gas analysis, fluid balance, vital signs"
+description: "[Internal] Run any quick clinical calculation from the terminal — BMI, blood gas, vitals, sepsis, CKD, shock and every other medprotocol calculator"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 user-invocable: true
 ---
 
 Read and follow: reference/core.md
-Read and follow: reference/cli-calculator.md
 medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — run this wherever the docs say `medprotocol`
 
 You are running quick clinical calculations for a healthcare professional using the command-line calculator. Follow the phases below exactly.
 
 ## Phase 1: Identify the Calculation
 
-Determine which calculator the user needs based on their request:
-
-| Calculator | Signal Words |
-|---|---|
-| `bmi` | BMI, body mass index, weight, height, obesity |
-| `abg` | pH, blood gas, ABG, acidosis, alkalosis, anion gap, bicarbonate, pCO2 |
-| `water-balance` | fluid balance, intake, output, I/O, diuresis, fluid management |
-| `vitals` | blood pressure, heart rate, pulse, oxygen, SpO2, temperature, respiratory rate |
-| `pafi` | PaFi, PaO2/FiO2, ARDS, oxygenation index, respiratory failure |
-| `dka` | DKA, diabetic ketoacidosis, glucemia, ketones, glucose reduction rate |
+Read reference/cli.md: its Available Calculators table lists every calculator (and sub-commands such as `sepsis qsofa` or `ckd egfr`). Pick the one that matches the request.
 
 If the request could match multiple calculators, ask: "Which calculation would you like me to run?" and list the options in clinical language.
 
@@ -30,38 +20,9 @@ If the request doesn't match any calculator, suggest building a full interface i
 
 ## Phase 2: Gather Clinical Inputs
 
-Ask the user for the required values **conversationally** — do not present a form or list of parameters. Adapt to what they've already provided.
+Run `medprotocol <command> --help` (or `medprotocol <command> <sub-command> --help`) to see the required and optional flags. Do not show the help text to the user.
 
-**BMI:**
-- Weight and height (ask which units they prefer — metric or imperial)
-- Example prompt: "What's the patient's weight and height?"
-
-**ABG (Arterial Blood Gas):**
-- pH, pCO2 (mmHg), HCO3 (mEq/L)
-- Optional: Na, Cl (for anion gap)
-- Example prompt: "What are the blood gas values? I need pH, pCO2, and bicarbonate at minimum."
-
-**Water Balance:**
-- Patient weight (kg), oral intake (mL), IV fluids (mL)
-- Outputs: diuresis (mL), number of stools
-- Optional: emesis, other losses
-- Example prompt: "What's the patient's weight and the intake/output values?"
-
-**Vitals:**
-- Blood pressure (systolic/diastolic), heart rate, temperature
-- Optional: respiratory rate, SpO2, FiO2
-- Example prompt: "What vital signs do you have?"
-
-**PaFi (PaO2/FiO2):**
-- PaO2 (mmHg), FiO2 (% — 21 for room air, up to 100)
-- Example prompt: "What are the PaO2 and FiO2 values?"
-
-**DKA:**
-- Current glucose value and unit (mg/dL or mmol/L)
-- Optional: previous glucose (for rate calculation), hours between readings
-- Optional: ketones, bicarbonate, pH (for resolution assessment)
-- Optional: insulin rate (for adjustment suggestion)
-- Example prompt: "What's the current glucose? Do you have a previous reading to calculate the rate?"
+Ask the user for the required values **conversationally** — do not present a form or list of parameters. Adapt to what they've already provided, and ask which units they use when a flag accepts more than one.
 
 If the user has already provided all needed values in their initial message, skip to Phase 3.
 
@@ -81,13 +42,18 @@ medprotocol water-balance --weight 70 --oral 1500 --iv 500 --diuresis 1200 --sto
 medprotocol vitals --bp 120/80 --hr 72 --temp 37.0 --json
 medprotocol pafi --pao2 60 --fio2 40 --json
 medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl --json
+medprotocol sepsis qsofa --rr 24 --sbp 90 --gcs 13 --json
+medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male --json
+medprotocol shock --sbp 82 --minutes 45 --skin cool --jvp elevated --json
 ```
 
 Do not show the command or raw output to the user.
 
 ## Phase 4: Present Results
 
-Translate the JSON output into clear clinical language:
+Translate the JSON output into clear clinical language. For any calculator not listed below, state the score or category it returns and what it means in one or two sentences.
+
+Bedside syndromic rules (`shock`, `volume`, `heart-failure`, `chest`, `pulmonary`, `respiratory-failure`) give a pattern, never a diagnosis: say so, and repeat that rule's caveat from the cli.md table (for example, "a bedside heuristic, not a diagnosis" for `shock`).
 
 - **BMI**: State the BMI value and WHO category (e.g., "The patient's BMI is 22.9 — normal weight")
 - **ABG**: State the primary disturbance, compensation status, and anion gap if calculated (e.g., "This shows a metabolic acidosis with respiratory compensation. The anion gap is elevated at 18.")
