@@ -1,6 +1,6 @@
 # Patient Module Context
 
-Basic patient demographics: name, date of birth (age calculated from it), sex, weight, height. Single source of truth for demographics on a dashboard.
+Basic synthetic patient demographics: a synthetic label and code, age, sex, weight, height. No real identity: no name, date of birth or record number. Single source of truth for demographics on a dashboard.
 
 Logic: `lib/medprotocol/patient.ts` — import from `@/lib/medprotocol/patient`. Build: see `building.md`.
 
@@ -8,31 +8,30 @@ Logic: `lib/medprotocol/patient.ts` — import from `@/lib/medprotocol/patient`.
 
 ## Screen spec
 
-**Shows:** compact card with name, age (`45y`), sex, weight and height. Empty state: "Click to add patient info".
+**Shows:** compact card with the synthetic label and code (`Synthetic patient 7K3Q`), age (`45y`), sex, weight and height. Empty state: "Click to add patient info".
 
 **Inputs** (strings, empty by default):
 
 | Field | Type / unit | Placeholder |
 |---|---|---|
-| Full name | text | Patient name |
-| Date of birth | Date Input, ISO `YYYY-MM-DD` | — |
+| Age | years, whole number 0–120; saved as a number, `null` when empty | 45 |
 | Sex | Select or Segmented Control: male / female | — |
 | Weight | kg | 70 |
 | Height | **cm** | 170 |
 
-**Outputs:** `age` from `calculateAge(dateOfBirth)`, recomputed on save.
+**Outputs:** none. `label` is always `Synthetic patient`; `code` is 4 random characters (A–Z without I and O, 2–9) set on first save and kept after.
 
 **Interaction:** click the card to enter edit mode, edit, save or cancel. `onData` fires when the saved data changes.
 
-**Display rules:** hide age when `calculateAge` returns `null`. Units next to weight and height.
+**Display rules:** hide age when it is `null`. Units next to weight and height.
 
 **Props contract:** `data?: PatientData`, `onData?: (data: PatientData) => void`. Sync the `data` prop into state when it changes (serialized comparison).
 
 ```typescript
 interface PatientData {
-  fullName: string;
-  dateOfBirth: string;   // YYYY-MM-DD
-  age: number | null;    // from calculateAge
+  label: string;         // always "Synthetic patient"
+  code: string;          // 4 characters, e.g. "7K3Q"
+  age: number | null;    // whole years
   sex: string;           // "male" | "female"
   weight: string;        // kg
   height: string;        // cm
@@ -45,8 +44,8 @@ interface PatientData {
 
 For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
-- **Full name:** `Synthetic patient` and a 4-character code (`Synthetic patient 7K3Q`). Never a person-like name.
-- **Date of birth:** age 18–90 at random; date of birth = today minus that age and 0–364 days.
+- **Label and code:** `Synthetic patient` and a new 4-character code (`Synthetic patient 7K3Q`).
+- **Age:** 18–90 years, whole number.
 - **Sex:** male or female at random.
 - **Height:** 150–180 cm for a female, 160–195 cm for a male.
 - **Weight:** target BMI 18.5–38 × height² (height in m), rounded to 0.1 kg.
@@ -55,9 +54,7 @@ Every generated patient is labelled "Synthetic patient" with a 4-character code,
 
 ## Lib Functions
 
-- `calculateAge(dateOfBirth: string)` → `number | null` — whole years as of today. `null` for empty, unparseable or future dates.
-
-Other shared helpers that ship alongside:
+The card needs no lib call. Shared helpers that ship alongside:
 - `sources.ts` — guideline citation strings (e.g. `KDIGO_2024_CKD`, `ADA_2026_TABLE_2_1`, `SEPSIS_3_2016`). Show the one a screen's lib call cites.
 - `trace.ts` — `Trace` class: `t.record(fn, inputs, output, source?)` returns `output` and logs the call; `t.toJSON()` → `TraceEntry[]`, stored on readings as `trace` for audit.
 

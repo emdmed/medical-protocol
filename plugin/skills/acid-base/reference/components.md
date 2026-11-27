@@ -4,7 +4,7 @@
 
 | Tool | What it does |
 |---|---|
-| patient | Patient demographics — name, DOB, age, sex, weight, height |
+| patient | Synthetic patient card — label and code, age, sex, weight, height |
 | vital-signs | Monitor BP, HR, RR, Temp, SpO2, FiO2 |
 | acid-base | Arterial blood gas analysis with anion gap |
 | water-balance | Fluid intake/output tracking |
