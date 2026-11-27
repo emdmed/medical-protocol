@@ -99,4 +99,4 @@ Translate the JSON output into clear clinical language:
 After presenting results, offer two options:
 
 1. "Would you like to run another calculation?"
-2. "Would you like me to build a full interface for this instead?" — if yes, route to the appropriate workflow skill (`bmi`, `acid-base`, `water-balance`, or `vitals`)
+2. "Would you like me to build a full interface for this instead?" — if yes, route to the appropriate workflow skill (`bmi`, `acid-base`, `water-balance`, `vital-signs`, `pafi`, or `dka`)

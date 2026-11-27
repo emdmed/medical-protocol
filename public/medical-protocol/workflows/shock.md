@@ -68,6 +68,6 @@ Tell the user: "Your shock category screen is ready. Enter the systolic pressure
 ## Related Tools
 
 - **/medical-protocol:start** with sepsis — SOFA and Sepsis-3 criteria
-- **/medical-protocol:vitals** — Blood pressure and heart rate monitoring
+- **Ask for a vital signs monitor** — Blood pressure and heart rate monitoring
 
 Only mention these if the user asks "what else can you do?" or if the clinical scenario suggests them.
