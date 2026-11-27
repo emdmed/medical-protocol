@@ -2,6 +2,18 @@
 
 One entry per release, newest first, written for the doctors and developers who use the plugin. Releases before 1.5.0 are in the git tags.
 
+## Unreleased
+
+- **Fixed links:** skill pages no longer point to skills that don't exist; those lines now read "Ask for a …", which `/start` routes.
+- **`/calc` covers every calculator:** it uses the calculator table in the CLI reference and `--help`, so no calculator is missing.
+- **Hepatology is reachable:** new `medprotocol hepatology` command (MASLD screening: FIB-4, then LSM or ELF when needed, with treatment text only when a result is not normal), plus routing words, a workflow and a `/start` route.
+- **Safer troubleshoot:** it finds this project's dev server by its folder and never stops other apps by port.
+- **Learning-only wording:** the FHIR bundle is built only when you ask to learn the format; the patient card takes an age instead of a name and date of birth; skills describe the "setting the prototype imagines"; the default level is medical student.
+- **New `/check`:** one skill replaces `protocol-audit` and `calc-audit`. It scores a protocol on five dimensions out of 20, using the calculation tests, and tells you in plain words what to ask for to fix it.
+- **Hidden helper skills:** skills that other skills use no longer show in the `/` menu, and the overlay runs them without typing a slash command.
+- **Plugin listing:** display name, homepage, repository, keywords, an "education" category and tags.
+- **Publishing stays blocked:** a test checks that `npm publish`, `yarn publish` and `pnpm publish` are refused.
+
 ## 1.7.0 — 2026-11-27
 
 - **For learning and prototyping only:** every screen shows "Learning prototype — not for patient care." and uses synthetic data only. Real patient data, deployment and links to clinical systems are out of scope. Skills, hooks and the CLI say "user", not "doctor".
