@@ -2,6 +2,11 @@
 
 One entry per release, newest first, written for the doctors and developers who use the plugin. Releases before 1.5.0 are in the git tags.
 
+## 1.6.1 — 2026-11-27
+
+- **Extraction page, syndromic tab:** rules whose findings point away from their syndrome are grouped as "Not supported by the findings stated", no longer "Not present". The note may leave findings out, so a rule never rules a syndrome out.
+- **Scope:** the README lists what Medical Protocol is not for: any real patient's care (chart review and audit included), real patient notes, triage, emergencies, diagnosis or treatment.
+
 ## 1.6.0 — 2026-11-26
 
 - **New bedside syndromic assessments**, each a quick-calculator command and a screen spec, routed by the new syndromic workflow. All are examination patterns, not diagnoses, and say "indeterminate" (with what would settle it) when signs are missing:
