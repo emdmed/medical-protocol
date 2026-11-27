@@ -46,37 +46,24 @@ function Dashboard() {
 />
 ```
 
-## Collecting data from multiple screens into one submission
+## Combining results from multiple screens in one view
 
 ```tsx
-import VitalSigns, { type IVitalSignsData, type FhirBundle } from "@/components/medprotocol/vital-signs/vital-signs";
+import VitalSigns, { type IVitalSignsData } from "@/components/medprotocol/vital-signs/vital-signs";
 import AcidBase from "@/components/medprotocol/acid-base/acid-base";
 import type { Result } from "@/lib/medprotocol/acid-base/interfaces";
 
-interface PatientAssessment {
-  vitals: IVitalSignsData | null;
-  fhir: FhirBundle | null;
-  abg: Result | null;
-}
-
-function AssessmentForm({ onSubmit }: { onSubmit: (data: PatientAssessment) => void }) {
-  const [assessment, setAssessment] = useState<PatientAssessment>({
-    vitals: null, fhir: null, abg: null,
-  });
+function CombinedView() {
+  const [vitals, setVitals] = useState<IVitalSignsData | null>(null);
+  const [abg, setAbg] = useState<Result | null>(null);
 
   return (
     <div className="space-y-4">
-      <VitalSigns
-        onData={(data, fhir) =>
-          setAssessment((prev) => ({ ...prev, vitals: data, fhir: fhir ?? null }))
-        }
-      />
-      <AcidBase
-        onData={(result) =>
-          setAssessment((prev) => ({ ...prev, abg: result }))
-        }
-      />
-      <button onClick={() => onSubmit(assessment)}>Submit</button>
+      <VitalSigns onData={setVitals} />
+      <AcidBase onData={setAbg} />
+      <p>
+        HR {vitals?.heartRate ?? "—"} bpm · pH {abg ? "entered" : "pending"}
+      </p>
     </div>
   );
 }
@@ -239,7 +226,7 @@ Every selection (tagged or not) writes a work order to `.medprotocol/queue/` —
 
 - **Temperature units**: VitalSigns stores temperature in the unit set by `useFahrenheit`. Normalize before passing cross-source data.
 
-- **FHIR bundle**: the second argument to VitalSigns' `onData` is a FHIR R4 Bundle with LOINC codes.
+- **FHIR bundle**: only built on request; then it is the second argument to VitalSigns' `onData` (FHIR R4, LOINC codes).
 
 - **Strings vs numbers**: vital signs and patient age are numbers; most lib functions and reading fields are strings. Convert at the boundary: `String(value ?? "")`.
 

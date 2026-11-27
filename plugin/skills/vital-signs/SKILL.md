@@ -41,7 +41,7 @@ Ask which vital signs to monitor:
 - **Hospital ward**: "Continuous monitoring with alerts, or manual entry during rounds?" (Default: manual)
 - **Clinic visits**: "Record vitals during the visit, or also review past readings?" (Default: record only)
 
-**FHIR support**: Include automatically. Do NOT ask about layout, colors, or storage.
+**FHIR**: leave it out. Build the FHIR bundle only if the user asks, as a way to learn the format. Do NOT ask about layout, colors, or storage.
 
 ## NEVER
 - Display vital sign values without units (always show mmHg, bpm, °F/°C, %, breaths/min)

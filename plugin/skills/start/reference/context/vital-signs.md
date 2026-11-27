@@ -1,6 +1,6 @@
 # Vital-Signs Module Context
 
-BP (systolic/diastolic), HR, RR, temperature (C/F), SpO2, FiO2. Inline editing, FHIR R4 bundle export, abnormal value flagging.
+BP (systolic/diastolic), HR, RR, temperature (C/F), SpO2, FiO2. Inline editing, abnormal value flagging. Optional FHIR R4 export, only on request.
 
 Logic: `lib/medprotocol/vital-signs-validations/` — import from `@/lib/medprotocol/vital-signs-validations/<file>`. Build: see `building.md`.
 
@@ -25,9 +25,9 @@ Logic: `lib/medprotocol/vital-signs-validations/` — import from `@/lib/medprot
 
 **Outputs:** per-vital severity and label from `severity.ts` (`normal` / `warning` / `critical`). Validation error messages from the `validate*` functions.
 
-**Interaction:** click a vital to edit it in place (when `editable`); invalid entries show the lib's error message and are not saved. `onData` fires on every change with the data and a FHIR bundle.
+**Interaction:** click a vital to edit it in place (when `editable`); invalid entries show the lib's error message and are not saved. `onData` fires on every change with the data.
 
-**FHIR R4 bundle** (second `onData` argument): one Observation per filled vital, LOINC-coded — BP panel 85354-9 (systolic 8480-6, diastolic 8462-4), HR 8867-4, RR 9279-1, temperature 8310-5, SpO2 59408-5, FiO2 3150-0 (inhaled oxygen concentration, `%`; not 3151-8, which is O2 flow rate in L/min). Units in UCUM (`mm[Hg]`, `/min`, `%`, `[degF]`/`Cel`).
+**FHIR R4 bundle** (only when the user asks to learn the format; not in default builds; then it is the second `onData` argument): one Observation per filled vital, LOINC-coded — BP panel 85354-9 (systolic 8480-6, diastolic 8462-4), HR 8867-4, RR 9279-1, temperature 8310-5, SpO2 59408-5, FiO2 3150-0 (inhaled oxygen concentration, `%`; not 3151-8, which is O2 flow rate in L/min). Units in UCUM (`mm[Hg]`, `/min`, `%`, `[degF]`/`Cel`).
 
 **Display rules:** badge text = the lib's `label`; color = the lib's `severity`. Never compare values against thresholds in the UI.
 
