@@ -32,7 +32,7 @@ Ask these questions conversationally — never in a technical or survey-like ton
 
 **Rules:**
 - Accept short answers — don't force elaboration
-- If the user says "defaults are fine" for any question, use sensible defaults (practising clinician, internal medicine, adults, standard guidelines, metric + mg/dL + Celsius)
+- If the user says "defaults are fine" for any question, use sensible defaults (medical student, internal medicine, adults, standard guidelines, metric + mg/dL + Celsius)
 - Never ask technical questions about code, components, or architecture
 
 ## Step 3: Write Context File

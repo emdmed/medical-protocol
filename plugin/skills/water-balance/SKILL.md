@@ -26,7 +26,7 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 - "Do you need to track oral and IV intake separately?" (Default: yes)
 - "Do you need insensible loss calculations based on patient weight?" (Default: yes)
 
-### Setting-Aware
+### Setting the prototype imagines
 
 - **Hospital ward**: "Track fluid balance per shift or per 24 hours?" (Default: per 24 hours)
 - **A list of patients**: Route to the dashboard workflow instead, offering water balance as a dashboard widget

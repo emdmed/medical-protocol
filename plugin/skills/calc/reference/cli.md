@@ -28,7 +28,7 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 ## When to Suggest Calculator vs Full Interface
 
 - **Quick calculator**: the user wants a one-off calculation, batch processing, or just the number -- e.g., "calculate BMI for a 70kg patient who is 1.75m tall", "what's the anion gap for these values", "just give me the fluid balance"
-- **Full interface**: the user wants a persistent tool, visual dashboard, or something they'll use repeatedly with patients
+- **Full interface**: the user wants a persistent tool, visual dashboard, or something reusable for practice
 
 When the user's request is simple enough for the quick calculator, offer it as an alternative: "I can give you that result right now, or build a full interface you can reuse -- which would you prefer?"
 

@@ -24,7 +24,7 @@ Before anything else, check if the current project already has clinical screens 
 
 ### New Project Suggestion
 
-If this is a brand-new project (no existing components found), suggest: "Would you like me to learn about your practice first so I can tailor everything to your workflow? Just say 'teach me' or we can jump straight into building."
+If this is a brand-new project (no existing components found), suggest: "Would you like me to learn what you are learning first (/medical-protocol:preferences) so I can tailor everything to it? Just say 'teach me' or we can jump straight into building."
 
 ## Step 2: Initial Clarification (BLOCKING — must complete before Step 3)
 

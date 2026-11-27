@@ -27,7 +27,7 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 - "Will you be entering PaO2 and FiO2 values manually?" (Default: yes, manual entry)
 
-### Setting-Aware
+### Setting the prototype imagines
 
 - **Hospital ward**: "Should the cases be on supplemental oxygen or mechanical ventilation?" — helps decide default FiO2
 - **A list of patients**: Route to the dashboard workflow instead, offering PaFi as a dashboard widget

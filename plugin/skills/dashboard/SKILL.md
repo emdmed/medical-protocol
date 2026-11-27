@@ -42,9 +42,9 @@ Present the available building blocks by category:
 
 - "Is this for a single patient view or a clinic overview?" (Default: single patient)
 
-### Setting-Aware
+### Setting the prototype imagines
 
-- **Hospital ward**: "Do you want the dashboard to highlight patients with abnormal readings?" (Default: yes)
+- **Hospital ward**: "Do you want the dashboard to highlight synthetic patients with abnormal readings?" (Default: yes)
 
 Do NOT ask about layout arrangement, navigation structure, or technical preferences.
 

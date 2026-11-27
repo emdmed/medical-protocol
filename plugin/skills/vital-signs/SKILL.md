@@ -36,9 +36,9 @@ Ask which vital signs to monitor:
 
 **Default: all five.** Ask: "Would you like alerts for abnormal ranges?" (Default: yes)
 
-### Setting-Aware
+### Setting the prototype imagines
 
-- **Hospital ward**: "Continuous monitoring with alerts, or manual entry during rounds?" (Default: manual)
+- **Hospital ward**: "Should the prototype imagine continuous monitoring with alerts, or manual entry during rounds?" (Default: manual)
 - **Clinic visits**: "Record vitals during the visit, or also review past readings?" (Default: record only)
 
 **FHIR**: leave it out. Build the FHIR bundle only if the user asks, as a way to learn the format. Do NOT ask about layout, colors, or storage.

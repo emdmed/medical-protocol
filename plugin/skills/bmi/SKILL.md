@@ -25,7 +25,7 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 - "Do you prefer metric (kg/m) or imperial (lbs/ft-in) units?" (Default: imperial, with a toggle to switch)
 
-### Setting-Aware
+### Setting the prototype imagines
 
 - **Multiple patients**: Route to the dashboard workflow instead, offering BMI as a dashboard widget
 - **Persistence enabled**: Store last-entered weight/height in localStorage

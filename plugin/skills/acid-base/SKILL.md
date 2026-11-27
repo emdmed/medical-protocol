@@ -35,7 +35,7 @@ Ask the user about their blood gas analysis needs:
 - "Will you be entering arterial blood gas values manually, or do you need to import them?" (Default: manual entry)
 - "Do you need anion gap and delta ratio calculations?" (Default: yes, if Na and Cl are available)
 
-### Setting-Aware
+### Setting the prototype imagines
 
 - **Hospital ward**: "Should the cases have acute or chronic respiratory conditions?" (Default: chronic — affects compensation formulas)
 - **A list of patients**: Route to the dashboard workflow instead, offering acid-base as a dashboard widget

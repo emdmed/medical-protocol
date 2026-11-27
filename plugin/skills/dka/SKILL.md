@@ -34,7 +34,7 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
   - All: glucose, ketones, bicarbonate, pH, potassium, insulin rate, GCS, urine output (full ICU-level tracking)
   - Default: standard DKA protocol
 
-### Setting-Aware
+### Setting the prototype imagines
 
 - **Hospital ward** (default for DKA): Full parameter set recommended — include GCS for cerebral edema detection and urine output for kidney function
 - **A list of patients**: Route to the dashboard workflow instead, offering DKA as a dashboard widget
@@ -45,5 +45,5 @@ Do NOT ask about formulas, resolution criteria details, or technical preferences
 - Omit potassium tracking — hypokalemia during insulin therapy is life-threatening
 - Show glucose reduction rate without the time interval
 - Mark DKA as "resolved" without checking ALL resolution criteria (pH >7.3, HCO3 >15, AG <12)
-- Hide GCS tracking for admitted patients — cerebral edema detection requires it
+- Hide GCS tracking for ward cases — cerebral edema detection requires it
 - Allow insulin dose changes without displaying current glucose trend
