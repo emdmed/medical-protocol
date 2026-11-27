@@ -62,7 +62,7 @@ For each order:
 2. Close the order: set `status: done` **and** write a `result` (`{ report }`) summarizing what was
    staged/applied so the user sees it in the overlay panel — the component chosen, the diff summary,
    and "review/approve in Claude Code" if approval is still pending (reference/queue.md).
-3. Recommend `/medical-protocol:overlay-audit` on the same region to verify; don't `--clear` until the
+3. Recommend medical-protocol:overlay-audit (plain text, no slash — the panel turns it into a button) on the same region to verify; don't `--clear` until the
    user has read the result.
 
 ## NEVER

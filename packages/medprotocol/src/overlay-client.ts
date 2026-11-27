@@ -170,7 +170,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
     '.mpo-panel-body a{color:#22d3ee}',
     '.mpo-score{display:inline-flex;align-items:center;gap:8px;margin:0 0 12px;padding:5px 11px;background:#0d2433;border:1px solid #164e63;border-radius:5px;font:700 12px/1 ' + MONO + ';letter-spacing:.04em;color:#67e8f9}',
     '.mpo-score .mpo-score-k{color:#5b7d8f;font-weight:600}',
-    // Inline skill trigger: a /medical-protocol:x mention in the report, clickable to re-run it here.
+    // Inline skill trigger: a medical-protocol:x mention in the report, clickable to re-run it here.
     '.mpo-skill{display:inline;background:#0d2433;color:#7dd3fc;border:1px solid #164e63;border-radius:3px;padding:1px 6px;margin:0 1px;font:600 11.5px/1.4 ' + MONO + ';cursor:pointer}',
     '.mpo-skill:hover{background:#123246;border-color:#22d3ee;color:#bff0ff}',
     // Suggested-actions row: structured skill triggers the report attached to its result.
@@ -545,9 +545,9 @@ export const OVERLAY_CLIENT_JS = `(function () {
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 420);
   }
 
-  // Turn every "/medical-protocol:<skill>" mention in one text node into a clickable trigger chip.
+  // Turn every "medical-protocol:<skill>" mention (leading slash optional) in one text node into a clickable trigger chip.
   function skillChips(text) {
-    var rx = new RegExp('/medical-protocol:[a-z][a-z0-9-]*', 'g');
+    var rx = new RegExp('/?medical-protocol:[a-z][a-z0-9-]*', 'g');
     var frag = document.createDocumentFragment();
     var last = 0, m, hit = false;
     while ((m = rx.exec(text))) {
@@ -572,7 +572,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
     var nodes = [], n;
     while ((n = walker.nextNode())) {
       if (n.parentNode && n.parentNode.closest && n.parentNode.closest('code,pre,a,.mpo-skill')) continue;
-      if (n.nodeValue.indexOf('/medical-protocol:') >= 0) nodes.push(n);
+      if (n.nodeValue.indexOf('medical-protocol:') >= 0) nodes.push(n);
     }
     for (var i = 0; i < nodes.length; i++) {
       var frag = skillChips(nodes[i].nodeValue);

@@ -55,8 +55,8 @@ Source: {located file:line, or "markup-only (source not located)"}
 
 ---
 Recommended next step:
-{fixable → "Run /medical-protocol:overlay-implement to replace this region with the {component}"
-          or "Run /medical-protocol:modify to fix {issue}"}
+{fixable → "Use medical-protocol:overlay-implement to replace this region with the {component}"
+          or "Use medical-protocol:modify to fix {issue}"}
 ```
 
 ## 5. Close
@@ -68,11 +68,11 @@ Edit the order file: set `status: done` **and** write the full report into `resu
 "result": {
   "score": "14/20",
   "report": "## Overlay Audit — bmi (14/20)\nSelected at: …\n\n### Clinical Correctness: 3/4\n…",
-  "suggestions": [ { "skill": "/medical-protocol:overlay-implement", "label": "Replace with the bmi component" } ]
+  "suggestions": [ { "skill": "overlay-implement", "label": "Replace with the bmi component" } ]
 }
 ```
 
-`suggestions` is optional — any `/medical-protocol:<skill>` you name in the `report` is already
+`suggestions` is optional — any medical-protocol:<skill> you name (plain text, not code) in the `report` is already
 auto-linked into a clickable trigger. Add `suggestions` for a labeled button or to carry a `prompt`
 (brief). Clicking a trigger re-runs that skill on the **same selection** (reference/queue.md).
 The overlay then shows a clickable "✓ audited — view" pill that opens `report` in its panel. Don't

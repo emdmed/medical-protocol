@@ -6652,7 +6652,7 @@ var init_overlay_client = __esm({
     '.mpo-panel-body a{color:#22d3ee}',
     '.mpo-score{display:inline-flex;align-items:center;gap:8px;margin:0 0 12px;padding:5px 11px;background:#0d2433;border:1px solid #164e63;border-radius:5px;font:700 12px/1 ' + MONO + ';letter-spacing:.04em;color:#67e8f9}',
     '.mpo-score .mpo-score-k{color:#5b7d8f;font-weight:600}',
-    // Inline skill trigger: a /medical-protocol:x mention in the report, clickable to re-run it here.
+    // Inline skill trigger: a medical-protocol:x mention in the report, clickable to re-run it here.
     '.mpo-skill{display:inline;background:#0d2433;color:#7dd3fc;border:1px solid #164e63;border-radius:3px;padding:1px 6px;margin:0 1px;font:600 11.5px/1.4 ' + MONO + ';cursor:pointer}',
     '.mpo-skill:hover{background:#123246;border-color:#22d3ee;color:#bff0ff}',
     // Suggested-actions row: structured skill triggers the report attached to its result.
@@ -7027,9 +7027,9 @@ var init_overlay_client = __esm({
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 420);
   }
 
-  // Turn every "/medical-protocol:<skill>" mention in one text node into a clickable trigger chip.
+  // Turn every "medical-protocol:<skill>" mention (leading slash optional) in one text node into a clickable trigger chip.
   function skillChips(text) {
-    var rx = new RegExp('/medical-protocol:[a-z][a-z0-9-]*', 'g');
+    var rx = new RegExp('/?medical-protocol:[a-z][a-z0-9-]*', 'g');
     var frag = document.createDocumentFragment();
     var last = 0, m, hit = false;
     while ((m = rx.exec(text))) {
@@ -7054,7 +7054,7 @@ var init_overlay_client = __esm({
     var nodes = [], n;
     while ((n = walker.nextNode())) {
       if (n.parentNode && n.parentNode.closest && n.parentNode.closest('code,pre,a,.mpo-skill')) continue;
-      if (n.nodeValue.indexOf('/medical-protocol:') >= 0) nodes.push(n);
+      if (n.nodeValue.indexOf('medical-protocol:') >= 0) nodes.push(n);
     }
     for (var i = 0; i < nodes.length; i++) {
       var frag = skillChips(nodes[i].nodeValue);
@@ -7214,9 +7214,10 @@ var init_overlay_client = __esm({
 var overlay_exports = {};
 __export(overlay_exports, {
   isLocalOrigin: () => isLocalOrigin,
+  normalizeSkill: () => normalizeSkill,
   run: () => run18
 });
-var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE18, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run18;
+var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE18, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, SKILLS_DIR, AUTO_PROMPT, makeDispatcher, serve, run18;
 var init_overlay = __esm({
   "src/commands/overlay.ts"() {
     "use strict";
@@ -7232,7 +7233,7 @@ var init_overlay = __esm({
 The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
 (.medprotocol/queue/) into a dispatch plan naming the skill to run for each
-selection \u2014 /medical-protocol:overlay-audit, overlay-implement, or overlay-add
+selection \u2014 overlay-audit, overlay-implement, or overlay-add
 (the user selects a region, types a brief, and Add builds a new component there).
 In Claude Code, /medical-protocol:overlay is the one entry point: it sets the overlay
 up and processes whatever is queued.
@@ -7267,14 +7268,14 @@ Examples:
   medprotocol overlay --watch
   medprotocol overlay --clear`;
     SKILL_BY_ACTION = {
-      audit: "/medical-protocol:overlay-audit",
-      implement: "/medical-protocol:overlay-implement",
-      add: "/medical-protocol:overlay-add"
+      audit: "overlay-audit",
+      implement: "overlay-implement",
+      add: "overlay-add"
     };
     normalizeSkill = (raw) => {
       if (typeof raw !== "string") return null;
       const m = raw.trim().match(/^\/?(?:medical-protocol:)?([a-z][a-z0-9-]*)$/);
-      return m ? `/medical-protocol:${m[1]}` : null;
+      return m ? m[1] : null;
     };
     within = (dir, p2) => p2 === dir || p2.startsWith(dir + import_node_path.sep);
     isLocalOrigin = (origin) => {
@@ -7330,7 +7331,8 @@ Examples:
       process.stdout.write("\n");
     };
     JSON_HEADER = { "Content-Type": "application/json" };
-    AUTO_PROMPT = `A medical-protocol overlay selection was just queued in .medprotocol/queue/. Process all pending overlay work orders now, without asking for confirmation: run \`node "${process.argv[1]}" overlay --drain --json\` to claim them, then for each order run the matching skill \u2014 overlay-audit for action "audit", overlay-implement for action "implement", overlay-add for action "add" (build the component described in the order's \`prompt\` field and stage it into the selected region). For action "skill", run the skill named in the order's \`skill\` field against the captured selection (use \`html\`/\`selector\`/\`source\` to locate the region, and the order's \`prompt\` as extra brief if present); if that skill builds or edits files, STAGE the diff only (never apply without approval); if it is read-only, just gather its findings. Write the findings into the work order's \`result\` field and set \`status: done\` so the overlay can display them. For implement and add, stage the diff only \u2014 never apply without approval. EXCEPTION: if a drained order already has \`approved: true\` and a staged diff under .medprotocol/staged/ (the user clicked Apply in the overlay), do NOT re-stage \u2014 land that staged diff into source, remove the shadow file, then set \`status: done\` and update \`result\` to note it was applied.`;
+    SKILLS_DIR = (0, import_node_path.resolve)(process.argv[1] ?? ".", "../../skills");
+    AUTO_PROMPT = `A medical-protocol overlay selection was just queued in .medprotocol/queue/. Process all pending overlay work orders now, without asking for confirmation: run \`node "${process.argv[1]}" overlay --drain --json\` to claim them. Each order names a skill by its folder name; to run skill <name>, read \`${(0, import_node_path.join)(SKILLS_DIR, "<name>", "SKILL.md")}\` and follow it from its Phase 1, reading \`\${CLAUDE_SKILL_DIR}\` in it as that skill's folder (never type it as a slash command). For each order run the matching skill \u2014 overlay-audit for action "audit", overlay-implement for action "implement", overlay-add for action "add" (build the component described in the order's \`prompt\` field and stage it into the selected region). For action "skill", run the skill named in the order's \`skill\` field against the captured selection (use \`html\`/\`selector\`/\`source\` to locate the region, and the order's \`prompt\` as extra brief if present); if that skill builds or edits files, STAGE the diff only (never apply without approval); if it is read-only, just gather its findings. Write the findings into the work order's \`result\` field and set \`status: done\` so the overlay can display them. For implement and add, stage the diff only \u2014 never apply without approval. EXCEPTION: if a drained order already has \`approved: true\` and a staged diff under .medprotocol/staged/ (the user clicked Apply in the overlay), do NOT re-stage \u2014 land that staged diff into source, remove the shadow file, then set \`status: done\` and update \`result\` to note it was applied.`;
     makeDispatcher = (cwd) => {
       let busy = false;
       let rerun = false;

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { run } from '../../packages/medprotocol/src/commands/overlay';
+import { run, normalizeSkill } from '../../packages/medprotocol/src/commands/overlay';
 
 let stdout: string;
 let dir: string;
@@ -36,5 +36,15 @@ describe('medprotocol overlay --drain', () => {
     run(['--drain', '--json', '--dir', dir]);
     expect(JSON.parse(stdout)).toHaveLength(2);
     expect(statusOf('2-implement')).toBe('processing');
+  });
+});
+
+describe('overlay skill names', () => {
+  it('normalizes to a bare skill folder name, never a slash command', () => {
+    expect(normalizeSkill('/medical-protocol:overlay-implement')).toBe('overlay-implement');
+    expect(normalizeSkill('medical-protocol:modify')).toBe('modify');
+    expect(normalizeSkill('modify')).toBe('modify');
+    expect(normalizeSkill('../etc')).toBeNull();
+    expect(normalizeSkill('other-plugin:x')).toBeNull();
   });
 });

@@ -34,13 +34,13 @@ them:
 "result": {
   "report": "## Overlay Add — built <AnemiaTracker/> …", // the report (markdown) shown in the panel
   "suggestions": [                                        // optional — recommended skills as clickable "Run" buttons
-    { "skill": "/medical-protocol:overlay-implement", "label": "Wire up the inputs" }
-    // each: { skill (required), label?, prompt? }. Clicking re-runs that skill on the same selection (POST /run).
+    { "skill": "overlay-implement", "label": "Wire up the inputs" }
+    // each: { skill (required, the skill folder name), label?, prompt? }. Clicking re-runs that skill on the same selection (POST /run).
   ]
 }
 ```
 
-Any `/medical-protocol:<skill>` mention in `report` is **also** auto-linked into a clickable trigger,
+Any medical-protocol:<skill> mention (plain text, not code) in `report` is **also** auto-linked into a clickable trigger,
 so a plain recommendation works without `suggestions`. Use `suggestions` for a labeled button or to
 carry a `prompt` (brief) into the triggered run.
 

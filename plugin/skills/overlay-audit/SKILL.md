@@ -46,8 +46,9 @@ to this one selection. Cite file:line (or the captured markup) with P0–P3 seve
 ## Phase 5: Report & close
 
 1. Output a per-selection report (format in reference/core.md), citing the `url` and selector.
-2. For fixable findings, recommend `/medical-protocol:overlay-implement` (replace the region with the
-   real component) or `/medical-protocol:modify`. These mentions render as **clickable triggers** in
+2. For fixable findings, recommend medical-protocol:overlay-implement (replace the region with the
+   real component) or medical-protocol:modify, written as plain text with no slash or backticks. These
+   mentions render as **clickable triggers** in
    the overlay panel — clicking one re-runs that skill on the same selection. Add a `result.suggestions`
    entry to give a recommendation a labeled button or a `prompt` (reference/queue.md).
 3. Close the order: set `status: done` **and** write the full report into `result` (`{ score, report }`)

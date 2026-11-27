@@ -95,7 +95,7 @@ user sees it in the overlay panel:
 The placement line must name the **selected element** and how the component sits relative to it
 (inside / after). If you had to deviate from literal placement, state that and why.
 
-Recommend `/medical-protocol:overlay-audit` on the new region to verify. Don't `--clear` until the
+Recommend medical-protocol:overlay-audit (plain text, no slash — the panel turns it into a button) on the new region to verify. Don't `--clear` until the
 user has read the result (clearing removes it).
 
 ## Scope discipline

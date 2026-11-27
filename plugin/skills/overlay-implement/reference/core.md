@@ -75,7 +75,7 @@ user sees it in the overlay panel:
 "result": { "report": "Staged: replaced the weight/height block with <Bmi/> (components/medprotocol/bmi/bmi.tsx).\nDiff: +1 component, -12 lines of hand-rolled inputs.\nApproval pending — review/approve in Claude Code." }
 ```
 
-Recommend `/medical-protocol:overlay-audit` on the same region to verify. Don't `--clear` until the
+Recommend medical-protocol:overlay-audit (plain text, no slash — the panel turns it into a button) on the same region to verify. Don't `--clear` until the
 user has read the result (clearing removes it).
 
 ## Scope discipline

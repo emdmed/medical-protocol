@@ -32,13 +32,13 @@ When you finish an order, write the full findings into `result` so the overlay c
   "score": "14/20",                     // optional headline (audit)
   "report": "## Overlay Audit — bmi …", // the full report text (markdown) the user reads in the panel
   "suggestions": [                       // optional — recommended skills, rendered as clickable "Run" buttons
-    { "skill": "/medical-protocol:overlay-implement", "label": "Replace with the bmi component" }
-    // each: { skill (required), label?, prompt? }. Clicking re-runs that skill on the same selection via POST /run.
+    { "skill": "overlay-implement", "label": "Replace with the bmi component" }
+    // each: { skill (required, the skill folder name), label?, prompt? }. Clicking re-runs that skill on the same selection via POST /run.
   ]
 }
 ```
 
-Any `/medical-protocol:<skill>` mention in the `report` markdown is **also** auto-linked into a clickable
+Any medical-protocol:<skill> mention (plain text, not code) in the `report` markdown is **also** auto-linked into a clickable
 trigger in the panel, so a plain recommendation works even without `suggestions`. Use `suggestions` when
 you want a labeled button or to carry a `prompt` (brief) into the triggered run.
 

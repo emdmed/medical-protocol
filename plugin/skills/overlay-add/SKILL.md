@@ -72,7 +72,7 @@ For each order:
    anchor** (e.g. "appended inside the selected `<div class=…>`"), the diff summary, and
    "review/approve in Claude Code" if approval is still pending (reference/queue.md). If you could not
    place it literally at the anchor, say so and why.
-3. Recommend `/medical-protocol:overlay-audit` on the new region to verify; don't `--clear` until the
+3. Recommend medical-protocol:overlay-audit (plain text, no slash — the panel turns it into a button) on the new region to verify; don't `--clear` until the
    user has read the result.
 
 ## NEVER

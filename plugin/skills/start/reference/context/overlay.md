@@ -62,7 +62,7 @@ The `--serve` process exposes:
 - `POST /run` `{ file, skill, prompt? }` — a **skill trigger** from the result panel. The user clicks a
   skill the report recommended; the server reads the originating order, **inherits its selection anchor**
   (selector/html/source/url), and mints a new `skill` work order that re-processes that same region with
-  the named skill. `skill` is validated against the `medical-protocol:` namespace. In automatic mode it kicks
+  the named skill. `skill` is normalized to a bare skill folder name (a `medical-protocol:` prefix or leading slash is stripped). In automatic mode it kicks
   the dispatcher immediately; otherwise the user runs `/medical-protocol:overlay` in Claude Code.
 - `POST /approve` `{ file }` — the result panel's **Apply** button. For a staged `add`/`implement` order
   it sets `approved: true` and re-queues it (`status → pending`) so the matching skill **lands the staged
@@ -98,7 +98,7 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 ```jsonc
 {
   "action": "implement",                // REQUIRED — "audit" | "implement" | "add" | "skill"
-  "skill": null,                        // skill only — slash command to run (minted by POST /run)
+  "skill": null,                        // skill only — skill folder name to run (minted by POST /run)
   "prompt": null,                       // add only — free-text brief: what component to build
   "selector": "main > section:nth-of-type(2) > div:nth-of-type(1)", // CSS path to the node
   "tag": "div",                         // tagName of the selection
@@ -118,7 +118,7 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 | Field | Required | Notes |
 |---|---|---|
 | `action` | yes | `audit` (static, read-only), `implement` (retrofit existing markup, lease/apply diff), `add` (build a new component from `prompt`, lease/apply diff), or `skill` (re-run a report-recommended skill on the same selection — minted by `POST /run`, never posted by the browser directly). |
-| `skill` | skill only | Slash command to run, e.g. `/medical-protocol:overlay-implement`. Set by `POST /run`; validated to the `medical-protocol:` namespace. |
+| `skill` | skill only | Skill folder name to run, e.g. `overlay-implement`. Set by `POST /run`. The processor reads that skill's `SKILL.md` and follows it — helper skills are not slash commands. |
 | `prompt` | add only* | Free-text brief of the component to build. Required when `action: "add"`; for `skill` it is an optional extra brief; ignored otherwise. The selection acts as the placement anchor. |
 | `selector` | yes* | CSS path to the selected node. *POST requires `selector` **or** `html`. |
 | `tag` / `classes` / `text` / `html` | no | Descriptors the skills use to classify the region and locate it in source. `html` is the primary identifier. |
@@ -148,13 +148,13 @@ is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 Classify the selection (`suggestedId` if present, else infer from `html`/`text`/`classes` via
 `classification.md`), locate it in source by grepping for the captured fragments, and **report
 findings** against the inferred module's rules + `lib/` validations. Never modifies files. Skill:
-`/medical-protocol:overlay-audit`.
+`overlay-audit`.
 
 ### Implement (lease / apply diff)
 Classify the selection and **confirm the inferred component in chat**, locate the markup in source,
 then **stage a diff** that replaces it with the medprotocol component — nothing is written until the
 user approves (`approved: true` from the overlay's "Apply", or in-session sign-off). Same lease →
-apply trust model Impeccable uses for live edits. Skill: `/medical-protocol:overlay-implement`.
+apply trust model Impeccable uses for live edits. Skill: `overlay-implement`.
 
 ### Add (lease / apply diff)
 The user selects a region and types a **free-text brief** (`prompt`) of a component to build — e.g.
@@ -162,26 +162,27 @@ The user selects a region and types a **free-text brief** (`prompt`) of a compon
 being replaced. Classify the brief against `classification.md` → registry component(s), **confirm the
 plan in chat**, locate the anchor in source, then **stage a diff** that inserts the newly composed
 component there. Same approval gate as Implement. In automatic mode, a headless Claude run builds it
-unattended (still staging-only). Skill: `/medical-protocol:overlay-add`. **Add builds new capability;
+unattended (still staging-only). Skill: `overlay-add`. **Add builds new capability;
 Implement retrofits existing markup.**
 
 ## Triggering recommended skills from the result panel
 
-Audit/implement/add reports routinely recommend a next step — *"Run `/medical-protocol:overlay-implement`
-to replace this region"* or *"Run `/medical-protocol:modify` to fix …"*. The result panel makes those
+Audit/implement/add reports routinely recommend a next step — *"Use medical-protocol:overlay-implement
+to replace this region"* or *"Use medical-protocol:modify to fix …"*. The result panel makes those
 recommendations **actionable** instead of copy-paste:
 
-- **Inline triggers** — every `/medical-protocol:<skill>` mention in the rendered `report` becomes a
-  clickable chip (code samples inside fenced/inline code are left untouched).
+- **Inline triggers** — every medical-protocol:<skill> mention (leading slash optional) in the rendered
+  `report` becomes a clickable chip (code samples inside fenced/inline code are left untouched), so
+  reports write it as plain text.
 - **Suggested actions** — a skill may also attach a structured `result.suggestions` array; each entry
   renders as a "Run" button under the report, and can carry a `label` and a `prompt` (brief):
 
   ```jsonc
   "result": {
-    "report": "## Overlay Audit — bmi (14/20)\n…\nRecommended: Run /medical-protocol:overlay-implement …",
+    "report": "## Overlay Audit — bmi (14/20)\n…\nRecommended: Use medical-protocol:overlay-implement …",
     "suggestions": [
-      { "skill": "/medical-protocol:overlay-implement", "label": "Replace with the bmi component" },
-      { "skill": "/medical-protocol:modify", "label": "Fix the missing validation", "prompt": "add height/weight range guards" }
+      { "skill": "overlay-implement", "label": "Replace with the bmi component" },
+      { "skill": "modify", "label": "Fix the missing validation", "prompt": "add height/weight range guards" }
     ]
   }
   ```

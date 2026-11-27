@@ -11,7 +11,7 @@ const USAGE = `Usage: medprotocol overlay [options]
 The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
 (.medprotocol/queue/) into a dispatch plan naming the skill to run for each
-selection — /medical-protocol:overlay-audit, overlay-implement, or overlay-add
+selection — overlay-audit, overlay-implement, or overlay-add
 (the user selects a region, types a brief, and Add builds a new component there).
 In Claude Code, /medical-protocol:overlay is the one entry point: it sets the overlay
 up and processes whatever is queued.
@@ -52,14 +52,14 @@ type Action = "audit" | "implement" | "add" | "skill";
 type Status = "pending" | "processing" | "done";
 
 interface SkillSuggestion {
-  skill: string; // slash command to offer, e.g. "/medical-protocol:overlay-implement"
+  skill: string; // skill to offer, by folder name, e.g. "overlay-implement"
   label?: string; // human button text (defaults to the skill name)
   prompt?: string; // optional brief to carry into the triggered run
 }
 
 interface WorkOrder {
   action: Action;
-  skill?: string | null; // "skill" action only — the slash command to run against this selection
+  skill?: string | null; // "skill" action only — the skill (folder name) to run against this selection
   prompt?: string | null; // free-text brief — required for "add" (what component to build), null otherwise
   selector?: string | null;
   tag?: string | null;
@@ -83,17 +83,17 @@ interface QueueEntry {
 }
 
 const SKILL_BY_ACTION: Record<Exclude<Action, "skill">, string> = {
-  audit: "/medical-protocol:overlay-audit",
-  implement: "/medical-protocol:overlay-implement",
-  add: "/medical-protocol:overlay-add",
+  audit: "overlay-audit",
+  implement: "overlay-implement",
+  add: "overlay-add",
 };
 
-// Accept "/medical-protocol:bmi", "medical-protocol:bmi", or bare "bmi"; normalize to the slash form.
-// Returns null for anything outside the medical-protocol plugin namespace.
-const normalizeSkill = (raw: unknown): string | null => {
+// Accept "/medical-protocol:bmi", "medical-protocol:bmi", or bare "bmi"; normalize to the bare skill
+// folder name (helper skills can't be typed as slash commands). Null for anything else.
+export const normalizeSkill = (raw: unknown): string | null => {
   if (typeof raw !== "string") return null;
   const m = raw.trim().match(/^\/?(?:medical-protocol:)?([a-z][a-z0-9-]*)$/);
-  return m ? `/medical-protocol:${m[1]}` : null;
+  return m ? m[1] : null;
 };
 
 // Path-containment guard. `startsWith(dir)` alone matches sibling dirs like "<dir>-evil";
@@ -170,10 +170,17 @@ const printOrders = (entries: QueueEntry[], json: boolean, header: string): void
 
 const JSON_HEADER = { "Content-Type": "application/json" } as const;
 
+// Skills live next to scripts/ in the plugin; the run reads a skill's SKILL.md instead of typing a
+// slash command, because helper skills are not user-invocable.
+const SKILLS_DIR = resolve(process.argv[1] ?? ".", "../../skills");
+
 const AUTO_PROMPT =
   "A medical-protocol overlay selection was just queued in .medprotocol/queue/. " +
   "Process all pending overlay work orders now, without asking for confirmation: run " +
-  `\`node "${process.argv[1]}" overlay --drain --json\` to claim them, then for each order run the matching ` +
+  `\`node "${process.argv[1]}" overlay --drain --json\` to claim them. Each order names a skill by its ` +
+  `folder name; to run skill <name>, read \`${join(SKILLS_DIR, "<name>", "SKILL.md")}\` and follow it from ` +
+  "its Phase 1, reading `${CLAUDE_SKILL_DIR}` in it as that skill's folder (never type it as a slash command). " +
+  "For each order run the matching " +
   "skill — overlay-audit for action \"audit\", overlay-implement for action \"implement\", " +
   "overlay-add for action \"add\" (build the component described in the order's `prompt` field and " +
   "stage it into the selected region). For action \"skill\", run the skill named in the order's `skill` " +

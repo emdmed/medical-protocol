@@ -36,8 +36,9 @@ Grep the app's root mount file (`app/layout.tsx`, `src/app/layout.tsx`, `pages/_
    | `add` | `${CLAUDE_SKILL_DIR}/../overlay-add/SKILL.md` |
 
 4. `skill` orders (the user clicked a recommended skill in a report): claim them with
-   `medprotocol overlay --drain --action skill --json`, then run the skill named in each order's
-   `skill` field against the captured selection (`html`/`selector`/`source` locate the region; `prompt`
+   `medprotocol overlay --drain --action skill --json`, then read and follow
+   `${CLAUDE_SKILL_DIR}/../<skill>/SKILL.md`, where `<skill>` is the order's `skill` field (a skill
+   folder name — never type it as a slash command), against the captured selection (`html`/`selector`/`source` locate the region; `prompt`
    is an extra brief). If it builds or edits files, **stage** the diff only. Write the findings into
    the order's `result` and set `status: done`.
 
