@@ -1,10 +1,19 @@
 {
   "name": "medical-protocol",
+  "displayName": "Medical Protocol",
   "version": "1.7.0",
   "license": "MIT",
   "description": "Educational clinical skills for Claude Code — tested calculators, screen prototyping and browser checks. For learning and quick prototyping of medical ideas, not for patient care",
   "author": {
     "name": "emdmed"
   },
-  "repository": "https://github.com/emdmed/medical-protocol"
+  "repository": "https://github.com/emdmed/medical-protocol",
+  "homepage": "https://github.com/emdmed/medical-protocol",
+  "keywords": [
+    "medical education",
+    "clinical calculators",
+    "synthetic patients",
+    "prototyping",
+    "note extraction"
+  ]
 }

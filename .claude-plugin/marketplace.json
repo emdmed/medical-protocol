@@ -10,7 +10,15 @@
     {
       "name": "medical-protocol",
       "source": "./plugin",
-      "description": "Educational clinical skills for Claude Code — tested calculators, screen prototyping and browser checks. For learning and quick prototyping of medical ideas, not for patient care"
+      "description": "Educational clinical skills for Claude Code — tested calculators, screen prototyping and browser checks. For learning and quick prototyping of medical ideas, not for patient care",
+      "category": "education",
+      "tags": [
+        "medical-education",
+        "clinical-calculators",
+        "synthetic-patients",
+        "prototyping",
+        "note-extraction"
+      ]
     }
   ]
 }
