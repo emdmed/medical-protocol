@@ -32,7 +32,7 @@
 | cases | Synthetic worked cases to practise with, or to use as labelled demo data |
 | demo | Screenshots and a walkthrough of the prototype with synthetic cases, saved locally in demo/ |
 | preferences | Configure user preferences and specialty |
-| protocol-audit | Audit protocol quality and compliance |
+| check | Test every calculation against the library and score the prototype in one report |
 | overlay | The one overlay entry point: wires the dev overlay if missing, otherwise processes every queued selection |
 | overlay-setup | Start the overlay server and wire the dev-only overlay `<script>` tag into any app |
 | overlay-audit | Audit a region selected in the dev overlay against protocol guidance (drains an "audit" work order; works on untagged apps) |

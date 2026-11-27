@@ -187,7 +187,7 @@ project `CLAUDE.md` with QA rules) → **Initial Clarification (blocking)** →
 `public/medical-protocol/context/classification.md` maps **signal words → domain**
 (vital-signs, bmi, acid-base, water-balance, pafi, dka, sepsis, diabetes,
 cardiology, nephrology, dashboard, modify, troubleshoot, calc, preferences,
-protocol-audit, calc-audit). Routing rules: initial clarification must complete
+check). Routing rules: initial clarification must complete
 first; multi-domain → prefer `dashboard`; problem reports → always
 `troubleshoot`; CKD routes to the **nephrology** domain. The `start` skill holds
 the domain→skill/workflow routing table.
@@ -200,8 +200,8 @@ Each skill is a directory under `plugin/skills/<name>/` with a `SKILL.md`
 `Read and follow: reference/<file>`; build skills also declare
 `Clinical logic source:` (the plugin's `lib/` folder) and `Module docs:`. Skills: `start`, `bmi`,
 `acid-base`, `vital-signs`, `water-balance`, `pafi`, `dka`, `dashboard`,
-`modify`, `troubleshoot`, `calc`, `calc-audit`, `preferences`,
-`protocol-audit`, `overlay`, `overlay-setup`, `overlay-audit`, `overlay-implement`,
+`modify`, `troubleshoot`, `calc`, `preferences`,
+`check`, `overlay`, `overlay-setup`, `overlay-audit`, `overlay-implement`,
 `overlay-add`.
 (`start` is the entry router; `nephrology`/`cardiology`/`sepsis`/`diabetes`
 domains route to workflow files inside `start/reference/` rather than their own

@@ -67,8 +67,7 @@ When the user describes what they need, classify into one of these domains based
 | **cases** | give me a case, example patient, synthetic case, practise, practice case, quiz me, demo data, sample patient |
 | **demo** | demo, present, presentation, show it to, screenshots, walkthrough, get it ready to show, for my class, for my talk |
 | **preferences** | teach, preferences, what I'm learning, configure, setup preferences, learn about me, my specialty |
-| **protocol-audit** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check |
-| **calc-audit** | test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors |
+| **check** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check, test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors |
 | **qa** | check it, is it working, try it, test the screen, test the calculator, check everything, add a case, also check a patient, what do you check |
 
 ---

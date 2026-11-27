@@ -56,8 +56,7 @@ Use the classification table to match the user's request to a domain, then route
 | **cases** | `../cases/SKILL.md` |
 | **demo** | `../demo/SKILL.md` |
 | **preferences** | `../preferences/SKILL.md` |
-| **protocol-audit** | `../protocol-audit/SKILL.md` |
-| **calc-audit** | `../calc-audit/SKILL.md` |
+| **check** | `../check/SKILL.md` |
 | **qa** | `../qa/SKILL.md` |
 
 ### Domains routed via workflow file
