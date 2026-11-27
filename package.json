@@ -1,6 +1,6 @@
 {
   "name": "medprotocol-core",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "license": "MIT",
   "description": "Medical protocol workflows, calculation logic, and CLI for Claude Code",
   "workspaces": [

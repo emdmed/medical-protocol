@@ -2,6 +2,15 @@
 
 One entry per release, newest first, written for the doctors and developers who use the plugin. Releases before 1.5.0 are in the git tags.
 
+## 1.7.0 — 2026-11-27
+
+- **For learning and prototyping only:** every screen shows "Learning prototype — not for patient care." and uses synthetic data only. Real patient data, deployment and links to clinical systems are out of scope. Skills, hooks and the CLI say "user", not "doctor".
+- **Generate random patient** on every clinical screen (Generate patients on list screens), with Clear. Each press makes a new synthetic patient with credible values from the module's generator section. Screens can also let you choose the results first, then generate a patient that has them. The syndromic rules' generators keep a patient only when the rule agrees with its scenario.
+- **New `syndromic-page` skill and `medprotocol syndromic --serve`** (port 7333): a local page that makes a synthetic patient for the six bedside rules, at random or with the results you choose (each list always offers "Any" and its "no"). It drafts the patient's note as ED shorthand or a written outpatient note, which you can copy or save as a text file, and shows what each rule says beside the note.
+- **New `cases` skill:** eleven synthetic worked cases to guess, enter and see explained.
+- **New `demo` skill:** checks each screen, generates a patient on it, saves screenshots and a walkthrough in `demo/`, all on your computer.
+- **Building:** clarification asks what the prototype imagines (setting, one patient or a list, persistence). After a build only a quick check runs; browser QA runs when you ask or before a demo. Checks use the port `npm run dev` prints, and text must read in both light and dark themes.
+
 ## 1.6.1 — 2026-11-27
 
 - **Extraction page, syndromic tab:** rules whose findings point away from their syndrome are grouped as "Not supported by the findings stated", no longer "Not present". The note may leave findings out, so a rule never rules a syndrome out.

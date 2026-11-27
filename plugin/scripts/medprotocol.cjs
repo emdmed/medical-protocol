@@ -9093,7 +9093,7 @@ ${JSON.stringify(findings)}`;
 });
 
 // package.json
-var version = "1.6.1";
+var version = "1.7.0";
 
 // src/index.ts
 init_cli();
