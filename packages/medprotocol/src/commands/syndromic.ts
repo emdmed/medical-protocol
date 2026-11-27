@@ -41,8 +41,8 @@ export interface Card {
 
 // "capillaryRefill" → "Capillary refill", "normal_or_low" → "normal or low"
 const words = (s: string) => s.replace(/([a-z])([A-Z0-9])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
-const ACRONYMS: Record<string, string> = { jvp: "JVP", ph: "pH", po2: "PO2", pco2: "PCO2", hco3: "HCO3", "cm h2o": "cmH2O", s3: "S3" };
-const label = (s: string) => words(s).replace(/\b(jvp|ph|po2|pco2|hco3|cm h2o|s3)\b/g, (m) => ACRONYMS[m]).replace(/^./, (c) => c.toUpperCase());
+const ACRONYMS: Record<string, string> = { jvp: "JVP", ph: "pH", po2: "PO2", pco2: "PCO2", hco3: "HCO3", "cm h2o": "cmH2O", s3: "S3", "temperature c": "temperature (°C)", "days": "(days)" };
+const label = (s: string) => words(s).replace(/\b(jvp|ph|po2|pco2|hco3|cm h2o|s3|temperature c|days)\b/g, (m) => ACRONYMS[m]).replace(/^./, (c) => c.toUpperCase());
 const spoken = (names: readonly string[]) => names.map(words).join(", ");
 
 const rows = (f: object, prefix = ""): [string, string][] =>

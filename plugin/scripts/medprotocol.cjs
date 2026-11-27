@@ -8883,8 +8883,8 @@ Options:
 
 Every patient is synthetic. Each note is one Claude run (claude -p, no tools), which uses tokens.`;
     words = (s) => s.replace(/([a-z])([A-Z0-9])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
-    ACRONYMS = { jvp: "JVP", ph: "pH", po2: "PO2", pco2: "PCO2", hco3: "HCO3", "cm h2o": "cmH2O", s3: "S3" };
-    label = (s) => words(s).replace(/\b(jvp|ph|po2|pco2|hco3|cm h2o|s3)\b/g, (m) => ACRONYMS[m]).replace(/^./, (c) => c.toUpperCase());
+    ACRONYMS = { jvp: "JVP", ph: "pH", po2: "PO2", pco2: "PCO2", hco3: "HCO3", "cm h2o": "cmH2O", s3: "S3", "temperature c": "temperature (\xB0C)", "days": "(days)" };
+    label = (s) => words(s).replace(/\b(jvp|ph|po2|pco2|hco3|cm h2o|s3|temperature c|days)\b/g, (m) => ACRONYMS[m]).replace(/^./, (c) => c.toUpperCase());
     spoken2 = (names) => names.map(words).join(", ");
     rows = (f, prefix = "") => Object.entries(f).flatMap(([k, v2]) => {
       if (v2 === void 0 || v2 === "") return [];
