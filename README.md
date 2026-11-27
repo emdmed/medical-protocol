@@ -21,6 +21,15 @@ The agent sets up the project, builds the screen and checks it in the browser.
 
 Medical Protocol is an open-source educational project. It and the tools it generates are for learning, prototyping and experimentation only and must not be used for real patient care, diagnosis or treatment decisions. They are not certified medical devices and do not replace professional clinical judgment. The authors make no warranty about accuracy and accept no liability for any use of this software.
 
+Not for:
+
+- The care of any real patient, now or after the fact (chart review and audit included)
+- Real patient notes: use made-up or de-identified notes only, as the note reader asks you to confirm
+- Triage, emergencies, alerts, diagnosis or treatment
+- Patients, or anyone outside learning and prototyping
+
+Results are worded as teaching: a bedside rule says what its findings point to, never that a condition is ruled out.
+
 ## Install
 
 In Claude Code:

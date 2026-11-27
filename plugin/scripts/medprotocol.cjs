@@ -5256,7 +5256,7 @@ mark.on,.card:hover,.card.on,.e:hover,.e.on{transition-duration:.12s}
 .tg{display:flex;gap:6px;margin-top:5px;font:400 12.5px/1.25 var(--ui);color:var(--ink-2)}
 .tg::before{content:"";flex:none;width:7px;height:7px;margin-top:4px;box-shadow:inset 0 0 0 1px currentColor}
 .gc.at .tg{color:var(--ink)}
-/* the syndromic tab is read at a glance: the rules in three groups (found, undecided, not present), each rule one
+/* the syndromic tab is read at a glance: the rules in three groups (found, undecided, not supported), each rule one
    shut row with its name and its result, opened on its detail. A group head is a section head of the page (the
    serif italic over an ink rule) with its mark; the rows sit indented under its words. The mark says the group in
    shape, not only colour: filled = the rule found its syndrome, open square = found none, hatched = could not
@@ -5969,9 +5969,9 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
         label();
       };
       top.appendChild(done); top.appendChild(all); f.appendChild(top);
-      // what a rule found first, then what it could not decide, then the syndromes ruled out, each in the workflow's
+      // what a rule found first, then what it could not decide, then the syndromes the findings stated do not support (not ruled out: the note may leave findings out), each in the workflow's
       // order; a rule the doctor discarded stays in its group, struck through
-      [["found", "Syndrome found"], ["open", "Undecided"], ["clear", "Not present"]].forEach(function (t) {
+      [["found", "Syndrome found"], ["open", "Undecided"], ["clear", "Not supported by the findings stated"]].forEach(function (t) {
         var of = as.filter(function (c) { return c.grid.tone === t[0]; });
         if (!of.length) return;
         var h = el("h3", "syn-g"), m = el("i", "tn " + t[0]), ol = el("ol", "syn-l");
