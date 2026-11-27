@@ -14,11 +14,11 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 ## Steps
 
-1. **Check `claude` is on PATH** (`command -v claude`). The page uses it to read the note. Prints nothing → tell the user the page can't run here and offer the chat route, `/medical-protocol:extract`. Stop.
+1. **Check `claude` is on PATH** (`command -v claude`). The page uses it to read the note. Prints nothing → tell the user the page can't run here and offer the chat route: paste the note here and say "extract this note". Stop.
 2. **Start the server** in the background (Bash, `run_in_background`): `medprotocol extract --serve`. Read the address it prints. The two local pages have their own ports: this one 7332, the synthetic patients page (`/medical-protocol:syndromic-page`) 7333. `Port <n> is in use` → the page is probably already running: give the user `http://localhost:<n>`; if they say it is not the extraction page, start again with `--port <number>`.
 3. **Tell the user**, in a full sentence, with the address the server printed: "The extraction page is open at http://localhost:7332. Paste your note there and tick the box; the page pulls out the values, re-checks them and lets you accept or reject each correction. Only use a made-up or de-identified note: it is sent to the AI model, which runs on external servers. Tell me when you are done, or if you want a screen of it in your app."
 4. **While the user works in the page, do nothing.** The server extracts, verifies and saves by itself: don't read the note, extract, verify or edit the files in `extractions/`.
-5. **When the user comes back**, the folder is the last `http://localhost:<port>/#<hash>` line the server printed. A screen of it in their app → `/medical-protocol:extract` (§ Build). One saved file of it → `/medical-protocol:extract-artifact`.
+5. **When the user comes back**, the folder is the last `http://localhost:<port>/#<hash>` line the server printed. A screen of it in their app → they say "build a screen of this extraction" (the extract skill, § Build). One saved file of it → they say "save this extraction as a page" (the extract-artifact skill).
 
 ## NEVER
 - Start `extract --serve` on anything but this computer, or expose its address (a tunnel, a proxy, `0.0.0.0`): the page holds the full note

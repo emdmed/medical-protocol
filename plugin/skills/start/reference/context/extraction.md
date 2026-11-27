@@ -23,7 +23,7 @@ Run these steps in this order, every time. Each note gets its own folder, `extra
 | `corrected.json` | step 3 — the first pass with every proposed correction applied | step 4, if the user rejects a correction |
 | `decisions.json` | step 4, in the page only — `{ "<position in findings>": "accepted" \| "rejected" }` | each time the user decides a finding |
 | `.consent` | the user's yes to this note being read: the `note-consent` hook (chat) or the server (page) — the date | |
-| `artifact.html` | `/medical-protocol:extract-artifact` — the page, with its calculations (§ Calculations on the page) | |
+| `artifact.html` | the extract-artifact skill ("save this extraction as a page") — the page, with its calculations (§ Calculations on the page) | |
 
 Below, `<dir>` is that folder, e.g. `extractions/3f9a1c07b2e4`.
 
@@ -285,7 +285,7 @@ medprotocol extract --note extractions/<hash>/note.md --items extractions/<hash>
 medprotocol extract --note extractions/<hash>/note.md --items extractions/<hash>/corrected.json --artifact extractions/<hash>/artifact.html
 ```
 
-`--serve` runs until stopped (Ctrl-C), listens on this computer only, and starts a `claude -p` run for each note pasted in the page (unattended, uses tokens). `--artifact` also writes a standalone page of the extraction (note beside items, same display rules as the Screen spec, plus § Calculations on the page), for `/medical-protocol:extract-artifact`.
+`--serve` runs until stopped (Ctrl-C), listens on this computer only, and starts a `claude -p` run for each note pasted in the page (unattended, uses tokens). `--artifact` also writes a standalone page of the extraction (note beside items, same display rules as the Screen spec, plus § Calculations on the page), for the extract-artifact skill.
 
 ---
 

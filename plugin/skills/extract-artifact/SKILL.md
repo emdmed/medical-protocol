@@ -18,7 +18,7 @@ One page per extraction: what the note says and how each quote checked, then a "
 
 ## Steps
 
-1. **Pick the extraction.** `<dir>` is `extractions/<hash>/`, the folder just finished by `/medical-protocol:extract`, or the one the user names. List `extractions/*/note.md` if unsure, show the first line of each, and ask which. It needs `<dir>/note.md` and its items, `<items>` below: `<dir>/corrected.json` if it exists, else `<dir>/extraction.json`. Neither → tell the user to run the extraction first and stop.
+1. **Pick the extraction.** `<dir>` is `extractions/<hash>/`, the folder just finished by the extract skill, or the one the user names. List `extractions/*/note.md` if unsure, show the first line of each, and ask which. It needs `<dir>/note.md` and its items, `<items>` below: `<dir>/corrected.json` if it exists, else `<dir>/extraction.json`. Neither → tell the user to run the extraction first and stop.
 2. **Write the local page:**
    ```bash
    medprotocol extract --note <dir>/note.md --items <items> --artifact <dir>/artifact.html

@@ -6327,7 +6327,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     rail.appendChild(el("p", "lead", "Your note is still here. Run it again, or start a new note."));
     statusLine.textContent = "The extraction did not finish.";
     box.appendChild(statusLine);
-    if (s.error && s.error.indexOf("'claude' command was not found") >= 0) box.appendChild(el("p", "lead", "This page needs the Claude Code command line tool. You can also run the extraction from the chat with /medical-protocol:extract."));
+    if (s.error && s.error.indexOf("'claude' command was not found") >= 0) box.appendChild(el("p", "lead", "This page needs the Claude Code command line tool. You can also run the extraction from the chat: paste the note and say \"extract this note\"."));
     else if (s.error) box.appendChild(el("pre", "", s.error));
     var again = el("button", "btn fill", "Try again"); again.type = "button";
     // the user already confirmed this note

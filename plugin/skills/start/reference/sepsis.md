@@ -71,8 +71,8 @@ Ask: "Would you like to adjust anything about the monitoring parameters?"
 ## Related Tools
 
 Based on clinical context, the user may also benefit from:
-- **/medical-protocol:acid-base** — Lactate and arterial blood gas analysis for sepsis-related metabolic derangements
-- **/medical-protocol:water-balance** — Fluid resuscitation tracking and intake/output monitoring
+- **Ask for a blood gas analysis** — Lactate and arterial blood gas analysis for sepsis-related metabolic derangements
+- **Ask for a fluid balance tracker** — Fluid resuscitation tracking and intake/output monitoring
 - **Ask for a vital signs monitor** — Hemodynamic monitoring with blood pressure, heart rate, and SpO2 trends
 
 Only mention these if the user asks "what else can you do?" or if the clinical scenario suggests them.

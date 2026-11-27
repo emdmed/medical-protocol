@@ -116,4 +116,4 @@ After the first run on a screen, offer once: "You can ask me to add any patient 
 
 ## Re-running later
 
-Recipes stay in the project. After any change to a screen, run its recipe again (step 2). The user can ask for this in plain words ("check it", "is it working?") or with `/medical-protocol:qa`.
+Recipes stay in the project. After any change to a screen, run its recipe again (step 2). The user can ask for this in plain words ("check it", "is it working?") or "test the screen".

@@ -87,9 +87,9 @@ Ask: "Would you like to adjust anything about the evaluation parameters?"
 ## Related Tools
 
 Based on clinical context, the user may also benefit from:
-- **/medical-protocol:dka** — DKA monitoring with hourly glucose, ketone, and insulin tracking
-- **/medical-protocol:nephrology** — CKD evaluation relevant to diabetic nephropathy
-- **/medical-protocol:cardiology** — Cardiovascular risk assessment for diabetes-related macrovascular disease
-- **/medical-protocol:bmi** — BMI calculation relevant to T2D screening and classification
+- **Ask for a DKA monitor** — DKA monitoring with hourly glucose, ketone, and insulin tracking
+- **Ask for a kidney function screen** — CKD evaluation relevant to diabetic nephropathy
+- **Ask for a cardiovascular risk calculator** — Cardiovascular risk assessment for diabetes-related macrovascular disease
+- **Ask for a BMI calculator** — BMI calculation relevant to T2D screening and classification
 
 Only mention these if the user asks "what else can you do?" or if the clinical scenario suggests them.

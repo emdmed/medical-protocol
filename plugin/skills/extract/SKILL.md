@@ -40,7 +40,7 @@ A screen in the user's app is still a chat request: only when the user asks for 
 
 Then extract and check as in `extraction.md` § Who extracts, steps 1–5 in order: hash and save the raw note (`medprotocol extract --save`) → `extractions/<hash>/note.md`, first pass → `<hash>/extraction.json`, verify with the `extraction-verifier` agent → `<hash>/verify.json` + `<hash>/corrected.json`, the user accepts or rejects each correction, then the screen data.
 
-Then offer once: "Want a page of this extraction you can open in the browser? It stays on this computer." On yes, run `/medical-protocol:extract-artifact` for `<hash>`.
+Then offer once: "Want a page of this extraction you can open in the browser? It stays on this computer." On yes, make the saved page (the extract-artifact skill) for `<hash>`.
 
 Do NOT ask about layout, colours, or matching rules.
 

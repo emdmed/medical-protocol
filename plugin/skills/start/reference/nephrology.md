@@ -118,7 +118,7 @@ Ask: "Would you like to adjust anything about the evaluation parameters?"
 
 Based on clinical context, the user may also benefit from:
 - **Ask for a cardiovascular risk screen** — Cardiovascular risk assessment for cardio-renal syndrome management
-- **/medical-protocol:acid-base** — Metabolic acidosis evaluation common in advanced CKD
-- **/medical-protocol:bmi** — Nutritional status monitoring relevant to CKD progression
+- **Ask for a blood gas analysis** — Metabolic acidosis evaluation common in advanced CKD
+- **Ask for a BMI calculator** — Nutritional status monitoring relevant to CKD progression
 
 Only mention these if the user asks "what else can you do?" or if the clinical scenario suggests them.

@@ -48,7 +48,7 @@ Ask: "Would you like to adjust anything?"
 ## Related Tools
 
 Based on clinical context, the user may also benefit from:
-- **/medical-protocol:bmi** — Obesity is a MASLD risk factor
+- **Ask for a BMI calculator** — Obesity is a MASLD risk factor
 - **Ask for a diabetes diagnosis screen** — Type 2 diabetes and prediabetes are MASLD risk factors
 - **Ask for a cardiovascular risk calculator** — Cardiovascular disease is the main cause of death in MASLD
 

@@ -50,6 +50,6 @@ Ask: "Would you like to adjust anything?"
 Based on clinical context, the user may also benefit from:
 - **Ask for a vital signs monitor** — Blood pressure and heart rate monitoring for ongoing cardiac assessment
 - **Ask for a kidney function (CKD) screen** — Renal function evaluation for cardio-renal syndrome risk
-- **/medical-protocol:bmi** — BMI as a modifiable cardiovascular risk factor
+- **Ask for a BMI calculator** — BMI as a modifiable cardiovascular risk factor
 
 Only mention these if the user asks "what else can you do?" or if the clinical scenario suggests them.
