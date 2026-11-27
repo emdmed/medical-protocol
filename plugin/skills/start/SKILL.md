@@ -68,6 +68,7 @@ These domains don't have a local SKILL.md. Read the workflow file and follow it 
 |---|---|
 | **nephrology** | `Read` from `reference/nephrology.md` |
 | **cardiology** | `Read` from `reference/cardiology.md` |
+| **hepatology** | `Read` from `reference/hepatology.md` |
 | **sepsis** | `Read` from `reference/sepsis.md` |
 | **shock** | `Read` from `reference/shock.md` |
 | **volume**, **heart-failure**, **chest-exam**, **focal-pulmonary**, **respiratory-failure** | `Read` from `reference/syndromic.md` |
@@ -77,7 +78,7 @@ These domains don't have a local SKILL.md. Read the workflow file and follow it 
 
 Once classified, route to the matched destination from the tables above:
 - **Local skills:** Read the matched SKILL.md file and follow its phases exactly.
-- **Workflow files (nephrology, cardiology, sepsis, shock, syndromic, diabetes):** `Read` the file at the exact path from the routing table above.
+- **Workflow files (nephrology, cardiology, hepatology, sepsis, shock, syndromic, diabetes):** `Read` the file at the exact path from the routing table above.
 
 Pass the Initial Clarification answers (setting, one patient or a list, persistence) as context to the workflow.
 

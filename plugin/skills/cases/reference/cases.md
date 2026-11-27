@@ -89,3 +89,11 @@ Synthetic case. An adult hypotensive for 45 minutes: systolic BP 82 mmHg, cool s
 **Command:** `medprotocol shock --sbp 82 --minutes 45 --skin cool --jvp elevated`
 
 Think about: how skin temperature and JVP together point to a shock category, and why this bedside heuristic is not a diagnosis.
+
+## Hepatology — indeterminate FIB-4
+
+Synthetic case. A 58-year-old with type 2 diabetes: AST 42 U/L, ALT 38 U/L, platelets 170 ×10⁹/L, liver stiffness 9.4 kPa.
+
+**Command:** `medprotocol hepatology --age 58 --ast 42 --alt 38 --platelets 170 --lsm 9.4`
+
+Think about: why an indeterminate FIB-4 needs a second test, and what the LSM result changes about referral.

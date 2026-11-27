@@ -29,7 +29,7 @@ for (const wf of ["patient-privacy.md", "quality-checklist.md"]) {
 }
 
 // Module docs (Screen specs) → one shared copy, at the path on each skill's `Module docs:` line.
-// In a subfolder because cardiology.md, nephrology.md, sepsis.md and shock.md are also workflow file names.
+// In a subfolder because cardiology.md, hepatology.md, nephrology.md, sepsis.md and shock.md are also workflow file names.
 const SHARED_DOCS = ["building.md", "classification.md", "cli.md", "components.md", "composition.md"];
 for (const doc of readdirSync(join(PUBLIC, "context")).filter((f) => !SHARED_DOCS.includes(f))) {
   cpSync(join(PUBLIC, "context", doc), join(ref("start"), "context", doc));
@@ -37,7 +37,7 @@ for (const doc of readdirSync(join(PUBLIC, "context")).filter((f) => !SHARED_DOC
 
 // Workflow files → start (for domain routing)
 copyTo(join(PUBLIC, "workflows/initial-clarification.md"), ["start"]);
-for (const wf of ["nephrology", "cardiology", "sepsis", "shock", "syndromic"]) {
+for (const wf of ["nephrology", "cardiology", "hepatology", "sepsis", "shock", "syndromic"]) {
   copyTo(join(PUBLIC, `workflows/${wf}.md`), ["start"]);
 }
 copyTo(join(PUBLIC, "workflows/troubleshoot.md"), ["troubleshoot"]);
