@@ -1,8 +1,8 @@
 ---
 name: water-balance
-description: "[Internal] Build a fluid balance tracker — intake, output, insensible losses, net balance calculation"
+description: "Build a fluid balance tracker — intake, output, insensible losses, net balance calculation"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md

@@ -1,8 +1,8 @@
 ---
 name: dashboard
-description: "[Internal] Build a combined clinical dashboard — pick building blocks and compose them into one view"
+description: "Build a combined clinical dashboard — pick building blocks and compose them into one view"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md

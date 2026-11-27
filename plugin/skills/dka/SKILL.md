@@ -1,8 +1,8 @@
 ---
 name: dka
-description: "[Internal] Build a DKA monitoring module — hourly tracking of glucose, ketones, potassium, insulin, GCS, urine output with resolution criteria"
+description: "Build a DKA monitoring module — hourly tracking of glucose, ketones, potassium, insulin, GCS, urine output with resolution criteria"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md

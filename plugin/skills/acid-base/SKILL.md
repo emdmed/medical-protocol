@@ -1,8 +1,8 @@
 ---
 name: acid-base
-description: "[Internal] Build a blood gas analyzer — pH, pCO2, HCO3, anion gap, acid-base interpretation"
+description: "Build a blood gas analyzer — pH, pCO2, HCO3, anion gap, acid-base interpretation"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md

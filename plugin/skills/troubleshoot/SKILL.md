@@ -1,8 +1,8 @@
 ---
 name: troubleshoot
-description: "[Internal] Diagnose and fix issues when the user reports something isn't working"
+description: "Diagnose and fix issues when the user reports something isn't working"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md

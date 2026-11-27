@@ -1,8 +1,8 @@
 ---
 name: modify
-description: "[Internal] Modify an existing clinical interface — add fields, change layout, adjust alerts, add new sections"
+description: "Modify an existing clinical interface — add fields, change layout, adjust alerts, add new sections"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md

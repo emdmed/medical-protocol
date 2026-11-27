@@ -1,8 +1,8 @@
 ---
 name: pafi
-description: "[Internal] Build a PaFi calculator — PaO2/FiO2 ratio with Berlin oxygenation range and FiO2 presets"
+description: "Build a PaFi calculator — PaO2/FiO2 ratio with Berlin oxygenation range and FiO2 presets"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md

@@ -1,6 +1,6 @@
 ---
 name: calc
-description: "[Internal] Run any quick clinical calculation from the terminal — BMI, blood gas, vitals, sepsis, CKD, shock and every other medprotocol calculator"
+description: "Run any quick clinical calculation from the terminal — BMI, blood gas, vitals, sepsis, CKD, shock and every other medprotocol calculator"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit
 user-invocable: true
 ---

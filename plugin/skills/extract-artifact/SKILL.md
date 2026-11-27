@@ -1,8 +1,8 @@
 ---
 name: extract-artifact
-description: "[Internal] Turn a checked note extraction into a page: the note beside the extracted values, quotes highlighted, in the Medical Protocol look. A local HTML file that stays on the user's computer; never published or hosted"
+description: "Turn a checked note extraction into a page: the note beside the extracted values, quotes highlighted, in the Medical Protocol look. A local HTML file that stays on the user's computer; never published or hosted"
 allowed-tools: Read, Glob, Bash
-user-invocable: true
+user-invocable: false
 hooks:
   UserPromptSubmit:
     - hooks:

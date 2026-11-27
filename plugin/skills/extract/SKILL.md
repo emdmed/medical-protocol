@@ -1,8 +1,8 @@
 ---
 name: extract
-description: "[Internal] Extract values from a clinical note, each with the exact words it came from, and build a screen showing the extraction beside the note — extraction only, no clinical analysis"
+description: "Extract values from a clinical note, each with the exact words it came from, and build a screen showing the extraction beside the note — extraction only, no clinical analysis"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
-user-invocable: true
+user-invocable: false
 hooks:
   UserPromptSubmit:
     - hooks:

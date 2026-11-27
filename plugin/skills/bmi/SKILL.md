@@ -1,8 +1,8 @@
 ---
 name: bmi
-description: "[Internal] Build a BMI calculator — weight, height, category classification with metric/imperial toggle"
+description: "Build a BMI calculator — weight, height, category classification with metric/imperial toggle"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/core.md

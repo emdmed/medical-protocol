@@ -1,8 +1,8 @@
 ---
 name: qa
-description: "[Internal] Check a built screen in the browser — write or update its patient-case recipe, run it with the qa-runner agent, fix what fails, report in clinical terms"
+description: "Check a built screen in the browser — write or update its patient-case recipe, run it with the qa-runner agent, fix what fails, report in clinical terms"
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
-user-invocable: true
+user-invocable: false
 ---
 
 Read and follow: reference/agent-qa.md
