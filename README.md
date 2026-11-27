@@ -88,8 +88,9 @@ Already have an app? Run `/medical-protocol:overlay`, then hover over any part o
 | `start` | Describe what you need. Everything starts here. |
 | `extract` | Pull the values out of a clinical note, each with the words it came from |
 | `extract-page` | Open the extraction page in your browser: paste a note, review the values, accept or reject corrections |
-| `preferences` | Set your specialty, patient population, guidelines and units |
-| `protocol-audit` | Audit the project for safety, completeness, privacy and accessibility |
+| `cases` | Practise with synthetic worked cases: guess, enter them in your screen, see the answer explained |
+| `preferences` | Set what you are learning: level, specialty, case population, guidelines and units |
+| `protocol-audit` | Audit the prototype for correct results, completeness, synthetic-data use and accessibility |
 | `calc-audit` | Test the clinical calculations in your screens against the library |
 | `overlay` | Turn on the dev overlay, or process what you selected in it: hover over any part of your app to audit it, replace it with a medical-protocol screen, or add a new one |
 
@@ -163,14 +164,14 @@ plugin/                    # The Claude Code plugin
 ├── agents/                # qa-runner (browser QA), extraction-verifier
 ├── scripts/medprotocol.cjs # Built CLI
 ├── hooks/                 # privacy-guard, note-consent, extraction-guard, track-workflow, qa-reminder
-└── lib/                   # Clinical logic (copied into doctor projects)
+└── lib/                   # Clinical logic (copied into user projects)
 public/medical-protocol/   # Source of the shared docs: build contract, routing, per-module specs, workflows
 packages/medprotocol/      # CLI source
 scripts/                   # Version bump; sync of the shared docs into plugin/skills (part of `npm run build`)
 tests/                     # Vitest, clinical logic only
 ```
 
-This repo has no UI code. Screens are generated in each doctor's project. See `CLAUDE.md` for details.
+This repo has no UI code. Screens are generated in each user's project. See `CLAUDE.md` for details.
 
 ## Contributing
 

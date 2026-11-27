@@ -1,8 +1,8 @@
 # Troubleshoot Workflow
 
-Triggered when the doctor reports a problem. Diagnose automatically, fix automatically, explain in plain language.
+Triggered when the user reports a problem. Diagnose automatically, fix automatically, explain in plain language.
 
-**Rule: Never show terminal output or technical details to the doctor.**
+**Rule: Never show terminal output or technical details to the user.**
 
 ---
 
@@ -51,13 +51,13 @@ Fix automatically. Use clinical language if you need to explain anything.
 
 ---
 
-## Phase 3: Doctor Communication
+## Phase 3: User Communication
 
 **If fixed:** "I found and fixed the issue. Everything should be working now at http://localhost:3000"
 
 **If not fixable**, explain in plain language:
 
-| Category | Tell the doctor |
+| Category | Tell the user |
 |---|---|
 | `setup-node` | "Your computer needs Node.js — download from https://nodejs.org (LTS version)" |
 | `setup-npm` | "Try restarting your computer. If it persists, reinstall Node.js" |

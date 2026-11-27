@@ -1,6 +1,6 @@
 # Overlay Add — Core Procedure
 
-Build a **new** medical-protocol component from the doctor's free-text brief and place it into the
+Build a **new** medical-protocol component from the user's free-text brief and place it into the
 region they selected in the dev overlay. The selection is a **placement anchor**, not the thing being
 replaced. Classify the brief, locate the anchor in source, stage a diff, apply on approval. Lease →
 apply, mirroring Impeccable's live-edit trust model.
@@ -40,12 +40,12 @@ The **`prompt` is the spec**; the DOM descriptors say **where** the new componen
 
 ## 2. Locate the anchor in source
 
-The work order has no file path (foreign app). Find the **exact JSX node** the doctor selected:
+The work order has no file path (foreign app). Find the **exact JSX node** the user selected:
 - Grep the project for distinctive `text` substrings, unusual `classes`, or attribute/string
   fragments from `html`. The captured `selector`/`html` describe one specific element — find *that*
   element's JSX, not just the file or some related list/registry it belongs to.
 - The located node is the **literal insertion point**. That is where the component goes.
-- `source` set → open it directly. Can't locate confidently → report the searches and ask the doctor;
+- `source` set → open it directly. Can't locate confidently → report the searches and ask the user;
   never guess a file.
 
 ## 3. Lease — build + stage, don't write
@@ -53,13 +53,13 @@ The work order has no file path (foreign app). Find the **exact JSX node** the d
 1. Build the screen(s) per building.md: copy the logic to `lib/medprotocol/`, generate
    `components/medprotocol/<module>/` with UI SDK. Reuse existing screens; several modules compose per
    `composition.md`. Never re-implement clinical math inline.
-2. **Place it AT the selected anchor — literally.** This is the contract: the doctor pointed at a
+2. **Place it AT the selected anchor — literally.** This is the contract: the user pointed at a
    specific element and expects the component to appear *there*. Insert the new component as the **last
    child inside the located node**, or immediately **after** it if inside is impossible (self-closing
    element, controlled list item). The rendered result must show up inside/next to the selected region
    on the page, with no extra click.
    - **Do NOT re-architect the page to place it.** Adding it to a `SECTIONS`/tabs/router/nav array, a
-     menu, or any switch that hides it behind another click is **wrong** unless the doctor's brief
+     menu, or any switch that hides it behind another click is **wrong** unless the user's brief
      explicitly asked for a tab/route. Idiomatic-but-hidden placement defeats the point of selecting an
      element. When in doubt, place it literally and inline.
    - If the anchor sits inside a conditionally-rendered region (e.g. a tab body that only shows when
@@ -77,7 +77,7 @@ Land only when approval is present:
 | Channel | Signal |
 |---|---|
 | Overlay "Apply" | `"approved": true` on the work order |
-| Claude Code review | Doctor approves the diff in this session |
+| Claude Code review | User approves the diff in this session |
 
 On approval: apply the staged changes to source, remove the shadow files, confirm what landed.
 No approval: leave the diff staged and stop.
@@ -85,7 +85,7 @@ No approval: leave the diff staged and stop.
 ## 5. Close
 
 Edit the order file: set `status: done` **and** write a `result` summarizing the outcome so the
-doctor sees it in the overlay panel:
+user sees it in the overlay panel:
 
 ```jsonc
 "status": "done",
@@ -96,7 +96,7 @@ The placement line must name the **selected element** and how the component sits
 (inside / after). If you had to deviate from literal placement, state that and why.
 
 Recommend `/medical-protocol:overlay-audit` on the new region to verify. Don't `--clear` until the
-doctor has read the result (clearing removes it).
+user has read the result (clearing removes it).
 
 ## Scope discipline
 - One brief per order; insert only at the located anchor.

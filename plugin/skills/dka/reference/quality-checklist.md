@@ -13,7 +13,7 @@ UI SDK components are unstyled, so the project's theme tokens carry the look.
   4. Update the font in `app/layout.tsx` to match the palette's `font-sans` value
 - Ensure all colors use `bg-background`, `text-foreground`, `border`, `muted`, etc. — never hardcoded hex/rgb
 - Ensure consistent use of semantic color tokens (`primary`, `secondary`, `destructive`, `muted`)
-- If the doctor mentions their clinic name or colors, pick the closest tweakcn preset or customize the CSS variables to match
+- If the user mentions their clinic name or colors, pick the closest tweakcn preset or customize the CSS variables to match
 
 ## 2. Responsiveness
 
@@ -55,7 +55,7 @@ Apply these additional checks based on what was built:
 
 ## 5. Layout Disclaimer
 
-- If `{project}/components/layout-disclaimer.tsx` does not exist, create it as a collapsible disclaimer banner (a native `<details>`/`<summary>` is enough) with text: "For educational and clinical decision-support purposes only. Not a substitute for professional medical judgment."
+- If `{project}/components/layout-disclaimer.tsx` does not exist, create it as a plain banner that is always visible (not collapsible) with the text, word for word: "Learning prototype — not for patient care." (the line `building.md` requires on every clinical screen)
 - Write the component to `{project}/components/layout-disclaimer.tsx`
 - Add `<LayoutDisclaimer />` to `app/layout.tsx` inside `<body>`, above `{children}`
 - Import: `import { LayoutDisclaimer } from "@/components/layout-disclaimer"`
@@ -76,6 +76,6 @@ Run the full browser QA workflow defined in `agent-qa.md`. It covers:
 
 **Rules:**
 - Auto-fix any issues you find (e.g., clipped popups, responsive classes)
-- If an issue can't be auto-fixed, translate it to clinical language for the doctor (e.g., "The edit popup gets cut off" not "overflow-hidden clips the absolutely-positioned element")
+- If an issue can't be auto-fixed, translate it to clinical language for the user (e.g., "The edit popup gets cut off" not "overflow-hidden clips the absolutely-positioned element")
 - After 2 failed fix attempts on the same issue, or 3 total browser crashes: skip browser QA and proceed
 - Use clinical language when reporting results — avoid technical terms like agent-browser, snapshots, or accessibility trees

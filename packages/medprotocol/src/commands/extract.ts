@@ -451,8 +451,8 @@ export const stateOf = (dir: string, running: boolean) => {
   const undecided = findings.some((f) => (f.correction || f.index !== undefined) && !f.decision);
   const state = verify ? (undecided ? "review" : "done") : !running ? "failed" : firstPass ? "verifying" : "extracting";
   const items = verify ? checkExtraction(note, readJson(join(dir, "corrected.json")) ?? []) : [];
-  // nothing is calculated from a correction the doctor has not answered yet
-  // the doctor's answer on each syndromic rule, by its title
+  // nothing is calculated from a correction the user has not answered yet
+  // the user's answer on each syndromic rule, by its title
   const reviews: Record<string, "confirmed" | "discarded"> = readJson(join(dir, "reviews.json")) ?? {};
   return { id: basename(dir), state, error: null as string | null, note, ...pageData(basename(dir), note, items), ...(undecided ? { calcs: [], held: true } : {}), findings, reviews };
 };
@@ -617,7 +617,7 @@ export const serve = (port: number, askModel: AskModel = askClaude): Server => {
           return send(400, { error: "a note and consent: true are required" });
         }
         const { dir } = saveNote(Buffer.from(body.note));
-        // same file the note-consent hook writes: the doctor agreed to this note being read
+        // same file the note-consent hook writes: the user agreed to this note being read
         writeFileSync(join(dir, ".consent"), new Date().toISOString() + "\n");
         process.stdout.write(`http://localhost:${at}/#${basename(dir)}\n`);
         if (!existsSync(join(dir, "verify.json"))) startJob(dir);
@@ -666,7 +666,7 @@ export const serve = (port: number, askModel: AskModel = askClaude): Server => {
         return send(200, { ...stateOf(dir, running.has(dir)), error: errors.get(dir) ?? null });
       }
 
-      // the doctor confirms or discards a syndromic rule's result; it changes nothing else
+      // the user confirms or discards a syndromic rule's result; it changes nothing else
       if (req.method === "POST" && reviews && dir && existsSync(join(dir, "note.md"))) {
         let body: any;
         try {

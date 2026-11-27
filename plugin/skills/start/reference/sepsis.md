@@ -3,14 +3,14 @@
 ## Prerequisites
 
 Check for `.clinical-context.md` in the project root.
-- **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
+- **If found:** Read it. Adapt level, specialty, case population, guidelines, and units throughout this workflow.
 - **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /medical-protocol:preferences to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
 ---
 
 ## Phase 1: Clinical Requirements
 
-Ask the doctor about their sepsis monitoring needs:
+Ask the user about their sepsis monitoring needs:
 
 - "Are you using this for qSOFA screening, full SOFA scoring, or both?" (Default: both)
 - "Do you need the hour-1 resuscitation bundle tracker?" (Default: yes)
@@ -63,16 +63,16 @@ Update `app/page.tsx` with a link to `/sepsis`.
 ## Phase 4: Quality & Preview
 
 Follow **After Any Workflow Completes** from the main protocol.
-Tell the doctor: "Your sepsis monitoring dashboard is ready. Enter the patient's weight and baseline SOFA, then add readings with vitals, labs, and vasopressor doses. It calculates qSOFA screening, full SOFA scoring with organ breakdown, tracks Sepsis-3 criteria, monitors the hour-1 resuscitation bundle, and calculates lactate clearance. View it at http://localhost:3000/sepsis"
+Tell the user: "Your sepsis monitoring dashboard is ready. Enter the patient's weight and baseline SOFA, then add readings with vitals, labs, and vasopressor doses. It calculates qSOFA screening, full SOFA scoring with organ breakdown, tracks Sepsis-3 criteria, monitors the hour-1 resuscitation bundle, and calculates lactate clearance. View it at http://localhost:3000/sepsis"
 Ask: "Would you like to adjust anything about the monitoring parameters?"
 
 ---
 
 ## Related Tools
 
-Based on clinical context, the doctor may also benefit from:
+Based on clinical context, the user may also benefit from:
 - **/medical-protocol:acid-base** — Lactate and arterial blood gas analysis for sepsis-related metabolic derangements
 - **/medical-protocol:water-balance** — Fluid resuscitation tracking and intake/output monitoring
 - **/medical-protocol:vitals** — Hemodynamic monitoring with blood pressure, heart rate, and SpO2 trends
 
-Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.
+Only mention these if the user asks "what else can you do?" or if the clinical scenario suggests them.

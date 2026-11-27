@@ -3,7 +3,7 @@
 ## Prerequisites
 
 Check for `.clinical-context.md` in the project root.
-- **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
+- **If found:** Read it. Adapt level, specialty, case population, guidelines, and units throughout this workflow.
 - **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /medical-protocol:preferences to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
 ---
@@ -40,16 +40,16 @@ Update `app/page.tsx` with a link to `/cardiology`.
 ## Phase 4: Quality & Preview
 
 Follow **After Any Workflow Completes** from the main protocol.
-Tell the doctor: "Your cardiology risk calculators are ready. Use the tabs to switch between ASCVD (10-year cardiovascular risk), HEART Score (chest pain triage), and CHA₂DS₂-VASc (AF stroke risk). View it at http://localhost:3000/cardiology"
+Tell the user: "Your cardiology risk calculators are ready. Use the tabs to switch between ASCVD (10-year cardiovascular risk), HEART Score (chest pain triage), and CHA₂DS₂-VASc (AF stroke risk). View it at http://localhost:3000/cardiology"
 Ask: "Would you like to adjust anything?"
 
 ---
 
 ## Related Tools
 
-Based on clinical context, the doctor may also benefit from:
+Based on clinical context, the user may also benefit from:
 - **/medical-protocol:vitals** — Blood pressure and heart rate monitoring for ongoing cardiac assessment
 - **/medical-protocol:nephrology** — Renal function evaluation for cardio-renal syndrome risk
 - **/medical-protocol:bmi** — BMI as a modifiable cardiovascular risk factor
 
-Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.
+Only mention these if the user asks "what else can you do?" or if the clinical scenario suggests them.

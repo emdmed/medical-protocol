@@ -34,9 +34,9 @@ A drained `audit` work order (`medprotocol overlay --drain --action audit --json
 
 | Dimension | What to check |
 |-----------|---------------|
-| **Clinical Safety** | Critical-value alerts, validation rejects dangerous input, units shown |
+| **Clinical Correctness** | Critical-value alerts, validation rejects out-of-range input, units shown |
 | **Data Completeness** | Required fields present, no orphan calculations |
-| **Privacy** | No external API calls / analytics in the region |
+| **Synthetic Data & Local Only** | No external API calls / analytics in the region; demo data synthetic and labelled; learning-only line shown |
 | **Accessibility** | Labels on inputs, color not sole indicator, keyboard navigable, aria |
 | **Protocol Adherence** | Matches the inferred module's guidance + `lib/` validations |
 
@@ -49,7 +49,7 @@ Severities: **P0** patient-safety · **P1** clinical-accuracy · **P2** usabilit
 Selected at: {url}  ·  {selector}
 Source: {located file:line, or "markup-only (source not located)"}
 
-### Clinical Safety: {n}/4
+### Clinical Correctness: {n}/4
 {findings with file:line/markup + severity}
 …(all five dimensions)…
 
@@ -67,7 +67,7 @@ Edit the order file: set `status: done` **and** write the full report into `resu
 "status": "done",
 "result": {
   "score": "14/20",
-  "report": "## Overlay Audit — bmi (14/20)\nSelected at: …\n\n### Clinical Safety: 3/4\n…",
+  "report": "## Overlay Audit — bmi (14/20)\nSelected at: …\n\n### Clinical Correctness: 3/4\n…",
   "suggestions": [ { "skill": "/medical-protocol:overlay-implement", "label": "Replace with the bmi component" } ]
 }
 ```
@@ -76,7 +76,7 @@ Edit the order file: set `status: done` **and** write the full report into `resu
 auto-linked into a clickable trigger. Add `suggestions` for a labeled button or to carry a `prompt`
 (brief). Clicking a trigger re-runs that skill on the **same selection** (reference/queue.md).
 The overlay then shows a clickable "✓ audited — view" pill that opens `report` in its panel. Don't
-suggest `--clear` until the doctor has read it (clearing removes the result). Never delete files
+suggest `--clear` until the user has read it (clearing removes the result). Never delete files
 yourself.
 
 ## NEVER

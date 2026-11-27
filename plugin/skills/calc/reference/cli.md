@@ -25,16 +25,16 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 
 ## When to Suggest Calculator vs Full Interface
 
-- **Quick calculator**: the doctor wants a one-off calculation, batch processing, or just the number -- e.g., "calculate BMI for a 70kg patient who is 1.75m tall", "what's the anion gap for these values", "just give me the fluid balance"
-- **Full interface**: the doctor wants a persistent tool, visual dashboard, or something they'll use repeatedly with patients
+- **Quick calculator**: the user wants a one-off calculation, batch processing, or just the number -- e.g., "calculate BMI for a 70kg patient who is 1.75m tall", "what's the anion gap for these values", "just give me the fluid balance"
+- **Full interface**: the user wants a persistent tool, visual dashboard, or something they'll use repeatedly with patients
 
-When the doctor's request is simple enough for the quick calculator, offer it as an alternative: "I can give you that result right now, or build a full interface you can reuse -- which would you prefer?"
+When the user's request is simple enough for the quick calculator, offer it as an alternative: "I can give you that result right now, or build a full interface you can reuse -- which would you prefer?"
 
 ## Communication Rules
 
 - Call it "quick calculator" or "command-line tool" -- never "Node.js CLI" or "npm script"
 - Always use `--json` internally, then translate the output to clinical language
-- Never show raw terminal output unless the doctor explicitly asks
+- Never show raw terminal output unless the user explicitly asks
 
 ## Dev overlay bridge (not a calculator)
 

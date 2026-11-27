@@ -17,9 +17,9 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 Before anything else, check if the current project already has clinical screens (e.g., `components/medprotocol/vital-signs/`, `components/medprotocol/acid-base/`, etc.):
 
-- If the doctor asks for something that already exists, route to the **modify** workflow — do not rebuild it.
-- If the doctor wants an existing screen checked or a patient case added ("check it", "is it working?", "also check a 45 kg patient"), route straight to `../qa/SKILL.md` — skip Steps 2–3.
-- If the doctor asks for something new that doesn't exist yet, proceed below.
+- If the user asks for something that already exists, route to the **modify** workflow — do not rebuild it.
+- If the user wants an existing screen checked or a patient case added ("check it", "is it working?", "also check a 45 kg patient"), route straight to `../qa/SKILL.md` — skip Steps 2–3.
+- If the user asks for something new that doesn't exist yet, proceed below.
 - Never re-scaffold the project if it already has a working setup.
 
 ### New Project Suggestion
@@ -28,15 +28,15 @@ If this is a brand-new project (no existing components found), suggest: "Would y
 
 ## Step 2: Initial Clarification (BLOCKING — must complete before Step 3)
 
-`Read` from `reference/initial-clarification.md` and follow it. **Ask the questions and wait for the doctor's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all three questions.
+`Read` from `reference/initial-clarification.md` and follow it. **Ask the questions and wait for the user's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all three questions.
 
-Only skip if the doctor's message explicitly addresses **all three** questions (patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers. Words like "track", "monitor", or plural "patients" do NOT satisfy Q2/Q3 — the doctor must explicitly say "multiple patients" or "save data between sessions" (or equivalent).
+Only skip if the user's message explicitly addresses **all three** questions (patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers. Words like "track", "monitor", or plural "patients" do NOT satisfy Q2/Q3 — the user must explicitly say "multiple patients" or "save data between sessions" (or equivalent).
 
 ## Step 3: Classification (only after Step 2 is complete)
 
 `Read` from `reference/classification.md` to get the signal words and routing rules.
 
-Use the classification table to match the doctor's request to a domain, then route to the corresponding skill or workflow:
+Use the classification table to match the user's request to a domain, then route to the corresponding skill or workflow:
 
 ### Domains with local skills
 
@@ -53,6 +53,7 @@ Use the classification table to match the doctor's request to a domain, then rou
 | **modify** | `../modify/SKILL.md` |
 | **troubleshoot** | `../troubleshoot/SKILL.md` |
 | **calc** | `../calc/SKILL.md` |
+| **cases** | `../cases/SKILL.md` |
 | **preferences** | `../preferences/SKILL.md` |
 | **protocol-audit** | `../protocol-audit/SKILL.md` |
 | **calc-audit** | `../calc-audit/SKILL.md` |
@@ -81,4 +82,4 @@ Pass the Initial Clarification answers (patient setting, single vs multiple, per
 
 ## Interface Language
 
-Use the same language the doctor uses in the conversation. If the doctor writes in Spanish, build the UI with Spanish labels. If they write in English, use English. If unclear, ask once: "Would you prefer the interface in Spanish or English?"
+Use the same language the user uses in the conversation. If the user writes in Spanish, build the UI with Spanish labels. If they write in English, use English. If unclear, ask once: "Would you prefer the interface in Spanish or English?"

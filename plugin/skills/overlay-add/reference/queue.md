@@ -63,7 +63,7 @@ fragments, and classify the requested concept from `prompt` via `classification.
 - **Close:** after finishing an order, edit the file in `.medprotocol/queue/` whose `ts` matches:
   set `"status": "done"` **and** write the full findings into `"result"` (`{ report }`). The
   overlay polls `/status`, sees `hasResult`, and turns the spinner into a clickable "✓ — view" pill
-  that opens the `report` in a panel. Do not `--clear` until the doctor has read it (clearing removes
+  that opens the `report` in a panel. Do not `--clear` until the user has read it (clearing removes
   the result).
 
 ## Useful CLI

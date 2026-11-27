@@ -30,7 +30,7 @@ Before proceeding, ask: "Would you also like to track glucemia and ketones for D
 
 ## Phase 1: Clinical Requirements
 
-Ask the doctor about their blood gas analysis needs:
+Ask the user about their blood gas analysis needs:
 
 - "Will you be entering arterial blood gas values manually, or do you need to import them?" (Default: manual entry)
 - "Do you need anion gap and delta ratio calculations?" (Default: yes, if Na and Cl are available)

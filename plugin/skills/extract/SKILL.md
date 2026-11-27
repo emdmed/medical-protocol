@@ -31,14 +31,14 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 **Default: the page.** Read and follow `${CLAUDE_SKILL_DIR}/../extract-page/SKILL.md`. The server does `extraction.md` § Who extracts steps 1–4 itself.
 
-A screen in the doctor's app is still a chat request: only when the doctor asks for one, do step 5 and build it (§ Build).
+A screen in the user's app is still a chat request: only when the user asks for one, do step 5 and build it (§ Build).
 
 **Fallback: the chat.** Only when `claude` is not on PATH (`command -v claude` prints nothing, or the page says the 'claude' command was not found). Then:
 
-- **Before reading any note**, say once: "To extract values I have to read the note, so it is sent to the AI model, which runs on external servers. Only give me a de-identified or made-up note. Save it as a file and type its path; don't paste it, and don't attach it with @ or as a photo or PDF, because those are sent before I can ask." (`patient-privacy.md`) The `note-consent` hook is a net, not a guarantee: a pasted note is held back unless the message says "not real data", and the first read of `<hash>/note.md` asks the doctor (do it with `cat <hash>/note.md` in Bash: only that dialog shows the doctor the question; Read and Grep are refused until it is answered), but it cannot see an @-attached file or an image, and the doctor's own file is unguarded, so never read it before `--save`. If the doctor declines, stop, and don't read the original file either.
+- **Before reading any note**, say once: "To extract values I have to read the note, so it is sent to the AI model, which runs on external servers. Only give me a de-identified or made-up note. Save it as a file and type its path; don't paste it, and don't attach it with @ or as a photo or PDF, because those are sent before I can ask." (`patient-privacy.md`) The `note-consent` hook is a net, not a guarantee: a pasted note is held back unless the message says "not real data", and the first read of `<hash>/note.md` asks the user (do it with `cat <hash>/note.md` in Bash: only that dialog shows the user the question; Read and Grep are refused until it is answered), but it cannot see an @-attached file or an image, and the user's own file is unguarded, so never read it before `--save`. If the user declines, stop, and don't read the original file either.
 - "What should I pull out — vital signs, labs, medications, or something specific?" (Default: every value in the `extraction.md` key table that the note states)
 
-Then extract and check as in `extraction.md` § Who extracts, steps 1–5 in order: hash and save the raw note (`medprotocol extract --save`) → `extractions/<hash>/note.md`, first pass → `<hash>/extraction.json`, verify with the `extraction-verifier` agent → `<hash>/verify.json` + `<hash>/corrected.json`, the doctor accepts or rejects each correction, then the screen data.
+Then extract and check as in `extraction.md` § Who extracts, steps 1–5 in order: hash and save the raw note (`medprotocol extract --save`) → `extractions/<hash>/note.md`, first pass → `<hash>/extraction.json`, verify with the `extraction-verifier` agent → `<hash>/verify.json` + `<hash>/corrected.json`, the user accepts or rejects each correction, then the screen data.
 
 Then offer once: "Want a page of this extraction you can open in the browser? It stays on this computer." On yes, run `/medical-protocol:extract-artifact` for `<hash>`.
 
@@ -51,10 +51,10 @@ Do NOT ask about layout, colours, or matching rules.
 - Name the folder yourself — the hash comes from `medprotocol extract --save`
 - Extract before `extractions/<hash>/note.md` is saved, or check against anything but that file
 - Overwrite, edit, move or delete `<hash>/note.md` or `<hash>/extraction.json` (the first pass) — corrections go to `<hash>/corrected.json`
-- Apply a correction the doctor rejected
+- Apply a correction the user rejected
 - Verify the extraction yourself in this chat — always spawn the `extraction-verifier` subagent (chat route; in the page the server runs it)
 - Start `extract --serve` on anything but this computer, or expose its address (a tunnel, a proxy, `0.0.0.0`): the page holds the full note
-- Drop an item that failed the check without telling the doctor
+- Drop an item that failed the check without telling the user
 - Show an extracted value without its quote
 - Pick one of several readings, or fill a missing unit — extract them all and let `toInputs` hold them for review
 - Use a key outside `FIELDS` — leave the item unkeyed instead

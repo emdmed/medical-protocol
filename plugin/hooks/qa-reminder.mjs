@@ -33,14 +33,14 @@ if (!workflowActive) process.exit(0);
 // Workflow ran but QA wasn't started — ask Claude to continue
 if (!qaStarted) {
   block(
-    "QUALITY CHECK REQUIRED: A workflow was executed but the Quality Checklist was not run. Before finishing, you must complete: 1) Theming with the project's styles, 2) Responsiveness check, 3) Error boundary wrapper, 4) Type check (npx tsc --noEmit) and compare results with the medprotocol CLI. Then start the dev server with 'npm run dev' and run Browser QA if agent-browser is available. Use clinical language when communicating with the doctor — these are background quality steps.",
+    "QUALITY CHECK REQUIRED: A workflow was executed but the Quality Checklist was not run. Before finishing, you must complete: 1) Theming with the project's styles, 2) Responsiveness check, 3) Error boundary wrapper, 4) Type check (npx tsc --noEmit) and compare results with the medprotocol CLI. Then start the dev server with 'npm run dev' and run Browser QA if agent-browser is available. Use clinical language when communicating with the user — these are background quality steps.",
   );
 }
 
 // QA started but dev server not up — remind to start it
 if (!devServerUp) {
   block(
-    "DEV SERVER NOT STARTED: QA checks were run but the dev server hasn't been started. Run 'npm run dev' in the background so the doctor can preview their interface at localhost:3000. Then run Browser QA if agent-browser is available.",
+    "DEV SERVER NOT STARTED: QA checks were run but the dev server hasn't been started. Run 'npm run dev' in the background so the user can preview their interface at localhost:3000. Then run Browser QA if agent-browser is available.",
   );
 }
 

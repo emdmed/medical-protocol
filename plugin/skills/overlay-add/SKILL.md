@@ -1,6 +1,6 @@
 ---
 name: overlay-add
-description: Build a NEW medical-protocol component from a free-text brief the doctor typed in the dev overlay, and place it into the region they selected — drains an "add" work order, reads its `prompt`, classifies the requested clinical concept, builds a screen on the right medprotocol module(s), and stages a diff that inserts it at the selected anchor. For adding capability to an app, not retrofitting existing markup.
+description: Build a NEW medical-protocol component from a free-text brief the user typed in the dev overlay, and place it into the region they selected — drains an "add" work order, reads its `prompt`, classifies the requested clinical concept, builds a screen on the right medprotocol module(s), and stages a diff that inserts it at the selected anchor. For adding capability to an app, not retrofitting existing markup.
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 user-invocable: false
 ---
@@ -14,19 +14,19 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 ## Purpose
 
-Process **add** work orders from the overlay queue (`.medprotocol/queue/`). The doctor selected a
+Process **add** work orders from the overlay queue (`.medprotocol/queue/`). The user selected a
 region of their app, chose "Add a component here…", and typed a free-text brief — e.g.
 *"a chronic kidney disease anemia tracker"*. Unlike **implement** (which retrofits the *existing*
 selected markup), **add** treats the selection as a **placement anchor** and builds a **new**
-component there from the `prompt`. Lease/apply: nothing lands until the doctor approves.
+component there from the `prompt`. Lease/apply: nothing lands until the user approves.
 
 ## Phase 1: Drain the queue
 
 1. Run `medprotocol overlay --drain --action add --json` to claim pending `add` orders (other actions stay queued for their own skill).
-2. If none, tell the doctor to select a region in their app,
+2. If none, tell the user to select a region in their app,
    choose "Add a component here…", and type what to build, then stop.
 3. **Apply fast-path:** if a drained order has `"approved": true` **and** a staged shadow already
-   exists under `.medprotocol/staged/` (the doctor clicked **Apply** in the overlay), skip Phases 2–4
+   exists under `.medprotocol/staged/` (the user clicked **Apply** in the overlay), skip Phases 2–4
    — go straight to Phase 5: land that staged diff into source, remove the shadow, mark `done`, and
    update `result` to say it was applied. Do **not** re-classify or re-build.
 
@@ -46,7 +46,7 @@ For each order:
 1. The selection's `selector`/`html`/`text`/`classes` mark **where** the new component goes. Grep the
    project for distinctive fragments to find the file + element that renders the anchor.
 2. If `source` is set (fast-path tag), open it directly. If you can't locate the anchor confidently,
-   report what you searched and ask the doctor to point at the file — do not guess.
+   report what you searched and ask the user to point at the file — do not guess.
 
 ## Phase 4: Lease — stage the new component
 
@@ -54,7 +54,7 @@ For each order:
    reusing any that exist). A brief spanning several modules composes them per `composition.md` —
    never inline clinical math.
 2. **Place it AT the selected anchor — literally.** Insert the component as the last child **inside**
-   the located node (or immediately **after** it if inside is impossible). The doctor pointed at a
+   the located node (or immediately **after** it if inside is impossible). The user pointed at a
    specific element and expects it to appear *there*, with no extra click. **Do NOT** add it to a
    `SECTIONS`/tabs/router/nav array or any switch that hides it behind another click — that re-architects
    the page instead of placing it, and is wrong unless the brief explicitly asked for a tab/route. If the
@@ -66,14 +66,14 @@ For each order:
 ## Phase 5: Apply gate + close
 
 1. Land the diff only on approval — `"approved": true` on the work order (overlay Apply) or the
-   doctor's in-session sign-off. Otherwise present the diff and stop.
+   user's in-session sign-off. Otherwise present the diff and stop.
 2. Close the order: set `status: done` **and** write a `result` (`{ report }`) summarizing what was
    built and staged — the component(s) chosen, **exactly where it was inserted relative to the selected
    anchor** (e.g. "appended inside the selected `<div class=…>`"), the diff summary, and
    "review/approve in Claude Code" if approval is still pending (reference/queue.md). If you could not
    place it literally at the anchor, say so and why.
 3. Recommend `/medical-protocol:overlay-audit` on the new region to verify; don't `--clear` until the
-   doctor has read the result.
+   user has read the result.
 
 ## NEVER
 - Write to source before approval — staging only.

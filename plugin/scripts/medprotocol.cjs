@@ -5285,7 +5285,7 @@ mark.on,.card:hover,.card.on,.e:hover,.e.on{transition-duration:.12s}
 .tn.open{box-shadow:inset 0 0 0 1.5px var(--ink);background:repeating-linear-gradient(135deg,transparent 0 2px,var(--ink) 2px 3px)}
 .syn-b{padding:0 4px 16px 20px}
 .syn-b .says{margin-top:0;font-size:14px}
-/* the doctor's answer on a rule: given, it is a word on the row (confirmed in ink, discarded struck through in
+/* the user's answer on a rule: given, it is a word on the row (confirmed in ink, discarded struck through in
    its group) and the detail offers only the other answer, to change it */
 /* the two answers on the shut row too, beside its summary (a button cannot sit inside the one that opens it);
    the one given stays filled */
@@ -5696,7 +5696,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return i;
   }
 
-  // the ledger's labels as the doctor reads them; the data keeps its own
+  // the ledger's labels as the user reads them; the data keeps its own
   var LEDGER = { Agrees: "Supports", Found: "Present", Absent: "Absent", Next: "Check next" };
   // a syndromic assessment as its rule: why it declined, what else the note says, the table on request, then
   // the caveat and the study. A ledger value is a list joined by "; ", each "finding: the note's words"
@@ -5723,7 +5723,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     f.appendChild(l);
     // a rule that is not a two-finding table has no grid to show
     if (g.cells.length) {
-      // the table is the long form: shut until the doctor asks for it, and kept that way across notes
+      // the table is the long form: shut until the user asks for it, and kept that way across notes
       var tg = el("button", "gtog"), tl = el("span", "", gridOpen ? "Hide the grid" : "Show the full grid");
       tg.appendChild(ic("grid")); tg.appendChild(tl);
       tg.type = "button"; tg.setAttribute("aria-expanded", String(gridOpen)); t.hidden = !gridOpen;
@@ -5760,13 +5760,13 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     return f;
   }
 
-  // the doctor's choice to run the syndromic evaluation without being asked; off until they tick the box
+  // the user's choice to run the syndromic evaluation without being asked; off until they tick the box
   var ran = null, gridOpen = false, tabNow = "", tabFor = null, showTab = function () {};
   function auto() { try { return localStorage.getItem("syndromic") === "on"; } catch (e) { return false; } }
 
-  // the doctor's answers on the rules of the note drawn, by title, and how one is given (set by render)
+  // the user's answers on the rules of the note drawn, by title, and how one is given (set by render)
   var opened = {}, reviews = {}, answer = function () {};
-  // a syndromic rule as one row: shut, it is the glance (its name, its result, the doctor's answer; its group says
+  // a syndromic rule as one row: shut, it is the glance (its name, its result, the user's answer; its group says
   // the rest); open, its detail and the two answers. Which rows are open is kept across a redraw
   function rule(c) {
     var g = c.grid, said = reviews[c.title], li = el("li", "card syn-r " + g.tone + (said === "discarded" ? " no" : "")), d = el("details"), sm = el("summary");
@@ -5948,7 +5948,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       sec("Calculated", cs.length, cl, "Worked out from the values found word for word in the current illness. Not in the note. For learning and prototyping, never patient care.", "calc");
     }
     // the other tab: what a bedside rule reads from the examination, drawn as the rule. It is never forced on the
-    // doctor: drawn at once only when they chose that (the box of the intake form, kept for next time), or already
+    // user: drawn at once only when they chose that (the box of the intake form, kept for next time), or already
     // ran it for this note; otherwise a button runs it. The results come with the data either way, so the button
     // asks nobody. The tab is its title, so the section has no head
     var syn = el("section", "calc syn");
@@ -5970,7 +5970,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
       };
       top.appendChild(done); top.appendChild(all); f.appendChild(top);
       // what a rule found first, then what it could not decide, then the syndromes the findings stated do not support (not ruled out: the note may leave findings out), each in the workflow's
-      // order; a rule the doctor discarded stays in its group, struck through
+      // order; a rule the user discarded stays in its group, struck through
       [["found", "Syndrome found"], ["open", "Undecided"], ["clear", "Not supported by the findings stated"]].forEach(function (t) {
         var of = as.filter(function (c) { return c.grid.tone === t[0]; });
         if (!of.length) return;
@@ -6025,7 +6025,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     });
   }
 
-  // the doctor's answers on the syndromic rules: live, the server keeps them beside the note (reviews.json); a page
+  // the user's answers on the syndromic rules: live, the server keeps them beside the note (reviews.json); a page
   // written by --artifact keeps them in this browser only
   function reviewsOf(d) {
     if (d.id) return d.reviews || {};
@@ -6151,7 +6151,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
     if (s.error && s.error.indexOf("'claude' command was not found") >= 0) box.appendChild(el("p", "lead", "This page needs the Claude Code command line tool. You can also run the extraction from the chat with /medical-protocol:extract."));
     else if (s.error) box.appendChild(el("pre", "", s.error));
     var again = el("button", "btn fill", "Try again"); again.type = "button";
-    // the doctor already confirmed this note
+    // the user already confirmed this note
     again.addEventListener("click", function () {
       again.disabled = true; again.setAttribute("aria-busy", "true");
       // drawn again even when the run fails the same way, so the button comes back
@@ -6187,7 +6187,7 @@ pre{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 12.5px/
         return r.text().then(function (body) {
           conn.hidden = true;
           if (!r.ok) { last = null; load(); return; }
-          // the redraw empties the rail and the note: keep where the doctor was reading and the pressed button
+          // the redraw empties the rail and the note: keep where the user was reading and the pressed button
           var a = rail.scrollTop, b = note.scrollTop;
           // the highlights are already on the page: don't draw them in again
           note.classList.remove("fresh");
@@ -6482,7 +6482,7 @@ var init_overlay_client = __esm({
     '.mpo-suggest-btn{display:inline-flex;align-items:center;gap:6px;background:#0891b2;color:#04181f;border:1px solid #22d3ee;border-radius:5px;padding:6px 11px;cursor:pointer;font:600 12px/1 ' + SANS + '}',
     '.mpo-suggest-btn:hover{background:#0aa5cb}',
     '.mpo-suggest-btn .mpo-ic{color:#04181f}',
-    // Compose panel: free-text "add a component here" brief the doctor types for the agent.
+    // Compose panel: free-text "add a component here" brief the user types for the agent.
     '.mpo-compose-body{padding:13px 16px 4px;display:flex;flex-direction:column;gap:9px}',
     '.mpo-compose-target{font:600 10.5px/1.4 ' + MONO + ';letter-spacing:.02em;color:#5b7d8f}',
     '.mpo-compose-target b{color:#67e8f9;font-weight:600}',
@@ -6833,7 +6833,7 @@ var init_overlay_client = __esm({
         t.pill.appendChild(c);
         t.pill.classList.add('mpo-clickable');
         t.pill.addEventListener('click', function () { openResultPanel(t); });
-        // keep the marker on screen until the doctor dismisses it
+        // keep the marker on screen until the user dismisses it
       } else {
         c.textContent = v.done;
         t.pill.appendChild(c);
@@ -7054,7 +7054,7 @@ The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
 (.medprotocol/queue/) into a dispatch plan naming the skill to run for each
 selection \u2014 /medical-protocol:overlay-audit, overlay-implement, or overlay-add
-(the doctor selects a region, types a brief, and Add builds a new component there).
+(the user selects a region, types a brief, and Add builds a new component there).
 In Claude Code, /medical-protocol:overlay is the one entry point: it sets the overlay
 up and processes whatever is queued.
 
@@ -7151,7 +7151,7 @@ Examples:
       process.stdout.write("\n");
     };
     JSON_HEADER = { "Content-Type": "application/json" };
-    AUTO_PROMPT = `A medical-protocol overlay selection was just queued in .medprotocol/queue/. Process all pending overlay work orders now, without asking for confirmation: run \`node "${process.argv[1]}" overlay --drain --json\` to claim them, then for each order run the matching skill \u2014 overlay-audit for action "audit", overlay-implement for action "implement", overlay-add for action "add" (build the component described in the order's \`prompt\` field and stage it into the selected region). For action "skill", run the skill named in the order's \`skill\` field against the captured selection (use \`html\`/\`selector\`/\`source\` to locate the region, and the order's \`prompt\` as extra brief if present); if that skill builds or edits files, STAGE the diff only (never apply without approval); if it is read-only, just gather its findings. Write the findings into the work order's \`result\` field and set \`status: done\` so the overlay can display them. For implement and add, stage the diff only \u2014 never apply without approval. EXCEPTION: if a drained order already has \`approved: true\` and a staged diff under .medprotocol/staged/ (the doctor clicked Apply in the overlay), do NOT re-stage \u2014 land that staged diff into source, remove the shadow file, then set \`status: done\` and update \`result\` to note it was applied.`;
+    AUTO_PROMPT = `A medical-protocol overlay selection was just queued in .medprotocol/queue/. Process all pending overlay work orders now, without asking for confirmation: run \`node "${process.argv[1]}" overlay --drain --json\` to claim them, then for each order run the matching skill \u2014 overlay-audit for action "audit", overlay-implement for action "implement", overlay-add for action "add" (build the component described in the order's \`prompt\` field and stage it into the selected region). For action "skill", run the skill named in the order's \`skill\` field against the captured selection (use \`html\`/\`selector\`/\`source\` to locate the region, and the order's \`prompt\` as extra brief if present); if that skill builds or edits files, STAGE the diff only (never apply without approval); if it is read-only, just gather its findings. Write the findings into the work order's \`result\` field and set \`status: done\` so the overlay can display them. For implement and add, stage the diff only \u2014 never apply without approval. EXCEPTION: if a drained order already has \`approved: true\` and a staged diff under .medprotocol/staged/ (the user clicked Apply in the overlay), do NOT re-stage \u2014 land that staged diff into source, remove the shadow file, then set \`status: done\` and update \`result\` to note it was applied.`;
     makeDispatcher = (cwd) => {
       let busy = false;
       let rerun = false;

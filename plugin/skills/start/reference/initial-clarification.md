@@ -1,8 +1,8 @@
 # Initial Clarification
 
-Ask the following questions **in a single conversational message** before proceeding to Classification. Only skip if the doctor's request explicitly answers **all three** questions below. Naming a specific module (e.g., "I need a vital signs monitor") is NOT enough to skip — the questions about patient setting, single vs multiple patients, and data persistence still need answers.
+Ask the following questions **in a single conversational message** before proceeding to Classification. Only skip if the user's request explicitly answers **all three** questions below. Naming a specific module (e.g., "I need a vital signs monitor") is NOT enough to skip — the questions about patient setting, single vs multiple patients, and data persistence still need answers.
 
-**Ask all together, conversationally — not as a numbered quiz. Provide defaults so the doctor can simply say "defaults are fine."**
+**Ask all together, conversationally — not as a numbered quiz. Provide defaults so the user can simply say "defaults are fine."**
 
 1. **Patient setting**
    - "What type of patients is this for?"
@@ -21,11 +21,11 @@ Ask the following questions **in a single conversational message** before procee
    - "Should the system remember data between sessions, or start fresh each time?"
      - **Remember data** — data is saved on your computer and available next time
      - **Start fresh** — data is only available during the current session
-   - Default: remember data (stored locally on the doctor's computer)
+   - Default: remember data (stored locally on the user's computer)
 
 **Rules:**
 - Never ask more than these three questions — keep it brief
-- **Always ask Q2 and Q3 explicitly.** Words like "track", "monitor", "manage", or plural "patients" in the doctor's request do NOT count as answering these questions. The doctor must explicitly state "multiple patients" or "save data between sessions" (or equivalent) for you to skip them.
+- **Always ask Q2 and Q3 explicitly.** Words like "track", "monitor", "manage", or plural "patients" in the user's request do NOT count as answering these questions. The user must explicitly state "multiple patients" or "save data between sessions" (or equivalent) for you to skip them.
 - The answers feed into Classification and influence how each workflow is executed
 - Components and component groups are chosen later during Classification — do not ask about them here
 - Automatically adapt the architecture based on the answers:

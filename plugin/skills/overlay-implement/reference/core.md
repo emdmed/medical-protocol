@@ -1,6 +1,6 @@
 # Overlay Implement — Core Procedure
 
-Retrofit a medical-protocol component into a region the doctor selected in the dev overlay — on an
+Retrofit a medical-protocol component into a region the user selected in the dev overlay — on an
 app that may have been built **without** medical protocol. Classify the selection, locate it in
 source, stage a diff, apply on approval. Lease → apply, mirroring Impeccable's live-edit trust model.
 
@@ -32,7 +32,7 @@ untagged foreign markup.
   `components.md`. Examples: weight/height/BMI → `bmi`; pH/pCO2/HCO3/anion gap → `acid-base`;
   creatinine/eGFR → `ckd`; SOFA/qSOFA/lactate → `sepsis`.
 - **Confirm in chat**: "This looks like a `{component}` — implement that here?" Stop if the selection
-  isn't clinical or the doctor declines.
+  isn't clinical or the user declines.
 
 ## 2. Locate in source
 
@@ -40,7 +40,7 @@ The work order has no file path (foreign app). Find it from descriptors:
 - Grep the project for distinctive `text` substrings, unusual `classes`, or attribute/string
   fragments from `html`.
 - Narrow to the element that renders the selection. Confirm by matching surrounding markup.
-- `source` set → open it directly. Can't locate confidently → report the searches and ask the doctor;
+- `source` set → open it directly. Can't locate confidently → report the searches and ask the user;
   never guess a file.
 
 ## 3. Lease — stage, don't write
@@ -60,7 +60,7 @@ Land only when approval is present:
 | Channel | Signal |
 |---|---|
 | Overlay "Apply" | `"approved": true` on the work order |
-| Claude Code review | Doctor approves the diff in this session |
+| Claude Code review | User approves the diff in this session |
 
 On approval: apply the staged change to source, remove the shadow file, confirm what landed.
 No approval: leave the diff staged and stop.
@@ -68,7 +68,7 @@ No approval: leave the diff staged and stop.
 ## 5. Close
 
 Edit the order file: set `status: done` **and** write a `result` summarizing the outcome so the
-doctor sees it in the overlay panel:
+user sees it in the overlay panel:
 
 ```jsonc
 "status": "done",
@@ -76,7 +76,7 @@ doctor sees it in the overlay panel:
 ```
 
 Recommend `/medical-protocol:overlay-audit` on the same region to verify. Don't `--clear` until the
-doctor has read the result (clearing removes it).
+user has read the result (clearing removes it).
 
 ## Scope discipline
 - One selection per order; only the located region.

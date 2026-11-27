@@ -15,10 +15,10 @@ You (the main agent) write a **recipe**: a short test script for one screen. The
 
 ## 1. Write or update the recipe
 
-One recipe per screen: `qa/recipes/<module>.md` (e.g. `qa/recipes/bmi.md`). If it already exists, update it to match the current screen instead of starting over — keep every case the doctor added.
+One recipe per screen: `qa/recipes/<module>.md` (e.g. `qa/recipes/bmi.md`). If it already exists, update it to match the current screen instead of starting over — keep every case the user added.
 
 A recipe has two parts:
-- **Cases** — for the doctor. One line per patient case, in plain clinical words: who the patient is, what is entered, what the screen should show. No UI or code terms. A doctor must be able to read and edit this list.
+- **Cases** — for the user. One line per patient case, in plain clinical words: who the patient is, what is entered, what the screen should show. No UI or code terms. A user must be able to read and edit this list.
 - **Steps** — for the runner. The clicks and checks that test each case, each tagged with its case number.
 
 Rules:
@@ -54,12 +54,12 @@ URL: http://localhost:3000/bmi
 
 Every recipe has the empty-input, tablet/desktop and keyboard cases. Add screen-specific cases, e.g. vital signs: "BP 190/120 → high blood pressure alert shown"; dashboard: "every card shows".
 
-### Cases the doctor adds
+### Cases the user adds
 
-The doctor may ask in their own words: "also check a 45 kg, 1.60 m patient". Add it as a new case:
+The user may ask in their own words: "also check a 45 kg, 1.60 m patient". Add it as a new case:
 - **No expected value given** → get it from `medprotocol <cmd> --json` and write it in.
-- **Doctor's expected value matches the CLI** → add it as stated.
-- **Doctor's expected value differs from the CLI** → do not pick one silently. Tell the doctor which guideline the calculation follows (see the module's context doc), e.g. "The calculator uses the WHO cut-offs, which classify a BMI of 17.6 as underweight. Should the screen follow a different guideline?" Never change `lib/medprotocol/` — if the doctor wants a different guideline, say it needs a change to the clinical library.
+- **User's expected value matches the CLI** → add it as stated.
+- **User's expected value differs from the CLI** → do not pick one silently. Tell the user which guideline the calculation follows (see the module's context doc), e.g. "The calculator uses the WHO cut-offs, which classify a BMI of 17.6 as underweight. Should the screen follow a different guideline?" Never change `lib/medprotocol/` — if the user wants a different guideline, say it needs a change to the clinical library.
 
 Confirm in one line: "Added: 45 kg, 1.60 m → BMI 17.6, Underweight. I'll check it every time."
 
@@ -80,7 +80,7 @@ Start the runner with the Agent tool, `subagent_type: "medical-protocol:qa-runne
 Read `qa/reports/<module>.md`.
 
 - **PASS** → done, go to step 4.
-- **SKIPPED** → browser unavailable; continue without browser QA and tell the doctor the screen could not be checked automatically.
+- **SKIPPED** → browser unavailable; continue without browser QA and tell the user the screen could not be checked automatically.
 - **FAIL** → fix the cause in the screen's code, then run the runner again.
 
 | Symptom | Fix |
@@ -97,13 +97,13 @@ If a failure is in the recipe itself (wrong label, wrong expectation), fix the r
 
 ---
 
-## 4. Tell the doctor
+## 4. Tell the user
 
 Summarize by **case**, in clinical words. Never show the report, steps, screenshots, file names or technical terms.
 
 > ✓ 5 of 5 checks passed for the BMI calculator — correct for a normal-weight and an obese patient, handles an empty weight, works on tablet and desktop, and by keyboard.
 
-When something was fixed or still fails, say what the doctor would have seen:
+When something was fixed or still fails, say what the user would have seen:
 
 > ✓ 4 of 5 checks passed.
 > ✗ On a tablet-sized screen the result covered the weight label — fixed and re-checked.
@@ -116,4 +116,4 @@ After the first run on a screen, offer once: "You can ask me to add any patient 
 
 ## Re-running later
 
-Recipes stay in the project. After any change to a screen, run its recipe again (step 2). The doctor can ask for this in plain words ("check it", "is it working?") or with `/medical-protocol:qa`.
+Recipes stay in the project. After any change to a screen, run its recipe again (step 2). The user can ask for this in plain words ("check it", "is it working?") or with `/medical-protocol:qa`.

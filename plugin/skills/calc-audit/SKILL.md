@@ -13,7 +13,7 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 ## Purpose
 
-Discover which clinical screens exist in the doctor's project, validate their calculation logic against the canonical medprotocol CLI, and optionally verify the UI renders matching results via agent-browser.
+Discover which clinical screens exist in the user's project, validate their calculation logic against the canonical medprotocol CLI, and optionally verify the UI renders matching results via agent-browser.
 
 ## Phase 1: Discover
 
@@ -25,7 +25,7 @@ Scan the project for clinical screens:
 4. For each screen, grep the source for calculation function calls imported from `lib/medprotocol` (e.g., `calculateBMI`, `analyzeABG`, `calculatePaFi`, `calculateTotalSOFA`, `calculateQSOFA`, `calculateEGFR`, `analyzeDKA`, `calculateWaterBalance`) to confirm which lib functions are in use. Any clinical value computed in the UI instead of the lib is a finding.
 5. Build a component inventory mapping each module to its calculation functions
 
-If no screens are found, tell the doctor: "I don't see any clinical tools built yet. Run /medical-protocol:start to build your first component, then come back to test."
+If no screens are found, tell the user: "I don't see any clinical tools built yet. Run /medical-protocol:start to build your first component, then come back to test."
 
 ## Phase 2: CLI Validation
 
@@ -106,7 +106,7 @@ Re-run /medical-protocol:calc-audit after fixes to verify.
 ```
 
 ## NEVER
-- Show raw CLI output or test commands to the doctor
+- Show raw CLI output or test commands to the user
 - Skip Phase 2 — CLI validation is always possible even without agent-browser
 - Report passing without actually running the checks
 - Modify component code — only report findings and recommend fixes

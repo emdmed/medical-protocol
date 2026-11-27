@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 // Medical Protocol Hook: UserPromptSubmit + PreToolUse/PostToolUse (Read/Bash/PowerShell/Grep)
-// A clinical note reaches the AI model only after the doctor says it is not real patient data.
+// A clinical note reaches the AI model only after the user says it is not real patient data.
 // Tool checks run plugin-wide from hooks.json (plugin hooks also run inside the verifier subagent; a plugin
 // agent's own frontmatter hooks are ignored) and do nothing unless a note is pending. The prompt check
 // looks at every prompt only once an extract skill registered it (--all); before that, only at /extract ones.
 // Prompts outside the extract flow are not ours to guard.
 // - a prompt that looks like a clinical note, or has an image attached (it can't be looked into), is
 //   blocked unless it says "not real data";
-// - a saved note is "pending" until the doctor clears it: extractions/<hash>/ has note.md but no .consent.
+// - a saved note is "pending" until the user clears it: extractions/<hash>/ has note.md but no .consent.
 //   Any Read or Grep that reaches a pending folder (real path, so symlinks and ".." count) is denied and
-//   sent to `cat` in Bash: only the Bash permission dialog shows the doctor this hook's question. Any Bash
+//   sent to `cat` in Bash: only the Bash permission dialog shows the user this hook's question. Any Bash
 //   command asks while a note is pending, since a shell command can read it in too many ways to parse; a
 //   yes to one naming the folder writes <hash>/.consent and later reads (the verifier, the page) go through;
 // - publishing an extraction page with the Artifact tool is always denied, wherever the page was copied
 //   to: the page holds the full note and stays a local file. The live page (`medprotocol extract --serve`)
 //   is the same template, so a saved copy of it is denied too.
-// The live page does not go through this hook: the doctor ticks a consent box there and the server writes
+// The live page does not go through this hook: the user ticks a consent box there and the server writes
 // the same <hash>/.consent, so later reads of that folder in the chat go through.
 // shortcut: pasted notes are spotted by vitals/units/ID patterns; @-attached files and images are not seen,
-// and a note file the doctor gives is unguarded until `extract --save` copies it into extractions/.
+// and a note file the user gives is unguarded until `extract --save` copies it into extractions/.
 // Widen the patterns if notes slip through.
 
 import * as fs from "fs";
@@ -79,7 +79,7 @@ if (input.tool_name === "Artifact") {
       hookSpecificOutput: {
         hookEventName: "PreToolUse",
         permissionDecision: "deny",
-        permissionDecisionReason: "NOTE CONSENT: extraction pages hold the full note and are never published. The page stays a local file; tell the doctor to open it in their browser.",
+        permissionDecisionReason: "NOTE CONSENT: extraction pages hold the full note and are never published. The page stays a local file; tell the user to open it in their browser.",
       },
     });
   process.exit(0);
@@ -110,7 +110,7 @@ const where = (hashes) => hashes.map((h) => `extractions/${h}/`).join(", ");
 
 if (/^(Bash|PowerShell)$/.test(input.tool_name)) {
   if (input.hook_event_name === "PostToolUse") {
-    // only runs if the call was allowed, i.e. the doctor said yes; clears the folders the command names
+    // only runs if the call was allowed, i.e. the user said yes; clears the folders the command names
     for (const h of pending) if ((t.command || "").includes(h)) fs.writeFileSync(path.join(root, h, ".consent"), new Date().toISOString() + "\n");
   } else
     ask(`NOTE CONSENT: a saved note (${where(pending)}) is not cleared yet and this command could send it to the AI model, which runs on external servers. Allow only if that note is not real patient data (made up or de-identified).`);
@@ -125,6 +125,6 @@ if (touched.length && input.hook_event_name === "PreToolUse")
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
       permissionDecision: "deny",
-      permissionDecisionReason: `NOTE CONSENT: the note in ${where(touched)} is not cleared yet. Read it first with Bash, one folder per command (cat extractions/<hash>/note.md): that shows the doctor the consent question, which this tool's dialog does not.`,
+      permissionDecisionReason: `NOTE CONSENT: the note in ${where(touched)} is not cleared yet. Read it first with Bash, one folder per command (cat extractions/<hash>/note.md): that shows the user the consent question, which this tool's dialog does not.`,
     },
   });

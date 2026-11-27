@@ -47,5 +47,5 @@ Ask which vital signs to monitor:
 - Display vital sign values without units (always show mmHg, bpm, °F/°C, %, breaths/min)
 - Use color alone to indicate abnormal values — always include text labels
 - Show "normal" ranges without citing the source (adult vs pediatric vs geriatric)
-- Default to metric if doctor's context specifies imperial, or vice versa
+- Default to metric if user's context specifies imperial, or vice versa
 - Suppress alerts for critical values (e.g., systolic >180 or <90)

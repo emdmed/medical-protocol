@@ -1,6 +1,6 @@
 ---
 name: protocol-audit
-description: Audit your clinical project for safety, completeness, privacy, accessibility, and protocol adherence
+description: Audit your clinical prototype for correct results, completeness, synthetic-data use, accessibility, and protocol adherence
 allowed-tools: Read, Grep, Glob, Bash
 user-invocable: true
 ---
@@ -10,7 +10,7 @@ Read when needed: reference/scoring-criteria.md
 
 ## Purpose
 
-Score a built project against clinical compliance criteria, produce a structured report with severity ratings, and recommend fixes.
+Score a built prototype against the protocol's quality criteria, produce a structured report with severity ratings, and recommend fixes. The score measures how well the prototype teaches and follows the protocol, never whether it is fit for patient care.
 
 ## Phase 1: Scan
 
@@ -21,7 +21,7 @@ Scan the project for clinical screens:
 3. Check for `app/` routes that correspond to them
 4. Build a component inventory: which screens exist, which routes exist, which `lib/medprotocol` functions each calls (from its header comment and imports)
 
-If no screens are found, tell the doctor: "I don't see any clinical tools built yet. Run /medical-protocol:start to build your first component, then come back for an audit."
+If no screens are found, tell the user: "I don't see any clinical tools built yet. Run /medical-protocol:start to build your first component, then come back for an audit."
 
 ## Phase 2: Score
 
@@ -29,9 +29,9 @@ Evaluate 5 dimensions (0–4 points each, total /20). Read the scoring criteria 
 
 | Dimension | What to Check |
 |-----------|--------------|
-| **Clinical Safety** | Critical value alerts present, validation rejects dangerous input, units always shown |
+| **Clinical Correctness** | Critical value alerts present, validation rejects out-of-range input, units always shown |
 | **Data Completeness** | All required fields present, no orphan calculations (e.g., AG without Na/Cl) |
-| **Privacy Compliance** | No external API calls, no analytics, data stays local, no realistic fake patient data |
+| **Synthetic Data & Local Only** | No external API calls, no analytics, data stays local, demo data synthetic and labelled, learning-only line shown |
 | **UI Accessibility** | Labels on all inputs, color not sole indicator, keyboard navigable, aria attributes |
 | **Protocol Adherence** | Component matches clinical guidelines (e.g., DKA resolution uses all 3 criteria) |
 
@@ -47,8 +47,8 @@ For each screen:
 
 | Level | Meaning |
 |-------|---------|
-| **P0** | Patient safety risk — must fix immediately |
-| **P1** | Clinical accuracy issue — fix before use |
+| **P0** | Wrong clinical result, or input that should be rejected is accepted — fix first |
+| **P1** | Clinical accuracy issue — fix next |
 | **P2** | Usability problem — fix when possible |
 | **P3** | Polish/enhancement — nice to have |
 
@@ -59,14 +59,14 @@ Output a structured report in clinical language:
 ```
 ## Protocol Audit — Score: {total}/20
 
-### Clinical Safety: {score}/4 {✓ if 4/4}
+### Clinical Correctness: {score}/4 {✓ if 4/4}
 {findings or "All critical value alerts working. Units displayed on all measurements."}
 
 ### Data Completeness: {score}/4 {✓ if 4/4}
 {findings with severity and recommendations}
 
-### Privacy Compliance: {score}/4 {✓ if 4/4}
-{findings or "No external data transmission. All storage is local."}
+### Synthetic Data & Local Only: {score}/4 {✓ if 4/4}
+{findings or "No external data transmission. All storage is local. Demo data is synthetic and labelled."}
 
 ### UI Accessibility: {score}/4 {✓ if 4/4}
 {findings with severity and recommendations}
@@ -75,6 +75,7 @@ Output a structured report in clinical language:
 {findings with severity and recommendations}
 
 ---
+This score is about the prototype's quality, not fitness for patient care: Medical Protocol is for learning and prototyping only.
 Re-run /medical-protocol:protocol-audit after fixes to see your score improve.
 ```
 
@@ -93,5 +94,6 @@ For each finding, map to the skill that can fix it:
 - Report a passing score without actually reading the source code
 - Skip any of the 5 dimensions — all must be evaluated
 - Use vague findings — always cite specific files and line numbers
-- Suggest fixes that require the doctor to write code
-- Mark privacy as passing without checking for external network calls
+- Suggest fixes that require the user to write code
+- Mark the data dimension as passing without checking for external network calls
+- Describe a passing score as safe or ready for patients

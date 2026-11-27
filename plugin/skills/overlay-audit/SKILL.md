@@ -1,6 +1,6 @@
 ---
 name: overlay-audit
-description: Audit a region the doctor selected in the dev overlay against medical-protocol guidance — drains an "audit" work order, classifies the selected UI, locates it in source, and reports findings. Read-only. Works on any app, tagged or not.
+description: Audit a region the user selected in the dev overlay against medical-protocol guidance — drains an "audit" work order, classifies the selected UI, locates it in source, and reports findings. Read-only. Works on any app, tagged or not.
 allowed-tools: Read, Grep, Glob, Bash
 user-invocable: false
 ---
@@ -11,7 +11,7 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 ## Purpose
 
-Process **audit** work orders from the overlay queue (`.medprotocol/queue/`). The doctor pointed at
+Process **audit** work orders from the overlay queue (`.medprotocol/queue/`). The user pointed at
 any region of an app — possibly one built **without** medical protocol — and chose "Audit this with
 medical protocol". The work order describes the selected DOM (selector, `outerHTML`, text, classes),
 not a module id. This skill classifies the region, finds it in source, and **reports findings**
@@ -20,7 +20,7 @@ against the relevant protocol guidance. Static and read-only — it never modifi
 ## Phase 1: Drain the queue
 
 1. Run `medprotocol overlay --drain --action audit --json` to claim pending `audit` orders (other actions stay queued for their own skill).
-2. If none, tell the doctor to select a region in their
+2. If none, tell the user to select a region in their
    app and choose Audit, then stop.
 
 ## Phase 2: Classify the selection
@@ -40,7 +40,7 @@ For each order:
 ## Phase 4: Audit (static, read-only)
 
 Evaluate the located region against the inferred module's guidance and the relevant `lib/`
-validations: Clinical Safety, Data Completeness, Privacy, Accessibility, Protocol Adherence — scoped
+validations: Clinical Correctness, Data Completeness, Synthetic Data & Local Only, Accessibility, Protocol Adherence — scoped
 to this one selection. Cite file:line (or the captured markup) with P0–P3 severities.
 
 ## Phase 5: Report & close
@@ -51,7 +51,7 @@ to this one selection. Cite file:line (or the captured markup) with P0–P3 seve
    the overlay panel — clicking one re-runs that skill on the same selection. Add a `result.suggestions`
    entry to give a recommendation a labeled button or a `prompt` (reference/queue.md).
 3. Close the order: set `status: done` **and** write the full report into `result` (`{ score, report }`)
-   so the doctor sees it in the overlay panel (reference/queue.md). Don't suggest `--clear` until they've
+   so the user sees it in the overlay panel (reference/queue.md). Don't suggest `--clear` until they've
    read it — clearing deletes the result.
 
 ## NEVER

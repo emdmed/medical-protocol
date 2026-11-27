@@ -30,7 +30,7 @@ When you finish an order, write the full findings into `result` so the overlay c
 ```jsonc
 "result": {
   "score": "14/20",                     // optional headline (audit)
-  "report": "## Overlay Audit — bmi …", // the full report text (markdown) the doctor reads in the panel
+  "report": "## Overlay Audit — bmi …", // the full report text (markdown) the user reads in the panel
   "suggestions": [                       // optional — recommended skills, rendered as clickable "Run" buttons
     { "skill": "/medical-protocol:overlay-implement", "label": "Replace with the bmi component" }
     // each: { skill (required), label?, prompt? }. Clicking re-runs that skill on the same selection via POST /run.
@@ -61,7 +61,7 @@ you want a labeled button or to carry a `prompt` (brief) into the triggered run.
 - **Close:** after finishing an order, edit the file in `.medprotocol/queue/` whose `ts` matches:
   set `"status": "done"` **and** write the full findings into `"result"` (`{ score?, report }`). The
   overlay polls `/status`, sees `hasResult`, and turns the spinner into a clickable "✓ — view" pill
-  that opens the `report` in a panel. Do not `--clear` until the doctor has read it (clearing removes
+  that opens the `report` in a panel. Do not `--clear` until the user has read it (clearing removes
   the result).
 
 ## Useful CLI

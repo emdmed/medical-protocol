@@ -3,14 +3,14 @@
 ## Prerequisites
 
 Check for `.clinical-context.md` in the project root.
-- **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
+- **If found:** Read it. Adapt level, specialty, case population, guidelines, and units throughout this workflow.
 - **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /medical-protocol:preferences to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
 ---
 
 ## Phase 1: Clinical Requirements
 
-Ask the doctor about their CKD evaluation needs:
+Ask the user about their CKD evaluation needs:
 
 - "Are you using this for initial CKD screening (eGFR + staging) or full monitoring with progression tracking?" (Default: full monitoring)
 - "Do you need KFRE kidney failure risk prediction with referral recommendations?" (Default: yes)
@@ -104,7 +104,7 @@ const gfrCategory = latestReading?.gfrCategory;
 ## Phase 4: Quality & Preview
 
 Follow **After Any Workflow Completes** from the main protocol.
-Tell the doctor: "Your CKD evaluation dashboard is ready. Enter the patient's creatinine, age, sex, and urine ACR. It calculates eGFR using the CKD-EPI 2021 equation, stages CKD using the KDIGO GFR and albuminuria categories, shows the risk heatmap color, predicts kidney failure risk with the 4-variable KFRE, recommends referral pathways, checks guideline criteria for RASi, SGLT2i, and finerenone, and monitors eGFR progression over time."
+Tell the user: "Your CKD evaluation dashboard is ready. Enter the patient's creatinine, age, sex, and urine ACR. It calculates eGFR using the CKD-EPI 2021 equation, stages CKD using the KDIGO GFR and albuminuria categories, shows the risk heatmap color, predicts kidney failure risk with the 4-variable KFRE, recommends referral pathways, checks guideline criteria for RASi, SGLT2i, and finerenone, and monitors eGFR progression over time."
 
 If anemia monitoring was included: "The anemia panel uses sex-specific hemoglobin thresholds, tracks iron status (ferritin/TSAT), indicates when iron supplementation is needed, and shows ESA criteria when Hb drops below 10 g/dL with adequate iron stores."
 
@@ -116,9 +116,9 @@ Ask: "Would you like to adjust anything about the evaluation parameters?"
 
 ## Related Tools
 
-Based on clinical context, the doctor may also benefit from:
+Based on clinical context, the user may also benefit from:
 - **/medical-protocol:cardiology** — Cardiovascular risk assessment for cardio-renal syndrome management
 - **/medical-protocol:acid-base** — Metabolic acidosis evaluation common in advanced CKD
 - **/medical-protocol:bmi** — Nutritional status monitoring relevant to CKD progression
 
-Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.
+Only mention these if the user asks "what else can you do?" or if the clinical scenario suggests them.

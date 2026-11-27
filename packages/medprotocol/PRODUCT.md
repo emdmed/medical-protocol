@@ -8,11 +8,11 @@ web
 
 ## Users
 
-Doctors, at a desk, checking an AI extraction of a clinical note before they use its values. Inferred from the repo and not contested by the user (2026-11-22).
+Users, at a desk, checking an AI extraction of a clinical note before they use its values. Inferred from the repo and not contested by the user (2026-11-22).
 
 ## Product Purpose
 
-The extraction page of the `medprotocol` CLI (`extract --artifact`, `extract --serve`). It shows one clinical note and the values pulled from it, each tied to the exact words it came from, so the doctor can confirm or reject every value fast.
+The extraction page of the `medprotocol` CLI (`extract --artifact`, `extract --serve`). It shows one clinical note and the values pulled from it, each tied to the exact words it came from, so the user can confirm or reject every value fast.
 
 ## Positioning
 
@@ -20,7 +20,7 @@ Every value carries its quote, and the page says how far to trust that tie: foun
 
 ## Operating Context
 
-A single local HTML file, or the same page served by a local server. It holds the full note and is never published. In live mode the doctor pastes a made-up or de-identified note, confirms that, waits one or two minutes for two passes (extract, second check), then accepts or rejects each proposed correction.
+A single local HTML file, or the same page served by a local server. It holds the full note and is never published. In live mode the user pastes a made-up or de-identified note, confirms that, waits one or two minutes for two passes (extract, second check), then accepts or rejects each proposed correction.
 
 ## Capabilities and Constraints
 
@@ -34,4 +34,4 @@ A single local HTML file, or the same page served by a local server. It holds th
 - The note is the source of truth; a value never appears without its words.
 - "Found in the note" means the words are there, not that the value is right.
 - What needs review comes first; what is verified stays quiet.
-- Nothing leaves the computer without the doctor's explicit confirmation.
+- Nothing leaves the computer without the user's explicit confirmation.

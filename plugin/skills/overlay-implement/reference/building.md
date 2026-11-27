@@ -4,7 +4,7 @@ Every clinical screen has two layers. Keep them apart.
 
 | Layer | What it is | Where it comes from | Who may change it |
 |---|---|---|---|
-| **Clinical logic** | Deterministic calculations, thresholds, classifications, guideline citations | Ships with the plugin in its `lib/` folder; copied into the project at `lib/medprotocol/` | Nobody in the doctor's project. Fixes go upstream. |
+| **Clinical logic** | Deterministic calculations, thresholds, classifications, guideline citations | Ships with the plugin in its `lib/` folder; copied into the project at `lib/medprotocol/` | Nobody in the user's project. Fixes go upstream. |
 | **UI** | Layout, inputs, display, interaction | Generated per project with [UI SDK](https://ui-sdk.dev/docs) | You, freely |
 
 There is no component registry and no component CLI. You generate the UI and import the logic.
@@ -53,13 +53,13 @@ UI SDK components are unstyled. Style them with the project's existing styles (T
 ## 4. Rules
 
 - **Never compute a clinical value in the UI.** Every number, category, severity, and recommendation on screen comes from a `lib/medprotocol` function.
-- **Never edit `lib/medprotocol/`.** If the logic seems wrong, tell the doctor. Do not patch it locally.
+- **Never edit `lib/medprotocol/`.** If the logic seems wrong, tell the user. Do not patch it locally.
 - **Never copy thresholds into the UI** (for example coloring BP red above 140). Use the severity/category the lib returns.
 - **Never let an input correct a clinical value.** Do not pass a clinical range as `min`/`max` to Number Input: it clamps a typed value to the bound on commit (400 becomes 350). Leave the bounds off, check the range yourself (the lib's `validate*` function where one exists, otherwise the Screen spec's accepted range), show the error, and do not save.
 - Pass inputs in the form the function expects. Most take strings and parse them internally.
 - Always show units next to values, and the guideline source when the lib provides one (`lib/medprotocol/sources.ts`).
 - Every input has a visible label. Everything works by keyboard. UI SDK gives you focus and keyboard behavior; don't remove it.
-- Show a medical disclaimer on every clinical screen.
+- Every clinical screen shows this line, word for word, where it is always visible: **"Learning prototype — not for patient care."**
 
 ## 5. Verify
 

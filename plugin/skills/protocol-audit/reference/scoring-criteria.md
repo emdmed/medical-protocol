@@ -1,6 +1,6 @@
 # Protocol Audit Scoring Criteria
 
-## Clinical Safety (0–4)
+## Clinical Correctness (0–4)
 
 | Score | Criteria |
 |-------|---------|
@@ -33,7 +33,7 @@
 - Water balance includes insensible losses?
 - BMI shows WHO classification alongside the number?
 
-## Privacy Compliance (0–4)
+## Synthetic Data & Local Only (0–4)
 
 | Score | Criteria |
 |-------|---------|
@@ -41,12 +41,13 @@
 | 1 | Some external calls, no analytics but data leaves the app |
 | 2 | No analytics, minimal external calls (fonts/CDN only) |
 | 3 | No data transmission, local storage only — minor concerns |
-| 4 | Zero external data transmission, no analytics, no realistic fake data, all local |
+| 4 | Zero external data transmission, no analytics, demo data synthetic and labelled, learning-only line on every screen |
 
 ### What to Check
 - No `fetch()` or `XMLHttpRequest` to external APIs (except CDN assets)
 - No Google Analytics, Mixpanel, Sentry, or similar
-- No realistic patient names, DOBs, or medical record numbers in demo data
+- Demo or seed data comes from synthetic cases and carries the "Synthetic case" label; no realistic patient names, DOBs, or medical record numbers
+- Every clinical screen shows "Learning prototype — not for patient care."
 - Data stored in localStorage/state only, not sent anywhere
 
 ## UI Accessibility (0–4)

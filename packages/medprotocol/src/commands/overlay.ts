@@ -12,7 +12,7 @@ The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
 (.medprotocol/queue/) into a dispatch plan naming the skill to run for each
 selection — /medical-protocol:overlay-audit, overlay-implement, or overlay-add
-(the doctor selects a region, types a brief, and Add builds a new component there).
+(the user selects a region, types a brief, and Add builds a new component there).
 In Claude Code, /medical-protocol:overlay is the one entry point: it sets the overlay
 up and processes whatever is queued.
 
@@ -46,7 +46,7 @@ Examples:
   medprotocol overlay --watch
   medprotocol overlay --clear`;
 
-// "skill" orders are minted by the result panel's "Run" triggers (POST /run): the doctor clicks a
+// "skill" orders are minted by the result panel's "Run" triggers (POST /run): the user clicks a
 // skill the report recommended, and we re-process the same selection with that named skill.
 type Action = "audit" | "implement" | "add" | "skill";
 type Status = "pending" | "processing" | "done";
@@ -100,7 +100,7 @@ const normalizeSkill = (raw: unknown): string | null => {
 // require an exact match or a real path-separator boundary.
 const within = (dir: string, p: string): boolean => p === dir || p.startsWith(dir + sep);
 
-// The bridge binds to loopback, but a browser the doctor has open can still POST cross-origin
+// The bridge binds to loopback, but a browser the user has open can still POST cross-origin
 // (the request reaches us even when CORS blocks the *response*). So we gate state-changing and
 // data endpoints on the Origin header: requests from a real website are refused, while the local
 // dev app (http://localhost:3000, 127.0.0.1, *.localhost) and non-browser callers (no Origin) pass.
@@ -135,7 +135,7 @@ const statusOf = (o: WorkOrder): Status => o.status ?? "pending";
 const truncate = (s: string, n: number): string => (s.length > n ? `${s.slice(0, n)}…` : s);
 
 const targetLabel = (o: WorkOrder): string => {
-  // "add" is described by the doctor's free-text brief, not the selected markup.
+  // "add" is described by the user's free-text brief, not the selected markup.
   if (o.action === "add" && o.prompt) return `"${truncate(o.prompt.trim(), 56)}"`;
   if (o.suggestedId) return o.suggestedId; // app already uses medprotocol
   const tag = o.tag ? `<${o.tag}>` : "selection";
@@ -183,7 +183,7 @@ const AUTO_PROMPT =
   "Write the findings into the work order's `result` field and " +
   "set `status: done` so the overlay can display them. For implement and add, stage the diff only — " +
   "never apply without approval. EXCEPTION: if a drained order already has `approved: true` and a " +
-  "staged diff under .medprotocol/staged/ (the doctor clicked Apply in the overlay), do NOT re-stage — " +
+  "staged diff under .medprotocol/staged/ (the user clicked Apply in the overlay), do NOT re-stage — " +
   "land that staged diff into source, remove the shadow file, then set `status: done` and update " +
   "`result` to note it was applied.";
 
@@ -251,7 +251,7 @@ const serve = (dir: string, port: number, auto: boolean): void => {
       return;
     }
 
-    // Every other endpoint either accepts selection data or hands it back. A real website the doctor
+    // Every other endpoint either accepts selection data or hands it back. A real website the user
     // has open could POST here (CORS blocks the response, not the request) and, in auto mode, drive a
     // headless Claude run with write/exec. Refuse anything that isn't a loopback origin.
     if (!localOrigin) {
@@ -262,7 +262,7 @@ const serve = (dir: string, port: number, auto: boolean): void => {
 
     // Live status of every work order — lets the overlay show progress on each selected element.
     // `auto` tells the client whether a processor is attached: without it, pending orders sit
-    // until the doctor drains them manually, so the overlay shows a "queued — needs drain" state
+    // until the user drains them manually, so the overlay shows a "queued — needs drain" state
     // instead of an open-ended spinner that reads as a hang.
     if (req.method === "GET" && path === "/status") {
       const orders = readQueue(dir).map(({ file, order }) => ({
@@ -277,7 +277,7 @@ const serve = (dir: string, port: number, auto: boolean): void => {
       return;
     }
 
-    // Full result for one work order — fetched on demand when the doctor opens the result panel.
+    // Full result for one work order — fetched on demand when the user opens the result panel.
     if (req.method === "GET" && path === "/result") {
       const fileParam = new URL(req.url ?? "/", "http://localhost").searchParams.get("file") ?? "";
       const resolved = resolve(fileParam);

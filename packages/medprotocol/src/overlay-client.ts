@@ -1,6 +1,6 @@
 // The dev overlay client — a framework-agnostic vanilla script served by
 // `medprotocol overlay --serve` at GET /overlay.js. Its job is to retrofit
-// medical-protocol into apps that were built WITHOUT it: the doctor hovers ANY
+// medical-protocol into apps that were built WITHOUT it: the user hovers ANY
 // element on ANY page, selects it, and chooses to Audit that region, Implement it
 // with medical protocol, or Add a brand-new component there from a free-text brief
 // typed into the overlay. Selection does not require the app to be tagged —
@@ -179,7 +179,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
     '.mpo-suggest-btn{display:inline-flex;align-items:center;gap:6px;background:#0891b2;color:#04181f;border:1px solid #22d3ee;border-radius:5px;padding:6px 11px;cursor:pointer;font:600 12px/1 ' + SANS + '}',
     '.mpo-suggest-btn:hover{background:#0aa5cb}',
     '.mpo-suggest-btn .mpo-ic{color:#04181f}',
-    // Compose panel: free-text "add a component here" brief the doctor types for the agent.
+    // Compose panel: free-text "add a component here" brief the user types for the agent.
     '.mpo-compose-body{padding:13px 16px 4px;display:flex;flex-direction:column;gap:9px}',
     '.mpo-compose-target{font:600 10.5px/1.4 ' + MONO + ';letter-spacing:.02em;color:#5b7d8f}',
     '.mpo-compose-target b{color:#67e8f9;font-weight:600}',
@@ -530,7 +530,7 @@ export const OVERLAY_CLIENT_JS = `(function () {
         t.pill.appendChild(c);
         t.pill.classList.add('mpo-clickable');
         t.pill.addEventListener('click', function () { openResultPanel(t); });
-        // keep the marker on screen until the doctor dismisses it
+        // keep the marker on screen until the user dismisses it
       } else {
         c.textContent = v.done;
         t.pill.appendChild(c);

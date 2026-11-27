@@ -8,13 +8,13 @@ Idempotent, dev-gated, reversible. The agent does the edit; the CLI only serves.
 ```bash
 medprotocol overlay --serve              # AUTOMATIC (default): each selection runs end-to-end via a headless Claude run
 medprotocol overlay --serve --port 8080  # if 7331 is taken (CLI prints EADDRINUSE)
-medprotocol overlay --serve --manual     # only when the doctor asks: selections queue until /medical-protocol:overlay runs
+medprotocol overlay --serve --manual     # only when the user asks: selections queue until /medical-protocol:overlay runs
 ```
 
 Do not ask which mode to use. Automatic closes the loop so results appear in the overlay with no
 terminal step; it runs unattended, uses tokens, and only **stages** diffs. If the `claude` CLI is not
 on PATH the server says so and falls back to manual: the overlay shows "queued — needs drain" until
-the doctor runs `/medical-protocol:overlay`. Tell the doctor which mode came up.
+the user runs `/medical-protocol:overlay`. Tell the user which mode came up.
 
 Run it in the background and read the port from the first stdout line:
 `medprotocol overlay server → http://localhost:<port>`. Use `<port>` in the injected tag.
@@ -52,7 +52,7 @@ script tags rendered inside components (it warns and they silently no-op on clie
 `pages/_document.tsx` with `next/script`). Never a bare `<script>`.
 
 **Vite / CRA / plain HTML** — here a real `<script>` in the static `index.html` is correct (it's
-parsed HTML, not React). Place before `</body>`. No `NODE_ENV` gate in static HTML; tell the doctor
+parsed HTML, not React). Place before `</body>`. No `NODE_ENV` gate in static HTML; tell the user
 it's dev-only and the teardown removes it:
 ```html
 <!-- medprotocol overlay (dev only — remove before deploy) -->
@@ -67,7 +67,7 @@ already wired — skipping" and make no change. Re-running the skill must never 
 ## 5. Teardown
 
 To remove: delete the `data-medprotocol-overlay` block from the mount file and stop the `--serve`
-process (Ctrl-C or kill the background job). Offer this whenever the doctor is done, and always for
+process (Ctrl-C or kill the background job). Offer this whenever the user is done, and always for
 the static-HTML case (no env gate there).
 
 ## Failure → manual fallback

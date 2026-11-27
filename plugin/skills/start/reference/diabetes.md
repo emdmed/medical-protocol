@@ -3,14 +3,14 @@
 ## Prerequisites
 
 Check for `.clinical-context.md` in the project root.
-- **If found:** Read it. Adapt specialty, practice type, patient population, guidelines, and units throughout this workflow.
+- **If found:** Read it. Adapt level, specialty, case population, guidelines, and units throughout this workflow.
 - **If not found:** Proceed with defaults. After Phase 4, mention once: "Tip: Run /medical-protocol:preferences to save your clinical preferences — specialty, units, and guidelines will apply automatically to every tool."
 
 ---
 
 ## Phase 1: Clinical Requirements
 
-Ask the doctor about their diabetes evaluation needs:
+Ask the user about their diabetes evaluation needs:
 
 - "Are you using this for diagnosis classification (A1C, FPG, OGTT) or for diabetes type differentiation (T1 vs T2, staging)?" (Default: diagnosis classification)
 - "Do you need GDM screening support (one-step IADPSG or two-step Carpenter-Coustan)?" (Default: no unless OB/GYN or primary care with pregnant patients)
@@ -58,7 +58,7 @@ Create `app/diabetes/page.tsx` importing the diabetes evaluator component(s).
 Wrap in `ErrorBoundary`. Provide `onData` callback for state management.
 Update `app/page.tsx` with a link to `/diabetes`.
 
-Wire only the sub-modules the doctor requested in Phase 1:
+Wire only the sub-modules the user requested in Phase 1:
 - **Diagnosis classifier** — always included
 - **T1D staging** — if endocrinology or explicitly requested
 - **T1 vs T2** — if endocrinology or explicitly requested
@@ -70,7 +70,7 @@ Wire only the sub-modules the doctor requested in Phase 1:
 ## Phase 4: Quality & Preview
 
 Follow **After Any Workflow Completes** from the main protocol.
-Tell the doctor: "Your diabetes evaluation tool is ready. It classifies lab results against ADA 2026 diagnostic thresholds (A1C, FPG, 2h-PG, Random PG), determines the composite diagnosis category, and checks confirmation logic requiring two abnormal results. View it at http://localhost:3000/diabetes"
+Tell the user: "Your diabetes evaluation tool is ready. It classifies lab results against ADA 2026 diagnostic thresholds (A1C, FPG, 2h-PG, Random PG), determines the composite diagnosis category, and checks confirmation logic requiring two abnormal results. View it at http://localhost:3000/diabetes"
 
 If T1D staging was included: "The T1D staging panel classifies Stages 1–3 based on autoantibody count and glycemic status per ADA Table 2.4."
 
@@ -86,10 +86,10 @@ Ask: "Would you like to adjust anything about the evaluation parameters?"
 
 ## Related Tools
 
-Based on clinical context, the doctor may also benefit from:
+Based on clinical context, the user may also benefit from:
 - **/medical-protocol:dka** — DKA monitoring with hourly glucose, ketone, and insulin tracking
 - **/medical-protocol:nephrology** — CKD evaluation relevant to diabetic nephropathy
 - **/medical-protocol:cardiology** — Cardiovascular risk assessment for diabetes-related macrovascular disease
 - **/medical-protocol:bmi** — BMI calculation relevant to T2D screening and classification
 
-Only mention these if the doctor asks "what else can you do?" or if the clinical scenario suggests them.
+Only mention these if the user asks "what else can you do?" or if the clinical scenario suggests them.

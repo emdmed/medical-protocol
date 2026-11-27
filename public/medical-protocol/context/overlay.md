@@ -1,10 +1,10 @@
 # Overlay Work-Order Queue
 
 The dev overlay exists to **retrofit medical protocol into apps built without it**. It is a thin
-selector: the doctor hovers **any** element on **any** page, selects it, and chooses to **Audit** that
+selector: the user hovers **any** element on **any** page, selects it, and chooses to **Audit** that
 region, **Implement** it with medical protocol, or **Add** a brand-new component there from a
 free-text brief they type into the overlay. The overlay captures the selection as DOM descriptors — a
-CSS selector + `outerHTML` + text — and records the doctor's intent. It **never runs clinical logic**.
+CSS selector + `outerHTML` + text — and records the user's intent. It **never runs clinical logic**.
 Intent lands as one JSON file per selection in the project's queue directory; the CLI bridge drains
 the queue and plugin skills act on each work order.
 
@@ -19,7 +19,7 @@ fast-path: when present they surface as `suggestedId`/`source` and let the skill
 ## Delivery — the overlay is a CLI-served script (no UI install)
 
 The overlay ships as a framework-agnostic vanilla script served by the CLI, **not** as an installed
-React component. The doctor runs one process and adds one dev-only script tag:
+React component. The user runs one process and adds one dev-only script tag:
 
 ```bash
 medprotocol overlay --serve        # default port 7331; --port to change
@@ -35,8 +35,8 @@ import Script from "next/script";
 ```
 (Non-React apps add a plain `<script async>` to their `index.html` instead.)
 
-The doctor uses one skill, `/medical-protocol:overlay`: it wires the overlay when the app has no tag
-yet, and otherwise processes whatever is queued, routing each order by its `action`. The doctor never
+The user uses one skill, `/medical-protocol:overlay`: it wires the overlay when the app has no tag
+yet, and otherwise processes whatever is queued, routing each order by its `action`. The user never
 hand-edits the tag: the internal `overlay-setup` skill starts the server, detects the
 mount point (app-router `layout.tsx` → pages `_app.tsx` → `index.html`), and injects the dev-gated
 tag idempotently (marked with `data-medprotocol-overlay`). Hand-paste is the documented fallback.
@@ -44,7 +44,7 @@ tag idempotently (marked with `data-medprotocol-overlay`). Hand-paste is the doc
 The `--serve` process exposes:
 - `GET /overlay.js` — the selector client: hover any element → highlight (press ↑ to widen to the
   parent) → action menu (Audit / Implement / Add a component… / Copy selector). "Add" opens a textarea
-  where the doctor types what to build; the brief rides along as the work order's `prompt`.
+  where the user types what to build; the brief rides along as the work order's `prompt`.
 - `POST /queue` — accepts a work order from the browser and writes it to `.medprotocol/queue/`.
 - `GET /status` — returns `{ auto, orders }`, where `orders` is each work order's
   `{ file, action, selector, status, hasResult }` and `auto` reports whether a processor is attached
@@ -57,17 +57,17 @@ The `--serve` process exposes:
   so an unattended selection never looks like a hang. Skills should set `status: done` promptly when they
   finish.
 - `GET /result?file=…` — the full `result` for one order, plus its `action` and `approved` flag — fetched
-  when the doctor opens the result panel. The panel renders the `report` markdown and makes any
+  when the user opens the result panel. The panel renders the `report` markdown and makes any
   recommended skill **runnable** (see [Triggering recommended skills](#triggering-recommended-skills-from-the-result-panel)).
-- `POST /run` `{ file, skill, prompt? }` — a **skill trigger** from the result panel. The doctor clicks a
+- `POST /run` `{ file, skill, prompt? }` — a **skill trigger** from the result panel. The user clicks a
   skill the report recommended; the server reads the originating order, **inherits its selection anchor**
   (selector/html/source/url), and mints a new `skill` work order that re-processes that same region with
   the named skill. `skill` is validated against the `medical-protocol:` namespace. In automatic mode it kicks
-  the dispatcher immediately; otherwise the doctor runs `/medical-protocol:overlay` in Claude Code.
+  the dispatcher immediately; otherwise the user runs `/medical-protocol:overlay` in Claude Code.
 - `POST /approve` `{ file }` — the result panel's **Apply** button. For a staged `add`/`implement` order
   it sets `approved: true` and re-queues it (`status → pending`) so the matching skill **lands the staged
   diff** (re-applies, does not re-stage). In automatic mode this also kicks the dispatcher to apply
-  immediately; otherwise the doctor runs `/medical-protocol:overlay` in Claude Code to land it.
+  immediately; otherwise the user runs `/medical-protocol:overlay` in Claude Code to land it.
 
 The script POSTs back to the origin it was loaded from, so the browser→filesystem write seam lives
 entirely in the one CLI process that already owns the queue. Nothing else needs to be installed in
@@ -85,11 +85,11 @@ diff — the approval gate is never bypassed.
 
 **Manual mode** — `--serve --manual`, or the fallback when `claude` is not found — only **records**
 intent. The marker sits in the slate "queued — needs drain" state (the client learns there's no
-processor from `/status`'s `auto: false`) until the doctor runs `/medical-protocol:overlay` in Claude Code.
+processor from `/status`'s `auto: false`) until the user runs `/medical-protocol:overlay` in Claude Code.
 
 ## Queue location
 
-`.medprotocol/queue/` at the doctor's project root. Git-ignorable — transient local intent, not
+`.medprotocol/queue/` at the user's project root. Git-ignorable — transient local intent, not
 source. One file per selection, named `<ISO-timestamp>-<slug>.json` (`:`/`.` replaced by `-`; slug
 is `suggestedId`/`tag`), e.g. `2026-06-14T07-46-52-611Z-h1.json`.
 
@@ -153,11 +153,11 @@ findings** against the inferred module's rules + `lib/` validations. Never modif
 ### Implement (lease / apply diff)
 Classify the selection and **confirm the inferred component in chat**, locate the markup in source,
 then **stage a diff** that replaces it with the medprotocol component — nothing is written until the
-doctor approves (`approved: true` from the overlay's "Apply", or in-session sign-off). Same lease →
+user approves (`approved: true` from the overlay's "Apply", or in-session sign-off). Same lease →
 apply trust model Impeccable uses for live edits. Skill: `/medical-protocol:overlay-implement`.
 
 ### Add (lease / apply diff)
-The doctor selects a region and types a **free-text brief** (`prompt`) of a component to build — e.g.
+The user selects a region and types a **free-text brief** (`prompt`) of a component to build — e.g.
 *"a chronic kidney disease anemia tracker"*. The selection is the **placement anchor**, not the thing
 being replaced. Classify the brief against `classification.md` → registry component(s), **confirm the
 plan in chat**, locate the anchor in source, then **stage a diff** that inserts the newly composed
@@ -188,7 +188,7 @@ recommendations **actionable** instead of copy-paste:
 
 Clicking either kind `POST`s to `/run`, which mints a `skill` work order on the **same selection**. The
 loop is identical to the rest of the overlay: in automatic mode a headless run processes it; otherwise the
-doctor runs `/medical-protocol:overlay` in Claude Code. Skills that build/edit files still **stage** a diff behind
+user runs `/medical-protocol:overlay` in Claude Code. Skills that build/edit files still **stage** a diff behind
 the approval gate — the panel shows an **Apply** button for a staged `skill` result just like `implement`/`add`.
 
 ## Why a queue (not a direct call)

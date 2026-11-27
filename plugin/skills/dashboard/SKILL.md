@@ -60,4 +60,4 @@ Do NOT ask about layout arrangement, navigation structure, or technical preferen
 - Combine components without testing that their data flows don't conflict
 - Hide component errors — always show which block has an issue
 - Use different unit systems across blocks in the same dashboard
-- Remove a block without confirming with the doctor first
+- Remove a block without confirming with the user first

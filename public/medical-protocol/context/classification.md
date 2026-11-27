@@ -1,6 +1,6 @@
 # Classification
 
-When the doctor describes what they need, classify into one of these domains based on signal words. The `start` skill maps each domain to the correct workflow or skill.
+When the user describes what they need, classify into one of these domains based on signal words. The `start` skill maps each domain to the correct workflow or skill.
 
 ## Base
 
@@ -58,7 +58,8 @@ When the doctor describes what they need, classify into one of these domains bas
 | **modify** | change, modify, add field, remove, adjust, different layout |
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix |
 | **calc** | calculate, quick calculation, from the terminal, command line, batch, just the number |
-| **preferences** | teach, preferences, my practice, configure, setup preferences, learn about me, my specialty |
+| **cases** | give me a case, example patient, synthetic case, practise, practice case, quiz me, demo data, sample patient |
+| **preferences** | teach, preferences, what I'm learning, configure, setup preferences, learn about me, my specialty |
 | **protocol-audit** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check |
 | **calc-audit** | test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors |
 | **qa** | check it, is it working, try it, test the screen, test the calculator, check everything, add a case, also check a patient, what do you check |
@@ -67,16 +68,16 @@ When the doctor describes what they need, classify into one of these domains bas
 
 ## Routing Rules
 
-**Cross-prompt:** When the doctor requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.
+**Cross-prompt:** When the user requests a **blood gas analyzer** (acid-base), ask: "Would you also like to track glucemia and ketones for DKA monitoring?" If yes, also route to `dka`.
 
 **Syndromic assessments:** `shock`, `volume`, `heart-failure`, `chest-exam`, `focal-pulmonary` and `respiratory-failure` all route to the syndromic workflow. "Respiratory failure" with a PaO2/FiO2 ratio or ARDS is `pafi`; on its own, or with SpO2, work of breathing or a blood gas, it is `respiratory-failure`.
 
 **If the request matches multiple domains**, prefer `dashboard` as it combines components.
 
-**If the doctor is reporting a problem** (signal words: not working, error, broken, crashed, blank/white screen, won't load, stuck, something wrong), always route to `troubleshoot` regardless of other domain matches.
+**If the user is reporting a problem** (signal words: not working, error, broken, crashed, blank/white screen, won't load, stuck, something wrong), always route to `troubleshoot` regardless of other domain matches.
 
-**If the doctor wants a built screen checked or a patient case added** (`qa` signal words), route to `qa` directly — skip Initial Clarification. If they describe a symptom ("it shows the wrong number"), that is `troubleshoot`.
+**If the user wants a built screen checked or a patient case added** (`qa` signal words), route to `qa` directly — skip Initial Clarification. If they describe a symptom ("it shows the wrong number"), that is `troubleshoot`.
 
 **If no domain matches**, ask: "Could you describe what clinical information you'd like to see or manage?"
 
-**Initial Clarification must be completed before classification.** If you haven't yet asked and received answers to the four initial clarification questions (module, patient setting, single vs multiple, persistence), stop and do that first. Do NOT use this classification table until you have the doctor's answers. Words like "track", "monitor", or plural "patients" do NOT count as answering the single-vs-multiple or persistence questions — those must be stated explicitly (e.g., "multiple patients", "save between sessions"). The answers are passed to the selected workflow as context. The workflow should automatically adapt its behavior, questions, and architecture based on these answers.
+**Initial Clarification must be completed before classification.** If you haven't yet asked and received answers to the four initial clarification questions (module, patient setting, single vs multiple, persistence), stop and do that first. Do NOT use this classification table until you have the user's answers. Words like "track", "monitor", or plural "patients" do NOT count as answering the single-vs-multiple or persistence questions — those must be stated explicitly (e.g., "multiple patients", "save between sessions"). The answers are passed to the selected workflow as context. The workflow should automatically adapt its behavior, questions, and architecture based on these answers.

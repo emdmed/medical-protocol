@@ -13,7 +13,7 @@ You are running quick clinical calculations for a healthcare professional using 
 
 ## Phase 1: Identify the Calculation
 
-Determine which calculator the doctor needs based on their request:
+Determine which calculator the user needs based on their request:
 
 | Calculator | Signal Words |
 |---|---|
@@ -30,7 +30,7 @@ If the request doesn't match any calculator, suggest building a full interface i
 
 ## Phase 2: Gather Clinical Inputs
 
-Ask the doctor for the required values **conversationally** — do not present a form or list of parameters. Adapt to what they've already provided.
+Ask the user for the required values **conversationally** — do not present a form or list of parameters. Adapt to what they've already provided.
 
 **BMI:**
 - Weight and height (ask which units they prefer — metric or imperial)
@@ -63,7 +63,7 @@ Ask the doctor for the required values **conversationally** — do not present a
 - Optional: insulin rate (for adjustment suggestion)
 - Example prompt: "What's the current glucose? Do you have a previous reading to calculate the rate?"
 
-If the doctor has already provided all needed values in their initial message, skip to Phase 3.
+If the user has already provided all needed values in their initial message, skip to Phase 3.
 
 ## Phase 3: Run the Calculation
 
@@ -83,7 +83,7 @@ medprotocol pafi --pao2 60 --fio2 40 --json
 medprotocol dka --glucose 400 --prev-glucose 460 --hours 2 --unit mgdl --json
 ```
 
-Do not show the command or raw output to the doctor.
+Do not show the command or raw output to the user.
 
 ## Phase 4: Present Results
 

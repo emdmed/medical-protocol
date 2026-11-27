@@ -29,7 +29,8 @@
 | troubleshoot | Fix errors, blank screens, broken UI |
 | test | Verify calculations and run QA |
 | calc | Quick terminal-based calculations |
-| preferences | Configure doctor preferences and specialty |
+| cases | Synthetic worked cases to practise with, or to use as labelled demo data |
+| preferences | Configure user preferences and specialty |
 | protocol-audit | Audit protocol quality and compliance |
 | overlay | The one overlay entry point: wires the dev overlay if missing, otherwise processes every queued selection |
 | overlay-setup | Start the overlay server and wire the dev-only overlay `<script>` tag into any app |
@@ -40,7 +41,7 @@
 
 ## Tool → Logic → Context
 
-Clinical logic lives in `lib/medprotocol/` in the doctor's project (copied from the plugin). Import from `@/lib/medprotocol/<module>`. Each generated screen goes in `components/medprotocol/<tool>/<tool>.tsx`.
+Clinical logic lives in `lib/medprotocol/` in the user's project (copied from the plugin). Import from `@/lib/medprotocol/<module>`. Each generated screen goes in `components/medprotocol/<tool>/<tool>.tsx`.
 
 | Tool | Lib module file(s) in `lib/medprotocol/` | Context doc |
 |---|---|---|
