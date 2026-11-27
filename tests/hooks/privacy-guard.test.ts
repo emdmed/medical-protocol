@@ -14,6 +14,11 @@ describe("privacy-guard hook", () => {
     expect(decision("PowerShell", "git push origin main")).toBe("deny");
   });
 
+  it.each(["npm publish", "yarn publish", "pnpm publish"])("denies %s from Bash and from PowerShell", (command) => {
+    expect(decision("Bash", command)).toBe("deny");
+    expect(decision("PowerShell", command)).toBe("deny");
+  });
+
   it("lets safe commands and other tools through", () => {
     expect(decision("PowerShell", "git status")).toBeUndefined();
     expect(decision("Read", "git push")).toBeUndefined();
