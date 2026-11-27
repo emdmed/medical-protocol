@@ -46,7 +46,7 @@
 ### What to Check
 - No `fetch()` or `XMLHttpRequest` to external APIs (except CDN assets)
 - No Google Analytics, Mixpanel, Sentry, or similar
-- Demo or seed data comes from synthetic cases and carries the "Synthetic case" label; no realistic patient names, DOBs, or medical record numbers
+- Every screen has a Generate patient button (building.md §3); demo or seed data comes from it or the synthetic cases and carries the "Synthetic patient" or "Synthetic case" label; no realistic patient names, DOBs, or medical record numbers
 - Every clinical screen shows "Learning prototype — not for patient care."
 - Data stored in localStorage/state only, not sent anywhere
 

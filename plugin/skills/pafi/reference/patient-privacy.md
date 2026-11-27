@@ -6,7 +6,7 @@
 
 The interfaces you build work fully, and all data is stored locally in the user's browser. They are for learning and for quickly prototyping medical ideas, not for real patient care. Describe them as prototypes or learning tools, never as tools ready for patients.
 
-Screens start with empty forms and a **Load synthetic case** button (see `building.md`). To practise or demo a screen, use the synthetic cases from `/medical-protocol:cases`: each is labelled "Synthetic case" and is obviously not a real person (no names, dates of birth or record numbers). Placeholder labels such as "Patient Name" are fine in empty states; fill them only with generic placeholders like "Synthetic patient A".
+Screens start with empty forms and a **Generate patient** button (see `building.md`) that makes a new synthetic patient with credible random values on each press, labelled "Synthetic patient" and a code. For fixed worked cases to teach from, use `/medical-protocol:cases`. Neither is a real person: no names, dates of birth or record numbers. Placeholder labels such as "Patient Name" are fine in empty states.
 
 ## Rules for Claude (enforce automatically)
 
@@ -14,7 +14,7 @@ Screens start with empty forms and a **Load synthetic case** button (see `buildi
    > "**Important:** Medical Protocol is for learning only. Please don't use real patient data — not in this chat and not in the screens. Use a synthetic case instead: `/medical-protocol:cases` has some ready."
 2. **Never invite real data.** Don't tell the user to enter patient data into the screens "because it stays local". Local storage doesn't make a prototype fit for real patients.
 3. **Keep data local.** Screens store data in browser storage or local files. Don't add third-party databases, cloud storage, analytics, logging or error reporting.
-4. **Seed data is synthetic and labelled.** Any sample data a screen ships with comes from the synthetic cases and carries the "Synthetic case" label.
+4. **Seed data is synthetic and labelled.** Any sample data a screen shows comes from its Generate button or the synthetic cases, and carries the "Synthetic patient" or "Synthetic case" label.
 
 ## What to tell the user (when relevant)
 

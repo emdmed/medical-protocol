@@ -38,6 +38,31 @@ All five screens are reading-based: latest result on top, history table below, a
 | T2D Screening | Age, BMI, ethnicity (free text; "Asian" lowers BMI threshold to 23), 10 risk-factor checkboxes (see T2D Screening below) | Action, interval, risk-factor count |
 | GDM Screening | Strategy (Segmented Control: one-step / two-step), gestational age (weeks), fasting, 1-h, 2-h, 3-h (two-step only) (mg/dL) | Positive/negative, exceeded values |
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+Generate for the screen that is open.
+
+- **Diagnosis** (mg/dL, %):
+
+| Scenario | A1C | FPG | 2-h PG |
+|---|---|---|---|
+| Normal | 4.8–5.6 | 75–99 | 90–139 |
+| Prediabetes | 5.7–6.4 | 100–125 | 140–199 |
+| Diabetes | 6.5–11.0 | 126–250 | 200–350 |
+| Discordant (needs repeat) | 6.5–6.9 | 100–120 | empty |
+
+  Random PG and symptoms only in the Diabetes scenario, 1 in 3: random PG 210–400 with symptoms on.
+- **T1D staging:** stage 1 = 2–4 autoantibodies with normal glucose (FPG 75–99, A1C 4.8–5.6); stage 2 = 2–4 with dysglycemia (FPG 100–125 or A1C 5.7–6.4); stage 3 = 1–4 with symptoms and diabetes-range glucose; or 0–1 autoantibodies and normal glucose.
+- **T1 vs T2:** T1-like: onset age 8–30, BMI 17–24, autoantibodies on, C-peptide 20–200 pmol/L, DKA history 1 in 3, other autoimmune 1 in 4. T2-like: age 40–70, BMI 28–40, autoantibodies off, C-peptide 600–1500, family history of T2D 3 in 5.
+- **T2D screening:** age 25–75, BMI 20–40, ethnicity from a short list ("White", "Black", "Hispanic", "Asian", "Other"), 0–4 risk factors checked at random.
+- **GDM:** gestational age 24–28 weeks. One-step (75 g): normal fasting 70–90, 1-h 110–175, 2-h 95–150; GDM raises one or two of them above 92 / 180 / 153. Two-step (100 g): normal 70–94 / 120–179 / 100–154 / 90–139; GDM raises two or more above 95 / 180 / 155 / 140.
+
+Rounding: glucose whole numbers, A1C 1 decimal, BMI 1 decimal.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Diagnostic Thresholds (ADA Table 2.1)
 
 | Test | Normal | Prediabetes | Diabetes |

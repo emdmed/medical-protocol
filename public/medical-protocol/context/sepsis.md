@@ -60,6 +60,22 @@ interface SepsisPatientData { weight: string; baselineSOFA: string; readings: Se
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+**Generate patient** creates the header and 2–3 readings 2–6 hours apart. Weight 50–110 kg; baseline SOFA 0 (1–2 with chronic disease, 1 in 4); suspected infection on; source from: pneumonia, urinary tract, abdominal, skin and soft tissue.
+
+| Scenario | PaO2/FiO2 | Platelets | Bilirubin | MAP / vasopressor | GCS | Creatinine | Lactate |
+|---|---|---|---|---|---|---|---|
+| Infection, no organ dysfunction | 320–450 | 160–350 | 0.3–1.1 | 75–95, none | 15 | 0.6–1.1 | 0.8–1.8 |
+| Sepsis | 200–300 | 100–150 | 1.2–2.5 | 65–75, none | 13–15 | 1.2–2.5 | 2.0–3.5 |
+| Septic shock | 100–250 (advanced support 1 in 2) | 50–120 | 1.5–4.0 | 58–65 on norepinephrine 0.1–0.5 µg/kg/min | 10–14 | 1.8–4.0 | 2.5–8.0 |
+
+Couplings: PaO2 = ratio × FiO2 ÷ 100 with FiO2 from 21, 28, 35, 40, 50, 60; SBP = MAP + 20–35 and DBP = (3 × MAP − SBP) ÷ 2, so MAP matches; RR 18–24 (sepsis), 22–34 (shock); urine output for 6 hours: ≥ 0.5 mL/kg/h without shock, 0.2–0.5 with it. Later readings either improve (lactate down 15–40%, MAP up, vasopressor down) or worsen (lactate down < 10% or up); pick one per patient. Rounding: bilirubin, creatinine, lactate 1 decimal; vasopressor 2 decimals; others whole numbers.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 All numeric inputs are `string` (parsed internally via `safeParseFloat`).

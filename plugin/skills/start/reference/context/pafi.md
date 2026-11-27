@@ -29,6 +29,21 @@ Logic: `lib/medprotocol/pafi.ts` — import from `@/lib/medprotocol/pafi`. Build
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | FiO2 (%) | Target ratio |
+|---|---|---|
+| Normal, room air | 21 | 400–480 |
+| Mild range | 30–50 | 201–300 |
+| Moderate range | 40–80 | 101–200 |
+| Severe range | 60–100 | 50–100 |
+
+FiO2 from the presets (21, 24, 28, 32, 35, 40, 50, 60, 70, 80, 100) inside the scenario's range. PaO2 = target ratio × FiO2 ÷ 100, rounded to a whole number, never above 600.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 - `calculatePaFi(paO2, fiO2)` → `string | null` (integer). Null if PaO2 ≤0 or FiO2 outside 21–100.

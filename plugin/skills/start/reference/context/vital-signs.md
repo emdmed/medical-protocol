@@ -56,6 +56,22 @@ interface IVitalSignsData {
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | BP (mmHg) | HR (bpm) | RR (/min) | Temp (°C) | SpO2 (%) | FiO2 (%) |
+|---|---|---|---|---|---|---|
+| Normal | 105–130 / 65–85 | 60–95 | 12–18 | 36.3–37.4 | 96–99 | 21 |
+| Hypertensive | 150–190 / 90–115 | 65–95 | 12–18 | 36.3–37.4 | 95–99 | 21 |
+| Febrile, hypotensive | 80–100 / 45–60 | 105–135 | 22–30 | 38.3–39.8 | 90–95 | 21 |
+| Bradycardic | 100–130 / 60–80 | 38–50 | 12–16 | 36.0–37.0 | 95–99 | 21 |
+| Hypoxaemic | 110–140 / 65–90 | 95–120 | 24–32 | 36.5–38.0 | 84–90 | 21–40 |
+
+Couplings: diastolic is 20–80 below systolic. In °F mode, °F = °C × 9 ÷ 5 + 32. Rounding: temperature 1 decimal, others whole numbers.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 **Severity** (`vital-signs-validations/severity.ts`) — each returns `{ severity: "normal" | "warning" | "critical"; label: string | null }`:

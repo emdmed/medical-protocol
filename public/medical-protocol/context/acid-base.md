@@ -36,6 +36,29 @@ Logic: `lib/medprotocol/acid-base/` — import from `@/lib/medprotocol/acid-base
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | HCO3 (mEq/L) | pCO2 (mmHg) | Anion gap target | Na⁺ | Albumin (g/dL) |
+|---|---|---|---|---|---|
+| Normal | 23–25 | 38–42 | 8–12 | 136–144 | 3.6–4.8 |
+| High-AG metabolic acidosis (ketoacidosis, lactic) | 8–18 | Winter's: 1.5 × HCO3 + 8, ± 1 | 18–30 | 132–142 | 3.0–4.5 |
+| Normal-AG metabolic acidosis (diarrhoea) | 12–18 | Winter's ± 1 | 8–12 | 134–142 | 3.5–4.5 |
+| Metabolic alkalosis (vomiting) | 30–40 | 40 + 0.7 × (HCO3 − 24), ± 2 | 8–14 | 134–142 | 3.5–4.8 |
+| Acute respiratory acidosis | 24 + 0.1 × (pCO2 − 40), ± 1 | 55–75 | 8–12 | 136–144 | 3.6–4.8 |
+| Chronic respiratory acidosis (COPD) | 24 + 0.35 × (pCO2 − 40), ± 1 | 50–70 | 8–12 | 136–144 | 3.4–4.5 |
+| Acute respiratory alkalosis | 24 − 0.2 × (40 − pCO2), ± 1 | 25–34 | 8–12 | 136–144 | 3.6–4.8 |
+| Mixed: metabolic + respiratory acidosis | 10–16 | Winter's + 6 to 10 | 18–28 | 132–142 | 3.0–4.2 |
+
+Couplings: draw the scenario's free value first, then the other from its formula. pH comes from Henderson–Hasselbalch, pH = 6.1 + log10(HCO3 / (0.03 × pCO2)), so `hhConsistency` never warns on a generated patient. Cl⁻ = Na⁺ − HCO3 − anion gap target.
+
+Rounding: pH 2 decimals; HCO3, pCO2, Na⁺, Cl⁻ whole numbers; albumin 1 decimal.
+
+The standalone screen reads respiratory compensation as chronic (`isChronic: true`), so the two acute respiratory scenarios show "Inadequate compensation" there. That is the lib's correct reading against chronic expectations, and worth explaining when one comes up; do not change the screen's mode to hide it.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 `analyze({ values, isChronic })` (`acid-base/analyze.ts`) — single entry point. Returns the full analysis (disorder, compensation, compensatoryResponse, expectedValues, anionGap, uncorrectedAG, correctedAG, agStatus, deltaRatio, deltaRatioInterpretation, allDisorders, hhConsistency) or `null` when pH, pCO2 or HCO3 is missing.

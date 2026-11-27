@@ -52,6 +52,27 @@ Outputs: score 0–9, category, action, color (all sex-aware).
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+One patient fills all three tabs, so age and sex agree across them.
+
+| Scenario | Age | Total chol. | HDL | SBP | BP treatment | Diabetes | Smoker |
+|---|---|---|---|---|---|---|---|
+| Low risk | 40–55 | 160–200 | 50–75 | 105–125 | no | no | no |
+| Intermediate | 50–68 | 190–240 | 40–55 | 125–145 | 1 in 2 | 1 in 5 | 1 in 3 |
+| High risk | 60–79 | 220–300 | 30–45 | 140–180 | 3 in 4 | 1 in 2 | 1 in 2 |
+
+Sex: male or female at random; race: white, aa or other at random. Units: mg/dL, mmHg.
+
+- **HEART:** score band matches the scenario (low 0–3, intermediate 4–6, high 7–10). The age item comes from the age (< 45 → 0, 45–64 → 1, ≥ 65 → 2); risk factors at least 1 when diabetes or smoking is on; draw the other items to land in the band.
+- **CHA₂DS₂-VASc:** age ≥ 75 → the age-75 item, 65–74 → the age-65 item; female → sex item; hypertension on when BP treatment is on; diabetes copied from ASCVD; CHF, stroke/TIA, vascular disease each 1 in 5 (1 in 3 in the high-risk scenario).
+
+Rounding: whole numbers.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 Types in `cardiology-types.ts`: `ASCVDInputs`, `HEARTInputs` (each field `0 | 1 | 2`), `CHADSVAScInputs`.

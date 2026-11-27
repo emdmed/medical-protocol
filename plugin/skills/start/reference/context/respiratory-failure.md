@@ -63,6 +63,22 @@ Group as Oxygenation, Work of breathing and Blood gas. Never preselect room air:
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | Oxygen support | SpO2 (%) | RR (/min) | Accessory / paradoxical / cyanosis | Speech | Arterial gas: pO2, pCO2 (mmHg), HCO3 |
+|---|---|---|---|---|---|---|
+| No respiratory failure | room_air | 95–99 | 12–18 | absent / absent / absent | full_sentences | none, or 85–100, 36–44, 22–26 |
+| Hypoxaemic (type 1) | supplemental_oxygen | 85–91 | 24–34 | present / absent / absent | limited | 50–59, 30–38, 22–26 |
+| Hypercapnic, chronic (COPD) | supplemental_oxygen | 84–90 | 22–30 | present / absent / present 1 in 3 | limited | 50–62, 55–75, 30–36 |
+| Hypercapnic, acute | non_invasive_ventilation | 85–92 | 26–36 | present / present / present 1 in 2 | limited | 55–70, 60–85, 24–28 |
+| Distress, gas exchange normal | room_air | 94–98 | 26–34 | present / absent / absent | limited | 80–95, 30–36, 22–26 |
+
+Couplings: pH from Henderson–Hasselbalch, 6.1 + log10(HCO3 / (0.03 × pCO2)), with pCO2 in mmHg. Blood gas type arterial. One patient in four reports the gas in kPa: pO2 and pCO2 ÷ `MMHG_PER_KPA`, 1 decimal. Rounding: pH 2 decimals, mmHg values whole numbers.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 - `assessRespiratoryFailure(input: RespiratoryFailureInput)` → `{ failure, failureReason, hypoxaemia, hypercapnia, distress, distressSigns, next, measured, arterialGas, notCalculated }`. Never null.

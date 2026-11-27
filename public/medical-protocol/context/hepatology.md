@@ -51,6 +51,20 @@ interface MasldScreeningReading {
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | Age | AST (U/L) | ALT (U/L) | Platelets (10⁹/L) | Risk factors (of 6) | LSM (kPa) |
+|---|---|---|---|---|---|---|
+| Low risk | 35–60 | 18–35 | 20–45 | 200–350 | 0–2 | empty, or 4.0–7.9 |
+| Indeterminate | 45–65 | 30–55 | 30–60 | 150–220 | 1–3 | empty, or 8.0–12.0 |
+| High risk (advanced fibrosis) | 55–75 | 50–120, above ALT | 35–90 | 80–150 | 2–5 | empty, or 12.1–25.0 |
+
+Age never below 35 (FIB-4 is not valid there). ELF stays empty, or in the high-risk scenario 1 in 3: 9.8–12.0. Rounding: LSM and ELF 1 decimal, others whole numbers.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 `Severity = "normal" | "warning" | "critical"`. Inputs are strings, parsed internally (invalid → 0).

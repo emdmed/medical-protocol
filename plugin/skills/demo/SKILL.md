@@ -1,6 +1,6 @@
 ---
 name: demo
-description: Get a prototype ready to show — start the app, check each screen in the browser, load a synthetic case on every screen, and save screenshots plus a short walkthrough in the project's demo/ folder, for a class, a talk or a teacher. Everything stays on this computer. Use when the user wants to demo, present, show or share their prototype, or take screenshots of it.
+description: Get a prototype ready to show — start the app, check each screen in the browser, generate a synthetic patient on every screen, and save screenshots plus a short walkthrough in the project's demo/ folder, for a class, a talk or a teacher. Everything stays on this computer. Use when the user wants to demo, present, show or share their prototype, or take screenshots of it.
 allowed-tools: Read, Grep, Glob, Bash, Write, Edit, Agent
 user-invocable: true
 ---
@@ -27,9 +27,9 @@ For each screen, run browser QA with `../qa/SKILL.md` (recipe, qa-runner, fix, r
 
 For each screen that passed, using the commands in `../../agents/qa-runner.md`:
 
-1. Open its route at 1280×800 and click **Load synthetic case** (building.md §3). No such button → route to `../modify/SKILL.md` to add it, then come back.
-2. Run the same case through the CLI with `--json` and check the screen shows the same results.
-3. Check "Learning prototype — not for patient care." and "Synthetic case" are visible.
+1. Open its route at 1280×800 and click **Generate patient** (building.md §3). No such button → route to `../modify/SKILL.md` to add it, then come back. Press it again until the scenario is one worth showing (not the normal one, unless it is the only screen).
+2. Read the generated inputs, run them through the CLI with `--json`, and check the screen shows the same results.
+3. Check "Learning prototype — not for patient care." and "Synthetic patient" are visible.
 4. Save a screenshot to `demo/<nn>-<module>.png` (`01-bmi.png`, …). Add a second one at 768×1024 if the layout changes on a tablet.
 5. Look at each screenshot yourself (Read it). Every value, badge and label must be readable against its background, in the theme the screenshot shows. Something hard to read → fix it with `../modify/SKILL.md`, then retake the screenshot. Never hand over a screenshot you have not looked at.
 
@@ -44,14 +44,14 @@ Write `demo/README.md`:
 
 ## {n}. {Screen name}
 ![{Screen name}]({nn}-{module}.png)
-**Synthetic case:** {the case's vignette, one or two lines}
+**Synthetic patient:** {the scenario and the generated values, one or two lines}
 **What the screen shows:** {the key results, in clinical words, as the CLI confirmed them}
-**Teaching point:** {the case's "Think about" line}
+**Teaching point:** {what this scenario shows, in one line; the matching case in `../cases/reference/cases.md` has a "Think about" line you can use}
 ```
 
 ## Step 6: Tell the user
 
-"Your demo is ready in the `demo/` folder: {n} screens, each with a synthetic case loaded and its numbers checked." List any screen left out and why. Mention once that the folder is plain files on this computer: they can open `demo/README.md`, or put the screenshots in slides.
+"Your demo is ready in the `demo/` folder: {n} screens, each with a generated synthetic patient and its numbers checked." List any screen left out and why. Mention once that the folder is plain files on this computer: they can open `demo/README.md`, or put the screenshots in slides.
 
 ## NEVER
 

@@ -33,6 +33,21 @@ Logic: `lib/medprotocol/water-balance.ts` — import from `@/lib/medprotocol/wat
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | Oral (mL) | IV (mL) | Urine (mL) | Stools |
+|---|---|---|---|---|
+| Balanced | 1200–2000 | 0–1000 | 60–90% of oral + IV | 0–2 |
+| Positive (resuscitation, post-op) | 0–800 | 2000–4000 | 500–1200 | 0–1 |
+| Negative (diuresis) | 800–1500 | 0–500 | 2000–3500 | 0–1 |
+| Negative (diarrhoea) | 800–1500 | 500–1500 | 600–1200 | 4–8 |
+
+Weight 45–110 kg. Rounding: volumes to the nearest 50 mL, weight to 0.1 kg.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 All return `string` (mL, rounded to integer). Inputs accept `string | number` and are parsed via `safeParseFloat`.

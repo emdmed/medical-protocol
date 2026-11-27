@@ -48,7 +48,11 @@ UI SDK components are unstyled. Style them with the project's existing styles (T
 - Start with one working version, then refine.
 - Follow the module's **Screen spec** in `{module}.md`: inputs with units, outputs, display rules.
 - Pass data between screens with props as shown in `composition.md`.
-- Every clinical screen starts empty and has a **Load synthetic case** button that fills its inputs with the module's case from the cases skill (`${CLAUDE_SKILL_DIR}/../cases/reference/cases.md`; the values are in its vignette), plus **Clear**. While the case is loaded, show "Synthetic case" beside the patient's name or header. The button fills inputs only: results still come from the lib. No case for the module → write one in that file's format at `components/medprotocol/<module>/case.md`, run its command to check the CLI accepts it, and load from that. A patient list is seeded with synthetic patients ("Synthetic patient A", "B", …), each from a case.
+- Every clinical screen starts empty and has a **Generate patient** button and **Clear**. A screen that lists patients has **Generate patients** instead, which adds 5 at once with mixed scenarios. Each press makes a new synthetic patient with random, credible values, following the **Synthetic patient generator** section of the module's `{module}.md`: pick a scenario at random, draw each value in its range, apply the couplings, round as stated.
+  - Put the generator in `components/medprotocol/<module>/generate.ts`: a pure function returning the screen's inputs, using `Math.random`. Its header comment lists the scenarios. It may use the coupling formulas its section gives, to keep the inputs coherent, but it never computes or shows a result: results still come only from the lib.
+  - Check each generated value with the lib's `validate*` function where one exists; if one is rejected, generate again.
+  - Show "Synthetic patient" and the patient's 4-character code (`Synthetic patient 7K3Q`) beside the header while generated values are in. Never a name, date of birth tied to a person, or record number.
+  - A screen without typed inputs (the extraction screen) has no button: see its module doc.
 - Add a short header comment to the main file: purpose, props, which `lib/medprotocol` functions it calls. Later skills (`modify`, `troubleshoot`, overlay) read it.
 
 ## 4. Rules

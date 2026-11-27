@@ -41,6 +41,18 @@ interface PatientData {
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+- **Full name:** `Synthetic patient` and a 4-character code (`Synthetic patient 7K3Q`). Never a person-like name.
+- **Date of birth:** age 18–90 at random; date of birth = today minus that age and 0–364 days.
+- **Sex:** male or female at random.
+- **Height:** 150–180 cm for a female, 160–195 cm for a male.
+- **Weight:** target BMI 18.5–38 × height² (height in m), rounded to 0.1 kg.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 - `calculateAge(dateOfBirth: string)` → `number | null` — whole years as of today. `null` for empty, unparseable or future dates.

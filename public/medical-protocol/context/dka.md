@@ -56,6 +56,27 @@ interface DKAPatientData { weight: string; glucoseUnit: "mmol" | "mgdl"; reading
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+**Generate patient** creates the weight and a course of 4–6 hourly readings.
+
+First reading: weight 50–100 kg; glucose 300–700 mg/dL; ketones 3.0–7.0 mmol/L; HCO3 5–15; pCO2 by Winter's (1.5 × HCO3 + 8, ± 1); pH from Henderson–Hasselbalch (6.1 + log10(HCO3 / (0.03 × pCO2))); Na⁺ 128–140; anion gap target 20–30, so Cl⁻ = Na⁺ − HCO3 − gap; albumin 3.5–4.5; K⁺ 4.0–6.0; GCS 14–15; insulin 0.1 U/kg/h; urine 60–150 mL per hour.
+
+| Course scenario | Each hour |
+|---|---|
+| On target, resolving | glucose falls 50–75 mg/dL; ketones fall 0.5–1.0; HCO3 rises 1–3; K⁺ falls 0.2–0.4 |
+| Glucose falling too slowly | glucose falls 15–45; ketones fall 0.2–0.4; HCO3 rises 0–1 |
+| Potassium falling | as on target, but K⁺ falls 0.4–0.7, reaching 3.0–3.4 by the end |
+| Cerebral oedema warning | as on target, then GCS drops by 2–4 over the last two readings |
+
+Every reading recomputes pCO2 (Winter's), pH (Henderson–Hasselbalch) and Cl⁻ from the new HCO3 and gap; the gap closes 2–4 per hour in the resolving course. Glucose never below 150, ketones never below 0.2. In mmol/L mode, glucose = mg/dL ÷ 18, 1 decimal.
+
+Rounding: glucose whole numbers; ketones, K⁺, albumin 1 decimal; pH 2 decimals; others whole numbers.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 `dka.ts` (all inputs `string`, parsed via `safeParseFloat`):

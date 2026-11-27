@@ -55,6 +55,21 @@ Every select defaults to `not_assessed`. Never preselect a finding. Group the fo
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | JVP | Bilateral rales | S3 | HJR | Ankle oedema | Hepatomegaly | Pleural effusion |
+|---|---|---|---|---|---|---|---|
+| Euvolaemic | normal_or_low, 1–5 cmH2O | absent | absent | absent | absent | absent | absent |
+| Volume overload | elevated, 10–18 cmH2O | present | present 2 in 5 | present 7 in 10 | present | present 2 in 5 | present 2 in 5 |
+
+A third scenario, **partial picture**: JVP elevated or normal_or_low, two or three of the overload signs present, the rest absent.
+
+One patient in four has one or two signs `not_assessed`. Fill either the JVP impression or the measured height, not both. Rounding: whole numbers.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 - `assessVolume(exam: VolumeExam)` → `VolumeAssessment | null`: `{ status, reason, pivotal }`. Null when the measured JVP is not a number ≥ 0.

@@ -55,6 +55,24 @@ Never preselect a sign: an empty select is "not recorded", which the rule reads 
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+Examination is `performed`. Pick one side for the focal syndrome (right or left); the other side gets the normal set.
+
+| Scenario | Trachea | Expansion | Percussion | Breath sounds | Added sounds | Vocal resonance |
+|---|---|---|---|---|---|---|
+| Normal (both sides) | central | normal | resonant | vesicular | none | normal |
+| Consolidation | central | reduced | dull | bronchial | crackles | increased |
+| Pleural effusion | central (deviated away when large, 1 in 4) | reduced | stony_dull | reduced or absent | none | reduced |
+| Collapse (atelectasis) | deviated toward the side | reduced | dull | reduced | none | reduced |
+| Pneumothorax | central (deviated away, 1 in 4) | reduced | hyperresonant | reduced or absent | none | reduced |
+
+Couplings: "deviated toward" the right side is `deviated_right`, away from it is `deviated_left`. One patient in four has one or two signs left unset, to show an incomplete examination. Use only the options in `SIDE_FINDINGS`, `TRACHEA` and `CHEST_EXAMINATION`.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 - `assessChestExam(exam: ChestExam)` → `{ right, left, patterns }`, each side `{ verdict, reason, unexplained: {sign, value}[], unrecorded: {syndrome, sign, values}[] }`. Never null.

@@ -56,6 +56,30 @@ interface CKDPatientData {
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+Header: age 35–85, sex at random, cause (diabetic, hypertensive, glomerular, or unknown) with comorbidities that fit it (diabetic → diabetes on; heart failure 1 in 5; prior CVD 1 in 4; transplant 1 in 20; on max RASi 1 in 2; potassium normal 4 in 5).
+
+Readings: 3–5, 4–12 months apart, ending today.
+
+| Scenario | First creatinine (mg/dL) female / male | ACR (mg/g) | Course |
+|---|---|---|---|
+| Early CKD (G1–G2) | 0.6–1.0 / 0.8–1.2 | 30–299 | creatinine rises 0–3% a year |
+| Moderate (G3a–G3b) | 1.1–1.9 / 1.4–2.4 | 30–600 | rises 3–8% a year |
+| Advanced (G4) | 2.0–3.2 / 2.6–4.0 | 300–2000 | rises 8–15% a year |
+| Rapid decline | 1.1–1.6 / 1.4–2.0 | 300–1500 | the last reading is 25–40% higher than the first; ACR doubles |
+
+Panels, matched to the stage (later stages lower Hb and raise phosphate and PTH):
+- **Anemia:** Hb 12–14 early, 9.5–12 G3, 8–11 G4 (g/dL); ferritin 50–400 ng/mL; TSAT 12–35%; serum iron 40–120 µg/dL; reticulocytes 0.5–2.0%.
+- **PhosphoCalcic:** calcium 8.4–10.2 mg/dL; phosphorus 3.0–4.5 early, 4.0–6.5 G4; PTH 40–90 early, 90–400 G4 (pg/mL); 25-OH vitamin D 10–40 ng/mL; albumin 3.4–4.5.
+- **CardioMetabolic:** total cholesterol 150–260, HDL 35–65, triglycerides 80–300, LDL = total − HDL − triglycerides ÷ 5 (Friedewald); HbA1c 6.5–9.0 with diabetes, else 5.0–5.9; glucose to match; SBP 120–170, DBP 65–95; Lp(a) 5–150; ApoB 60–140 (mg/dL).
+
+Rounding: creatinine 2 decimals; Hb, calcium, phosphorus, albumin, HbA1c 1 decimal; others whole numbers.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Screen spec — Nephrology panels
 
 All three share one layout: latest-reading value grid (value + unit + lib severity), recommendation strip, history table, add-reading form. On narrow containers a Latest / History toggle replaces the side-by-side view. Each reading has `id`, `date` and optional `trace`.

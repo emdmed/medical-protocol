@@ -27,6 +27,21 @@ Logic: `lib/medprotocol/bmi.ts` — import from `@/lib/medprotocol/bmi`. Build: 
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | Target BMI (kg/m²) |
+|---|---|
+| Underweight | 16.0–18.4 |
+| Normal | 18.5–24.9 |
+| Overweight | 25.0–29.9 |
+| Obese I–III | 30.0–45.0 |
+
+Height: adult, 1.50–1.80 m for a female and 1.60–1.95 m for a male (pick the sex at random; it is not shown). Weight = target BMI × height², rounded to 0.1 kg. In imperial mode, convert (1 lb = 0.453592 kg, 1 in = 0.0254 m): weight in whole lbs, height as ft + whole in.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 - `calculateBMI(w, hFt, hIn, hM, metric)` → `string | null` (1 decimal). All inputs `string`, `metric: boolean`. Returns `null` for weight ≤0 or >700 kg / >1500 lb, height ≤0 or >2.75 m / >108 in.

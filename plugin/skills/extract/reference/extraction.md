@@ -235,6 +235,15 @@ The two local pages (`--artifact` and `--serve`) are the one place that reads `i
 
 ---
 
+## Synthetic patient generator
+
+The extraction screen has no typed inputs, so it has no Generate button. When the user wants a note to practise on, write one in the chat or in a file:
+
+- First line, exactly: `SYNTHETIC NOTE — invented for learning, not real data.`
+- 6–15 lines in a clinician's style: age and sex (no name, date of birth or record number), presenting complaint, history, examination, vitals, labs, plan.
+- Build it on another module's scenario (a DKA course, a septic patient, a CKD review, a chest syndrome), so its numbers are credible and the extracted values feed a calculator.
+- Include at least one finding stated as absent ("no chest pain"), one item from the past history (for the episode tag), and one value with a time.
+
 ## Lib Functions
 
 - `checkItem(note, item)` / `checkExtraction(note, items)` → `CheckedItem` = item + `status: "quoted" | "edited" | "approximate" | "reordered" | "mismatched" | "unverified" | "none"`, `start`/`end` (offsets of the span found in the NFC note, set whenever one was found), `match?: "exact" | "loose" | "words"`, `distance?` (loose and words only, characters off), `ambiguous?` (exact only).

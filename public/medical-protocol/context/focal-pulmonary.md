@@ -60,6 +60,21 @@ Group the inputs as three labelled sections (History, Examination, Imaging) so a
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | History | Temp (°C) / SpO2 (%) | Examination | Imaging |
+|---|---|---|---|---|
+| Lobar pneumonia | cough present, sputum purulent, fever present, pleuritic pain present, breathlessness present, 2–7 days | 38.0–39.8 / 88–95 | consolidation on one side (`chest-exam.md` sets) | chest_radiograph, consolidation, present, same side, current |
+| Viral bronchitis | cough present, sputum mucoid or none, fever 1 in 2, no pleuritic pain, 2–10 days | 37.0–38.3 / 95–99 | normal both sides | chest_radiograph, normal, present, not_stated, current |
+| Pleural effusion | breathlessness present, cough 1 in 2, no fever, 7–30 days | 36.5–37.5 / 91–96 | effusion on one side | chest_ultrasound or chest_radiograph, pleural_effusion, present, same side, current |
+| Pneumonia, no imaging yet | as lobar pneumonia | as lobar pneumonia | consolidation on one side | no rows |
+
+One patient in four also gets a historical imaging row (a past finding, timing `historical`), to show how timing changes the evidence. Rounding: temperature 1 decimal, SpO2 and days whole numbers.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 - `assessFocalPulmonary(input: FocalPulmonaryInput)` → `{ verdict, reason, focalSide, pneumoniaEvidence, differential, next, conflict }`. Never null.

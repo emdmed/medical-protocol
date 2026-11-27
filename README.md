@@ -89,7 +89,7 @@ Already have an app? Run `/medical-protocol:overlay`, then hover over any part o
 | `extract` | Pull the values out of a clinical note, each with the words it came from |
 | `extract-page` | Open the extraction page in your browser: paste a note, review the values, accept or reject corrections |
 | `cases` | Practise with synthetic worked cases: guess, enter them in your screen, see the answer explained |
-| `demo` | Get a prototype ready to show: checked screens, synthetic cases loaded, screenshots and a walkthrough in `demo/` |
+| `demo` | Get a prototype ready to show: checked screens, a generated synthetic patient on each, screenshots and a walkthrough in `demo/` |
 | `preferences` | Set what you are learning: level, specialty, case population, guidelines and units |
 | `protocol-audit` | Audit the prototype for correct results, completeness, synthetic-data use and accessibility |
 | `calc-audit` | Test the clinical calculations in your screens against the library |

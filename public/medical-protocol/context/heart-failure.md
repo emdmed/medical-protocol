@@ -50,6 +50,21 @@ Never preselect a finding or a reference point. Group by symptoms, chest (left),
 
 ---
 
+## Synthetic patient generator
+
+For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+
+| Scenario | Left signs | Right signs | JVP (cm above the sternal angle) |
+|---|---|---|---|
+| No heart failure | breathlessness absent or present, crackles none, third heart sound absent | oedema absent, liver absent, HJR absent, ascites absent | normal_or_low, 1–3 |
+| Left-sided congestion | breathlessness present, crackles bilateral, third heart sound left_or_unsided 1 in 2 | oedema dependent 1 in 3, others absent | normal_or_low or elevated, 2–6 |
+| Right-sided congestion | breathlessness present 1 in 2, crackles none | oedema dependent, hepatomegaly present (pulsatile 1 in 4), HJR present, ascites 1 in 3, loud P2 and TR murmur 1 in 2, parasternal heave 1 in 3 | elevated, 6–12 |
+| Biventricular | as left-sided | as right-sided | elevated, 6–12 |
+
+Couplings: JVP impression and height agree (elevated when > 4 cm above the sternal angle); "measured from" is the sternal angle. Leg swelling (history) is present when peripheral oedema is dependent. One patient in four has two or three signs left `not_assessed`. Use only the options in `PRESENCE`, `HEART_FAILURE_FINDINGS` and `SHOCK_FINDINGS.jvp`.
+
+Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
+
 ## Lib Functions
 
 - `assessHeartFailure(exam: HeartFailureExam)` → `{ verdict, reason, left, right, leftSigns, rightSigns, systemicSigns, rightVentricularSigns, symptoms, syndrome, jvp, notCalculated, next }`. Never null.
