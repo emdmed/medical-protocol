@@ -83,19 +83,21 @@ Already have an app? Run `/medical-protocol:overlay`, then hover over any part o
 
 ### Skills
 
-| Skill | Use it to |
-|-------|-----------|
-| `start` | Describe what you need. Everything starts here. |
-| `extract` | Pull the values out of a clinical note, each with the words it came from |
-| `extract-page` | Open the extraction page in your browser: paste a note, review the values, accept or reject corrections |
-| `syndromic-page` | Open the synthetic patients page in your browser: make a patient at random or with the results you choose, read its note, see what each of the six bedside rules says |
-| `cases` | Practise with synthetic worked cases: guess, enter them in your screen, see the answer explained |
-| `demo` | Get a prototype ready to show: checked screens, a generated synthetic patient on each, screenshots and a walkthrough in `demo/` |
-| `preferences` | Set what you are learning: level, specialty, case population, guidelines and units |
-| `check` | Test every calculation against the library and score the prototype for correctness, completeness, synthetic-data use and accessibility |
-| `overlay` | Turn on the dev overlay, or process what you selected in it: hover over any part of your app to audit it, replace it with a medical-protocol screen, or add a new one |
+Five features, nine skills you can run. Everything else is called by the agent.
 
-Internal skills (called by the agent): `vital-signs`, `acid-base`, `bmi`, `pafi`, `dka`, `water-balance`, `dashboard`, `modify`, `calc`, `qa`, `extract-artifact`, `troubleshoot`, `overlay-setup`, `overlay-audit`, `overlay-implement`, `overlay-add`.
+| Feature | Skill | Use it to |
+|---------|-------|-----------|
+| **Practise** | `cases` | Practise with synthetic worked cases: guess, enter them in your screen, see the answer explained |
+| | `calc` | Run any calculator from the terminal, hepatology (FIB-4) included |
+| | `syndromic-page` | Open the synthetic patients page in your browser: make a patient at random or with the results you choose, read its note, see what each of the six bedside rules says |
+| | `preferences` | Set what you are learning: level, specialty, case population, guidelines and units |
+| **Build** | `start` | Describe what you need. Everything starts here. |
+| **Read a note** | `extract-page` | Open the extraction page in your browser: paste a note, review the values, accept or reject corrections |
+| **Check and show** | `check` | Test every calculation against the library and score the prototype for correctness, completeness, synthetic-data use and accessibility |
+| | `demo` | Get a prototype ready to show: checked screens, a generated synthetic patient on each, screenshots and a walkthrough in `demo/` |
+| **Retrofit an app** | `overlay` | Turn on the dev overlay, or process what you selected in it: hover over any part of your app to audit it, replace it with a medical-protocol screen, or add a new one |
+
+Internal skills (called by the agent): `vital-signs`, `acid-base`, `bmi`, `pafi`, `dka`, `water-balance`, `dashboard`, `modify`, `extract`, `extract-artifact`, `qa`, `troubleshoot`, `overlay-setup`, `overlay-audit`, `overlay-implement`, `overlay-add`.
 
 ### Hooks
 
@@ -111,7 +113,7 @@ Internal skills (called by the agent): `vital-signs`, `acid-base`, `bmi`, `pafi`
 
 | Module | What it calculates |
 |--------|-------------------|
-| **Vital Signs** | BP, HR, RR, SpO2, temperature: validated ranges, severity alerts, FHIR R4 output |
+| **Vital Signs** | BP, HR, RR, SpO2, temperature: validated ranges, severity alerts |
 | **Acid-Base** | Primary disorder, compensation (Winter's), anion gap, delta ratio |
 | **BMI** | WHO classification |
 | **Water Balance** | Insensible losses, endogenous water, net fluid balance |
@@ -121,6 +123,7 @@ Internal skills (called by the agent): `vital-signs`, `acid-base`, `bmi`, `pafi`
 | **Sepsis** | qSOFA, SOFA-2 (6 organs), lactate clearance, hour-1 bundle |
 | **CKD** | eGFR (CKD-EPI 2021), KDIGO staging, KFRE 2/5-year risk, treatment criteria, anemia, CKD-MBD |
 | **Diabetes** | ADA 2026 diagnosis, T1D staging, T1 vs T2, T2D screening, gestational diabetes |
+| **Hepatology** | MASLD screening: FIB-4, then LSM or ELF when indeterminate, risk stage and referral (ADA 2026) |
 
 ## The `medprotocol` CLI
 
@@ -154,7 +157,7 @@ Quick SOFA (qSOFA)
   GCS               13
 ```
 
-Commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `shock`, `ckd`, `diabetes`, `extract`, `syndromic`, `overlay`. Add `--json` to any command, `--help` for its options. `medprotocol extract --serve` starts the local extraction page and `medprotocol syndromic --serve` the synthetic patients page (`--port <number>` to change the port).
+Commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `shock`, `volume`, `heart-failure`, `chest`, `pulmonary`, `respiratory-failure`, `ckd`, `diabetes`, `hepatology`, `extract`, `syndromic`, `overlay`. Add `--json` to any command, `--help` for its options. `medprotocol extract --serve` starts the local extraction page and `medprotocol syndromic --serve` the synthetic patients page (`--port <number>` to change the port).
 
 ## Repository layout
 
