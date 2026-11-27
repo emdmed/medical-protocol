@@ -4701,6 +4701,185 @@ Examples:
   }
 });
 
+// ../../plugin/lib/hepatology.ts
+function calculateFIB4(age, ast, alt, platelets) {
+  const a = sf(age);
+  const astVal = sf(ast);
+  const altVal = sf(alt);
+  const plt = sf(platelets);
+  if (a <= 0 || astVal <= 0 || altVal <= 0 || plt <= 0) {
+    return { score: 0, tier: "low", severity: "normal" };
+  }
+  const score = a * astVal / (plt * Math.sqrt(altVal));
+  const lowCutoff = a >= 65 ? 2 : 1.3;
+  const highCutoff = a >= 65 ? 2.67 : 2.67;
+  let tier;
+  let severity;
+  if (score < lowCutoff) {
+    tier = "low";
+    severity = "normal";
+  } else if (score >= highCutoff) {
+    tier = "high";
+    severity = "critical";
+  } else {
+    tier = "indeterminate";
+    severity = "warning";
+  }
+  return { score: Math.round(score * 100) / 100, tier, severity };
+}
+function getMASLDRiskStratification(fib4Tier, lsm, elf) {
+  if (fib4Tier === "high") {
+    return {
+      stage: "High risk \u2014 advanced fibrosis",
+      action: "Refer to hepatologist",
+      severity: "critical",
+      referral: true,
+      interval: "Immediate"
+    };
+  }
+  if (fib4Tier === "low") {
+    return {
+      stage: "Low risk",
+      action: "Reassess with FIB-4",
+      severity: "normal",
+      referral: false,
+      interval: "Every 1\u20132 years"
+    };
+  }
+  const lsmVal = sf(lsm ?? "");
+  const elfVal = sf(elf ?? "");
+  if (lsmVal > 0) {
+    if (lsmVal < 8) {
+      return {
+        stage: "Low risk (LSM confirmed)",
+        action: "Reassess with FIB-4",
+        severity: "normal",
+        referral: false,
+        interval: "Every 1\u20132 years"
+      };
+    }
+    return {
+      stage: "At-risk \u2014 significant fibrosis",
+      action: "Refer to hepatologist",
+      severity: "critical",
+      referral: true,
+      interval: "Specialist evaluation"
+    };
+  }
+  if (elfVal > 0) {
+    if (elfVal < 9.8) {
+      return {
+        stage: "Low risk (ELF confirmed)",
+        action: "Reassess with FIB-4",
+        severity: "normal",
+        referral: false,
+        interval: "Every 1\u20132 years"
+      };
+    }
+    return {
+      stage: "At-risk \u2014 significant fibrosis",
+      action: "Refer to hepatologist",
+      severity: "critical",
+      referral: true,
+      interval: "Specialist evaluation"
+    };
+  }
+  return {
+    stage: "Indeterminate",
+    action: "Obtain LSM or ELF",
+    severity: "warning",
+    referral: false,
+    interval: "Needs further workup"
+  };
+}
+function getMASLDTreatmentRecommendation(referral, severity) {
+  if (referral || severity === "critical") {
+    return {
+      obesity: "ADA Fig 4.3: weight loss \u226510% (lifestyle \xB1 GLP-1 RA \xB1 metabolic surgery)",
+      diabetes: "ADA Fig 4.3: pioglitazone or GLP-1 RA preferred for glycemic management",
+      mash: "ADA Fig 4.3: resmetirom (thyroid hormone receptor-beta agonist) may be considered if biopsy-confirmed MASH with F2\u2013F3 fibrosis"
+    };
+  }
+  if (severity === "warning") {
+    return {
+      obesity: "ADA Fig 4.3: weight loss \u22655\u20137% through lifestyle modification",
+      diabetes: "ADA Fig 4.3: optimize glycemic control; GLP-1 RA may be considered",
+      mash: "ADA Fig 4.3: monitor; LSM or ELF to clarify risk"
+    };
+  }
+  return {
+    obesity: "ADA Fig 4.3: maintain healthy weight",
+    diabetes: "ADA Fig 4.3: standard glycemic management",
+    mash: "ADA Fig 4.3: routine monitoring per screening interval"
+  };
+}
+var sf;
+var init_hepatology = __esm({
+  "../../plugin/lib/hepatology.ts"() {
+    "use strict";
+    sf = (v2) => {
+      const n = parseFloat(v2);
+      return isNaN(n) ? 0 : n;
+    };
+  }
+});
+
+// src/commands/hepatology.ts
+var hepatology_exports = {};
+__export(hepatology_exports, {
+  run: () => run17
+});
+var USAGE17, run17;
+var init_hepatology2 = __esm({
+  "src/commands/hepatology.ts"() {
+    "use strict";
+    init_hepatology();
+    init_cli();
+    USAGE17 = `Usage: medprotocol hepatology [options]
+
+MASLD screening (ADA 2026 Fig 4.3): FIB-4, then LSM or ELF when FIB-4 is indeterminate.
+
+Options:
+  --age <number>         Age in years (required)
+  --ast <number>         AST in U/L (required)
+  --alt <number>         ALT in U/L (required)
+  --platelets <number>   Platelets in 10^9/L, e.g. 200 (required)
+  --lsm <number>         Liver stiffness in kPa (optional, phase 2)
+  --elf <number>         ELF score (optional, phase 2)
+  --json                 Output as JSON
+  --help                 Show this help
+
+Examples:
+  medprotocol hepatology --age 55 --ast 40 --alt 35 --platelets 200
+  medprotocol hepatology --age 55 --ast 40 --alt 35 --platelets 150 --lsm 9.2`;
+    run17 = (argv) => {
+      const values = parseFlags(argv, {
+        age: { type: "string" },
+        ast: { type: "string" },
+        alt: { type: "string" },
+        platelets: { type: "string" },
+        lsm: { type: "string" },
+        elf: { type: "string" }
+      }, USAGE17);
+      if (!values) return;
+      if (!requireFlags(values, ["age", "ast", "alt", "platelets"], USAGE17)) return;
+      const fib4 = calculateFIB4(values.age, values.ast, values.alt, values.platelets);
+      if (fib4.score === 0) return fail("Could not calculate FIB-4 \u2014 age, AST, ALT and platelets must be numbers > 0");
+      const risk = getMASLDRiskStratification(fib4.tier, values.lsm, values.elf);
+      const treatment = risk.severity === "normal" ? null : getMASLDTreatmentRecommendation(risk.referral, risk.severity);
+      const data = { fib4: fib4.score, fib4Tier: fib4.tier, ...risk, treatment };
+      printTable(data, values.json, "MASLD Screening", [
+        ["FIB-4", `${fib4.score} (${fib4.tier})`],
+        ["Stage", risk.stage],
+        ["Action", risk.action],
+        ["Interval", risk.interval],
+        ["Severity", risk.severity],
+        ...treatment ? [["Obesity", treatment.obesity], ["Diabetes", treatment.diabetes], ["MASH", treatment.mash]] : []
+      ]);
+    };
+  }
+});
+
 // src/claude-spawn.ts
 var import_node_child_process, quoteWin, claudeCommand, killClaude;
 var init_claude_spawn = __esm({
@@ -5012,20 +5191,20 @@ var init_extraction = __esm({
 
 // ../../plugin/lib/nephrology.ts
 function classifyBPInCKD(sbp, dbp) {
-  const s = sf(sbp);
-  const d = sf(dbp);
+  const s = sf2(sbp);
+  const d = sf2(dbp);
   if (s === 0 || d === 0) return { label: "\u2014", severity: "normal" };
   if (s < 120 && d < 80) return { label: "On target", severity: "normal" };
   if (s < 140 && d < 90) return { label: "Above target", severity: "warning" };
   return { label: "Uncontrolled", severity: "critical" };
 }
-var sf;
+var sf2;
 var init_nephrology = __esm({
   "../../plugin/lib/nephrology.ts"() {
     "use strict";
     init_ckd();
     init_ckd();
-    sf = (v2) => {
+    sf2 = (v2) => {
       const n = parseFloat(v2);
       return isNaN(n) ? 0 : n;
     };
@@ -7035,9 +7214,9 @@ var init_overlay_client = __esm({
 var overlay_exports = {};
 __export(overlay_exports, {
   isLocalOrigin: () => isLocalOrigin,
-  run: () => run17
+  run: () => run18
 });
-var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE17, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run17;
+var import_node_fs, import_node_path, import_node_http, import_node_child_process2, USAGE18, SKILL_BY_ACTION, normalizeSkill, within, isLocalOrigin, readQueue, statusOf, truncate, targetLabel, dispatchLine, printOrders, JSON_HEADER, AUTO_PROMPT, makeDispatcher, serve, run18;
 var init_overlay = __esm({
   "src/commands/overlay.ts"() {
     "use strict";
@@ -7048,7 +7227,7 @@ var init_overlay = __esm({
     init_claude_spawn();
     init_cli();
     init_overlay_client();
-    USAGE17 = `Usage: medprotocol overlay [options]
+    USAGE18 = `Usage: medprotocol overlay [options]
 
 The local bridge for the dev overlay. Serves the overlay client script, accepts
 selections from the browser, and drains the resulting work-order queue
@@ -7473,7 +7652,7 @@ Examples:
         }
       });
     };
-    run17 = (argv) => {
+    run18 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string" },
@@ -7486,7 +7665,7 @@ Examples:
         watch: { type: "boolean", default: false },
         clear: { type: "boolean", default: false },
         dir: { type: "string" }
-      }, USAGE17);
+      }, USAGE18);
       if (!values) return;
       const dir = (0, import_node_path.resolve)(values.dir ?? (0, import_node_path.join)(".medprotocol", "queue"));
       const json = values.json;
@@ -7557,11 +7736,11 @@ Waiting for the overlay to create it\u2026
 var extract_exports = {};
 __export(extract_exports, {
   calculations: () => calculations,
-  run: () => run18,
+  run: () => run19,
   serve: () => serve2,
   stateOf: () => stateOf
 });
-var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE18, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, sideKeys, spoken, bedsideRules, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run18;
+var import_node_child_process3, import_node_crypto, import_node_fs2, import_node_http2, import_node_path2, USAGE19, saveNote, itemsError, scaleOf, SECONDARY, shockGrid, sideKeys, spoken, bedsideRules, calculations, pageData, readJson, stateOf, children, TIMEOUT_MS, askClaude, invalid, parseReply, NO_TOOLS, EXTRACT_PROMPT, VERIFY_PROMPT, runJob, MAX_BODY, serve2, run19;
 var init_extract = __esm({
   "src/commands/extract.ts"() {
     "use strict";
@@ -7589,7 +7768,7 @@ var init_extract = __esm({
     init_cli();
     init_extract_artifact();
     init_overlay();
-    USAGE18 = `Usage: medprotocol extract --note <file> --items <file> [options]
+    USAGE19 = `Usage: medprotocol extract --note <file> --items <file> [options]
        medprotocol extract --save <file>
        medprotocol extract --serve [--port <number>]
 
@@ -8143,7 +8322,7 @@ ${check}`));
       });
       return server;
     };
-    run18 = (argv) => {
+    run19 = (argv) => {
       const values = parseFlags(argv, {
         serve: { type: "boolean", default: false },
         port: { type: "string", default: "7332" },
@@ -8151,7 +8330,7 @@ ${check}`));
         note: { type: "string" },
         items: { type: "string" },
         artifact: { type: "string" }
-      }, USAGE18);
+      }, USAGE19);
       if (!values) return;
       if (values.serve) {
         const port = Number(values.port);
@@ -8175,7 +8354,7 @@ ${check}`));
         printResult({ dir, existed }, values.json, () => dir + (existed ? "  (already saved)" : ""));
         return;
       }
-      if (!values.note || !values.items) return fail("--note and --items are required", USAGE18);
+      if (!values.note || !values.items) return fail("--note and --items are required", USAGE19);
       let note;
       let items;
       try {
@@ -8851,10 +9030,10 @@ __export(syndromic_exports, {
   keepsNumbers: () => keepsNumbers,
   optionsFor: () => optionsFor,
   readWant: () => readWant,
-  run: () => run19,
+  run: () => run20,
   serve: () => serve3
 });
-var import_node_child_process4, import_node_http3, USAGE19, words, ACRONYMS, label, spoken2, rows, assess, optionsFor, readWant, FIRST_LINE, RULES, SYSTEM, numbersOf, keepsNumbers, draftNote, children2, askClaude2, MAX_BODY2, serve3, run19;
+var import_node_child_process4, import_node_http3, USAGE20, words, ACRONYMS, label, spoken2, rows, assess, optionsFor, readWant, FIRST_LINE, RULES, SYSTEM, numbersOf, keepsNumbers, draftNote, children2, askClaude2, MAX_BODY2, serve3, run20;
 var init_syndromic = __esm({
   "src/commands/syndromic.ts"() {
     "use strict";
@@ -8871,7 +9050,7 @@ var init_syndromic = __esm({
     init_syndromic_page();
     init_syndromic_patient();
     init_overlay();
-    USAGE19 = `Usage: medprotocol syndromic --serve [--port <number>]
+    USAGE20 = `Usage: medprotocol syndromic --serve [--port <number>]
 
 Synthetic patients for the six bedside rules (shock, volume, heart failure, chest, focal pulmonary,
 respiratory failure), on a local page: generate one at random or with the results you choose, read the
@@ -9080,10 +9259,10 @@ ${JSON.stringify(findings)}`;
       });
       return server;
     };
-    run19 = (argv) => {
-      const values = parseFlags(argv, { serve: { type: "boolean", default: false }, port: { type: "string", default: "7333" } }, USAGE19);
+    run20 = (argv) => {
+      const values = parseFlags(argv, { serve: { type: "boolean", default: false }, port: { type: "string", default: "7333" } }, USAGE20);
       if (!values) return;
-      if (!values.serve) return fail("--serve is required", USAGE19);
+      if (!values.serve) return fail("--serve is required", USAGE20);
       if (values.json) return fail("--serve takes no other options but --port");
       const port = Number(values.port);
       if (!Number.isInteger(port) || port < 0 || port > 65535) return fail("--port must be a number from 0 to 65535");
@@ -9097,7 +9276,7 @@ var version = "1.7.0";
 
 // src/index.ts
 init_cli();
-var USAGE20 = `medprotocol \u2014 Medical calculations from the terminal
+var USAGE21 = `medprotocol \u2014 Medical calculations from the terminal
 
 Usage: medprotocol <command> [options]
 
@@ -9118,6 +9297,7 @@ Commands:
   respiratory-failure  Respiratory failure and distress, two verdicts (gas exchange, work of breathing)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
+  hepatology       MASLD screening (FIB-4, LSM/ELF, referral; ADA 2026)
   extract          Check extracted values against the note they came from
   syndromic        Synthetic patients for the six bedside rules, on a local page (--serve)
   overlay          Drain the dev overlay work-order queue (.medprotocol/queue/)
@@ -9156,6 +9336,7 @@ Examples:
   medprotocol diabetes t1-vs-t2 --age 25 --bmi 22 --autoantibodies --c-peptide 150
   medprotocol diabetes t2d-screen --age 40 --bmi 28 --hypertension
   medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160
+  medprotocol hepatology --age 55 --ast 40 --alt 35 --platelets 200
   medprotocol extract --note note.txt --items extraction.json
   medprotocol syndromic --serve
   medprotocol overlay --drain`;
@@ -9167,7 +9348,7 @@ if (command === "--version" || command === "-v") {
   process.exit(0);
 }
 if (!command || command === "--help" || command === "-h") {
-  process.stdout.write(USAGE20 + "\n");
+  process.stdout.write(USAGE21 + "\n");
   process.exit(0);
 }
 var commands = {
@@ -9187,6 +9368,7 @@ var commands = {
   "respiratory-failure": () => Promise.resolve().then(() => (init_respiratory_failure2(), respiratory_failure_exports)),
   ckd: () => Promise.resolve().then(() => (init_ckd2(), ckd_exports)),
   diabetes: () => Promise.resolve().then(() => (init_diabetes(), diabetes_exports)),
+  hepatology: () => Promise.resolve().then(() => (init_hepatology2(), hepatology_exports)),
   extract: () => Promise.resolve().then(() => (init_extract(), extract_exports)),
   syndromic: () => Promise.resolve().then(() => (init_syndromic(), syndromic_exports)),
   overlay: () => Promise.resolve().then(() => (init_overlay(), overlay_exports))

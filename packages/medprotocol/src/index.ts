@@ -24,6 +24,7 @@ Commands:
   respiratory-failure  Respiratory failure and distress, two verdicts (gas exchange, work of breathing)
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
+  hepatology       MASLD screening (FIB-4, LSM/ELF, referral; ADA 2026)
   extract          Check extracted values against the note they came from
   syndromic        Synthetic patients for the six bedside rules, on a local page (--serve)
   overlay          Drain the dev overlay work-order queue (.medprotocol/queue/)
@@ -62,6 +63,7 @@ Examples:
   medprotocol diabetes t1-vs-t2 --age 25 --bmi 22 --autoantibodies --c-peptide 150
   medprotocol diabetes t2d-screen --age 40 --bmi 28 --hypertension
   medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160
+  medprotocol hepatology --age 55 --ast 40 --alt 35 --platelets 200
   medprotocol extract --note note.txt --items extraction.json
   medprotocol syndromic --serve
   medprotocol overlay --drain`;
@@ -96,6 +98,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   "respiratory-failure": () => import("./commands/respiratory-failure"),
   ckd: () => import("./commands/ckd"),
   diabetes: () => import("./commands/diabetes"),
+  hepatology: () => import("./commands/hepatology"),
   extract: () => import("./commands/extract"),
   syndromic: () => import("./commands/syndromic"),
   overlay: () => import("./commands/overlay"),

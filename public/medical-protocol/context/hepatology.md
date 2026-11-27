@@ -109,7 +109,15 @@ Every generated patient is labelled "Synthetic patient" with a 4-character code,
 
 - **Platelets in 10⁹/L** (e.g. 200), not /µL
 - **Treatment text is shown only for warning/critical**
-- No CLI command for this module yet
+
+---
+
+## CLI
+
+```bash
+medprotocol hepatology --age 55 --ast 40 --alt 35 --platelets 200
+medprotocol hepatology --age 55 --ast 40 --alt 35 --platelets 150 --lsm 9.2
+```
 
 ---
 

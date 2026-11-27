@@ -23,6 +23,7 @@ The `medprotocol` quick calculator is available for fast clinical calculations w
 | `extract` | Checks extracted values against the note they came from (quote in note, value in quote) — no interpretation; `--save <file>` stores a note in `extractions/<hash>/`, `--artifact <file>` writes a page of it (with BMI, PaO2/FiO2, acid-base and the CKD results when the note has their inputs), `--serve` (with `--port <number>`, default 7332) starts the local extraction page | `medprotocol extract --note note.txt --items extraction.json` |
 | `syndromic` | `--serve` (with `--port <number>`, default 7333) starts the local synthetic patients page: a patient for the six bedside rules, at random or with chosen results, its note drafted by `claude -p` (Haiku, no tools), and each rule's result from plugin/lib | `medprotocol syndromic --serve` |
 | `ckd` | CKD evaluation (eGFR, KDIGO staging, KFRE) | `medprotocol ckd egfr --creatinine 1.2 --age 55 --sex male` |
+| `hepatology` | MASLD screening: FIB-4 tier, then LSM or ELF when indeterminate, risk stage and referral (ADA 2026 Fig 4.3) | `medprotocol hepatology --age 55 --ast 40 --alt 35 --platelets 200` |
 
 ## When to Suggest Calculator vs Full Interface
 
