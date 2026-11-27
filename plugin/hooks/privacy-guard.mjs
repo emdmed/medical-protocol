@@ -17,7 +17,7 @@ function deny(reason) {
       permissionDecisionReason:
         "PRIVACY GUARD: " +
         reason +
-        " All patient data must stay on this machine. If the doctor explicitly requested this action, ask them to confirm they understand the privacy implications.",
+        " All patient data must stay on this machine. If the user explicitly requested this action, ask them to confirm they understand the privacy implications.",
     },
   };
   process.stdout.write(JSON.stringify(out, null, 2) + "\n");
