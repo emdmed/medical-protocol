@@ -88,6 +88,7 @@ Already have an app? Run `/medical-protocol:overlay`, then hover over any part o
 | `start` | Describe what you need. Everything starts here. |
 | `extract` | Pull the values out of a clinical note, each with the words it came from |
 | `extract-page` | Open the extraction page in your browser: paste a note, review the values, accept or reject corrections |
+| `syndromic-page` | Open the synthetic patients page in your browser: make a patient at random or with the results you choose, read its note, see what each of the six bedside rules says |
 | `cases` | Practise with synthetic worked cases: guess, enter them in your screen, see the answer explained |
 | `demo` | Get a prototype ready to show: checked screens, a generated synthetic patient on each, screenshots and a walkthrough in `demo/` |
 | `preferences` | Set what you are learning: level, specialty, case population, guidelines and units |
@@ -154,7 +155,7 @@ Quick SOFA (qSOFA)
   GCS               13
 ```
 
-Commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `shock`, `ckd`, `diabetes`, `extract`, `overlay`. Add `--json` to any command, `--help` for its options. `medprotocol extract --serve` starts the local extraction page (`--port <number>` to change the port).
+Commands: `bmi`, `abg`, `vitals`, `pafi`, `dka`, `water-balance`, `cardiology`, `sepsis`, `shock`, `ckd`, `diabetes`, `extract`, `syndromic`, `overlay`. Add `--json` to any command, `--help` for its options. `medprotocol extract --serve` starts the local extraction page and `medprotocol syndromic --serve` the synthetic patients page (`--port <number>` to change the port).
 
 ## Repository layout
 

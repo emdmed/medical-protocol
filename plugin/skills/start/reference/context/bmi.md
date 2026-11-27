@@ -29,7 +29,7 @@ Logic: `lib/medprotocol/bmi.ts` — import from `@/lib/medprotocol/bmi`. Build: 
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
 | Scenario | Target BMI (kg/m²) |
 |---|---|

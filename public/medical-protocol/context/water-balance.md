@@ -35,7 +35,7 @@ Logic: `lib/medprotocol/water-balance.ts` — import from `@/lib/medprotocol/wat
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
 | Scenario | Oral (mL) | IV (mL) | Urine (mL) | Stools |
 |---|---|---|---|---|

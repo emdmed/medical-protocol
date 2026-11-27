@@ -55,15 +55,15 @@ Every select defaults to `not_assessed`. Never preselect a finding.
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
-| Scenario | SBP (mmHg) | Minutes | Skin | JVP (cmH2O) | Capillary refill | Pulse | Lungs |
-|---|---|---|---|---|---|---|---|
-| Hypovolaemic | 70–88 | 20–120 | cool | normal_or_low, 1–5 | delayed | thready | clear |
-| Cardiogenic | 72–90 | 30–180 | cool | elevated, 10–18 | delayed | thready | bilateral_crackles |
-| Septic (distributive) | 72–90 | 30–180 | warm | normal_or_low, 2–7 | brisk | bounding | clear |
+| Scenario | SBP (mmHg) | Minutes | Skin | JVP (cmH2O) | Capillary refill | Pulse | Lungs | Expected verdict |
+|---|---|---|---|---|---|---|---|---|
+| Hypovolaemic | 70–88 | 30–120 | cool | normal_or_low, 1–5 | delayed | thready | clear | hypovolemic |
+| Cardiogenic | 72–88 | 30–180 | cool | elevated, 10–18 | delayed | thready | bilateral_crackles | cardiogenic |
+| Septic (distributive) | 72–88 | 30–180 | warm | normal_or_low, 2–7 | brisk | bounding | clear | septic |
 
-One patient in five has one supporting finding swapped for one pointing elsewhere (for example septic with `delayed` refill); one in five has one finding `not_assessed`. Fill either the JVP impression or the measured height, not both. Rounding: whole numbers.
+SBP stays below 90 and minutes at 30 or more, or the rule declines the patient as outside its cohort. One patient in five has one supporting finding swapped for one pointing elsewhere (for example septic with `delayed` refill); one in five has one finding `not_assessed`. Fill either the JVP impression or the measured height, not both. Rounding: whole numbers.
 
 Every generated patient is labelled "Synthetic patient" with a 4-character code, never a name. Results still come only from the lib.
 

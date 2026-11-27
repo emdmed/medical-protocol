@@ -40,7 +40,7 @@ All five screens are reading-based: latest result on top, history table below, a
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
 Generate for the screen that is open.
 

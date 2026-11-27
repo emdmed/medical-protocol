@@ -57,14 +57,14 @@ Every select defaults to `not_assessed`. Never preselect a finding. Group the fo
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
-| Scenario | JVP | Bilateral rales | S3 | HJR | Ankle oedema | Hepatomegaly | Pleural effusion |
-|---|---|---|---|---|---|---|---|
-| Euvolaemic | normal_or_low, 1–5 cmH2O | absent | absent | absent | absent | absent | absent |
-| Volume overload | elevated, 10–18 cmH2O | present | present 2 in 5 | present 7 in 10 | present | present 2 in 5 | present 2 in 5 |
+| Scenario | JVP | Bilateral rales | S3 | HJR | Ankle oedema | Hepatomegaly | Pleural effusion | Expected verdict |
+|---|---|---|---|---|---|---|---|---|
+| Euvolaemic | normal_or_low, 1–5 cmH2O | absent | absent | absent | absent | absent | absent | no_overload |
+| Volume overload | elevated, 10–18 cmH2O | present | present 2 in 5 | present 7 in 10 | present | present 2 in 5 | present 2 in 5 | overload |
 
-A third scenario, **partial picture**: JVP elevated or normal_or_low, two or three of the overload signs present, the rest absent.
+A third scenario, **partial picture**: JVP elevated or normal_or_low, two or three of the overload signs present, the rest absent. Expected verdict: either `overload` or `no_overload`, never `indeterminate`.
 
 One patient in four has one or two signs `not_assessed`. Fill either the JVP impression or the measured height, not both. Rounding: whole numbers.
 

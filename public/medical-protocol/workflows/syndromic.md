@@ -35,6 +35,8 @@ Ask the user:
 
 - "Should I read the findings from a clinical note, or will you enter them?" (Default: from a note)
 
+To practise on generated patients instead, with no note of their own, use the synthetic patients page (`/medical-protocol:syndromic-page`, `medprotocol syndromic --serve`).
+
 Do NOT ask about thresholds, which findings count, or technical preferences.
 
 ### From a clinical note

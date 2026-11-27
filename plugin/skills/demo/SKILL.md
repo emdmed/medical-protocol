@@ -27,7 +27,7 @@ For each screen, run browser QA with `../qa/SKILL.md` (recipe, qa-runner, fix, r
 
 For each screen that passed, using the commands in `../../agents/qa-runner.md`:
 
-1. Open its route at 1280×800 and click **Generate patient** (building.md §3). No such button → route to `../modify/SKILL.md` to add it, then come back. Press it again until the scenario is one worth showing (not the normal one, unless it is the only screen).
+1. Open its route at 1280×800 and set **How** to "Choose the results", set a result worth showing (not the normal one, unless it is the only screen) and click **Generate patient with these results** (building.md §3). No such button or select → route to `../modify/SKILL.md` to add it, then come back.
 2. Read the generated inputs, run them through the CLI with `--json`, and check the screen shows the same results.
 3. Check "Learning prototype — not for patient care." and "Synthetic patient" are visible.
 4. Save a screenshot to `demo/<nn>-<module>.png` (`01-bmi.png`, …). Add a second one at 768×1024 if the layout changes on a tablet.

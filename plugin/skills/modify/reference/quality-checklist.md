@@ -40,7 +40,7 @@ UI SDK components are unstyled, so the project's theme tokens carry the look.
 - Clinical values: every number, category and severity on screen comes from a `lib/medprotocol` function — no thresholds or calculations in the UI (building.md §4)
 - Units next to every value; guideline source shown when the lib provides one
 - Loading/empty states: show a meaningful empty state when no data exists (not a blank screen)
-- **Generate patient** (or **Generate patients**) gives different, credible values on each press, within the module's generator section, labelled "Synthetic patient" and a code; the results match the CLI for the generated inputs; **Clear** empties it (building.md §3)
+- **Generate random patient** (or **Generate patients**) gives different, credible values on each press, within the module's generator section, labelled "Synthetic patient" and a code; the results match the CLI for the generated inputs; results set first give a patient with those results; **Clear** empties it (building.md §3)
 
 ## Dynamic Items
 

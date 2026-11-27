@@ -29,7 +29,7 @@ npx vitest run tests/vital-signs/     # Run a single test directory
 npx vitest run tests/bmi/bmi.test.ts  # Run a single test file
 npm run version:bump 0.4.0            # Bump version everywhere + rebuild
 npm run build                         # Build CLI → plugin/scripts/medprotocol.cjs, sync reference docs into skills (commit both)
-node plugin/scripts/medprotocol.cjs <cmd> [opts]  # CLI calculators (abg, bmi, cardiology, ckd, diabetes, dka, extract, pafi, sepsis, shock, vitals, water-balance, overlay)
+node plugin/scripts/medprotocol.cjs <cmd> [opts]  # CLI calculators (abg, bmi, cardiology, ckd, diabetes, dka, extract, pafi, sepsis, shock, syndromic, vitals, water-balance, overlay)
 ```
 
 No linter. TypeScript strict mode (`tsconfig.json`).

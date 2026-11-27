@@ -58,9 +58,9 @@ interface DKAPatientData { weight: string; glucoseUnit: "mmol" | "mgdl"; reading
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
-**Generate patient** creates the weight and a course of 4–6 hourly readings.
+**Generate random patient** creates the weight and a course of 4–6 hourly readings.
 
 First reading: weight 50–100 kg; glucose 300–700 mg/dL; ketones 3.0–7.0 mmol/L; HCO3 5–15; pCO2 by Winter's (1.5 × HCO3 + 8, ± 1); pH from Henderson–Hasselbalch (6.1 + log10(HCO3 / (0.03 × pCO2))); Na⁺ 128–140; anion gap target 20–30, so Cl⁻ = Na⁺ − HCO3 − gap; albumin 3.5–4.5; K⁺ 4.0–6.0; GCS 14–15; insulin 0.1 U/kg/h; urine 60–150 mL per hour.
 

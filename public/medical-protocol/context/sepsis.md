@@ -62,9 +62,9 @@ interface SepsisPatientData { weight: string; baselineSOFA: string; readings: Se
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
-**Generate patient** creates the header and 2–3 readings 2–6 hours apart. Weight 50–110 kg; baseline SOFA 0 (1–2 with chronic disease, 1 in 4); suspected infection on; source from: pneumonia, urinary tract, abdominal, skin and soft tissue.
+**Generate random patient** creates the header and 2–3 readings 2–6 hours apart. Weight 50–110 kg; baseline SOFA 0 (1–2 with chronic disease, 1 in 4); suspected infection on; source from: pneumonia, urinary tract, abdominal, skin and soft tissue.
 
 | Scenario | PaO2/FiO2 | Platelets | Bilirubin | MAP / vasopressor | GCS | Creatinine | Lactate |
 |---|---|---|---|---|---|---|---|

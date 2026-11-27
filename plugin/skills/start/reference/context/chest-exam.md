@@ -57,17 +57,17 @@ Never preselect a sign: an empty select is "not recorded", which the rule reads 
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
-Examination is `performed`. Pick one side for the focal syndrome (right or left); the other side gets the normal set.
+Examination is `performed`. Pick one side for the focal syndrome (right or left); the other side gets the normal set, expected `no_syndrome`.
 
-| Scenario | Trachea | Expansion | Percussion | Breath sounds | Added sounds | Vocal resonance |
-|---|---|---|---|---|---|---|
-| Normal (both sides) | central | normal | resonant | vesicular | none | normal |
-| Consolidation | central | reduced | dull | bronchial | crackles | increased |
-| Pleural effusion | central (deviated away when large, 1 in 4) | reduced | stony_dull | reduced or absent | none | reduced |
-| Collapse (atelectasis) | deviated toward the side | reduced | dull | reduced | none | reduced |
-| Pneumothorax | central (deviated away, 1 in 4) | reduced | hyperresonant | reduced or absent | none | reduced |
+| Scenario | Trachea | Expansion | Percussion | Breath sounds | Added sounds | Vocal resonance | Expected verdict (that side) |
+|---|---|---|---|---|---|---|---|
+| Normal (both sides) | central | normal | resonant | vesicular | none | normal | no_syndrome (both sides) |
+| Consolidation | central | reduced | dull | bronchial | crackles | increased | consolidation |
+| Pleural effusion | central (deviated away when large, 1 in 4) | reduced | stony_dull | reduced or absent | none | reduced | pleural_effusion |
+| Collapse (atelectasis) | deviated toward the side | reduced | dull | reduced | none | reduced | atelectasis |
+| Pneumothorax | central (deviated away, 1 in 4) | reduced | hyperresonant | reduced or absent | none | reduced | pneumothorax |
 
 Couplings: "deviated toward" the right side is `deviated_right`, away from it is `deviated_left`. One patient in four has one or two signs left unset, to show an incomplete examination. Use only the options in `SIDE_FINDINGS`, `TRACHEA` and `CHEST_EXAMINATION`.
 

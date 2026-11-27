@@ -25,6 +25,7 @@ Commands:
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
+  syndromic        Synthetic patients for the six bedside rules, on a local page (--serve)
   overlay          Drain the dev overlay work-order queue (.medprotocol/queue/)
 
 Global options:
@@ -62,6 +63,7 @@ Examples:
   medprotocol diabetes t2d-screen --age 40 --bmi 28 --hypertension
   medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160
   medprotocol extract --note note.txt --items extraction.json
+  medprotocol syndromic --serve
   medprotocol overlay --drain`;
 
 const command = process.argv[2];
@@ -95,6 +97,7 @@ const commands: Record<string, () => Promise<{ run: (argv: string[]) => void }>>
   ckd: () => import("./commands/ckd"),
   diabetes: () => import("./commands/diabetes"),
   extract: () => import("./commands/extract"),
+  syndromic: () => import("./commands/syndromic"),
   overlay: () => import("./commands/overlay"),
 };
 

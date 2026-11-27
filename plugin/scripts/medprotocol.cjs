@@ -15,9 +15,9 @@ var formatTable, formatHeader, formatError, printResult;
 var init_format = __esm({
   "../../plugin/lib/format.ts"() {
     "use strict";
-    formatTable = (rows) => {
-      const maxLabel = Math.max(...rows.map(([label]) => label.length));
-      return rows.map(([label, value]) => `  ${label.padEnd(maxLabel)}  ${value}`).join("\n");
+    formatTable = (rows2) => {
+      const maxLabel = Math.max(...rows2.map(([label2]) => label2.length));
+      return rows2.map(([label2, value]) => `  ${label2.padEnd(maxLabel)}  ${value}`).join("\n");
     };
     formatHeader = (title) => {
       return `
@@ -66,7 +66,7 @@ var init_cli = __esm({
       }
       return values;
     };
-    printTable = (data, json, title, rows) => printResult(data, json, () => [formatHeader(title), formatTable(rows)].join("\n"));
+    printTable = (data, json, title, rows2) => printResult(data, json, () => [formatHeader(title), formatTable(rows2)].join("\n"));
     runSubcommand = (argv, usage, subcommands) => {
       const [subcommand, ...subArgs] = argv;
       if (!subcommand || subcommand === "--help" || subcommand === "-h") {
@@ -577,27 +577,27 @@ Examples:
           deltaRatioInterpretation: result.deltaRatioInterpretation
         }
       };
-      const rows = [
+      const rows2 = [
         ["Disorder", result.disorder],
         ["Compensation", result.compensation],
         ["Interpretation", result.interpretation]
       ];
       if (result.expectedValues?.low && result.expectedValues?.high) {
-        rows.push(["Expected range", `${result.expectedValues.low}\u2013${result.expectedValues.high}`]);
+        rows2.push(["Expected range", `${result.expectedValues.low}\u2013${result.expectedValues.high}`]);
       }
       if (result.anionGap !== null) {
-        rows.push(["Anion Gap", `${result.anionGap} (${result.agStatus})`]);
+        rows2.push(["Anion Gap", `${result.anionGap} (${result.agStatus})`]);
       }
       if (result.correctedAG !== null) {
-        rows.push(["Corrected AG", result.correctedAG]);
+        rows2.push(["Corrected AG", result.correctedAG]);
       }
       if (result.deltaRatio !== null) {
-        rows.push(["Delta Ratio", `${result.deltaRatio} \u2014 ${result.deltaRatioInterpretation}`]);
+        rows2.push(["Delta Ratio", `${result.deltaRatio} \u2014 ${result.deltaRatioInterpretation}`]);
       }
       if (result.additionalDisorders.length > 0) {
-        rows.push(["Additional", result.additionalDisorders.join(", ")]);
+        rows2.push(["Additional", result.additionalDisorders.join(", ")]);
       }
-      printTable(data, values.json, "ABG Analysis", rows);
+      printTable(data, values.json, "ABG Analysis", rows2);
     };
   }
 });
@@ -1011,13 +1011,13 @@ var init_severity = __esm({
     init_temperature_validations();
     init_blood_oxygen_validations();
     NORMAL = { severity: "normal", label: null };
-    critical = (label) => ({
+    critical = (label2) => ({
       severity: "critical",
-      label
+      label: label2
     });
-    warning = (label) => ({
+    warning = (label2) => ({
       severity: "warning",
-      label
+      label: label2
     });
     CRITICAL_LIMITS = {
       BLOOD_PRESSURE: {
@@ -1119,7 +1119,7 @@ Examples:
   medprotocol vitals --bp 150/95 --hr 110 --rr 22 --temp 101.2 --fahrenheit
   medprotocol vitals --spo2 92 --fio2 40 --json`;
     severityFields = (s) => ({ severity: s.severity, ...s.severity === "critical" && { alert: s.label } });
-    severityLabel = (label, s) => s.severity === "critical" ? `${s.label}, critical` : label;
+    severityLabel = (label2, s) => s.severity === "critical" ? `${s.label}, critical` : label2;
     run4 = (argv) => {
       const values = parseFlags(argv, {
         bp: { type: "string" },
@@ -1249,11 +1249,11 @@ Examples:
               severity,
               ...ratio && { spO2FiO2Ratio: parseFloat(ratio) }
             };
-            let label = `${spo22}%`;
-            if (severity !== "normal") label += ` (${severity})`;
-            if (fio2Val !== 21) label += ` on FiO2 ${fio2Val}%`;
-            if (ratio) label += ` \u2014 SpO2/FiO2: ${ratio}`;
-            humanRows.push(["SpO2", label]);
+            let label2 = `${spo22}%`;
+            if (severity !== "normal") label2 += ` (${severity})`;
+            if (fio2Val !== 21) label2 += ` on FiO2 ${fio2Val}%`;
+            if (ratio) label2 += ` \u2014 SpO2/FiO2: ${ratio}`;
+            humanRows.push(["SpO2", label2]);
           }
         }
       } else if (values.fio2) {
@@ -1472,7 +1472,7 @@ Examples:
       if (!values.glucose) return fail("--glucose is required", USAGE6);
       const unit = values.unit === "mmol" ? "mmol" : "mgdl";
       const unitLabel = unit === "mgdl" ? "mg/dL" : "mmol/L";
-      const rows = [
+      const rows2 = [
         ["Glucose", `${values.glucose} ${unitLabel}`]
       ];
       const data = {
@@ -1487,8 +1487,8 @@ Examples:
         );
         if (rate) {
           const onTarget = isGlucoseOnTarget(rate, unit);
-          rows.push(["Glucose rate", `${rate} ${unitLabel}/hr`]);
-          rows.push(["On target", onTarget ? "Yes" : "No"]);
+          rows2.push(["Glucose rate", `${rate} ${unitLabel}/hr`]);
+          rows2.push(["On target", onTarget ? "Yes" : "No"]);
           data.glucoseRate = parseFloat(rate);
           data.glucoseOnTarget = onTarget;
         }
@@ -1500,10 +1500,10 @@ Examples:
           values.bicarbonate,
           values.ph
         );
-        rows.push(["Ketones", `${values.ketones} mmol/L`]);
-        rows.push(["Bicarbonate", `${values.bicarbonate} mEq/L`]);
-        rows.push(["pH", values.ph]);
-        rows.push(["DKA Resolved", resolution.resolved ? "Yes" : "No"]);
+        rows2.push(["Ketones", `${values.ketones} mmol/L`]);
+        rows2.push(["Bicarbonate", `${values.bicarbonate} mEq/L`]);
+        rows2.push(["pH", values.ph]);
+        rows2.push(["DKA Resolved", resolution.resolved ? "Yes" : "No"]);
         data.ketones = parseFloat(values.ketones);
         data.bicarbonate = parseFloat(values.bicarbonate);
         data.pH = parseFloat(values.ph);
@@ -1524,12 +1524,12 @@ Examples:
           unit,
           dkaResolved
         );
-        rows.push(["Insulin rate", `${values["insulin-rate"]} U/hr`]);
-        rows.push(["Guideline", suggestion]);
+        rows2.push(["Insulin rate", `${values["insulin-rate"]} U/hr`]);
+        rows2.push(["Guideline", suggestion]);
         data.insulinRate = parseFloat(values["insulin-rate"]);
         data.insulinSuggestion = suggestion;
       }
-      printTable(data, values.json, "DKA Assessment", rows);
+      printTable(data, values.json, "DKA Assessment", rows2);
     };
   }
 });
@@ -1874,8 +1874,8 @@ Examples:
       }, USAGE7);
       if (!values) return;
       if (!requireFlags(values, ["history", "ecg", "age", "risk-factors", "troponin"], USAGE7)) return;
-      const parseScore = (v) => {
-        const n = parseInt(v, 10);
+      const parseScore = (v2) => {
+        const n = parseInt(v2, 10);
         if (n === 0 || n === 1 || n === 2) return n;
         return 0;
       };
@@ -1941,7 +1941,7 @@ Examples:
         severity,
         inputs
       };
-      const factors = Object.entries(inputs).filter(([, v]) => v).map(([k]) => k).join(", ");
+      const factors = Object.entries(inputs).filter(([, v2]) => v2).map(([k]) => k).join(", ");
       printTable(data, values.json, "CHA\u2082DS\u2082-VASc Score", [
         ["Score", `${score}/9`],
         ["Category", category],
@@ -2020,12 +2020,12 @@ var init_sepsis = __esm({
       return 0;
     };
     calculateCoagulationSOFA = (platelets) => {
-      const p = safeParseFloat(platelets);
-      if (platelets === "" || p <= 0) return 0;
-      if (p <= 50) return 4;
-      if (p <= 80) return 3;
-      if (p <= 100) return 2;
-      if (p <= 150) return 1;
+      const p2 = safeParseFloat(platelets);
+      if (platelets === "" || p2 <= 0) return 0;
+      if (p2 <= 50) return 4;
+      if (p2 <= 80) return 3;
+      if (p2 <= 100) return 2;
+      if (p2 <= 150) return 1;
       return 0;
     };
     calculateLiverSOFA = (bilirubin) => {
@@ -2321,7 +2321,7 @@ Examples:
         severity,
         baseline: parseFloat(values.baseline) || 0
       };
-      const rows = [
+      const rows2 = [
         ["SOFA Score", `${score}/24`],
         ["Delta", `${delta >= 0 ? "+" : ""}${delta}`],
         ["Severity", severityLevel]
@@ -2329,7 +2329,7 @@ Examples:
       if (values.infection) {
         const isSepsis = assessSepsis(score, delta, true);
         data.sepsis = isSepsis;
-        rows.push(["Sepsis", isSepsis ? "Yes" : "No"]);
+        rows2.push(["Sepsis", isSepsis ? "Yes" : "No"]);
         if (isSepsis && values.lactate !== "") {
           const vasopressorsNeeded = hasVasopressors(
             values.dopamine,
@@ -2341,11 +2341,11 @@ Examples:
           const septicShock = assessSepticShock(true, vasopressorsNeeded, values.lactate);
           data.septicShock = septicShock;
           data.lactate = parseFloat(values.lactate);
-          rows.push(["Lactate", `${values.lactate} mmol/L`]);
-          rows.push(["Septic Shock", septicShock ? "Yes" : "No"]);
+          rows2.push(["Lactate", `${values.lactate} mmol/L`]);
+          rows2.push(["Septic Shock", septicShock ? "Yes" : "No"]);
         }
       }
-      printTable(data, values.json, "SOFA-2 Score (Sepsis-3)", rows);
+      printTable(data, values.json, "SOFA-2 Score (Sepsis-3)", rows2);
     };
     runQSOFA = (argv) => {
       const values = parseFlags(argv, {
@@ -2923,7 +2923,7 @@ Examples:
         caveat: HF_CAVEAT,
         sources
       };
-      const row = (label, items) => items.length ? [[label, items.join(", ")]] : [];
+      const row = (label2, items) => items.length ? [[label2, items.join(", ")]] : [];
       printTable(data, Boolean(values.json), "Heart Failure (bedside examination)", [
         ["Verdict", data.label],
         ...row("Why", data.reasonText ? [data.reasonText] : []),
@@ -2994,7 +2994,7 @@ var init_chest_exam = __esm({
     patternsOf = (e) => {
       if (!examined(e)) return [];
       const both = (set) => SIDES.every((s) => set.includes(e[s]?.addedSounds ?? ""));
-      return PATTERNS.filter((p) => both(p === "bronchial_obstruction" ? WHEEZE : CRACKLES));
+      return PATTERNS.filter((p2) => both(p2 === "bronchial_obstruction" ? WHEEZE : CRACKLES));
     };
     unexplainedSigns = (s, patterns) => {
       const out = [];
@@ -3019,8 +3019,8 @@ var init_chest_exam = __esm({
       const toward = pull === null ? { met: false, missing: [{ sign: "trachea", values: [`deviated_${side}`] }] } : pull === "toward" ? { met: true, recorded: true } : { met: false, missing: [] };
       const percussion = s.percussion === void 0 ? { met: true, recorded: false } : is("percussion", ["dull"]);
       const b = is("breathSounds", ["bronchial"]);
-      const v = is("vocalResonance", ["increased"]);
-      const sign = b.met ? b : v.met ? v : { met: false, missing: [...b.missing, ...v.missing] };
+      const v2 = is("vocalResonance", ["increased"]);
+      const sign = b.met ? b : v2.met ? v2 : { met: false, missing: [...b.missing, ...v2.missing] };
       return [
         ["pneumothorax", [is("percussion", ["hyperresonant"]), is("breathSounds", QUIET), notToward]],
         ["pleural_effusion", [is("percussion", ["stony_dull"]), notToward]],
@@ -3117,17 +3117,17 @@ Examples:
         ...result,
         rightText: describe(result.right),
         leftText: describe(result.left),
-        patternText: result.patterns.map((p) => CHEST_PATTERN_LABELS[p]),
+        patternText: result.patterns.map((p2) => CHEST_PATTERN_LABELS[p2]),
         caveat: CHEST_CAVEAT
       };
       const sideRows = (side2) => {
         const a = result[side2];
         const name = side2 === "right" ? "Right" : "Left";
-        const rows = [[name, CHEST_LABELS[a.verdict]]];
-        if (a.reason) rows.push([`  Why`, CHEST_REASONS[a.reason]]);
-        if (a.unexplained.length) rows.push([`  Unexplained`, a.unexplained.map((u) => `${CHEST_SIGN_LABELS[u.sign]} ${u.value}`).join(", ")]);
-        for (const u of a.unrecorded) rows.push([`  ${CHEST_LABELS[u.syndrome]} if`, `${CHEST_SIGN_LABELS[u.sign]} ${u.values.join(" or ")}`]);
-        return rows;
+        const rows2 = [[name, CHEST_LABELS[a.verdict]]];
+        if (a.reason) rows2.push([`  Why`, CHEST_REASONS[a.reason]]);
+        if (a.unexplained.length) rows2.push([`  Unexplained`, a.unexplained.map((u) => `${CHEST_SIGN_LABELS[u.sign]} ${u.value}`).join(", ")]);
+        for (const u of a.unrecorded) rows2.push([`  ${CHEST_LABELS[u.syndrome]} if`, `${CHEST_SIGN_LABELS[u.sign]} ${u.values.join(" or ")}`]);
+        return rows2;
       };
       printTable(data, Boolean(values.json), "Chest Examination (bedside syndromes)", [
         ...sideRows("right"),
@@ -3197,7 +3197,7 @@ var init_focal_pulmonary = __esm({
       else if (examSide && consolidationSign(side(examSide)) && !imagingHas("consolidation", "absent")) {
         pneumoniaEvidence = symptomatic ? "clinically-suspected" : "physical-sign-only";
       }
-      const either = (p) => SIDES.some((s) => p(side(s)));
+      const either = (p2) => SIDES.some((s) => p2(side(s)));
       const differential = DIFFERENTIAL.filter((d) => {
         if (d === "pneumonia") return pneumoniaEvidence === "imaging-supported" || pneumoniaEvidence === "clinically-suspected";
         if (d === "atelectasis") {
@@ -3338,7 +3338,7 @@ Examples:
       }
       const imaging = [];
       for (const item of values.imaging ?? []) {
-        const parts = item.split(",").map((p) => p.trim());
+        const parts = item.split(",").map((p2) => p2.trim());
         if (parts.length !== IMAGING_KEYS.length) return fail(`--imaging takes ${IMAGING_KEYS.length} values: ${IMAGING_KEYS.join(",")}`);
         for (const [i, key] of IMAGING_KEYS.entries()) {
           const allowed = IMAGING_FINDINGS[key];
@@ -4136,19 +4136,19 @@ Examples:
       const iron = values.ferritin && values.tsat ? assessIronStatus(values.ferritin, values.tsat) : null;
       const esa = values.ferritin && values.tsat ? checkESAEligibility(values.hb, values.ferritin, values.tsat, values.sex) : null;
       const data = { anemia, iron, esa };
-      const rows = [
+      const rows2 = [
         ["Anemic", anemia.anemic ? "Yes" : "No"],
         ["Severity", anemia.severity]
       ];
       if (iron) {
-        rows.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
-        rows.push(["Iron Criteria", iron.recommendation]);
+        rows2.push(["Iron Deficient", iron.ironDeficient ? "Yes" : "No"]);
+        rows2.push(["Iron Criteria", iron.recommendation]);
       }
       if (esa) {
-        rows.push(["ESA Criteria", esa.eligible ? "Met" : "Not met"]);
-        rows.push(["ESA Reason", esa.reason]);
+        rows2.push(["ESA Criteria", esa.eligible ? "Met" : "Not met"]);
+        rows2.push(["ESA Reason", esa.reason]);
       }
-      printTable(data, values.json, "CKD Anemia Assessment", rows);
+      printTable(data, values.json, "CKD Anemia Assessment", rows2);
     };
     runMBD = (argv) => {
       const values = parseFlags(argv, {
@@ -4175,26 +4175,26 @@ Examples:
         vitaminD: vitDResult,
         monitoring
       };
-      const rows = [
+      const rows2 = [
         ["GFR Category", gfrCat]
       ];
       if (phosphateResult) {
-        rows.push(["Phosphate", `${phosphateResult.status} \u2014 ${phosphateResult.recommendation}`]);
+        rows2.push(["Phosphate", `${phosphateResult.status} \u2014 ${phosphateResult.recommendation}`]);
       }
       if (correctedCa !== null) {
-        rows.push(["Corrected Ca", `${correctedCa} mg/dL`]);
+        rows2.push(["Corrected Ca", `${correctedCa} mg/dL`]);
       }
       if (pthResult) {
-        rows.push(["PTH", `${pthResult.status} \u2014 ${pthResult.recommendation}`]);
+        rows2.push(["PTH", `${pthResult.status} \u2014 ${pthResult.recommendation}`]);
       }
       if (vitDResult) {
-        rows.push(["Vitamin D", `${vitDResult.status} \u2014 ${vitDResult.recommendation}`]);
+        rows2.push(["Vitamin D", `${vitDResult.status} \u2014 ${vitDResult.recommendation}`]);
       }
-      rows.push(["Monitor PO\u2084", monitoring.phosphate]);
-      rows.push(["Monitor Ca", monitoring.calcium]);
-      rows.push(["Monitor PTH", monitoring.pth]);
-      rows.push(["Monitor Vit D", monitoring.vitaminD]);
-      printTable(data, values.json, "CKD-MBD Assessment", rows);
+      rows2.push(["Monitor PO\u2084", monitoring.phosphate]);
+      rows2.push(["Monitor Ca", monitoring.calcium]);
+      rows2.push(["Monitor PTH", monitoring.pth]);
+      rows2.push(["Monitor Vit D", monitoring.vitaminD]);
+      printTable(data, values.json, "CKD-MBD Assessment", rows2);
     };
     run15 = (argv) => runSubcommand(argv, USAGE15, {
       egfr: runEGFR,
@@ -4209,31 +4209,31 @@ Examples:
 
 // ../../plugin/lib/diabetes-dx.ts
 function classifyA1C(a1c) {
-  const v = safeParseFloat(a1c);
-  if (v === 0) return { label: "\u2014", severity: "normal" };
-  if (v < 5.7) return { label: "Normal", severity: "normal" };
-  if (v < 6.5) return { label: "Prediabetes", severity: "warning" };
+  const v2 = safeParseFloat(a1c);
+  if (v2 === 0) return { label: "\u2014", severity: "normal" };
+  if (v2 < 5.7) return { label: "Normal", severity: "normal" };
+  if (v2 < 6.5) return { label: "Prediabetes", severity: "warning" };
   return { label: "Diabetes", severity: "critical" };
 }
 function classifyFPG(fpg) {
-  const v = safeParseFloat(fpg);
-  if (v === 0) return { label: "\u2014", severity: "normal" };
-  if (v < 100) return { label: "Normal", severity: "normal" };
-  if (v < 126) return { label: "IFG", severity: "warning" };
+  const v2 = safeParseFloat(fpg);
+  if (v2 === 0) return { label: "\u2014", severity: "normal" };
+  if (v2 < 100) return { label: "Normal", severity: "normal" };
+  if (v2 < 126) return { label: "IFG", severity: "warning" };
   return { label: "Diabetes", severity: "critical" };
 }
 function classify2hPG(value) {
-  const v = safeParseFloat(value);
-  if (v === 0) return { label: "\u2014", severity: "normal" };
-  if (v < 140) return { label: "Normal", severity: "normal" };
-  if (v < 200) return { label: "IGT", severity: "warning" };
+  const v2 = safeParseFloat(value);
+  if (v2 === 0) return { label: "\u2014", severity: "normal" };
+  if (v2 < 140) return { label: "Normal", severity: "normal" };
+  if (v2 < 200) return { label: "IGT", severity: "warning" };
   return { label: "Diabetes", severity: "critical" };
 }
 function classifyRandomPG(value, hasSymptoms) {
-  const v = safeParseFloat(value);
-  if (v === 0) return { label: "\u2014", severity: "normal" };
-  if (v >= 200 && hasSymptoms) return { label: "Diabetes", severity: "critical" };
-  if (v >= 200) return { label: "\u2265200 (no symptoms)", severity: "warning" };
+  const v2 = safeParseFloat(value);
+  if (v2 === 0) return { label: "\u2014", severity: "normal" };
+  if (v2 >= 200 && hasSymptoms) return { label: "Diabetes", severity: "critical" };
+  if (v2 >= 200) return { label: "\u2265200 (no symptoms)", severity: "warning" };
   return { label: "Normal", severity: "normal" };
 }
 function getDiagnosis(a1c, fpg, twohPG, randomPG, hasSymptoms) {
@@ -4480,25 +4480,25 @@ Examples:
         return fail("At least one test value required (--a1c, --fpg, --2h-pg, or --random-pg)", USAGE16);
       }
       const diagnosis = getDiagnosis(a1c, fpg, twohPG, randomPG, hasSymptoms);
-      const rows = [];
+      const rows2 = [];
       if (a1c) {
         const cls = classifyA1C(a1c);
-        rows.push(["A1C", `${a1c}% \u2014 ${cls.label}`]);
+        rows2.push(["A1C", `${a1c}% \u2014 ${cls.label}`]);
       }
       if (fpg) {
         const cls = classifyFPG(fpg);
-        rows.push(["FPG", `${fpg} mg/dL \u2014 ${cls.label}`]);
+        rows2.push(["FPG", `${fpg} mg/dL \u2014 ${cls.label}`]);
       }
       if (twohPG) {
         const cls = classify2hPG(twohPG);
-        rows.push(["2h-PG", `${twohPG} mg/dL \u2014 ${cls.label}`]);
+        rows2.push(["2h-PG", `${twohPG} mg/dL \u2014 ${cls.label}`]);
       }
       if (randomPG) {
         const cls = classifyRandomPG(randomPG, hasSymptoms);
-        rows.push(["Random PG", `${randomPG} mg/dL \u2014 ${cls.label}`]);
+        rows2.push(["Random PG", `${randomPG} mg/dL \u2014 ${cls.label}`]);
       }
-      rows.push(["Diagnosis", diagnosis.label]);
-      rows.push(["Category", diagnosis.category]);
+      rows2.push(["Diagnosis", diagnosis.label]);
+      rows2.push(["Category", diagnosis.category]);
       const data = {
         a1c: a1c ? parseFloat(a1c) : null,
         fpg: fpg ? parseFloat(fpg) : null,
@@ -4508,7 +4508,7 @@ Examples:
         diagnosis: diagnosis.label,
         category: diagnosis.category
       };
-      printTable(data, values.json, "Diabetes Diagnosis (ADA 2026)", rows);
+      printTable(data, values.json, "Diabetes Diagnosis (ADA 2026)", rows2);
     };
     runT1DStage = (argv) => {
       const values = parseFlags(argv, {
@@ -4527,22 +4527,22 @@ Examples:
         values.a1c,
         values.symptoms
       );
-      const rows = [
+      const rows2 = [
         ["Autoantibodies", values.autoantibodies],
         ["Stage", `${result.stage}`],
         ["Classification", result.label],
         ["Severity", result.severity]
       ];
-      if (values.fpg) rows.push(["FPG", `${values.fpg} mg/dL`]);
-      if (values["2h-pg"]) rows.push(["2h-PG", `${values["2h-pg"]} mg/dL`]);
-      if (values.a1c) rows.push(["A1C", `${values.a1c}%`]);
+      if (values.fpg) rows2.push(["FPG", `${values.fpg} mg/dL`]);
+      if (values["2h-pg"]) rows2.push(["2h-PG", `${values["2h-pg"]} mg/dL`]);
+      if (values.a1c) rows2.push(["A1C", `${values.a1c}%`]);
       const data = {
         autoantibodyCount: parseInt(values.autoantibodies, 10),
         stage: result.stage,
         classification: result.label,
         severity: result.severity
       };
-      printTable(data, values.json, "T1D Staging (ADA Table 2.4)", rows);
+      printTable(data, values.json, "T1D Staging (ADA Table 2.4)", rows2);
     };
     runT1vsT2 = (argv) => {
       const values = parseFlags(argv, {
@@ -4567,7 +4567,7 @@ Examples:
         values["dka-history"],
         values.autoimmune
       );
-      const rows = [
+      const rows2 = [
         ["Classification", result.classification],
         ["Severity", result.severity],
         ["T1 Features", result.features.t1.join(", ") || "None"],
@@ -4584,7 +4584,7 @@ Examples:
           cPeptide: parseFloat(values["c-peptide"])
         }
       };
-      printTable(data, values.json, "T1 vs T2 Classification (AABBCC)", rows);
+      printTable(data, values.json, "T1 vs T2 Classification (AABBCC)", rows2);
     };
     runT2DScreen = (argv) => {
       const values = parseFlags(argv, {
@@ -4622,8 +4622,8 @@ Examples:
         values.ethnicity,
         riskFactors
       );
-      const activeFactors = Object.entries(riskFactors).filter(([, v]) => v).map(([k]) => k);
-      const rows = [
+      const activeFactors = Object.entries(riskFactors).filter(([, v2]) => v2).map(([k]) => k);
+      const rows2 = [
         ["Action", result.action],
         ["Interval", result.interval],
         ["Severity", result.severity],
@@ -4644,7 +4644,7 @@ Examples:
           ethnicity: values.ethnicity
         }
       };
-      printTable(data, values.json, "T2D Screening (ADA Table 2.5)", rows);
+      printTable(data, values.json, "T2D Screening (ADA Table 2.5)", rows2);
     };
     runGDM = (argv) => {
       const values = parseFlags(argv, {
@@ -4666,7 +4666,7 @@ Examples:
       if (missing.length > 0) return fail(`Missing required flags: ${missing.join(", ")}`, USAGE16);
       const strategy = values.strategy;
       const result = strategy === "one-step" ? classifyGDM_OneStep(values.fasting, values["1h"], values["2h"]) : classifyGDM_TwoStep(values.fasting, values["1h"], values["2h"], values["3h"]);
-      const rows = [
+      const rows2 = [
         ["Strategy", strategy === "one-step" ? "One-step (IADPSG)" : "Two-step (Carpenter-Coustan)"],
         ["Result", result.positive ? "GDM Positive" : "GDM Negative"],
         ["Exceeded", result.exceededCount > 0 ? result.exceededValues.join(", ") : "None"],
@@ -4675,7 +4675,7 @@ Examples:
         ["2-hour", `${values["2h"]} mg/dL`]
       ];
       if (strategy === "two-step") {
-        rows.push(["3-hour", `${values["3h"]} mg/dL`]);
+        rows2.push(["3-hour", `${values["3h"]} mg/dL`]);
       }
       const data = {
         strategy,
@@ -4689,7 +4689,7 @@ Examples:
           threeHour: strategy === "two-step" ? parseFloat(values["3h"]) : null
         }
       };
-      printTable(data, values.json, `GDM Screening \u2014 ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`, rows);
+      printTable(data, values.json, `GDM Screening \u2014 ${strategy === "one-step" ? "IADPSG" : "Carpenter-Coustan"}`, rows2);
     };
     run16 = (argv) => runSubcommand(argv, USAGE16, {
       diagnose: runDiagnose,
@@ -4830,7 +4830,7 @@ var init_extraction = __esm({
       const source = numbersIn(quote);
       let at = 0;
       for (const values of numbersIn(value)) {
-        const found = source.findIndex((readings, i) => i >= at && readings.some((r) => values.some((v) => same(r, v))));
+        const found = source.findIndex((readings, i) => i >= at && readings.some((r) => values.some((v2) => same(r, v2))));
         if (found === -1) return false;
         at = found + 1;
       }
@@ -4882,15 +4882,15 @@ var init_extraction = __esm({
       let best = null;
       for (let i = 0; i + qw.length <= nw.length; i++) {
         const window = nw.slice(i, i + qw.length);
-        const pairs = qw.flatMap((a, x) => window.map((b, y) => ({ x, y, d: cost(a, b.w) }))).sort((p, r) => p.d - r.d);
+        const pairs = qw.flatMap((a, x) => window.map((b, y) => ({ x, y, d: cost(a, b.w) }))).sort((p2, r) => p2.d - r.d);
         const usedQ = /* @__PURE__ */ new Set();
         const usedN = /* @__PURE__ */ new Set();
         let distance = 0;
-        for (const p of pairs) {
-          if (usedQ.has(p.x) || usedN.has(p.y)) continue;
-          usedQ.add(p.x);
-          usedN.add(p.y);
-          distance += p.d;
+        for (const p2 of pairs) {
+          if (usedQ.has(p2.x) || usedN.has(p2.y)) continue;
+          usedQ.add(p2.x);
+          usedN.add(p2.y);
+          distance += p2.d;
         }
         if (distance < (best?.distance ?? Infinity)) best = { distance, start: window[0].start, end: window.at(-1).end };
       }
@@ -4909,15 +4909,15 @@ var init_extraction = __esm({
         const budget = Math.min(MAX_EDITS, Math.floor(q.length / 4));
         const span = closestSpan(text, q);
         if (span.end === 0 || span.distance > budget) {
-          const words = reorderedSpan(nfc, q);
-          if (!words || words.distance > budget) return { ...item, status: "unverified" };
+          const words2 = reorderedSpan(nfc, q);
+          if (!words2 || words2.distance > budget) return { ...item, status: "unverified" };
           return {
             ...item,
-            status: valueInQuote(item.value, nfc.slice(words.start, words.end)) ? "reordered" : "mismatched",
-            start: words.start,
-            end: words.end,
+            status: valueInQuote(item.value, nfc.slice(words2.start, words2.end)) ? "reordered" : "mismatched",
+            start: words2.start,
+            end: words2.end,
             match: "words",
-            distance: words.distance
+            distance: words2.distance
           };
         }
         const start = map[span.start];
@@ -4960,14 +4960,14 @@ var init_extraction = __esm({
       male: ["male", "man", "m", "hombre", "masculino", "varon"]
     };
     sexStated = (value, quote) => {
-      const words = stripAccents(quote).toLowerCase().split(/[^a-z]+/);
-      const has = (s) => SEX_WORDS[s].some((w) => words.includes(w));
+      const words2 = stripAccents(quote).toLowerCase().split(/[^a-z]+/);
+      const has = (s) => SEX_WORDS[s].some((w) => words2.includes(w));
       return (value === "female" || value === "male") && has(value) && !has(value === "female" ? "male" : "female") ? value : null;
     };
     toNumber = (value) => {
-      const v = value.trim();
-      if (!/^-?\d+(?:[.,]\d+)?$/.test(v) || /,\d{3}$/.test(v)) return null;
-      return Number(v.replace(",", "."));
+      const v2 = value.trim();
+      if (!/^-?\d+(?:[.,]\d+)?$/.test(v2) || /,\d{3}$/.test(v2)) return null;
+      return Number(v2.replace(",", "."));
     };
     unitOk = (key, unit) => !unit || FIELDS[key].units.some((u) => u.toLowerCase() === unit.trim().toLowerCase());
     toInputs = (checked) => {
@@ -5025,8 +5025,8 @@ var init_nephrology = __esm({
     "use strict";
     init_ckd();
     init_ckd();
-    sf = (v) => {
-      const n = parseFloat(v);
+    sf = (v2) => {
+      const n = parseFloat(v2);
       return isNaN(n) ? 0 : n;
     };
   }
@@ -7097,7 +7097,7 @@ Examples:
       const m = raw.trim().match(/^\/?(?:medical-protocol:)?([a-z][a-z0-9-]*)$/);
       return m ? `/medical-protocol:${m[1]}` : null;
     };
-    within = (dir, p) => p === dir || p.startsWith(dir + import_node_path.sep);
+    within = (dir, p2) => p2 === dir || p2.startsWith(dir + import_node_path.sep);
     isLocalOrigin = (origin) => {
       if (!origin) return true;
       try {
@@ -7642,13 +7642,13 @@ Example:
       const badAbsent = items.find((i) => i.absent !== void 0 && (typeof i.absent !== "boolean" || i.absent && i.key !== void 0));
       if (badAbsent) return `"${badAbsent.field}": absent is true or false, and an absent finding takes no key`;
       const badExam = items.find((i) => (i.exam !== void 0 || i.reads !== void 0) && !readsOk(i.exam, i.reads));
-      if (badExam) return `"${badExam.field}": exam and reads go together \u2014 ${Object.entries(EXAM_FINDINGS).map(([k, v]) => `${k}: ${v.filter((r) => r !== "not_assessed").join(" | ")}`).join("; ")}`;
+      if (badExam) return `"${badExam.field}": exam and reads go together \u2014 ${Object.entries(EXAM_FINDINGS).map(([k, v2]) => `${k}: ${v2.filter((r) => r !== "not_assessed").join(" | ")}`).join("; ")}`;
       return null;
     };
-    scaleOf = (label, value, unit, cuts, at, band, [lo, hi]) => {
-      const v = Number(value);
+    scaleOf = (label2, value, unit, cuts, at, band, [lo, hi]) => {
+      const v2 = Number(value);
       const pad3 = (hi - lo) * 0.08;
-      return { label, value, ...unit ? { unit } : {}, min: v < lo ? v - pad3 : lo, max: v > hi ? v + pad3 : hi, cuts: [...cuts], at, band };
+      return { label: label2, value, ...unit ? { unit } : {}, min: v2 < lo ? v2 - pad3 : lo, max: v2 > hi ? v2 + pad3 : hi, cuts: [...cuts], at, band };
     };
     SECONDARY = { capillaryRefill: "capillary refill", pulseVolume: "pulse", lungExam: "lungs" };
     shockGrid = (exam, shock, quotes, said) => {
@@ -7699,18 +7699,18 @@ Example:
       const r = (k) => found[k]?.reads;
       const str = (k) => inputs[k] ? String(inputs[k].value) : "";
       const out = [];
-      const card = (title, reads, numbers, source, v) => {
+      const card = (title, reads, numbers, source, v2) => {
         const got = reads.filter((k) => found[k]);
         if (!got.length) return;
         const nums = numbers.filter((k) => inputs[k]);
         const said = (absent) => got.map((k) => checked[found[k].index]).filter((c) => !!c.absent === absent).map((c) => `${c.field}: ${c.value}`);
         const ledger = [
-          ["Agrees", v.agrees ?? ""],
+          ["Agrees", v2.agrees ?? ""],
           ["Found", [...said(false), ...nums.map((k) => `${FIELDS[k].label}: ${inputs[k].value}${inputs[k].unit ? ` ${inputs[k].unit}` : ""}`)].join("; ")],
           ["Absent", said(true).join("; ")],
-          ["Next", (v.next ?? []).join("; ")]
+          ["Next", (v2.next ?? []).join("; ")]
         ];
-        out.push({ title, rows: [], scales: [], uses: [...uses(...nums), ...got.map((k) => found[k].index)], source, grid: { result: v.result, named: v.named, tone: v.tone, ...v.why ? { why: v.why } : {}, cols: [], rows: [], cells: [], ledger: ledger.filter((l) => l[1]), caveat: v.caveat } });
+        out.push({ title, rows: [], scales: [], uses: [...uses(...nums), ...got.map((k) => found[k].index)], source, grid: { result: v2.result, named: v2.named, tone: v2.tone, ...v2.why ? { why: v2.why } : {}, cols: [], rows: [], cells: [], ledger: ledger.filter((l) => l[1]), caveat: v2.caveat } });
       };
       const lung = r("lungExam"), s3 = r("thirdHeartSound"), oedema = r("peripheralOedema"), liver = r("hepatomegaly");
       const presence = (x, yes) => x ? yes ? "present" : "absent" : void 0;
@@ -7728,7 +7728,7 @@ Example:
         named: volume.status !== "indeterminate",
         tone: { overload: "found", no_overload: "clear", indeterminate: "open" }[volume.status],
         ...volume.reason ? { why: VOLUME_REASONS[volume.reason] } : {},
-        next: volume.pivotal.length ? [`Would settle it: ${volume.pivotal.map((p) => p.replace(/[A-Z]/g, (c) => ` ${c.toLowerCase()}`)).join(", ")}`] : [],
+        next: volume.pivotal.length ? [`Would settle it: ${volume.pivotal.map((p2) => p2.replace(/[A-Z]/g, (c) => ` ${c.toLowerCase()}`)).join(", ")}`] : [],
         caveat: VOLUME_CAVEAT
       });
       const hf = assessHeartFailure({
@@ -7760,7 +7760,7 @@ Example:
         named: sides.every(([, a]) => a.verdict !== "indeterminate"),
         tone: sides.some(([, a]) => FOCAL_SYNDROMES.includes(a.verdict)) || chest.patterns.length ? "found" : sides.some(([, a]) => a.verdict === "indeterminate") ? "open" : "clear",
         why: sides.filter(([, a]) => a.reason).map(([s, a]) => `${s === "right" ? "Right" : "Left"}: ${CHEST_REASONS[a.reason]}${a.unexplained.length ? ` (${a.unexplained.map((u) => `${CHEST_SIGN_LABELS[u.sign].toLowerCase()} ${u.value.replace(/_/g, " ")}`).join(", ")})` : ""}.`).join(" ") || void 0,
-        agrees: chest.patterns.map((p) => CHEST_PATTERN_LABELS[p]).join("; "),
+        agrees: chest.patterns.map((p2) => CHEST_PATTERN_LABELS[p2]).join("; "),
         caveat: CHEST_CAVEAT
       });
       const celsius = /^[°º]c$/i.test(inputs.temp?.unit?.trim() ?? "");
@@ -7809,7 +7809,7 @@ Example:
     };
     calculations = (checked) => {
       const { inputs: asStated, sex } = toInputs(checked);
-      const inputs = Object.fromEntries(Object.entries(asStated).map(([k, v]) => [k, toExpectedUnit(k, v)]));
+      const inputs = Object.fromEntries(Object.entries(asStated).map(([k, v2]) => [k, toExpectedUnit(k, v2)]));
       const converted = (...keys) => keys.flatMap((k) => inputs[k]?.from ? [[`${FIELDS[k].label}, converted`, String(inputs[k].value), `${inputs[k].unit} (note: ${inputs[k].from})`]] : []);
       const str = (k) => inputs[k] ? String(inputs[k].value) : "";
       const unit = (k) => inputs[k]?.unit?.trim().toLowerCase();
@@ -7830,9 +7830,9 @@ Example:
       }
       const abg = inputs.ph && inputs.pco2 && inputs.hco3 ? analyze({ values: { pH: str("ph"), pCO2: str("pco2"), HCO3: str("hco3"), Na: str("na"), Cl: str("cl"), Albumin: str("albumin") }, isChronic: false }) : null;
       if (abg) {
-        const against = (label, k, [lo, hi], ends) => {
+        const against = (label2, k, [lo, hi], ends) => {
           const at = inputs[k].value < lo ? 0 : inputs[k].value > hi ? 2 : 1;
-          return { ...scaleOf(label, str(k), inputs[k].unit, [lo, hi], at, ["Below the normal range", "In the normal range", "Above the normal range"][at], ends), ref: 1 };
+          return { ...scaleOf(label2, str(k), inputs[k].unit, [lo, hi], at, ["Below the normal range", "In the normal range", "Above the normal range"][at], ends), ref: 1 };
         };
         out.push({
           title: "Acid-base",
@@ -7848,9 +7848,9 @@ Example:
           source: WINTERS_1967
         });
       }
-      const gfrScale = (label, value, u) => {
+      const gfrScale = (label2, value, u) => {
         const g = classifyGFRCategory(value);
-        return scaleOf(label, value, u, GFR_BANDS.cuts, GFR_BANDS.labels.indexOf(g), `${g}: ${getGFRCategoryLabel(g)}`, [0, 120]);
+        return scaleOf(label2, value, u, GFR_BANDS.cuts, GFR_BANDS.labels.indexOf(g), `${g}: ${getGFRCategoryLabel(g)}`, [0, 120]);
       };
       const made = inputs.creatinine && inputs.age && sex && unit("creatinine") === "mg/dl" ? calculateEGFR(str("creatinine"), str("age"), sex) : 0;
       if (made) out.push({ title: "eGFR from creatinine", rows: converted("creatinine"), scales: [gfrScale("eGFR", String(made), "mL/min/1.73m\xB2")], uses: uses("creatinine", "age", "sex"), source: CKD_EPI_2021 });
@@ -8209,10 +8209,885 @@ ${check}`));
           formatTable(checked.map((c) => [c.field, `${c.value}${c.unit ? ` ${c.unit}` : ""}  (${c.episode})  [${c.status}${c.distance ? `, ${c.distance} chars off` : ""}${c.ambiguous ? ", ambiguous" : ""}]  "${c.quote}"`])),
           "",
           formatTable(Object.entries(counts).map(([s, n]) => [s, String(n)])),
-          ...Object.keys(inputs).length || sex ? [formatHeader("Inputs for calculators"), formatTable([...Object.entries(inputs).map(([k, v]) => [k, `${v.value}${v.unit ? ` ${v.unit}` : ""}`]), ...sex ? [["sex", sex]] : []])] : [],
+          ...Object.keys(inputs).length || sex ? [formatHeader("Inputs for calculators"), formatTable([...Object.entries(inputs).map(([k, v2]) => [k, `${v2.value}${v2.unit ? ` ${v2.unit}` : ""}`]), ...sex ? [["sex", sex]] : []])] : [],
           ...review.length ? [formatHeader("Held back"), formatTable(review.map((r) => [r.item.key, `${r.item.value}  [${r.reason}]`]))] : []
         ].join("\n")
       );
+    };
+  }
+});
+
+// src/syndromic-page.ts
+var SYNDROMIC_PAGE_HTML;
+var init_syndromic_page = __esm({
+  "src/syndromic-page.ts"() {
+    "use strict";
+    SYNDROMIC_PAGE_HTML = String.raw`<!doctype html>
+<meta charset="utf-8">
+<title>Synthetic patients</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital@0;1&family=Fira+Sans:wght@400;600&family=Fira+Sans+Condensed:wght@700&family=Geist+Mono:wght@500;600&display=swap" media="print" onload="this.media='all'">
+<style>
+:root{
+  --ground:#f1ebde; --sheet:#fbf8f2; --ink:#1d1a16; --ink-2:#5a534a; --line:#cdc3b0; --hl:#e3d9c3;
+  --bad:#b0182f; --warn:#8a5200; --mark:#3a2e2a;
+  --ui:"Fira Sans",system-ui,sans-serif; --label:"Fira Sans Condensed","Arial Narrow",sans-serif;
+  --text:"Spectral",Georgia,serif; --mono:"Geist Mono",ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.16,1,.3,1); --gut:16px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f; --hl:#3d372f;
+  --bad:#e7959f; --warn:#e3b566; --mark:var(--ink); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#1d1a16; --sheet:#28241e; --ink:#f1ebde; --ink-2:#a89e8e; --line:#3d372f; --hl:#3d372f;
+  --bad:#e7959f; --warn:#e3b566; --mark:var(--ink); color-scheme:dark}
+@media (min-width:700px){:root{--gut:28px}}
+*{box-sizing:border-box}
+body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;min-height:100dvh;margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.4 var(--ui);font-variant-numeric:tabular-nums}
+@media (min-width:1024px){body{height:100dvh;overflow:hidden}}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+h1,h2,h3,p,ol,ul{margin:0;padding:0}
+ol,ul{list-style:none}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 24px;min-height:52px;padding:8px var(--gut);border-bottom:1px solid var(--ink)}
+.brand{display:flex;align-items:center;gap:9px;font:700 14px/1 var(--label);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.brand svg{width:20px;height:20px}
+.brand path{stroke:var(--mark)}
+h1{font:400 23px/1.1 var(--text);padding-left:24px;border-left:1px solid var(--line)}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 14px;border:1px solid var(--ink);font:600 14px/1.2 var(--ui);color:var(--ink);transition:background-color .3s var(--ease)}
+.btn:hover{background:var(--line)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btn.fill{border-radius:3px;background:var(--ink);color:var(--ground)}
+.btn.fill:hover{background:var(--ink-2);border-color:var(--ink-2)}
+.btn:disabled{border-color:var(--ink-2);color:var(--ink-2);cursor:default;background:transparent}
+.bar{margin-left:auto;padding-inline:2px;border-color:transparent;font:700 12.5px/1.2 var(--label);letter-spacing:.12em;text-transform:uppercase}
+.bar:hover{background:none;text-decoration:underline}
+
+.shell{min-height:0}
+@media (min-width:1024px){.shell{display:grid;grid-template-columns:300px minmax(0,1fr)}}
+nav{padding:0 var(--gut) 20px;border-bottom:1px solid var(--line)}
+@media (min-width:1024px){nav{overflow-y:auto;border-bottom:0;border-right:1px solid var(--line);padding-right:20px}}
+.pane{min-width:0;padding:0 var(--gut) 40px}
+@media (min-width:1024px){.pane{overflow-y:auto}}
+.hd{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:4px 12px;min-height:40px;padding-bottom:6px;border-bottom:1px solid var(--ink);font:italic 400 21px/24px var(--text)}
+.hd span{font:400 13px/1.3 var(--ui);font-style:normal;color:var(--ink-2)}
+.row{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:12px;width:100%;padding:12px 10px;border-bottom:1px solid var(--line);transition:background-color .2s var(--ease)}
+@media (min-width:1024px){.row{margin-inline:-10px;width:calc(100% + 20px)}}
+.row:hover,.row[aria-current]{background:var(--sheet)}
+.row:focus-visible{outline-offset:-2px}
+.num{flex:none;display:grid;place-items:center;width:22px;height:22px;margin-top:1px;border:1px solid var(--ink-2);font:500 12px/1 var(--mono);color:var(--ink-2)}
+.num.on{border-color:var(--ink);background:var(--ink);color:var(--ground)}
+.tick{flex:none;width:16px;height:16px;margin-top:3px;border:1px solid var(--ink-2)}
+.tick.done{border-color:var(--ink);background:linear-gradient(var(--ink),var(--ink)) center/8px 8px no-repeat}
+.t{display:block;font-weight:600}
+.s{display:block;margin-top:2px;font-size:13px;color:var(--ink-2)}
+.code{font:500 14px/1 var(--mono);color:var(--ink)}
+
+.view>header{padding:24px 0}
+.view h2{font:400 30px/1.15 var(--text);text-wrap:balance}
+.lead{margin-top:4px;font-size:14px;color:var(--ink-2)}
+.form{display:grid;gap:32px;max-width:44rem}
+.form .help{margin-top:8px;font-size:13px;color:var(--ink-2)}
+.choice{display:inline-flex;flex-wrap:wrap;gap:16px;margin-top:10px}
+.choice button{all:unset;cursor:pointer;padding:4px 1px;border-bottom:2px solid transparent;font:700 12.5px/1.2 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.choice button[aria-checked="true"]{border-color:var(--ink);color:var(--ink)}
+.choice button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.grid{display:grid;gap:12px 16px;margin-top:12px}
+@media (min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+label{display:grid;gap:4px;font-size:14px;font-weight:600}
+select{height:36px;padding:0 8px;border:1px solid var(--line);border-radius:0;background:var(--sheet);color:var(--ink);font:400 14px var(--ui)}
+select:hover{border-color:var(--ink)}
+
+.two{display:grid;gap:40px}
+@media (min-width:1280px){.two{grid-template-columns:minmax(0,40rem) minmax(300px,1fr)}}
+.sheet{align-self:start;border:1px solid var(--ink);background:var(--sheet);box-shadow:0 1px 2px rgba(29,26,22,.06),0 14px 28px -14px rgba(29,26,22,.28)}
+.sheet>header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 16px;padding:6px 20px;border-bottom:1px solid var(--ink);font:500 14px var(--mono)}
+.sheet .choice{margin:0}
+.note{padding:20px 28px 32px;font:400 17px/1.65 var(--text);white-space:pre-wrap;overflow-wrap:anywhere}
+.acts{display:flex;flex-wrap:wrap;gap:10px;padding:0 28px 24px}
+.note .err{font:400 14px var(--ui);color:var(--bad);white-space:normal}
+.skel{height:14px;margin:12px 0;background:var(--hl);animation:p 1.4s ease-in-out infinite}
+@keyframes p{50%{opacity:.4}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
+.res{padding:12px 0;border-bottom:1px solid var(--line)}
+.res h3{display:flex;gap:10px;font:400 20px/1.2 var(--text)}
+.res h3::before{content:"";flex:none;width:8px;height:8px;margin-top:7px;background:var(--ink)}
+.res.found h3{color:var(--warn)}
+.res.found h3::before{background:var(--warn)}
+.res.open h3::before{background:none;border:1.5px solid var(--ink-2);border-radius:50%}
+.res p{margin-top:6px;padding-left:18px;font-size:14px;color:var(--ink-2)}
+.res .k{margin-right:6px;font:700 11.5px/1 var(--label);letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+.cav{margin-top:12px;font-size:12.5px;color:var(--ink-2)}
+dl{display:grid;grid-template-columns:auto 1fr;gap:0 16px;margin-top:8px;font-size:14px}
+dt,dd{margin:0;padding:6px 0;border-bottom:1px solid var(--line)}
+dt{color:var(--ink-2)}
+dd{font-weight:600}
+.list .row{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:baseline}
+.list .i{font:500 12px var(--mono);color:var(--ink-2)}
+.list .go{font-size:13px;color:var(--ink-2)}
+.next{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--ink)}
+.mt{margin-top:24px}
+
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 24px;padding:10px var(--gut);border-top:1px solid var(--ink);background:var(--ground);font-size:14px}
+footer b{font-weight:600}
+footer span{color:var(--ink-2)}
+</style>
+
+<header class="run">
+  <span class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8.5 6 L2.5 16 L8.5 26 M23.5 6 L29.5 16 L23.5 26" fill="none" stroke-width="4" stroke-linecap="square"/><rect x="9.5" y="13.75" width="13" height="4.5" fill="#e8907a"/><rect x="13.75" y="9.5" width="4.5" height="13" fill="#e8907a"/></svg>Medical Protocol</span>
+  <h1>Synthetic patients</h1>
+  <button type="button" class="btn bar" id="theme">Dark mode</button>
+</header>
+
+<main class="shell">
+  <nav aria-label="Steps">
+    <h2 class="hd">In this order <span id="count"></span></h2>
+    <ol id="steps"></ol>
+  </nav>
+  <div class="pane" id="pane">
+    <section class="view" id="setup" aria-labelledby="setup-h">
+      <header><h2 id="setup-h">Generate a patient</h2><p class="lead">One synthetic person for all six assessments. The model then drafts its note.</p></header>
+      <div class="form">
+        <div>
+          <h3 class="hd">How</h3>
+          <div class="choice" role="radiogroup" aria-label="How to make the patient" id="mode"></div>
+          <p class="help" id="mode-help"></p>
+        </div>
+        <div id="results" hidden>
+          <h3 class="hd">Results <span>Only results that fit together, plus each one's "no".</span></h3>
+          <div class="grid" id="selects"></div>
+          <p class="help">A "no" that fits no case with the others is taken from another case; the patient then says so.</p>
+        </div>
+        <div>
+          <h3 class="hd">Note tone</h3>
+          <div class="choice" role="radiogroup" aria-label="Note tone" id="tone"></div>
+        </div>
+        <div><button type="button" class="btn fill" id="go">Generate random patient</button> <p class="help" id="go-err" role="alert"></p></div>
+      </div>
+    </section>
+    <section class="view" id="noteview" aria-labelledby="note-h" hidden>
+      <header><h2 id="note-h">The note</h2><p class="lead" id="note-lead"></p></header>
+      <div class="two">
+        <div id="sheet-a"></div>
+        <div>
+          <h3 class="hd">What the six rules say <span>Step 3, in this order</span></h3>
+          <ol class="list" id="summary"></ol>
+          <button type="button" class="btn fill mt" id="first">Next: Shock category →</button>
+        </div>
+      </div>
+    </section>
+    <section class="view" id="rule" aria-labelledby="rule-h" hidden>
+      <header><h2 id="rule-h"></h2><p class="lead" id="rule-lead"></p></header>
+      <div class="two">
+        <div id="sheet-b"></div>
+        <div>
+          <h3 class="hd">What the rule says</h3>
+          <div id="verdict"></div>
+          <h3 class="hd mt">Findings <span>As the generator drew them</span></h3>
+          <dl id="findings"></dl>
+        </div>
+      </div>
+      <nav class="next" aria-label="Assessment order"><button type="button" class="btn" id="prev"></button><button type="button" class="btn fill" id="nxt"></button></nav>
+    </section>
+  </div>
+</main>
+
+<footer><b>Learning prototype — not for patient care.</b><span>Every patient is synthetic. Notes are drafted by the model; results come from plugin/lib.</span></footer>
+
+<script>
+(function () {
+  var MODES = { random: "Random", choose: "Choose the results" };
+  var TONES = { ed: "ED shorthand", outpatient: "Outpatient, written" };
+  var ANY = "Any";
+  var S = { view: "setup", mode: "random", tone: "ed", want: {}, assessments: [], options: {}, patient: null, notes: {}, seen: {} };
+
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function $(id) { return document.getElementById(id); }
+  function post(path, body) {
+    return fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || "Request failed"); return j; }); });
+  }
+
+  var themeBtn = $("theme");
+  function dark() { var t = document.documentElement.dataset.theme; return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; }
+  function themeLabel() { themeBtn.textContent = dark() ? "Light mode" : "Dark mode"; }
+  themeBtn.onclick = function () { document.documentElement.dataset.theme = dark() ? "light" : "dark"; themeLabel(); };
+  themeLabel();
+
+  /** A row of radio buttons, arrow keys move between them. */
+  function choice(box, labels, value, onPick) {
+    box.textContent = "";
+    Object.keys(labels).forEach(function (k, i, keys) {
+      var b = el("button", "", labels[k]);
+      b.type = "button"; b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(k === value)); b.tabIndex = k === value ? 0 : -1;
+      b.onclick = function () { onPick(k); };
+      b.onkeydown = function (e) {
+        var d = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+        if (!d) return;
+        e.preventDefault(); onPick(keys[(i + d + keys.length) % keys.length]);
+        box.querySelector('[aria-checked="true"]').focus();
+      };
+      box.appendChild(b);
+    });
+  }
+
+  function title(id) { var a = S.assessments.filter(function (x) { return x.id === id; })[0]; return a ? a.title : id; }
+  function mixedText(p) { return p.mixed.map(title).join(" and ") + " from another case"; }
+
+  function open(view) {
+    S.view = view;
+    if (view !== "setup" && view !== "noteview") S.seen[view] = true;
+    draw();
+    $("pane").scrollTo(0, 0);
+  }
+
+  // --- step 1 -------------------------------------------------------------------------------------------
+  function drawSetup() {
+    $("setup-h").textContent = S.patient ? "Generate another patient" : "Generate a patient";
+    choice($("mode"), MODES, S.mode, function (m) { S.mode = m; drawSetup(); });
+    $("mode-help").textContent = S.mode === "random" ? "A case at random sets all six results." : 'Set the results you want; the rest stay "Any" and are picked at random.';
+    $("results").hidden = S.mode !== "choose";
+    choice($("tone"), TONES, S.tone, function (t) { S.tone = t; draw(); });
+    $("go").textContent = S.mode === "choose" ? "Generate patient with these results" : "Generate random patient";
+    var box = $("selects");
+    box.textContent = "";
+    S.assessments.forEach(function (a) {
+      var l = el("label", "", a.title), sel = el("select");
+      [ANY].concat(S.options[a.id] || []).forEach(function (o) { var op = el("option", "", o); op.value = o === ANY ? "" : o; sel.appendChild(op); });
+      sel.value = S.want[a.id] || "";
+      sel.onchange = function () {
+        if (sel.value) S.want[a.id] = sel.value; else delete S.want[a.id];
+        loadOptions().then(function () { drawSetup(); box.querySelectorAll("select")[S.assessments.indexOf(a)].focus(); });
+      };
+      l.appendChild(sel); box.appendChild(l);
+    });
+  }
+  function loadOptions() {
+    return post("/api/options", { want: S.want }).then(function (j) { S.assessments = j.assessments; S.options = j.options; });
+  }
+  $("go").onclick = function () {
+    var go = $("go");
+    go.disabled = true; $("go-err").textContent = "";
+    post("/api/patients", { want: S.mode === "choose" ? S.want : {} })
+      .then(function (p) { S.patient = p; S.notes = {}; S.seen = {}; open("noteview"); })
+      .catch(function (e) { $("go-err").textContent = e.message; })
+      .then(function () { go.disabled = false; });
+  };
+
+  // --- the note -----------------------------------------------------------------------------------------
+  function note() {
+    var p = S.patient, key = p.code + ":" + S.tone;
+    if (!S.notes[key]) {
+      S.notes[key] = { text: null };
+      post("/api/notes", { findings: p.findings, style: S.tone })
+        .then(function (j) { S.notes[key] = { text: j.note }; })
+        .catch(function (e) { S.notes[key] = { error: e.message }; })
+        .then(draw);
+    }
+    return S.notes[key];
+  }
+  function sheet(box) {
+    var n = note(), f = el("figure", "sheet"), h = el("header"), t = el("div", "choice");
+    f.style.margin = "0";
+    h.appendChild(el("span", "", "Note for patient " + S.patient.code));
+    t.setAttribute("role", "radiogroup"); t.setAttribute("aria-label", "Note tone");
+    choice(t, TONES, S.tone, function (k) { S.tone = k; draw(); });
+    h.appendChild(t); f.appendChild(h);
+    var body = el("div", "note");
+    if (n.text) body.textContent = n.text;
+    else if (n.error) { var e = el("p", "err", n.error + " "); var again = el("button", "btn", "Try again"); again.type = "button"; again.onclick = function () { delete S.notes[S.patient.code + ":" + S.tone]; draw(); }; e.appendChild(again); body.appendChild(e); }
+    else { body.setAttribute("role", "status"); body.setAttribute("aria-label", "Drafting the note"); [92, 64, 80, 48, 86, 70].forEach(function (w) { var d = el("div", "skel"); d.style.width = w + "%"; body.appendChild(d); }); }
+    f.appendChild(body);
+    if (n.text) f.appendChild(noteActions(n.text));
+    box.textContent = ""; box.appendChild(f);
+  }
+  /** Copy the note, or save it as a text file through the browser's own download. */
+  function noteActions(text) {
+    var row = el("div", "acts"), copy = el("button", "btn", "Copy note"), save = el("button", "btn", "Save as text file");
+    copy.type = save.type = "button";
+    function said(ok) { copy.textContent = ok ? "Copied" : "Copy failed"; setTimeout(function () { copy.textContent = "Copy note"; }, 1800); }
+    copy.onclick = function () {
+      function fallback() {
+        var t = el("textarea"); t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
+        document.body.appendChild(t); t.select();
+        var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+        t.remove(); said(ok);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { said(true); }, fallback);
+      else fallback();
+    };
+    save.onclick = function () {
+      var a = el("a"), url = URL.createObjectURL(new Blob([text + "\n"], { type: "text/plain" }));
+      a.href = url; a.download = "synthetic-note-" + S.patient.code + "-" + S.tone + ".txt";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    };
+    row.appendChild(copy); row.appendChild(save);
+    return row;
+  }
+  function lead() {
+    var p = S.patient;
+    return "Synthetic patient " + p.code + " · " + p.story.toLowerCase() + (p.mixed.length ? " · " + mixedText(p) + ", so the note may not read as one person" : "");
+  }
+  function drawNote() {
+    $("note-lead").textContent = lead();
+    sheet($("sheet-a"));
+    var ol = $("summary"); ol.textContent = "";
+    S.patient.cards.forEach(function (c, i) {
+      var li = el("li"), b = el("button", "row"), mid = el("span");
+      b.type = "button"; b.onclick = function () { open(c.id); };
+      mid.appendChild(el("span", "t", c.title)); mid.appendChild(el("span", "s", c.result));
+      b.appendChild(el("span", "i", String(i + 1))); b.appendChild(mid); b.appendChild(el("span", "go", "Open →"));
+      li.appendChild(b); ol.appendChild(li);
+    });
+  }
+  $("first").onclick = function () { open(S.assessments[0].id); };
+
+  // --- one rule -----------------------------------------------------------------------------------------
+  function line(box, k, text) { if (!text) return; var p = el("p"); p.appendChild(el("b", "k", k)); p.appendChild(document.createTextNode(text)); box.appendChild(p); }
+  function drawRule() {
+    var cards = S.patient.cards, at = cards.map(function (c) { return c.id; }).indexOf(S.view), c = cards[at];
+    $("rule-h").textContent = c.title;
+    $("rule-lead").textContent = "Assessment " + (at + 1) + " of " + cards.length + " · " + lead().charAt(0).toLowerCase() + lead().slice(1);
+    sheet($("sheet-b"));
+    var v = $("verdict"); v.textContent = "";
+    var r = el("div", "res " + c.tone); r.appendChild(el("h3", "", c.result));
+    line(r, "Why", c.why); line(r, "Agrees", c.agrees);
+    c.next.forEach(function (n) { line(r, "Next", n); });
+    r.appendChild(el("p", "cav", c.caveat));
+    v.appendChild(r);
+    var dl = $("findings"); dl.textContent = "";
+    c.findings.forEach(function (f) { dl.appendChild(el("dt", "", f[0])); dl.appendChild(el("dd", "", f[1])); });
+    var prev = cards[at - 1], next = cards[at + 1];
+    $("prev").textContent = "← " + (prev ? prev.title : "The note");
+    $("prev").onclick = function () { open(prev ? prev.id : "noteview"); };
+    $("nxt").textContent = (next ? "Next: " + next.title : "Back to the note") + " →";
+    $("nxt").onclick = function () { open(next ? next.id : "noteview"); };
+  }
+
+  // --- the rail -----------------------------------------------------------------------------------------
+  function step(n, on, done, t, s, view, current) {
+    var li = el("li"), b = el("button", "row"), mid = el("span");
+    b.type = "button"; if (current) b.setAttribute("aria-current", "true");
+    b.onclick = function () { open(view); };
+    b.appendChild(el("span", on ? "num on" : "num", String(n)));
+    mid.appendChild(el("span", "t", t)); if (done) mid.appendChild(el("span", "sr", " (done)"));
+    mid.appendChild(el("span", "s", s)); b.appendChild(mid); li.appendChild(b);
+    return li;
+  }
+  function drawRail() {
+    var p = S.patient, seen = Object.keys(S.seen).length, total = S.assessments.length;
+    var next = !p ? 1 : seen === 0 ? 2 : seen < total ? 3 : 0;
+    var n = p && S.notes[p.code + ":" + S.tone];
+    $("count").textContent = p ? seen + " of " + total + " checked" : "";
+    var ol = $("steps"); ol.textContent = "";
+    ol.appendChild(step(1, next === 1, !!p, "Generate a patient", p ? p.code + " · " + p.story + (p.mixed.length ? " · " + mixedText(p) : "") : "Random, or with the results you choose.", "setup", S.view === "setup"));
+    ol.appendChild(step(2, next === 2, !!p && seen > 0, "Read the note", !p ? "After step 1." : n && n.text ? TONES[S.tone] + ", ready to read." : n && n.error ? "The note could not be drafted." : "The model is drafting it…", p ? "noteview" : "setup", S.view === "noteview"));
+    var li = el("li"), h = step(3, next === 3, !!p && next === 0, "Check the six assessments", p ? (next === 0 ? "All six seen." : "In order, each beside the note.") : "After step 1.", p ? S.assessments[0].id : "setup", false);
+    li.appendChild(h.firstChild);
+    var sub = el("ol");
+    S.assessments.forEach(function (a) {
+      var c = p && p.cards.filter(function (x) { return x.id === a.id; })[0];
+      var r = el("li"), b = el("button", "row"), mid = el("span");
+      b.type = "button"; if (S.view === a.id) b.setAttribute("aria-current", "true");
+      b.disabled = !p; b.onclick = function () { if (p) open(a.id); };
+      b.appendChild(el("span", S.seen[a.id] ? "tick done" : "tick"));
+      mid.appendChild(el("span", "t", a.title)); mid.appendChild(el("span", "s", c ? c.result : "No patient yet"));
+      b.appendChild(mid); r.appendChild(b); sub.appendChild(r);
+    });
+    li.appendChild(sub); ol.appendChild(li);
+  }
+
+  function draw() {
+    ["setup", "noteview", "rule"].forEach(function (v) { $(v).hidden = true; });
+    var view = S.patient || S.view === "setup" ? S.view : "setup";
+    if (view === "setup") { $("setup").hidden = false; drawSetup(); }
+    else if (view === "noteview") { $("noteview").hidden = false; drawNote(); }
+    else { $("rule").hidden = false; drawRule(); }
+    drawRail();
+  }
+
+  loadOptions().then(draw).catch(function (e) { $("go-err").textContent = "Could not reach the page's server: " + e.message; draw(); });
+})();
+</script>
+`;
+  }
+});
+
+// src/syndromic-patient.ts
+function generateWholePatient(want = {}) {
+  const set = ids(want), fits = storiesWith(want);
+  const score = (x) => set.filter((id) => x.results[id] === want[id]).length;
+  const best = Math.max(...fits.map(score));
+  const s = pick(fits.filter((x) => score(x) === best));
+  const findings = drawChecked(s.draw, s.expect);
+  const mixed = set.filter((id) => s.results[id] !== want[id]);
+  for (const id of mixed) {
+    const d = pick(STORIES.filter((x) => x.results[id] === want[id]));
+    Object.assign(findings, { [id]: drawChecked(d.draw, d.expect)[id] });
+  }
+  return { story: s.name, findings, mixed };
+}
+var pick, chance, uniform, drawChecked, patientCode, NORMAL2, FOCAL, drawChest, p, other, gas, NO_OVERLOAD, NO_RIGHT, bothSides, v, STORIES, STORY_NAMES, NO, ids, storiesWith, resultOptions, ASSESSMENTS;
+var init_syndromic_patient = __esm({
+  "src/syndromic-patient.ts"() {
+    "use strict";
+    init_shock();
+    init_volume();
+    init_heart_failure();
+    init_chest_exam();
+    init_focal_pulmonary();
+    init_respiratory_failure();
+    pick = (items) => items[Math.floor(Math.random() * items.length)];
+    chance = (p2) => Math.random() < p2;
+    uniform = (min, max, digits = 0) => (min + Math.random() * (max - min)).toFixed(digits);
+    drawChecked = (draw, matches) => {
+      let value = draw();
+      for (let i = 1; i < 20 && !matches(value); i++) value = draw();
+      return value;
+    };
+    patientCode = () => Array.from({ length: 4 }, () => pick([..."ABCDEFGHJKLMNPQRSTUVWXYZ23456789"])).join("");
+    NORMAL2 = { expansion: "normal", percussion: "resonant", breathSounds: "vesicular", addedSounds: "none", vocalResonance: "normal" };
+    FOCAL = {
+      consolidation: () => ({ expansion: "reduced", percussion: "dull", breathSounds: "bronchial", addedSounds: "crackles", vocalResonance: "increased" }),
+      pleural_effusion: () => ({ expansion: "reduced", percussion: "stony_dull", breathSounds: pick(["reduced", "absent"]), addedSounds: "none", vocalResonance: "reduced" })
+    };
+    drawChest = (scenario) => {
+      const side = pick(SIDES);
+      if (scenario === "normal") return { side, exam: { examination: "performed", trachea: "central", right: { ...NORMAL2 }, left: { ...NORMAL2 } } };
+      const trachea = chance(0.25) && scenario === "pleural_effusion" ? `deviated_${other(side)}` : "central";
+      return { side, exam: { examination: "performed", trachea, [side]: FOCAL[scenario](), [other(side)]: { ...NORMAL2 } } };
+    };
+    p = (yes) => yes ? "present" : "absent";
+    other = (s) => s === "right" ? "left" : "right";
+    gas = (po2, pco2, hco3) => {
+      const c = uniform(...pco2), b = uniform(...hco3);
+      return { bloodGas: "arterial", gasUnit: "mmHg", po2: uniform(...po2), pco2: c, hco3: b, ph: (6.1 + Math.log10(Number(b) / (0.03 * Number(c)))).toFixed(2) };
+    };
+    NO_OVERLOAD = { rales: "absent", s3Gallop: "absent", hepatojugularReflux: "absent", bilateralAnkleEdema: "absent", hepatomegaly: "absent", pleuralEffusion: "absent" };
+    NO_RIGHT = { thirdHeartSound: "absent", peripheralOedema: "absent", hepatomegaly: "absent", hepatojugularReflux: "absent", ascites: "absent", legSwelling: "absent" };
+    bothSides = (added) => {
+      const { exam } = drawChest("normal");
+      return { ...exam, right: { ...exam.right, addedSounds: added }, left: { ...exam.left, addedSounds: added } };
+    };
+    v = (f) => ({
+      shock: classifyShock(f.shock)?.category,
+      volume: assessVolume(f.volume)?.status,
+      hf: assessHeartFailure(f["heart-failure"]).verdict,
+      chest: assessChestExam(f["chest-exam"]),
+      focal: assessFocalPulmonary(f["focal-pulmonary"]),
+      rf: assessRespiratoryFailure(f["respiratory-failure"])
+    });
+    STORIES = [
+      {
+        name: "Septic shock from lobar pneumonia",
+        results: { shock: "Septic", volume: "No overload", "heart-failure": "No congestion", "chest-exam": "Consolidation, one side", "focal-pulmonary": "Pneumonia on imaging", "respiratory-failure": "Failure with distress" },
+        draw: () => {
+          const { exam: chest, side } = drawChest("consolidation");
+          const spo22 = uniform(85, 89);
+          return {
+            shock: { systolic: uniform(72, 88), durationMinutes: uniform(30, 180), skin: "warm", jvp: "normal_or_low", capillaryRefill: "brisk", pulseVolume: "bounding", lungExam: "unilateral_crackles" },
+            volume: { jvp: "normal_or_low", ...NO_OVERLOAD },
+            "heart-failure": { breathlessness: "present", crackles: "unilateral", jvp: "normal_or_low", ...NO_RIGHT },
+            "chest-exam": chest,
+            "focal-pulmonary": {
+              cough: "present",
+              sputum: "purulent",
+              reportedFever: "present",
+              pleuriticPain: "present",
+              breathlessness: "present",
+              symptomDurationDays: uniform(2, 6),
+              temperatureC: uniform(38.4, 39.8, 1),
+              oxygenSaturation: spo22,
+              ...chest,
+              imaging: [{ modality: "chest_radiograph", finding: "consolidation", result: "present", side, timing: "current" }]
+            },
+            "respiratory-failure": { oxygenSupport: "supplemental_oxygen", oxygenSaturation: spo22, respiratoryRate: uniform(24, 34), accessoryMuscles: "present", paradoxicalBreathing: "absent", cyanosis: "absent", speech: "limited", ...gas([50, 59], [28, 36], [18, 24]) }
+          };
+        },
+        expect: (f) => {
+          const r = v(f), side = ["right", "left"].find((s) => r.chest[s].verdict === "consolidation");
+          return r.shock === "septic" && r.volume === "no_overload" && r.hf === "no_congestion" && !!side && r.chest[other(side)].verdict === "no_syndrome" && r.focal.pneumoniaEvidence === "imaging-supported" && r.rf.failure === "present" && r.rf.distress === "present";
+        }
+      },
+      {
+        name: "Cardiogenic shock with pulmonary oedema",
+        results: { shock: "Cardiogenic", volume: "Overload", "heart-failure": "Congestion, left side", "chest-exam": "Crackles on both sides", "focal-pulmonary": "Not supported", "respiratory-failure": "Failure" },
+        draw: () => {
+          const spo22 = uniform(84, 89);
+          return {
+            shock: { systolic: uniform(72, 88), durationMinutes: uniform(30, 180), skin: "cool", jvp: "elevated", capillaryRefill: "delayed", pulseVolume: "thready", lungExam: "bilateral_crackles" },
+            volume: { jvp: "elevated", rales: "present", s3Gallop: "present", hepatojugularReflux: "present", bilateralAnkleEdema: p(chance(0.6)), hepatomegaly: p(chance(0.4)), pleuralEffusion: "absent" },
+            "heart-failure": { breathlessness: "present", crackles: "bilateral", thirdHeartSound: "left_or_unsided", jvp: "elevated", hepatojugularReflux: "present", peripheralOedema: chance(0.6) ? "dependent" : "absent", hepatomegaly: "absent", ascites: "absent" },
+            "chest-exam": bothSides("crackles"),
+            "focal-pulmonary": {
+              cough: p(chance(0.5)),
+              sputum: pick(["none", "mucoid"]),
+              reportedFever: "absent",
+              pleuriticPain: "absent",
+              breathlessness: "present",
+              symptomDurationDays: uniform(1, 3),
+              temperatureC: uniform(36.4, 37.4, 1),
+              oxygenSaturation: spo22,
+              ...bothSides("crackles"),
+              imaging: [{ modality: "chest_radiograph", finding: "pulmonary_oedema", result: "present", side: "bilateral", timing: "current" }]
+            },
+            "respiratory-failure": { oxygenSupport: "supplemental_oxygen", oxygenSaturation: spo22, respiratoryRate: uniform(26, 34), accessoryMuscles: "present", paradoxicalBreathing: "absent", cyanosis: "absent", speech: "limited", ...gas([50, 59], [30, 38], [19, 24]) }
+          };
+        },
+        expect: (f) => {
+          const r = v(f);
+          return r.shock === "cardiogenic" && r.volume === "overload" && (r.hf === "biventricular" || r.hf === "left") && r.chest.right.verdict === "no_syndrome" && r.chest.left.verdict === "no_syndrome" && r.chest.patterns.includes("diffuse_crackles") && r.focal.verdict === "unsupported" && r.rf.failure === "present";
+        }
+      },
+      {
+        name: "Hypovolaemic shock",
+        results: { shock: "Hypovolaemic", volume: "No overload", "heart-failure": "No congestion", "chest-exam": "Normal", "focal-pulmonary": "Not supported", "respiratory-failure": "No failure, no distress" },
+        draw: () => {
+          const spo22 = uniform(95, 99), rr = uniform(18, 26);
+          return {
+            shock: { systolic: uniform(70, 88), durationMinutes: uniform(30, 120), skin: "cool", jvp: "normal_or_low", capillaryRefill: "delayed", pulseVolume: "thready", lungExam: "clear" },
+            volume: { jvp: "normal_or_low", ...NO_OVERLOAD },
+            "heart-failure": { breathlessness: "absent", crackles: "none", jvp: "normal_or_low", ...NO_RIGHT },
+            "chest-exam": drawChest("normal").exam,
+            "focal-pulmonary": { cough: "absent", reportedFever: "absent", pleuriticPain: "absent", breathlessness: "absent", temperatureC: uniform(35.8, 37, 1), oxygenSaturation: spo22, ...drawChest("normal").exam, imaging: [] },
+            "respiratory-failure": { oxygenSupport: "room_air", oxygenSaturation: spo22, respiratoryRate: rr, accessoryMuscles: "absent", paradoxicalBreathing: "absent", cyanosis: "absent", speech: "full_sentences" }
+          };
+        },
+        expect: (f) => {
+          const r = v(f);
+          return r.shock === "hypovolemic" && r.volume === "no_overload" && r.hf === "no_congestion" && r.chest.right.verdict === "no_syndrome" && r.chest.left.verdict === "no_syndrome" && r.focal.verdict === "unsupported" && r.rf.failure === "absent" && r.rf.distress === "absent";
+        }
+      },
+      {
+        name: "Hypercapnic COPD exacerbation",
+        results: { shock: "Not in shock (indeterminate)", volume: "No overload", "heart-failure": "No congestion", "chest-exam": "Wheeze on both sides", "focal-pulmonary": "Not supported", "respiratory-failure": "Hypercapnic failure" },
+        draw: () => {
+          const spo22 = uniform(84, 89);
+          return {
+            // not hypotensive: the shock rule declines the patient as outside its cohort
+            shock: { systolic: uniform(118, 156), skin: "warm", jvp: "normal_or_low", capillaryRefill: "brisk", pulseVolume: "normal", lungExam: "clear" },
+            volume: { jvp: "normal_or_low", ...NO_OVERLOAD },
+            "heart-failure": { breathlessness: "present", crackles: "none", jvp: "normal_or_low", ...NO_RIGHT },
+            "chest-exam": bothSides("wheeze"),
+            "focal-pulmonary": {
+              cough: "present",
+              sputum: pick(["mucoid", "purulent"]),
+              reportedFever: "absent",
+              pleuriticPain: "absent",
+              breathlessness: "present",
+              symptomDurationDays: uniform(3, 7),
+              temperatureC: uniform(36.6, 37.6, 1),
+              oxygenSaturation: spo22,
+              ...bothSides("wheeze"),
+              imaging: [{ modality: "chest_radiograph", finding: "normal", result: "present", side: "not_stated", timing: "current" }]
+            },
+            "respiratory-failure": { oxygenSupport: "non_invasive_ventilation", oxygenSaturation: spo22, respiratoryRate: uniform(26, 34), accessoryMuscles: "present", paradoxicalBreathing: p(chance(0.5)), cyanosis: p(chance(0.5)), speech: "limited", ...gas([50, 58], [62, 85], [26, 30]) }
+          };
+        },
+        expect: (f) => {
+          const r = v(f);
+          return r.shock === "indeterminate" && r.volume === "no_overload" && r.hf === "no_congestion" && r.chest.patterns.includes("bronchial_obstruction") && r.focal.verdict === "unsupported" && r.rf.failure === "present" && r.rf.hypercapnia === "present";
+        }
+      },
+      {
+        name: "Large pleural effusion",
+        results: { shock: "Not in shock (indeterminate)", volume: "No overload", "heart-failure": "No congestion", "chest-exam": "Pleural effusion, one side", "focal-pulmonary": "Supported", "respiratory-failure": "Distress without failure" },
+        draw: () => {
+          const { exam: chest, side } = drawChest("pleural_effusion");
+          const spo22 = uniform(91, 94);
+          return {
+            shock: { systolic: uniform(112, 148), skin: "warm", jvp: "normal_or_low", capillaryRefill: "brisk", pulseVolume: "normal", lungExam: "clear" },
+            volume: { jvp: "normal_or_low", ...NO_OVERLOAD, pleuralEffusion: "present" },
+            "heart-failure": { breathlessness: "present", crackles: "none", jvp: "normal_or_low", ...NO_RIGHT },
+            "chest-exam": chest,
+            "focal-pulmonary": {
+              cough: p(chance(0.5)),
+              reportedFever: "absent",
+              pleuriticPain: p(chance(0.4)),
+              breathlessness: "present",
+              symptomDurationDays: uniform(10, 30),
+              temperatureC: uniform(36.5, 37.4, 1),
+              oxygenSaturation: spo22,
+              ...chest,
+              imaging: [{ modality: pick(["chest_radiograph", "chest_ultrasound"]), finding: "pleural_effusion", result: "present", side, timing: "current" }]
+            },
+            "respiratory-failure": { oxygenSupport: "room_air", oxygenSaturation: spo22, respiratoryRate: uniform(22, 28), accessoryMuscles: "present", paradoxicalBreathing: "absent", cyanosis: "absent", speech: "limited" }
+          };
+        },
+        expect: (f) => {
+          const r = v(f), side = ["right", "left"].find((s) => r.chest[s].verdict === "pleural_effusion");
+          return r.shock === "indeterminate" && r.volume === "no_overload" && r.hf === "no_congestion" && !!side && r.chest[other(side)].verdict === "no_syndrome" && r.focal.verdict === "supported" && r.rf.failure === "absent" && r.rf.distress === "present";
+        }
+      }
+    ];
+    STORY_NAMES = STORIES.map((s) => s.name);
+    NO = { shock: "Not in shock (indeterminate)", volume: "No overload", "heart-failure": "No congestion", "chest-exam": "Normal", "focal-pulmonary": "Not supported", "respiratory-failure": "No failure, no distress" };
+    ids = (want) => Object.keys(want).filter((id) => want[id]);
+    storiesWith = (want) => STORIES.filter((s) => ids(want).every((id) => want[id] === NO[id] || s.results[id] === want[id]));
+    resultOptions = (want, id) => [.../* @__PURE__ */ new Set([...storiesWith({ ...want, [id]: void 0 }).map((s) => s.results[id]), NO[id]])];
+    ASSESSMENTS = [
+      { id: "shock", title: "Shock category" },
+      { id: "volume", title: "Volume overload" },
+      { id: "heart-failure", title: "Heart failure" },
+      { id: "chest-exam", title: "Chest examination" },
+      { id: "focal-pulmonary", title: "Focal pulmonary syndrome" },
+      { id: "respiratory-failure", title: "Respiratory failure and distress" }
+    ];
+  }
+});
+
+// src/commands/syndromic.ts
+var syndromic_exports = {};
+__export(syndromic_exports, {
+  FIRST_LINE: () => FIRST_LINE,
+  SYSTEM: () => SYSTEM,
+  assess: () => assess,
+  draftNote: () => draftNote,
+  keepsNumbers: () => keepsNumbers,
+  optionsFor: () => optionsFor,
+  readWant: () => readWant,
+  run: () => run19,
+  serve: () => serve3
+});
+var import_node_child_process4, import_node_http3, USAGE19, words, ACRONYMS, label, spoken2, rows, assess, optionsFor, readWant, FIRST_LINE, RULES, SYSTEM, numbersOf, keepsNumbers, draftNote, children2, askClaude2, MAX_BODY2, serve3, run19;
+var init_syndromic = __esm({
+  "src/commands/syndromic.ts"() {
+    "use strict";
+    import_node_child_process4 = require("child_process");
+    import_node_http3 = require("http");
+    init_chest_exam();
+    init_focal_pulmonary();
+    init_heart_failure();
+    init_respiratory_failure();
+    init_shock();
+    init_volume();
+    init_claude_spawn();
+    init_cli();
+    init_syndromic_page();
+    init_syndromic_patient();
+    init_overlay();
+    USAGE19 = `Usage: medprotocol syndromic --serve [--port <number>]
+
+Synthetic patients for the six bedside rules (shock, volume, heart failure, chest, focal pulmonary,
+respiratory failure), on a local page: generate one at random or with the results you choose, read the
+note the model drafts for it, then check what each rule says.
+
+Options:
+  --serve           Start the local page server
+  --port <number>   Port (default 7333)
+
+Every patient is synthetic. Each note is one Claude run (claude -p, no tools), which uses tokens.`;
+    words = (s) => s.replace(/([a-z])([A-Z0-9])/g, "$1 $2").replace(/_/g, " ").toLowerCase();
+    ACRONYMS = { jvp: "JVP", ph: "pH", po2: "PO2", pco2: "PCO2", hco3: "HCO3", "cm h2o": "cmH2O", s3: "S3" };
+    label = (s) => words(s).replace(/\b(jvp|ph|po2|pco2|hco3|cm h2o|s3)\b/g, (m) => ACRONYMS[m]).replace(/^./, (c) => c.toUpperCase());
+    spoken2 = (names) => names.map(words).join(", ");
+    rows = (f, prefix = "") => Object.entries(f).flatMap(([k, v2]) => {
+      if (v2 === void 0 || v2 === "") return [];
+      if (Array.isArray(v2)) return v2.map((x, i) => [`${label(prefix + k)} ${i + 1}`, Object.values(x).map(String).map(words).join(", ")]);
+      if (typeof v2 === "object") return rows(v2, `${prefix}${k} `);
+      return [[label(prefix + k), words(String(v2))]];
+    });
+    assess = (f) => {
+      const card = (id, c) => ({ id, title: ASSESSMENTS.find((a) => a.id === id).title, ...c, findings: rows(f[id]) });
+      const shock = classifyShock(f.shock);
+      const volume = assessVolume(f.volume);
+      const hf = assessHeartFailure(f["heart-failure"]);
+      const chest = assessChestExam(f["chest-exam"]);
+      const focal = assessFocalPulmonary(f["focal-pulmonary"]);
+      const rf = assessRespiratoryFailure(f["respiratory-failure"]);
+      const sides = ["right", "left"].map((s) => [s === "right" ? "Right" : "Left", chest[s]]);
+      return [
+        card("shock", shock ? { result: SHOCK_LABELS[shock.category], tone: shock.reason ? "open" : "found", ...shock.reason ? { why: SHOCK_REASONS[shock.reason] + "." } : {}, agrees: spoken2(shock.supporting), next: [], caveat: SHOCK_CAVEAT } : { result: "Check the systolic, the duration and the measured JVP", tone: "open", next: [], caveat: SHOCK_CAVEAT }),
+        card("volume", volume ? { result: VOLUME_LABELS[volume.status], tone: { overload: "found", no_overload: "clear", indeterminate: "open" }[volume.status], ...volume.reason ? { why: VOLUME_REASONS[volume.reason] + "." } : {}, next: volume.pivotal.length ? [`Would settle it: ${spoken2(volume.pivotal)}`] : [], caveat: VOLUME_CAVEAT } : { result: "Indeterminate", tone: "open", next: [], caveat: VOLUME_CAVEAT }),
+        card("heart-failure", {
+          result: HF_LABELS[hf.verdict],
+          tone: hf.verdict === "indeterminate" ? "open" : hf.verdict === "no_congestion" ? "clear" : "found",
+          why: [hf.reason ? HF_REASONS[hf.reason] : HF_SYNDROME_LABELS[hf.syndrome], ...hf.notCalculated].join(". ") + ".",
+          agrees: [hf.leftSigns.length && `left: ${spoken2(hf.leftSigns)}`, hf.rightSigns.length && `right: ${spoken2(hf.rightSigns)}`].filter(Boolean).join("; "),
+          next: hf.next.map((n) => HF_NEXT_LABELS[n]),
+          caveat: HF_CAVEAT
+        }),
+        card("chest-exam", {
+          result: sides.map(([s, a]) => `${s}: ${CHEST_LABELS[a.verdict]}`).join(" \xB7 "),
+          tone: sides.some(([, a]) => a.verdict !== "no_syndrome" && a.verdict !== "indeterminate") || chest.patterns.length ? "found" : sides.some(([, a]) => a.verdict === "indeterminate") ? "open" : "clear",
+          why: sides.filter(([, a]) => a.reason).map(([s, a]) => `${s}: ${CHEST_REASONS[a.reason]}.`).join(" ") || void 0,
+          agrees: chest.patterns.map((p2) => CHEST_PATTERN_LABELS[p2]).join("; "),
+          next: [],
+          caveat: CHEST_CAVEAT
+        }),
+        card("focal-pulmonary", {
+          result: FOCAL_LABELS[focal.verdict],
+          tone: { supported: "found", unsupported: "clear", indeterminate: "open" }[focal.verdict],
+          why: FOCAL_REASONS[focal.reason] + ".",
+          agrees: [`pneumonia evidence: ${FOCAL_EVIDENCE_LABELS[focal.pneumoniaEvidence]}`, focal.differential.length && `differential: ${focal.differential.map((d) => FOCAL_DIFFERENTIAL_LABELS[d]).join(", ")}`].filter(Boolean).join("; "),
+          next: focal.next.map((n) => FOCAL_NEXT_LABELS[n]),
+          caveat: FOCAL_CAVEAT
+        }),
+        card("respiratory-failure", {
+          result: `${RF_FAILURE_LABELS[rf.failure]} \xB7 ${RF_DISTRESS_LABELS[rf.distress]}`,
+          tone: rf.failure === "present" || rf.distress === "present" ? "found" : rf.failure === "absent" && rf.distress === "absent" ? "clear" : "open",
+          why: [RF_FAILURE_REASONS[rf.failureReason], ...rf.notCalculated].join(". ") + ".",
+          agrees: [rf.distressSigns.map((d) => RF_SIGN_LABELS[d]).join(", "), rf.arterialGas?.disorder && `gas: ${rf.arterialGas.disorder}`].filter(Boolean).join("; "),
+          next: rf.next.map((n) => RF_NEXT_LABELS[n]),
+          caveat: RF_CAVEAT
+        })
+      ].map((c) => c.agrees ? c : (({ agrees, ...rest }) => rest)(c));
+    };
+    optionsFor = (want) => Object.fromEntries(ASSESSMENTS.map((a) => [a.id, resultOptions(want, a.id)]));
+    readWant = (body) => {
+      if (body === void 0 || body === null) return {};
+      if (typeof body !== "object" || Array.isArray(body)) return "want must be an object";
+      const want = {};
+      for (const [id, r] of Object.entries(body)) {
+        if (!ASSESSMENTS.some((a) => a.id === id)) return `unknown assessment: ${id}`;
+        if (r === void 0 || r === null || r === "") continue;
+        if (typeof r !== "string") return `${id} must be a string`;
+        want[id] = r;
+      }
+      for (const id of Object.keys(want)) if (!resultOptions(want, id).includes(want[id])) return `${id}: "${want[id]}" does not fit with the other results`;
+      return want;
+    };
+    FIRST_LINE = "SYNTHETIC NOTE \u2014 invented for learning, not real data.";
+    RULES = `The findings you are given are the patient's symptoms and examination. Rules:
+- Every given finding appears once: symptoms (breathlessness, leg swelling, cough, sputum, reported fever, pleuritic pain, how long symptoms lasted) in the history (HPI or History), signs and measurements in the examination (O/E or Examination). Same meaning, and the same meaning. Each number is written exactly as given, with its unit (for example 93 min, not ~90 min; 4 cmH2O, not 4 cm).
+- A finding that is missing or not_assessed is simply not mentioned.
+- The findings are grouped by assessment. They are one patient: a finding repeated in several groups (the systolic, the JVP, crackles, the chest signs, SpO2) is one finding, written once. Imaging rows are reports to state in the note.
+- Field meanings: durationMinutes is how long the systolic has been that low (e.g. "SBP 80 mmHg, hypotensive for 93 min"), not how long symptoms lasted; symptomDurationDays is how long symptoms lasted; jvpCmH2O and jvpHeightCm are a measured JVP; imaging rows are reports of current or past imaging (timing historical = an old report).
+- You may invent only context no bedside rule reads: age and sex (e.g. "72M"), the presenting complaint and its timing, past history, medications, social history. Keep them plausible for these findings and never let them add or contradict an examination finding.
+- Never add an examination finding, mental state or consciousness (drowsy, confused, GCS, alert), vital sign, saturation, temperature, lab, imaging, ECG, impression, differential, diagnosis, syndrome name or plan.
+- No name, date, place, hospital, ward bed or record number.`;
+    SYSTEM = {
+      ed: `You write EHR entries for synthetic teaching patients, the way a busy emergency doctor types them. Reply with the entry only, plain text, no markdown.
+
+First line, exactly: ${FIRST_LINE}
+Then the entry:
+- A header line: setting, who is writing and a time of day, e.g. "ED \u2014 Medical SHO review, 02:40" or "Ward 7 \u2014 FY1 review, 14:15".
+- "PC:" one line, then "HPI:" two to four lines, then "PMH:", "DHx:" (meds) and "SH:" as short lines, then "O/E:" with the examination.
+- Write as doctors do: abbreviations (SOB, CRT, JVP, HS I+II+0, bibasal creps, PEA, \u2193, \u2191, R/L), fragments instead of sentences, the examination grouped by system (General, CVS, Resp, Abdo, Peripheries).
+
+${RULES}`,
+      outpatient: `You write outpatient consultation notes for synthetic teaching patients, the way a consultant writes them up after a clinic appointment. Reply with the note only, plain text, no markdown.
+
+First line, exactly: ${FIRST_LINE}
+Then the note:
+- A header line: clinic and who saw the patient, e.g. "Cardiology outpatient clinic \u2014 Consultant review" (no date).
+- Short headed sections in full sentences and paragraphs: "History", "Past medical history", "Medications", "Social history", "Examination". Few abbreviations, spelled out on first use. Read like a written record, not a list.
+- If the findings could not be seen in a clinic (on non-invasive ventilation, hypotensive for an hour), write it as a medical day unit or ward review in the same written style.
+
+${RULES}`
+    };
+    numbersOf = (findings) => JSON.stringify(findings).match(/"-?\d+(\.\d+)?"/g)?.map((n) => n.slice(1, -1)) ?? [];
+    keepsNumbers = (note, findings) => numbersOf(findings).every((n) => new RegExp(`(^|[^\\d.])${n.replace(".", "\\.")}(?![\\d])`).test(note));
+    draftNote = async (findings, style, askModel) => {
+      const prompt = `Patient: all six assessments
+Findings (JSON):
+${JSON.stringify(findings)}`;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const note = (await askModel(SYSTEM[style], prompt)).trim();
+        if (note.startsWith(FIRST_LINE) && keepsNumbers(note, findings)) return note;
+      }
+      return null;
+    };
+    children2 = /* @__PURE__ */ new Set();
+    askClaude2 = (system, prompt) => new Promise((done, reject) => {
+      const cmd = claudeCommand(["-p", "--model", "haiku", "--output-format", "json", "--tools", "", "--no-session-persistence", "--system-prompt", system]);
+      const child = (0, import_node_child_process4.spawn)(cmd.command, cmd.args, { shell: cmd.shell });
+      children2.add(child);
+      let out = "";
+      const timer = setTimeout(() => killClaude(child), 9e4);
+      child.stdout.on("data", (d) => out += d);
+      child.on("error", (e) => reject(new Error(e.code === "ENOENT" ? "The 'claude' command was not found" : e.message)));
+      child.on("close", (code) => {
+        clearTimeout(timer);
+        children2.delete(child);
+        try {
+          const reply = JSON.parse(out);
+          if (code !== 0 || reply.is_error || typeof reply.result !== "string") return reject(new Error(`claude failed: ${reply.result ?? `exit code ${code}`}`));
+          done(reply.result);
+        } catch {
+          reject(new Error(`claude exited with code ${code}`));
+        }
+      });
+      child.stdin.on("error", () => {
+      });
+      child.stdin.end(prompt);
+    });
+    MAX_BODY2 = 2e4;
+    serve3 = (port, askModel = askClaude2) => {
+      const server = (0, import_node_http3.createServer)((req, res) => {
+        const send = (status, body, type = "application/json") => {
+          res.writeHead(status, { "Content-Type": type, "Cache-Control": "no-store" });
+          res.end(typeof body === "string" ? body : JSON.stringify(body));
+        };
+        const path = new URL(req.url ?? "/", "http://localhost").pathname;
+        const at = req.socket.localPort;
+        if (req.headers.host !== `localhost:${at}` && req.headers.host !== `127.0.0.1:${at}`) return send(403, { error: "forbidden" });
+        if (path.startsWith("/api") && !isLocalOrigin(req.headers.origin)) return send(403, { error: "forbidden" });
+        const chunks = [];
+        let size = 0;
+        req.on("data", (chunk) => {
+          size += chunk.length;
+          if (size <= MAX_BODY2) chunks.push(chunk);
+        });
+        req.on("end", () => {
+          if (size > MAX_BODY2) return send(413, { error: "body too large" });
+          if (req.method === "GET" && path === "/") return send(200, SYNDROMIC_PAGE_HTML, "text/html; charset=utf-8");
+          if (req.method !== "POST" || !["/api/options", "/api/patients", "/api/notes"].includes(path)) return send(404, { error: "not found" });
+          let body;
+          try {
+            body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
+          } catch {
+            return send(400, { error: "the body must be JSON" });
+          }
+          if (path === "/api/notes") {
+            if (body?.style !== "ed" && body?.style !== "outpatient") return send(400, { error: 'style must be "ed" or "outpatient"' });
+            if (!body.findings || typeof body.findings !== "object" || Array.isArray(body.findings)) return send(400, { error: "findings must be an object" });
+            draftNote(body.findings, body.style, askModel).then((note) => note ? send(200, { note }) : send(502, { error: "The model did not return a usable note. Try again." })).catch((e) => send(502, { error: e.message }));
+            return;
+          }
+          const want = readWant(body?.want);
+          if (typeof want === "string") return send(400, { error: want });
+          if (path === "/api/options") return send(200, { assessments: ASSESSMENTS, options: optionsFor(want) });
+          const patient = generateWholePatient(want);
+          const code = patientCode();
+          process.stdout.write(`Synthetic patient ${code} \xB7 ${patient.story}
+`);
+          send(200, { code, ...patient, cards: assess(patient.findings) });
+        });
+      });
+      server.on("error", (err) => {
+        process.stderr.write(err.code === "EADDRINUSE" ? `Port ${port} is in use. Pick another with --port <number>.
+` : `Synthetic patients server error: ${err.message}
+`);
+        process.exitCode = 1;
+      });
+      const stop = () => {
+        for (const child of children2) killClaude(child);
+        process.exit();
+      };
+      process.on("SIGINT", stop).on("SIGTERM", stop);
+      server.on("close", () => process.off("SIGINT", stop).off("SIGTERM", stop));
+      server.listen(port, "127.0.0.1", () => {
+        process.stdout.write(`medprotocol synthetic patients page \u2192 http://localhost:${server.address().port}
+`);
+        process.stdout.write(`Each note drafted there starts a Claude run (claude -p, Haiku) \u2014 uses tokens. Ctrl-C to stop.
+`);
+      });
+      return server;
+    };
+    run19 = (argv) => {
+      const values = parseFlags(argv, { serve: { type: "boolean", default: false }, port: { type: "string", default: "7333" } }, USAGE19);
+      if (!values) return;
+      if (!values.serve) return fail("--serve is required", USAGE19);
+      if (values.json) return fail("--serve takes no other options but --port");
+      const port = Number(values.port);
+      if (!Number.isInteger(port) || port < 0 || port > 65535) return fail("--port must be a number from 0 to 65535");
+      serve3(port);
     };
   }
 });
@@ -8222,7 +9097,7 @@ var version = "1.6.1";
 
 // src/index.ts
 init_cli();
-var USAGE19 = `medprotocol \u2014 Medical calculations from the terminal
+var USAGE20 = `medprotocol \u2014 Medical calculations from the terminal
 
 Usage: medprotocol <command> [options]
 
@@ -8244,6 +9119,7 @@ Commands:
   ckd              CKD evaluation (eGFR, staging, KFRE, treatment)
   diabetes         Diabetes diagnosis and classification (ADA 2026)
   extract          Check extracted values against the note they came from
+  syndromic        Synthetic patients for the six bedside rules, on a local page (--serve)
   overlay          Drain the dev overlay work-order queue (.medprotocol/queue/)
 
 Global options:
@@ -8281,6 +9157,7 @@ Examples:
   medprotocol diabetes t2d-screen --age 40 --bmi 28 --hypertension
   medprotocol diabetes gdm --strategy one-step --fasting 95 --1h 185 --2h 160
   medprotocol extract --note note.txt --items extraction.json
+  medprotocol syndromic --serve
   medprotocol overlay --drain`;
 var command = process.argv[2];
 var commandArgs = process.argv.slice(3);
@@ -8290,7 +9167,7 @@ if (command === "--version" || command === "-v") {
   process.exit(0);
 }
 if (!command || command === "--help" || command === "-h") {
-  process.stdout.write(USAGE19 + "\n");
+  process.stdout.write(USAGE20 + "\n");
   process.exit(0);
 }
 var commands = {
@@ -8311,6 +9188,7 @@ var commands = {
   ckd: () => Promise.resolve().then(() => (init_ckd2(), ckd_exports)),
   diabetes: () => Promise.resolve().then(() => (init_diabetes(), diabetes_exports)),
   extract: () => Promise.resolve().then(() => (init_extract(), extract_exports)),
+  syndromic: () => Promise.resolve().then(() => (init_syndromic(), syndromic_exports)),
   overlay: () => Promise.resolve().then(() => (init_overlay(), overlay_exports))
 };
 var loader = commands[command];

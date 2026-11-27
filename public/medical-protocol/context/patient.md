@@ -43,7 +43,7 @@ interface PatientData {
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
 - **Full name:** `Synthetic patient` and a 4-character code (`Synthetic patient 7K3Q`). Never a person-like name.
 - **Date of birth:** age 18–90 at random; date of birth = today minus that age and 0–364 days.

@@ -38,7 +38,7 @@ Logic: `lib/medprotocol/acid-base/` — import from `@/lib/medprotocol/acid-base
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
 | Scenario | HCO3 (mEq/L) | pCO2 (mmHg) | Anion gap target | Na⁺ | Albumin (g/dL) |
 |---|---|---|---|---|---|

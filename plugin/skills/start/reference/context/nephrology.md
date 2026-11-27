@@ -58,7 +58,7 @@ interface CKDPatientData {
 
 ## Synthetic patient generator
 
-For the **Generate patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
+For the **Generate random patient** button (`building.md` §3). Each press: pick a scenario at random, draw each value uniformly in its range, apply the couplings, round as stated. Fields not listed stay empty.
 
 Header: age 35–85, sex at random, cause (diabetic, hypertensive, glomerular, or unknown) with comorbidities that fit it (diabetic → diabetes on; heart failure 1 in 5; prior CVD 1 in 4; transplant 1 in 20; on max RASi 1 in 2; potassium normal 4 in 5).
 
