@@ -9,7 +9,7 @@ You (the main agent) write a **recipe**: a short test script for one screen. The
 ## Prerequisites
 
 1. `agent-browser --version` — if it fails, **skip this workflow**
-2. Dev server is responding (`npx wait-on http://localhost:3000 -t 30000`)
+2. Dev server is responding (`npx wait-on http://localhost:<port> -t 30000`). Take the port from the `Local:` line `npm run dev` printed: Next.js moves to 3001 or higher when another app has 3000. Use it in the recipe's URL, and check the page is this project's screen.
 
 ---
 

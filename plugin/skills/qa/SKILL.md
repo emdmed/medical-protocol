@@ -12,7 +12,7 @@ The user wants a screen checked ("check it", "is it working?", "test the BMI cal
 
 1. Find the screens: the ones the user named, the one just built or changed in this conversation, or every folder in `components/medprotocol/` if they said "everything". If nothing has been built yet, say so and offer to build one.
 2. **Adding a case?** Add it to the screen's recipe as described in `reference/agent-qa.md` ("Cases the user adds"), then continue to run it.
-3. Make sure the app is running: start `npm run dev` in the background if needed, then `npx wait-on http://localhost:3000 -t 30000`.
+3. Make sure the app is running: start `npm run dev` in the background if needed, then `npx wait-on http://localhost:<port> -t 30000`, with the port from the `Local:` line `npm run dev` printed (Next.js moves past 3000 when another app has it).
 4. For each screen, run the workflow in `reference/agent-qa.md` (write or update the recipe, run it, fix, re-run).
 5. Tell the user the result per patient case, as in step 4 of `reference/agent-qa.md`. Never show reports, logs or code.
 

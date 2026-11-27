@@ -1,6 +1,6 @@
 # Quality Checklist
 
-> **For Claude only.** Items 1–5 are the quick pass: run them automatically after every build, before `npm run dev`, together with the type check and a CLI run of the screen's synthetic case. Item 6 (Browser QA) runs only when the user asks for it, says yes when offered, or before a demo; then after the dev server is ready. This is a background quality step — fix any issues found and communicate results in clinical language, not technical details.
+> **For Claude only.** Items 1–5 are the quick pass: run them automatically after every build, before `npm run dev`, together with the type check; once the server is up, load the screen's synthetic case in the browser and compare its results with the CLI (after-workflow step 3). Item 6 (Browser QA) runs only when the user asks for it, says yes when offered, or before a demo; then after the dev server is ready. This is a background quality step — fix any issues found and communicate results in clinical language, not technical details.
 
 ## 1. Theming & Branding
 
@@ -13,6 +13,7 @@ UI SDK components are unstyled, so the project's theme tokens carry the look.
   4. Update the font in `app/layout.tsx` to match the palette's `font-sans` value
 - Ensure all colors use `bg-background`, `text-foreground`, `border`, `muted`, etc. — never hardcoded hex/rgb
 - Ensure consistent use of semantic color tokens (`primary`, `secondary`, `destructive`, `muted`)
+- Text must stay readable in both light and dark mode: every badge, alert and label gets a background and text color from tokens that are defined for both themes (a light badge background with light dark-mode text is unreadable)
 - If the user mentions their clinic name or colors, pick the closest tweakcn preset or customize the CSS variables to match
 
 ## 2. Responsiveness

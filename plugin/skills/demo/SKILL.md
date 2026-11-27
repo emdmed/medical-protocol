@@ -16,7 +16,7 @@ Find the built screens (`components/medprotocol/<module>/`, also under `src/`) a
 
 ## Step 2: Start the app
 
-1. Run `npm run dev` in the background, then `npx wait-on http://localhost:3000 -t 30000`.
+1. Run `npm run dev` in the background and read the port from its `Local:` line (Next.js moves past 3000 when another app has it), then `npx wait-on http://localhost:<port> -t 30000`. Open one page and check it is this project's app before going on.
 2. `agent-browser --version` fails → skip to Step 5 and write the walkthrough without screenshots; tell the user they can take the screenshots by hand.
 
 ## Step 3: Check before showing
@@ -31,6 +31,7 @@ For each screen that passed, using the commands in `../../agents/qa-runner.md`:
 2. Run the same case through the CLI with `--json` and check the screen shows the same results.
 3. Check "Learning prototype — not for patient care." and "Synthetic case" are visible.
 4. Save a screenshot to `demo/<nn>-<module>.png` (`01-bmi.png`, …). Add a second one at 768×1024 if the layout changes on a tablet.
+5. Look at each screenshot yourself (Read it). Every value, badge and label must be readable against its background, in the theme the screenshot shows. Something hard to read → fix it with `../modify/SKILL.md`, then retake the screenshot. Never hand over a screenshot you have not looked at.
 
 ## Step 5: Write the walkthrough
 

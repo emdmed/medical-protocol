@@ -17,7 +17,7 @@ Say "Let me take a look." Run all checks, collect failures before fixing.
 | `project-scaffold` | `package.json` has `next` | No project |
 | `project-dependencies` | `node_modules` exists | Deps missing |
 | `project-config` | `.claude/CLAUDE.md` exists | Config missing |
-| `server-port` | Read the `npm run dev` output (it says port 3000 is in use) | Port occupied |
+| `server-port` | Read the `npm run dev` output (it says port 3000 is in use and names the port it took) | Port occupied: use the port it names, and check that page is this project's |
 | `server-stopped` | `ps aux \| grep "next dev"` | Server down |
 | `server-crashed` | `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000` | Not responding |
 | `component-missing` | `ls components/` | No components |

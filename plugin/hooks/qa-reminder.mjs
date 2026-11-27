@@ -33,14 +33,14 @@ if (!workflowActive) process.exit(0);
 // Workflow ran but QA wasn't started — ask Claude to continue
 if (!qaStarted) {
   block(
-    "QUALITY CHECK REQUIRED: A workflow was executed but the quick pass was not run. Before finishing, you must complete: 1) Theming with the project's styles, 2) Responsiveness check, 3) Error boundary wrapper, 4) Type check (npx tsc --noEmit) and run the screen's synthetic case through the medprotocol CLI to confirm its numbers. Then start the dev server with 'npm run dev' and offer Browser QA (run it only if the user wants it). Use clinical language when communicating with the user — these are background quality steps.",
+    "QUALITY CHECK REQUIRED: A workflow was executed but the quick pass was not run. Before finishing, you must complete: 1) Theming with the project's styles, 2) Responsiveness check, 3) Error boundary wrapper, 4) Type check (npx tsc --noEmit). Then start the dev server with 'npm run dev', load the screen's synthetic case and compare its results with the medprotocol CLI, and offer Browser QA (run it only if the user wants it). Use clinical language when communicating with the user — these are background quality steps.",
   );
 }
 
 // QA started but dev server not up — remind to start it
 if (!devServerUp) {
   block(
-    "DEV SERVER NOT STARTED: QA checks were run but the dev server hasn't been started. Run 'npm run dev' in the background so the user can preview their interface at localhost:3000. Then offer Browser QA (run it only if the user wants it).",
+    "DEV SERVER NOT STARTED: QA checks were run but the dev server hasn't been started. Run 'npm run dev' in the background so the user can preview their interface, at the port its 'Local:' line prints (3000, or higher when another app has it). Then offer Browser QA (run it only if the user wants it).",
   );
 }
 
