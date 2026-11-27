@@ -36,8 +36,8 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 ### Setting-Aware
 
-- **Admitted patients** (default for DKA): Full parameter set recommended — include GCS for cerebral edema detection and urine output for kidney function
-- **Multiple patients**: Route to the dashboard workflow instead, offering DKA as a dashboard widget
+- **Hospital ward** (default for DKA): Full parameter set recommended — include GCS for cerebral edema detection and urine output for kidney function
+- **A list of patients**: Route to the dashboard workflow instead, offering DKA as a dashboard widget
 
 Do NOT ask about formulas, resolution criteria details, or technical preferences.
 

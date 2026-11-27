@@ -37,8 +37,8 @@ Ask the user about their blood gas analysis needs:
 
 ### Setting-Aware
 
-- **Admitted patients**: "Do you typically work with acute or chronic respiratory conditions?" (Default: chronic — affects compensation formulas)
-- **Multiple patients**: Route to the dashboard workflow instead, offering acid-base as a dashboard widget
+- **Hospital ward**: "Should the cases have acute or chronic respiratory conditions?" (Default: chronic — affects compensation formulas)
+- **A list of patients**: Route to the dashboard workflow instead, offering acid-base as a dashboard widget
 
 Do NOT ask about technical integrations, display preferences, or formulas.
 

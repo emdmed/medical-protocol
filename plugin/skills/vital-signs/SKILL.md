@@ -38,8 +38,8 @@ Ask which vital signs to monitor:
 
 ### Setting-Aware
 
-- **Admitted patients**: "Continuous monitoring with alerts, or manual entry during rounds?" (Default: manual)
-- **Private practice**: "Record vitals during the visit, or also review past readings?" (Default: record only)
+- **Hospital ward**: "Continuous monitoring with alerts, or manual entry during rounds?" (Default: manual)
+- **Clinic visits**: "Record vitals during the visit, or also review past readings?" (Default: record only)
 
 **FHIR support**: Include automatically. Do NOT ask about layout, colors, or storage.
 

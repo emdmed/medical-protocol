@@ -1,6 +1,6 @@
 # Quality Checklist
 
-> **For Claude only.** Run automatically after every workflow build. Items 1–5 run before `npm run dev`; item 6 (Browser QA) runs after the dev server is ready. This is a background quality step — fix any issues found and communicate results in clinical language, not technical details.
+> **For Claude only.** Items 1–5 are the quick pass: run them automatically after every build, before `npm run dev`, together with the type check and a CLI run of the screen's synthetic case. Item 6 (Browser QA) runs only when the user asks for it, says yes when offered, or before a demo; then after the dev server is ready. This is a background quality step — fix any issues found and communicate results in clinical language, not technical details.
 
 ## 1. Theming & Branding
 
@@ -39,6 +39,7 @@ UI SDK components are unstyled, so the project's theme tokens carry the look.
 - Clinical values: every number, category and severity on screen comes from a `lib/medprotocol` function — no thresholds or calculations in the UI (building.md §4)
 - Units next to every value; guideline source shown when the lib provides one
 - Loading/empty states: show a meaningful empty state when no data exists (not a blank screen)
+- **Load synthetic case** fills every input of the screen and its results match the CLI for that case; **Clear** empties it (building.md §3)
 
 ## Dynamic Items
 
@@ -60,9 +61,9 @@ Apply these additional checks based on what was built:
 - Add `<LayoutDisclaimer />` to `app/layout.tsx` inside `<body>`, above `{children}`
 - Import: `import { LayoutDisclaimer } from "@/components/layout-disclaimer"`
 
-## 6. Browser QA (requires agent-browser)
+## 6. Browser QA (requires agent-browser; on request)
 
-> **Skip this entire section** if `agent-browser --version` fails. The system works without it — this is an enhancement, not a requirement.
+> Run this when the user asks for a check, says yes when offered, or before a demo. **Skip this entire section** if `agent-browser --version` fails. The system works without it — this is an enhancement, not a requirement.
 
 Run the full browser QA workflow defined in `agent-qa.md`. It covers:
 

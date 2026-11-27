@@ -30,6 +30,7 @@
 | test | Verify calculations and run QA |
 | calc | Quick terminal-based calculations |
 | cases | Synthetic worked cases to practise with, or to use as labelled demo data |
+| demo | Screenshots and a walkthrough of the prototype with synthetic cases, saved locally in demo/ |
 | preferences | Configure user preferences and specialty |
 | protocol-audit | Audit protocol quality and compliance |
 | overlay | The one overlay entry point: wires the dev overlay if missing, otherwise processes every queued selection |

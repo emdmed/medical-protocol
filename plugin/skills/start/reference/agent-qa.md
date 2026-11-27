@@ -1,6 +1,6 @@
 # Browser QA Workflow (recipes)
 
-> **For Claude only.** Run automatically as part of the Quality Checklist. This is a background quality step — communicate results in clinical language, not browser testing terminology.
+> **For Claude only.** Run when the user asks for a check, says yes when offered after a build, or before a demo (Quality Checklist item 6). This is a background quality step — communicate results in clinical language, not browser testing terminology.
 
 You (the main agent) write a **recipe**: a short test script for one screen. The `medical-protocol:qa-runner` agent (Haiku) runs it in the browser and writes a report. You read the report, fix the code, and run it again.
 

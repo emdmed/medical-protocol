@@ -44,7 +44,7 @@ Present the available building blocks by category:
 
 ### Setting-Aware
 
-- **Admitted patients**: "Do you want the dashboard to highlight patients with abnormal readings?" (Default: yes)
+- **Hospital ward**: "Do you want the dashboard to highlight patients with abnormal readings?" (Default: yes)
 
 Do NOT ask about layout arrangement, navigation structure, or technical preferences.
 

@@ -15,7 +15,8 @@ Every case here is synthetic: invented for learning, not a real person. Medical 
 
 - The user names a module or topic ("a DKA case", "something on acid-base") → take the matching case from `reference/cases.md`.
 - The user says "any" or "surprise me" → pick one, preferring the specialty and case population in `.clinical-context.md` if it exists.
-- Nothing in `reference/cases.md` fits → write a new case in the same format, run its command to check the CLI accepts it, and say it is new.
+- A screen has its own case at `components/medprotocol/<module>/case.md` → use that one.
+- Nothing fits → write a new case in the same format, run its command to check the CLI accepts it, and say it is new.
 
 ## Step 2: Present it
 

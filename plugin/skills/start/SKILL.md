@@ -30,7 +30,7 @@ If this is a brand-new project (no existing components found), suggest: "Would y
 
 `Read` from `reference/initial-clarification.md` and follow it. **Ask the questions and wait for the user's answers before proceeding.** Do NOT classify or route to any workflow until you have answers to all three questions.
 
-Only skip if the user's message explicitly addresses **all three** questions (patient setting, single vs multiple patients, and data persistence). Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers. Words like "track", "monitor", or plural "patients" do NOT satisfy Q2/Q3 — the user must explicitly say "multiple patients" or "save data between sessions" (or equivalent).
+Only skip if the user's message explicitly addresses **all three** questions (setting, one patient or a list, and data persistence), or asks for a quick prototype ("just build it", "quick", "defaults"): then use the defaults and name them in one line. Naming a specific module alone is NOT enough to skip — the patient-management and persistence questions still need answers. Words like "track", "monitor", or plural "patients" do NOT satisfy Q2/Q3 — the user must explicitly say "multiple patients" or "save data between sessions" (or equivalent).
 
 ## Step 3: Classification (only after Step 2 is complete)
 
@@ -54,6 +54,7 @@ Use the classification table to match the user's request to a domain, then route
 | **troubleshoot** | `../troubleshoot/SKILL.md` |
 | **calc** | `../calc/SKILL.md` |
 | **cases** | `../cases/SKILL.md` |
+| **demo** | `../demo/SKILL.md` |
 | **preferences** | `../preferences/SKILL.md` |
 | **protocol-audit** | `../protocol-audit/SKILL.md` |
 | **calc-audit** | `../calc-audit/SKILL.md` |
@@ -78,7 +79,7 @@ Once classified, route to the matched destination from the tables above:
 - **Local skills:** Read the matched SKILL.md file and follow its phases exactly.
 - **Workflow files (nephrology, cardiology, sepsis, shock, syndromic, diabetes):** `Read` the file at the exact path from the routing table above.
 
-Pass the Initial Clarification answers (patient setting, single vs multiple, persistence) as context to the workflow.
+Pass the Initial Clarification answers (setting, one patient or a list, persistence) as context to the workflow.
 
 ## Interface Language
 

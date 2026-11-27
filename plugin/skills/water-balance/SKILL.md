@@ -28,8 +28,8 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 ### Setting-Aware
 
-- **Admitted patients**: "Track fluid balance per shift or per 24 hours?" (Default: per 24 hours)
-- **Multiple patients**: Route to the dashboard workflow instead, offering water balance as a dashboard widget
+- **Hospital ward**: "Track fluid balance per shift or per 24 hours?" (Default: per 24 hours)
+- **A list of patients**: Route to the dashboard workflow instead, offering water balance as a dashboard widget
 
 Do NOT ask about calculation formulas, display preferences, or technical preferences.
 

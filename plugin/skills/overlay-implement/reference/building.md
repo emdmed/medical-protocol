@@ -48,6 +48,7 @@ UI SDK components are unstyled. Style them with the project's existing styles (T
 - Start with one working version, then refine.
 - Follow the module's **Screen spec** in `{module}.md`: inputs with units, outputs, display rules.
 - Pass data between screens with props as shown in `composition.md`.
+- Every clinical screen starts empty and has a **Load synthetic case** button that fills its inputs with the module's case from the cases skill (`${CLAUDE_SKILL_DIR}/../cases/reference/cases.md`; the values are in its vignette), plus **Clear**. While the case is loaded, show "Synthetic case" beside the patient's name or header. The button fills inputs only: results still come from the lib. No case for the module → write one in that file's format at `components/medprotocol/<module>/case.md`, run its command to check the CLI accepts it, and load from that. A patient list is seeded with synthetic patients ("Synthetic patient A", "B", …), each from a case.
 - Add a short header comment to the main file: purpose, props, which `lib/medprotocol` functions it calls. Later skills (`modify`, `troubleshoot`, overlay) read it.
 
 ## 4. Rules
@@ -65,4 +66,4 @@ UI SDK components are unstyled. Style them with the project's existing styles (T
 
 1. Run the project's type check.
 2. Compare a few results with the CLI: `medprotocol <cmd> ...` must give the same numbers as the screen.
-3. Run browser QA (see `quality-checklist.md`).
+3. Offer browser QA, and run it when the user wants it or before a demo (see `quality-checklist.md`).

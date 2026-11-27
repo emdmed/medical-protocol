@@ -59,6 +59,7 @@ When the user describes what they need, classify into one of these domains based
 | **troubleshoot** | not working, error, broken, crashed, blank screen, white screen, won't load, stuck, help, something wrong, fix |
 | **calc** | calculate, quick calculation, from the terminal, command line, batch, just the number |
 | **cases** | give me a case, example patient, synthetic case, practise, practice case, quiz me, demo data, sample patient |
+| **demo** | demo, present, presentation, show it to, screenshots, walkthrough, get it ready to show, for my class, for my talk |
 | **preferences** | teach, preferences, what I'm learning, configure, setup preferences, learn about me, my specialty |
 | **protocol-audit** | audit, check quality, review, compliance, is it correct, verify protocol, score, protocol check |
 | **calc-audit** | test components, verify calculations, compare results, check math, validate logic, test against CLI, run test vectors |
@@ -80,4 +81,4 @@ When the user describes what they need, classify into one of these domains based
 
 **If no domain matches**, ask: "Could you describe what clinical information you'd like to see or manage?"
 
-**Initial Clarification must be completed before classification.** If you haven't yet asked and received answers to the four initial clarification questions (module, patient setting, single vs multiple, persistence), stop and do that first. Do NOT use this classification table until you have the user's answers. Words like "track", "monitor", or plural "patients" do NOT count as answering the single-vs-multiple or persistence questions — those must be stated explicitly (e.g., "multiple patients", "save between sessions"). The answers are passed to the selected workflow as context. The workflow should automatically adapt its behavior, questions, and architecture based on these answers.
+**Initial Clarification must be completed before classification.** If you haven't yet asked and received answers to the initial clarification questions (setting, one patient or a list, persistence), or the user asked for a quick prototype and you named the defaults, stop and do that first. Do NOT use this classification table until you have the user's answers. Words like "track", "monitor", or plural "patients" do NOT count as answering the single-vs-multiple or persistence questions — those must be stated explicitly (e.g., "multiple patients", "save between sessions"). The answers are passed to the selected workflow as context. The workflow should automatically adapt its behavior, questions, and architecture based on these answers.

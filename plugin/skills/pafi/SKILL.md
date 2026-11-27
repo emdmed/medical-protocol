@@ -29,8 +29,8 @@ medprotocol CLI: node "${CLAUDE_SKILL_DIR}/../../scripts/medprotocol.cjs" — ru
 
 ### Setting-Aware
 
-- **Admitted patients**: "Do you typically work with patients on supplemental oxygen or mechanical ventilation?" — helps decide default FiO2
-- **Multiple patients**: Route to the dashboard workflow instead, offering PaFi as a dashboard widget
+- **Hospital ward**: "Should the cases be on supplemental oxygen or mechanical ventilation?" — helps decide default FiO2
+- **A list of patients**: Route to the dashboard workflow instead, offering PaFi as a dashboard widget
 
 Do NOT ask about ARDS classification details, formulas, or technical preferences.
 

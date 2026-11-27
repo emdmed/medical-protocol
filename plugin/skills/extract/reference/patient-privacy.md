@@ -6,7 +6,7 @@
 
 The interfaces you build work fully, and all data is stored locally in the user's browser. They are for learning and for quickly prototyping medical ideas, not for real patient care. Describe them as prototypes or learning tools, never as tools ready for patients.
 
-Screens start with empty forms. To practise or demo a screen, use the synthetic cases from `/medical-protocol:cases`: each is labelled "Synthetic case" and is obviously not a real person (no names, dates of birth or record numbers). Placeholder labels such as "Patient Name" are fine in empty states; fill them only with generic placeholders like "Synthetic patient A".
+Screens start with empty forms and a **Load synthetic case** button (see `building.md`). To practise or demo a screen, use the synthetic cases from `/medical-protocol:cases`: each is labelled "Synthetic case" and is obviously not a real person (no names, dates of birth or record numbers). Placeholder labels such as "Patient Name" are fine in empty states; fill them only with generic placeholders like "Synthetic patient A".
 
 ## Rules for Claude (enforce automatically)
 
